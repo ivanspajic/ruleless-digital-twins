@@ -7,31 +7,122 @@
 @base <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/> .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation> rdf:type owl:Ontology ;
-                                                                        owl:imports <http://qudt.org/2.1/vocab/unit> ,
-                                                                                    <http://www.w3.org/ns/ssn/systems/> .
+                                                                        owl:imports <http://www.w3.org/ns/ssn/systems/> .
 
 #################################################################
 #    Datatypes
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#testType
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/testType
 :testType rdf:type rdfs:Datatype .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#affects
+:affects rdf:type owl:ObjectProperty ;
+         rdfs:domain :ActuatorState ;
+         rdfs:range <http://www.w3.org/ns/sosa/ObservableProperty> ;
+         rdfs:comment "Represents that a given actuator state has an effect on a given property."@en ;
+         rdfs:label "affects"@en .
+
+
+###  http://www.w3.org/ns/ssn/forProperty
+<http://www.w3.org/ns/ssn/forProperty> rdfs:range <http://www.w3.org/ns/ssn/Property> .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#decreasesBy
+:decreasesBy rdf:type owl:DatatypeProperty ;
+             rdfs:domain :ActuatorState ;
+             rdfs:range xsd:double ;
+             rdfs:comment "Denotes an actuator state's decrease of a given property's value by a certain amount."@en ;
+             rdfs:label "decreasesBy"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#hasComputationFMU
+:hasComputationFMU rdf:type owl:DatatypeProperty ;
+                   rdfs:subPropertyOf :hasModel ;
+                   rdfs:range xsd:anyURI ;
+                   rdfs:comment "Refers to an FMU to be used for computations or modeling."@en ;
+                   rdfs:label "hasComputationFMU"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#hasDataSanitizationFMU
+:hasDataSanitizationFMU rdf:type owl:DatatypeProperty ;
+                        rdfs:subPropertyOf :hasModel ;
+                        rdfs:range xsd:anyURI ;
+                        rdfs:comment "Refers to an FMU to be used for data sanitization."@en ;
+                        rdfs:label "hasDataSanitizationFMU"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#hasModel
+:hasModel rdf:type owl:DatatypeProperty ;
+          rdfs:domain <http://www.w3.org/ns/sosa/Procedure> ;
+          rdfs:range xsd:anyURI ;
+          rdfs:comment "Refers to a model, such as a functional mock-up unit (FMU), used by a given Procedure."@en ;
+          rdfs:label "hasModel"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#increasesBy
+:increasesBy rdf:type owl:DatatypeProperty ;
+             rdfs:domain :ActuatorState ;
+             rdfs:range xsd:double ;
+             rdfs:comment "Denotes an actuator state's increase of a given property's value by a certain amount."@en ;
+             rdfs:label "increasesBy"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#setsTo
+:setsTo rdf:type owl:DatatypeProperty ;
+        rdfs:domain :ActuatorState ;
+        rdfs:range rdfs:Literal ;
+        rdfs:comment "A range of possible property values set by a given actuator state."@en ;
+        rdfs:label "setsTo"@en .
 
 
 #################################################################
 #    Classes
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#ActuatorState
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#NonOptimalCondition
+:NonOptimalCondition rdf:type owl:Class ;
+                     rdfs:subClassOf <http://www.w3.org/ns/ssn/systems/Condition> ,
+                                     [ rdf:type owl:Restriction ;
+                                       owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
+                                       owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                       owl:onClass <http://www.w3.org/ns/sosa/ObservableProperty>
+                                     ] ;
+                     owl:disjointWith :OptimalCondition ;
+                     rdfs:comment "A non-optimal property condition, such as an undesired value range definition. For example, a non-optimal temperature condition of a room could be defined as values greater than 22 degrees Celsius."@en ;
+                     rdfs:label "NonOptimalCondition"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#OptimalCondition
+:OptimalCondition rdf:type owl:Class ;
+                  rdfs:subClassOf <http://www.w3.org/ns/ssn/systems/Condition> ,
+                                  [ rdf:type owl:Restriction ;
+                                    owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
+                                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                    owl:onClass <http://www.w3.org/ns/sosa/ObservableProperty>
+                                  ] ;
+                  rdfs:comment "An optimal property condition, such as a desired value range definition. For example, an optimal temperature condition of a room could be defined as values greater than 18 and less than 22 degrees Celsius." ;
+                  rdfs:label "OptimalCondition"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/ActuatorState
 :ActuatorState rdf:type owl:Class ;
+               rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                 owl:onProperty :affects ;
+                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onClass <http://www.w3.org/ns/sosa/ObservableProperty>
+                               ] ;
                rdfs:comment "The state of a given actuator, such as \"On\" or \"Off\" for a simple cooling fan or a specific temperature setting of an AC unit."@en ;
                rdfs:label "ActuatorState"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#EffectOnProperty
-:EffectOnProperty rdf:type owl:Class ;
-                  rdfs:comment "The effect on a property, such as increasing or decreasing its value."@en ;
-                  rdfs:label "EffectOnProperty"@en .
 
 
 ###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

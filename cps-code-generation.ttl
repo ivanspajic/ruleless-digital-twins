@@ -21,7 +21,28 @@
 #    Object Properties
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#affects
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#hasState
+:hasState rdf:type owl:ObjectProperty ;
+          owl:inverseOf :isStateOf ;
+          rdfs:domain <http://www.w3.org/ns/sosa/Actuator> ;
+          rdfs:range :ActuatorState .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#isOutputOf
+:isOutputOf rdf:type owl:ObjectProperty ;
+            owl:inverseOf <http://www.w3.org/ns/ssn/hasOutput> .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#isStateOf
+:isStateOf rdf:type owl:ObjectProperty .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#isSubsystemOf
+:isSubsystemOf rdf:type owl:ObjectProperty ;
+               owl:inverseOf <http://www.w3.org/ns/ssn/hasSubSystem> .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/affects
 :affects rdf:type owl:ObjectProperty ;
          rdfs:domain :ActuatorState ;
          rdfs:range <http://www.w3.org/ns/sosa/ObservableProperty> ;
@@ -37,7 +58,12 @@
 #    Data properties
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#decreasesBy
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#hasValueType
+:hasValueType rdf:type owl:DatatypeProperty ;
+              rdfs:range rdfs:Literal .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/decreasesBy
 :decreasesBy rdf:type owl:DatatypeProperty ;
              rdfs:domain :ActuatorState ;
              rdfs:range xsd:double ;
@@ -45,7 +71,7 @@
              rdfs:label "decreasesBy"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#hasComputationFMU
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasComputationFMU
 :hasComputationFMU rdf:type owl:DatatypeProperty ;
                    rdfs:subPropertyOf :hasModel ;
                    rdfs:range xsd:anyURI ;
@@ -53,7 +79,7 @@
                    rdfs:label "hasComputationFMU"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#hasDataSanitizationFMU
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasDataSanitizationFMU
 :hasDataSanitizationFMU rdf:type owl:DatatypeProperty ;
                         rdfs:subPropertyOf :hasModel ;
                         rdfs:range xsd:anyURI ;
@@ -61,7 +87,7 @@
                         rdfs:label "hasDataSanitizationFMU"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#hasModel
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasModel
 :hasModel rdf:type owl:DatatypeProperty ;
           rdfs:domain <http://www.w3.org/ns/sosa/Procedure> ;
           rdfs:range xsd:anyURI ;
@@ -69,7 +95,7 @@
           rdfs:label "hasModel"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#increasesBy
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/increasesBy
 :increasesBy rdf:type owl:DatatypeProperty ;
              rdfs:domain :ActuatorState ;
              rdfs:range xsd:double ;
@@ -77,7 +103,7 @@
              rdfs:label "increasesBy"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#setsTo
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/setsTo
 :setsTo rdf:type owl:DatatypeProperty ;
         rdfs:domain :ActuatorState ;
         rdfs:range rdfs:Literal ;
@@ -89,7 +115,23 @@
 #    Classes
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#NonOptimalCondition
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/ActuatorState
+:ActuatorState rdf:type owl:Class ;
+               rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                 owl:onProperty :isStateOf ;
+                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onClass <http://www.w3.org/ns/sosa/Actuator>
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty :affects ;
+                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onClass <http://www.w3.org/ns/sosa/ObservableProperty>
+                               ] ;
+               rdfs:comment "The state of a given actuator, such as \"On\" or \"Off\" for a simple cooling fan or a specific temperature setting of an AC unit."@en ;
+               rdfs:label "ActuatorState"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/NonOptimalCondition
 :NonOptimalCondition rdf:type owl:Class ;
                      rdfs:subClassOf <http://www.w3.org/ns/ssn/systems/Condition> ,
                                      [ rdf:type owl:Restriction ;
@@ -102,7 +144,7 @@
                      rdfs:label "NonOptimalCondition"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#OptimalCondition
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/OptimalCondition
 :OptimalCondition rdf:type owl:Class ;
                   rdfs:subClassOf <http://www.w3.org/ns/ssn/systems/Condition> ,
                                   [ rdf:type owl:Restriction ;
@@ -114,15 +156,185 @@
                   rdfs:label "OptimalCondition"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/ActuatorState
-:ActuatorState rdf:type owl:Class ;
-               rdfs:subClassOf [ rdf:type owl:Restriction ;
-                                 owl:onProperty :affects ;
-                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                 owl:onClass <http://www.w3.org/ns/sosa/ObservableProperty>
-                               ] ;
-               rdfs:comment "The state of a given actuator, such as \"On\" or \"Off\" for a simple cooling fan or a specific temperature setting of an AC unit."@en ;
-               rdfs:label "ActuatorState"@en .
+###  http://www.w3.org/ns/sosa/Actuator
+<http://www.w3.org/ns/sosa/Actuator> rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                                       owl:onProperty :hasState ;
+                                                       owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                       owl:onClass :ActuatorState
+                                                     ] .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#AirConditioningUnit
+:AirConditioningUnit rdf:type owl:NamedIndividual ,
+                              <http://www.w3.org/ns/sosa/Actuator> ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty :hasState ;
+                                owl:hasValue :AirConditioningUnitStateOn
+                              ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#AirConditioningUnitStateOn
+:AirConditioningUnitStateOn rdf:type owl:NamedIndividual ,
+                                     :ActuatorState .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#CeilingFan
+:CeilingFan rdf:type owl:NamedIndividual ,
+                     <http://www.w3.org/ns/sosa/Actuator> ,
+                     [ rdf:type owl:Restriction ;
+                       owl:onProperty :hasState ;
+                       owl:someValuesFrom [ rdf:type owl:Class ;
+                                            owl:oneOf ( :CeilingFanStateHighSpeed
+                                                        :CeilingFanStateLowSpeed
+                                                      )
+                                          ]
+                     ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#CeilingFanStateHighSpeed
+:CeilingFanStateHighSpeed rdf:type owl:NamedIndividual ,
+                                   :ActuatorState ,
+                                   [ rdf:type owl:Restriction ;
+                                     owl:onProperty :isStateOf ;
+                                     owl:hasValue :CeilingFan
+                                   ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#CeilingFanStateLowSpeed
+:CeilingFanStateLowSpeed rdf:type owl:NamedIndividual ,
+                                  :ActuatorState ,
+                                  [ rdf:type owl:Restriction ;
+                                    owl:onProperty :isStateOf ;
+                                    owl:hasValue :CeilingFan
+                                  ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#SoftSensor1
+:SoftSensor1 rdf:type owl:NamedIndividual ,
+                      <http://www.w3.org/ns/ssn/System> ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty <http://www.w3.org/ns/ssn/hasSubSystem> ;
+                        owl:hasValue :TemperatureSensor1
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty <http://www.w3.org/ns/ssn/hasSubSystem> ;
+                        owl:hasValue :TemperatureSensor2
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
+                        owl:hasValue :SoftSensor1Algorithm
+                      ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#SoftSensor1Algorithm
+:SoftSensor1Algorithm rdf:type owl:NamedIndividual ,
+                               <http://www.w3.org/ns/sosa/Procedure> ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty <http://www.w3.org/ns/ssn/hasOutput> ;
+                                 owl:hasValue :SoftSensor1Output
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty :hasComputationFMU ;
+                                 owl:hasValue "C:/dev/test_path/foo.fmu"^^xsd:anyURI
+                               ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#SoftSensor1Output
+:SoftSensor1Output rdf:type owl:NamedIndividual ,
+                            <http://www.w3.org/ns/ssn/Output> ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty :hasValueType ;
+                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange xsd:double
+                            ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#Temperature1
+:Temperature1 rdf:type owl:NamedIndividual ,
+                       <http://www.w3.org/ns/sosa/ObservableProperty> ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :hasValueType ;
+                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                         owl:onDataRange xsd:double
+                       ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#Temperature2
+:Temperature2 rdf:type owl:NamedIndividual ,
+                       <http://www.w3.org/ns/sosa/ObservableProperty> ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :hasValueType ;
+                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                         owl:onDataRange xsd:double
+                       ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#TemperatureSensor1
+:TemperatureSensor1 rdf:type owl:NamedIndividual ,
+                             <http://www.w3.org/ns/sosa/Sensor> ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty <http://www.w3.org/ns/sosa/observes> ;
+                               owl:hasValue :Temperature1
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
+                               owl:hasValue :TemperatureSensor1Procedure
+                             ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#TemperatureSensor1Output
+:TemperatureSensor1Output rdf:type owl:NamedIndividual ,
+                                   <http://www.w3.org/ns/ssn/Output> ,
+                                   [ rdf:type owl:Restriction ;
+                                     owl:onProperty :hasValueType ;
+                                     owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                     owl:onDataRange xsd:double
+                                   ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#TemperatureSensor1Procedure
+:TemperatureSensor1Procedure rdf:type owl:NamedIndividual ,
+                                      <http://www.w3.org/ns/sosa/Procedure> ,
+                                      [ rdf:type owl:Restriction ;
+                                        owl:onProperty <http://www.w3.org/ns/ssn/hasOutput> ;
+                                        owl:hasValue :TemperatureSensor1Output
+                                      ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#TemperatureSensor2
+:TemperatureSensor2 rdf:type owl:NamedIndividual ,
+                             <http://www.w3.org/ns/sosa/Sensor> ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty <http://www.w3.org/ns/sosa/observes> ;
+                               owl:hasValue :Temperature2
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
+                               owl:hasValue :TemperatureSensor2Procedure
+                             ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#TemperatureSensor2Output
+:TemperatureSensor2Output rdf:type owl:NamedIndividual ,
+                                   <http://www.w3.org/ns/ssn/Output> ,
+                                   [ rdf:type owl:Restriction ;
+                                     owl:onProperty :hasValueType ;
+                                     owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                     owl:onDataRange xsd:double
+                                   ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#TemperatureSensor2Procedure
+:TemperatureSensor2Procedure rdf:type owl:NamedIndividual ,
+                                      <http://www.w3.org/ns/sosa/Procedure> ,
+                                      [ rdf:type owl:Restriction ;
+                                        owl:onProperty <http://www.w3.org/ns/ssn/hasOutput> ;
+                                        owl:hasValue :TemperatureSensor2Output
+                                      ] .
 
 
 ###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

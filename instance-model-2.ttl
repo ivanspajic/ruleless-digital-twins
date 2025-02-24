@@ -1,0 +1,116 @@
+@prefix : <http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/> .
+
+<http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2> rdf:type owl:Ontology ;
+                                                                    owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation> .
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2#CompressionRatio
+:CompressionRatio rdf:type owl:Class ;
+                  rdfs:subClassOf <http://www.w3.org/ns/sosa/ObservableProperty> ,
+                                  [ rdf:type owl:Restriction ;
+                                    owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
+                                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                    owl:onDataRange xsd:double
+                                  ] .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2#Epsilon
+:Epsilon rdf:type owl:Class ;
+         rdfs:subClassOf <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/ConfigurableProperty> ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
+                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                           owl:onDataRange xsd:double
+                         ] .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2#NumberOfBufferedPoints
+:NumberOfBufferedPoints rdf:type owl:Class ;
+                        rdfs:subClassOf <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/ConfigurableProperty> ,
+                                        [ rdf:type owl:Restriction ;
+                                          owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
+                                          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                          owl:onDataRange xsd:integer
+                                        ] .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/SoftSensor1OutputParameter
+:SoftSensor1OutputParameter rdf:type owl:Class ;
+                            rdfs:subClassOf <http://www.w3.org/ns/ssn/Output> .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/Temperature
+:Temperature rdf:type owl:Class ;
+             rdfs:subClassOf <http://www.w3.org/ns/sosa/ObservableProperty> ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
+                               owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:double
+                             ] .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1OutputParameter
+:TemperatureSensor1OutputParameter rdf:type owl:Class ;
+                                   rdfs:subClassOf <http://www.w3.org/ns/ssn/Output> .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/SoftSensor1
+:SoftSensor1 rdf:type owl:NamedIndividual ,
+                      <http://www.w3.org/ns/ssn/System> ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty <http://www.w3.org/ns/ssn/hasSubSystem> ;
+                        owl:hasValue :TemperatureSensor1
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
+                        owl:hasValue :SoftSensor1Algorithm
+                      ] .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/SoftSensor1Algorithm
+:SoftSensor1Algorithm rdf:type owl:NamedIndividual ,
+                               <http://www.w3.org/ns/sosa/Procedure> .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/SoftSensor1Output
+:SoftSensor1Output rdf:type owl:NamedIndividual ,
+                            :SoftSensor1OutputParameter .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1
+:TemperatureSensor1 rdf:type owl:NamedIndividual ,
+                             <http://www.w3.org/ns/sosa/Sensor> ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
+                               owl:hasValue :TemperatureSensor1Procedure
+                             ] .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1MeasuredTemperature
+:TemperatureSensor1MeasuredTemperature rdf:type owl:NamedIndividual ,
+                                                :TemperatureSensor1OutputParameter .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1Procedure
+:TemperatureSensor1Procedure rdf:type owl:NamedIndividual ,
+                                      <http://www.w3.org/ns/sosa/Procedure> ,
+                                      [ rdf:type owl:Restriction ;
+                                        owl:onProperty <http://www.w3.org/ns/ssn/hasOutput> ;
+                                        owl:hasValue :TemperatureSensor1MeasuredTemperature
+                                      ] .
+
+
+###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

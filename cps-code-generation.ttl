@@ -73,10 +73,6 @@ xsd:duration rdf:type rdfs:Datatype .
                    rdfs:label "withActuatorState"@en .
 
 
-###  http://www.w3.org/ns/ssn/forProperty
-<http://www.w3.org/ns/ssn/forProperty> rdfs:range <http://www.w3.org/ns/ssn/Property> .
-
-
 #################################################################
 #    Data properties
 #################################################################
@@ -131,17 +127,6 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Classes
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation#ConfigurableProperty
-:ConfigurableProperty rdf:type owl:Class ;
-                      rdfs:subClassOf <http://www.w3.org/ns/ssn/Property> ,
-                                      [ rdf:type owl:Restriction ;
-                                        owl:onProperty :hasValueType ;
-                                        owl:cardinality "1"^^xsd:nonNegativeInteger
-                                      ] ;
-                      rdfs:comment "A property not directly observable or actuatable but rather used for configuring a System or Procedure."@en ;
-                      rdfs:label "ConfigurableProperty"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/ActuatorState
 :ActuatorState rdf:type owl:Class ;
                rdfs:subClassOf [ rdf:type owl:Restriction ;
@@ -156,6 +141,17 @@ xsd:duration rdf:type rdfs:Datatype .
                                ] ;
                rdfs:comment "The state of a given actuator, such as \"On\" or \"Off\" for a simple cooling fan or a specific temperature setting of an AC unit."@en ;
                rdfs:label "ActuatorState"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/ConfigurableProperty
+:ConfigurableProperty rdf:type owl:Class ;
+                      rdfs:subClassOf <http://www.w3.org/ns/ssn/Property> ,
+                                      [ rdf:type owl:Restriction ;
+                                        owl:onProperty :hasValueType ;
+                                        owl:cardinality "1"^^xsd:nonNegativeInteger
+                                      ] ;
+                      rdfs:comment "A property not directly observable or actuatable but rather used for configuring a System or Procedure."@en ;
+                      rdfs:label "ConfigurableProperty"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/Decrease

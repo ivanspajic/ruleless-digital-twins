@@ -24,8 +24,16 @@ xsd:duration rdf:type rdfs:Datatype .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/affectsPropertyWith
 :affectsPropertyWith rdf:type owl:ObjectProperty ;
                      rdfs:range :Effect ;
-                     rdfs:comment "Represents that a given actuator state has an effect on a given property."@en ;
+                     rdfs:comment "Represents that a Thing has an effect on a Property."@en ;
                      rdfs:label "affectsPropertyWith"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasActuator
+:hasActuator rdf:type owl:ObjectProperty ;
+             rdfs:domain :MitigationStrategy ;
+             rdfs:range <http://www.w3.org/ns/sosa/Actuator> ;
+             rdfs:comment "The relation between a MitigationStrategy and an Actuator it uses."@en ;
+             rdfs:label "hasActuator"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasActuatorState
@@ -33,8 +41,22 @@ xsd:duration rdf:type rdfs:Datatype .
                   owl:inverseOf :isStateOf ;
                   rdfs:domain <http://www.w3.org/ns/sosa/Actuator> ;
                   rdfs:range :ActuatorState ;
-                  rdfs:label "Represents the relation between an actuator and its state."@en ,
-                             "hasActuatorState"@en .
+                  rdfs:comment "The relation between an Actuator and an ActuatorState it uses."@en ;
+                  rdfs:label "hasActuatorState"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasSeverity
+:hasSeverity rdf:type owl:ObjectProperty ;
+             rdfs:range :Severity ;
+             rdfs:comment "Relates a Thing to a given Severity it has."@en ;
+             rdfs:label "hasSeverity"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/isInputOf
+:isInputOf rdf:type owl:ObjectProperty ;
+           owl:inverseOf <http://www.w3.org/ns/ssn/hasInput> ;
+           rdfs:comment "Relation between an Input and its Procedure."@en ;
+           rdfs:label "isInputOf"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/isOutputOf
@@ -57,20 +79,12 @@ xsd:duration rdf:type rdfs:Datatype .
                rdfs:label "isSubsystemOf"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/withActuator
-:withActuator rdf:type owl:ObjectProperty ;
-              rdfs:domain :MitigationStrategy ;
-              rdfs:range <http://www.w3.org/ns/sosa/Actuator> ;
-              rdfs:comment "The relation between a MitigationStrategy and an Actuator it uses."@en ;
-              rdfs:label "withActuator"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/withActuatorState
-:withActuatorState rdf:type owl:ObjectProperty ;
-                   rdfs:domain :MitigationStrategy ;
-                   rdfs:range :ActuatorState ;
-                   rdfs:comment "The relation between a MitigationStrategy and an ActuatorState it uses."@en ;
-                   rdfs:label "withActuatorState"@en .
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/optimizesBy
+:optimizesBy rdf:type owl:ObjectProperty ;
+             rdfs:domain <http://www.w3.org/ns/sosa/Platform> ;
+             rdfs:range :Effect ;
+             rdfs:comment "Represents a relation between a System and an Effect it optimizes some Property with."@en ;
+             rdfs:label "optimizesBy"@en .
 
 
 #################################################################
@@ -101,6 +115,14 @@ xsd:duration rdf:type rdfs:Datatype .
           rdfs:label "hasModel"@en .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasTimeLimit
+:hasTimeLimit rdf:type owl:DatatypeProperty ;
+              rdfs:domain :MitigationStrategy ;
+              rdfs:range xsd:duration ;
+              rdfs:comment "Represents a time limit on the duration of the MitigationStrategy."@en ;
+              rdfs:label "hasTimeLimit"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueConstraint
 :hasValueConstraint rdf:type owl:DatatypeProperty ;
                     rdfs:range xsd:double ;
@@ -115,14 +137,6 @@ xsd:duration rdf:type rdfs:Datatype .
               rdfs:label "hasValueType"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/withTimeLimit
-:withTimeLimit rdf:type owl:DatatypeProperty ;
-               rdfs:domain :MitigationStrategy ;
-               rdfs:range xsd:duration ;
-               rdfs:comment "Represents a time limit on the duration of the MitigationStrategy."@en ;
-               rdfs:label "withTimeLimit"@en .
-
-
 #################################################################
 #    Classes
 #################################################################
@@ -131,7 +145,7 @@ xsd:duration rdf:type rdfs:Datatype .
 :ActuatorState rdf:type owl:Class ;
                rdfs:subClassOf [ rdf:type owl:Restriction ;
                                  owl:onProperty :affectsPropertyWith ;
-                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                  owl:onClass :Effect
                                ] ,
                                [ rdf:type owl:Restriction ;
@@ -166,9 +180,9 @@ xsd:duration rdf:type rdfs:Datatype .
         rdfs:subClassOf [ rdf:type owl:Restriction ;
                           owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
                           owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                          owl:onClass <http://www.w3.org/ns/sosa/ObservableProperty>
+                          owl:onClass <http://www.w3.org/ns/ssn/Property>
                         ] ;
-        rdfs:comment "The type of effect an actuator state has on the value of a property."@en ;
+        rdfs:comment "The type of effect on the value of a property."@en ;
         rdfs:label "Effect"@en .
 
 
@@ -181,23 +195,25 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/MitigationStrategy
 :MitigationStrategy rdf:type owl:Class ;
-                    rdfs:subClassOf <http://www.w3.org/ns/sosa/Procedure> ,
-                                    [ rdf:type owl:Restriction ;
-                                      owl:onProperty :withActuator ;
-                                      owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                      owl:onClass <http://www.w3.org/ns/sosa/Actuator>
+                    rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                      owl:onProperty :affectsPropertyWith ;
+                                      owl:someValuesFrom :Effect
                                     ] ,
                                     [ rdf:type owl:Restriction ;
-                                      owl:onProperty :withActuatorState ;
-                                      owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                      owl:onClass :ActuatorState
+                                      owl:onProperty :hasActuator ;
+                                      owl:someValuesFrom <http://www.w3.org/ns/sosa/Actuator>
                                     ] ,
                                     [ rdf:type owl:Restriction ;
-                                      owl:onProperty :withTimeLimit ;
-                                      owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                      owl:onProperty :hasSeverity ;
+                                      owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                      owl:onClass :Severity
+                                    ] ,
+                                    [ rdf:type owl:Restriction ;
+                                      owl:onProperty :hasTimeLimit ;
+                                      owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                       owl:onDataRange xsd:duration
                                     ] ;
-                    rdfs:comment "Represents a strategy for regaining optimal conditions with some combination of appropriate actuators, their states, and given actuation durations."@en ;
+                    rdfs:comment "Represents a strategy for regaining optimal conditions."@en ;
                     rdfs:label "MitigationStrategy"@en .
 
 
@@ -207,23 +223,24 @@ xsd:duration rdf:type rdfs:Datatype .
                                      [ rdf:type owl:Restriction ;
                                        owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
                                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                       owl:onClass <http://www.w3.org/ns/sosa/ObservableProperty>
+                                       owl:onClass <http://www.w3.org/ns/ssn/Property>
+                                     ] ,
+                                     [ rdf:type owl:Restriction ;
+                                       owl:onProperty :hasValueConstraint ;
+                                       owl:cardinality "1"^^xsd:nonNegativeInteger
                                      ] ;
-                     owl:disjointWith :OptimalCondition ;
                      rdfs:comment "A non-optimal property condition, such as an undesired value range definition. For example, a non-optimal temperature condition of a room could be defined as values greater than 22 degrees Celsius."@en ;
                      rdfs:label "NonOptimalCondition"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/OptimalCondition
-:OptimalCondition rdf:type owl:Class ;
-                  rdfs:subClassOf <http://www.w3.org/ns/ssn/systems/Condition> ,
-                                  [ rdf:type owl:Restriction ;
-                                    owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
-                                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                    owl:onClass <http://www.w3.org/ns/sosa/ObservableProperty>
-                                  ] ;
-                  rdfs:comment "An optimal property condition, such as a desired value range definition. For example, an optimal temperature condition of a room could be defined as values greater than 18 and less than 22 degrees Celsius." ;
-                  rdfs:label "OptimalCondition"@en .
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/Severity
+:Severity rdf:type owl:Class ;
+          rdfs:subClassOf [ rdf:type owl:Restriction ;
+                            owl:onProperty :hasValueConstraint ;
+                            owl:cardinality "1"^^xsd:nonNegativeInteger
+                          ] ;
+          rdfs:comment "Represents the severity of a problem or requirement to enable solution prioritization."@en ;
+          rdfs:label "Severity"@en .
 
 
 ###  http://www.w3.org/ns/sosa/Actuator

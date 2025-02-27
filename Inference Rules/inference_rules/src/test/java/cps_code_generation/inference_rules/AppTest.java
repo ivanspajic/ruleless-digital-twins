@@ -1,4 +1,4 @@
-package csp_code_generation.inference_rules;
+package cps_code_generation.inference_rules;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

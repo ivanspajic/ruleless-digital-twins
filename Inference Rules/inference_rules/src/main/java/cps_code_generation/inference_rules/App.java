@@ -1,28 +1,37 @@
 package cps_code_generation.inference_rules;
 
-import org.apache.jena.rdf.model.*;
-import org.apache.jena.vocabulary.RDFS;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.List;
 
-/**
- * Hello world!
- *
- */
+import org.apache.jena.rdf.model.*;
+import org.apache.jena.reasoner.Reasoner;
+import org.apache.jena.reasoner.ReasonerRegistry;
+import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
+import org.apache.jena.reasoner.rulesys.Rule;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
+
 public class App 
 {
-    public static void main( String[] args )
+	private static final String ontologyBasePath = "C:\\dev\\cps-code-generation\\Ontology\\";
+	private static final String instanceBasePath = "C:\\dev\\cps-code-generation\\Instance Models\\";
+	
+    public static void main( String[] args ) throws FileNotFoundException
     {
-    	String NS = "urn:x-hp-jena:eg/";
-
-    	// Build a trivial example data set
-    	Model rdfsExample = ModelFactory.createDefaultModel();
-    	Property p = rdfsExample.createProperty(NS, "p");
-    	Property q = rdfsExample.createProperty(NS, "q");
-    	rdfsExample.add(p, RDFS.subPropertyOf, q);
-    	rdfsExample.createResource(NS+"a").addProperty(p, "foo");
+    	Model ontology = RDFDataMgr.loadModel(ontologyBasePath + "cps-code-generation.ttl");
+    	Model instanceModel = RDFDataMgr.loadModel(instanceBasePath + "instance-model-1.ttl");
+    	Reasoner owlReasoner = ReasonerRegistry.getOWLReasoner()
+    			.bindSchema(ontology);
     	
-    	InfModel inf = ModelFactory.createRDFSModel(rdfsExample);
+    	InfModel basicInferredModel = ModelFactory.createInfModel(owlReasoner, instanceModel);
     	
-    	Resource a = inf.getResource(NS+"a");
-    	System.out.println("Statement: " + a.getProperty(q));
+    	List ruleList = Rule.rulesFromURL(instanceBasePath + "instance-model-1-inference-rules.rules");
+    	GenericRuleReasoner ruleReasoner = new GenericRuleReasoner(ruleList);
+    	
+    	InfModel finalInferredModel = ModelFactory.createInfModel(ruleReasoner, basicInferredModel);
+    	
+    	FileOutputStream fileOutputStream = new FileOutputStream(instanceBasePath + "inferred-model-1.ttl");
+    	RDFDataMgr.write(fileOutputStream, finalInferredModel, Lang.TTL);
     }
 }

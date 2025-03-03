@@ -37,5 +37,7 @@ public class App
     	
     	FileOutputStream fileOutputStream = new FileOutputStream(instanceBasePath + "inferred-model-1.ttl");
     	RDFDataMgr.write(fileOutputStream, finalInferredModel, Lang.TTL);
+    	
+    	System.out.println("Terminated.");
     }
 }

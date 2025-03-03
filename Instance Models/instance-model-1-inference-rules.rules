@@ -1,6 +1,29 @@
 # Example rule file
 @prefix : <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#>.
+@prefix meta: <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/>.
 @include <RDFS>.
 @include <OWL>.
 
-[rule1: (?individual rdf:type owl:NamedIndividual) (?individual rdf:type <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/NonOptimalCondition>) -> (?individual rdfs:comment "THIS IS A TEST COMMENT")]
+[rule1: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:NonOptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    isBNode(?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    isBNode(?bNode2)
+    (?bNode2 owl:withRestrictions ?bNode3)
+    isBNode(?bNode3)
+    (?bNode3 rdf:first ?restriction)
+    (?restriction xsd:maxExclusive ?value)
+    -> (?bNode3 rdf:comment "MAX EXCLUSIVE COMMENT")]
+
+[rule2: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:NonOptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    isBNode(?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    isBNode(?bNode2)
+    (?bNode2 owl:withRestrictions ?bNode3)
+    isBNode(?bNode3)
+    (?bNode3 rdf:first ?restriction)
+    (?restriction xsd:minExclusive ?value)
+    -> (?bNode3 rdf:comment "MIN EXCLUSIVE COMMENT")]

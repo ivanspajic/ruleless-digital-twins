@@ -39,7 +39,6 @@ xsd:duration rdf:type rdfs:Datatype .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasActuatorState
 :hasActuatorState rdf:type owl:ObjectProperty ;
                   owl:inverseOf :isStateOf ;
-                  rdfs:domain <http://www.w3.org/ns/sosa/Actuator> ;
                   rdfs:range :ActuatorState ;
                   rdfs:comment "The relation between an Actuator and an ActuatorState it uses."@en ;
                   rdfs:label "hasActuatorState"@en .
@@ -196,12 +195,14 @@ xsd:duration rdf:type rdfs:Datatype .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/MitigationStrategy
 :MitigationStrategy rdf:type owl:Class ;
                     rdfs:subClassOf [ rdf:type owl:Restriction ;
-                                      owl:onProperty :affectsPropertyWith ;
-                                      owl:someValuesFrom :Effect
+                                      owl:onProperty :hasActuator ;
+                                      owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                      owl:onClass <http://www.w3.org/ns/sosa/Actuator>
                                     ] ,
                                     [ rdf:type owl:Restriction ;
-                                      owl:onProperty :hasActuator ;
-                                      owl:someValuesFrom <http://www.w3.org/ns/sosa/Actuator>
+                                      owl:onProperty :hasActuatorState ;
+                                      owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                      owl:onClass :ActuatorState
                                     ] ,
                                     [ rdf:type owl:Restriction ;
                                       owl:onProperty :hasSeverity ;

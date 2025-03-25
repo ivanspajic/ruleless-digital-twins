@@ -16,52 +16,48 @@
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/AustevollSite
 :AustevollSite rdf:type owl:NamedIndividual ;
                <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/optimizesBy> :ValueDecrease ;
-               <http://www.w3.org/ns/sosa/hosts> :CompressionRatioSoftSensor ,
-                                                 :CustomPieceSoftSensor ,
+               <http://www.w3.org/ns/sosa/hosts> :CustomPieceSoftSensor ,
                                                  :TemperatureSensor1 .
 
 
-###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioSoftSensor
-:CompressionRatioSoftSensor rdf:type owl:NamedIndividual ;
-                            <http://www.w3.org/ns/ssn/hasSubSystem> :CustomPieceSoftSensor ;
-                            <http://www.w3.org/ns/ssn/implements> :CompressionRatioSoftSensorAlgorithm .
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressedTimeSeries
+:CompressedTimeSeries rdf:type owl:NamedIndividual ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
+                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onDataRange xsd:base64Binary
+                               ] .
 
 
-###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioSoftSensorAlgorithm
-:CompressionRatioSoftSensorAlgorithm rdf:type owl:NamedIndividual ;
-                                     <http://www.w3.org/ns/ssn/hasInput> :NumberOfBufferedPoints ;
-                                     <http://www.w3.org/ns/ssn/hasOutput> :CompressionRatioSoftSensorRatio .
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatio
+:CompressionRatio rdf:type owl:NamedIndividual ,
+                           [ rdf:type owl:Restriction ;
+                             owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
+                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                             owl:onDataRange xsd:double
+                           ] .
 
 
-###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioSoftSensorRatio
-:CompressionRatioSoftSensorRatio rdf:type owl:NamedIndividual ,
-                                          [ rdf:type owl:Restriction ;
-                                            owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
-                                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                            owl:onDataRange xsd:double
-                                          ] .
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm
+:CompressionRatioAlgorithm rdf:type owl:NamedIndividual ;
+                           <http://www.w3.org/ns/ssn/hasInput> :CompressedTimeSeries ,
+                                                               :NumberOfBufferedPoints ;
+                           <http://www.w3.org/ns/ssn/hasOutput> :CompressionRatio ;
+                           <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasModel> "../compressionRatio.fmu"^^xsd:anyURI .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPiece
+:CustomPiece rdf:type owl:NamedIndividual ;
+             <http://www.w3.org/ns/ssn/hasInput> :Epsilon ,
+                                                 :NumberOfBufferedPoints ;
+             <http://www.w3.org/ns/ssn/hasOutput> :CompressedTimeSeries ;
+             <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasModel> "../customPiece.fmu"^^xsd:anyURI .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor
 :CustomPieceSoftSensor rdf:type owl:NamedIndividual ;
-                       <http://www.w3.org/ns/ssn/hasSubSystem> :TemperatureSensor1 ;
-                       <http://www.w3.org/ns/ssn/implements> :CustomPieceSoftSensorAlgorithm .
-
-
-###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensorAlgorithm
-:CustomPieceSoftSensorAlgorithm rdf:type owl:NamedIndividual ;
-                                <http://www.w3.org/ns/ssn/hasInput> :Epsilon ,
-                                                                    :NumberOfBufferedPoints ;
-                                <http://www.w3.org/ns/ssn/hasOutput> :CustomPieceSoftSensorCompressedTimeSeries .
-
-
-###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensorCompressedTimeSeries
-:CustomPieceSoftSensorCompressedTimeSeries rdf:type owl:NamedIndividual ,
-                                                    [ rdf:type owl:Restriction ;
-                                                      owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
-                                                      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                      owl:onDataRange xsd:base64Binary
-                                                    ] .
+                       <http://www.w3.org/ns/ssn/implements> :CompressionRatioAlgorithm ,
+                                                             :CustomPiece .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/Epsilon
@@ -74,7 +70,7 @@
                   ] ;
          <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/affectsPropertyWith> :ValueDecrease ,
                                                                                                     :ValueIncrease ;
-         <http://www.w3.org/ns/ssn/forProperty> :CompressionRatioSoftSensorRatio .
+         <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/HighSeverity
@@ -95,7 +91,7 @@
                                                               ]
                                          ] ;
                                 <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasSeverity> :HighSeverity ;
-                                <http://www.w3.org/ns/ssn/forProperty> :CompressionRatioSoftSensorRatio .
+                                <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/NumberOfBufferedPoints
@@ -108,7 +104,7 @@
                                  ] ;
                         <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/affectsPropertyWith> :ValueDecrease ,
                                                                                                                    :ValueIncrease ;
-                        <http://www.w3.org/ns/ssn/forProperty> :CompressionRatioSoftSensorRatio .
+                        <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1
@@ -134,7 +130,7 @@
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/ValueDecrease
 :ValueDecrease rdf:type owl:NamedIndividual ,
                         <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/Decrease> ;
-               <http://www.w3.org/ns/ssn/forProperty> :CompressionRatioSoftSensorRatio ,
+               <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio ,
                                                       :Epsilon ,
                                                       :NumberOfBufferedPoints .
 
@@ -142,7 +138,7 @@
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/ValueIncrease
 :ValueIncrease rdf:type owl:NamedIndividual ,
                         <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/Increase> ;
-               <http://www.w3.org/ns/ssn/forProperty> :CompressionRatioSoftSensorRatio .
+               <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
 
 
 ###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

@@ -1,33 +1,195 @@
 @prefix : <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#>.
 @prefix meta: <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/>.
-@include <RDFS>.
 @include <OWL>.
+
+// These rules cover individuals with single constraints.
 
 [rule1: (?individual rdf:type owl:NamedIndividual)
     (?individual rdf:type meta:OptimalCondition)
     (?individual meta:hasValueConstraint ?bNode1)
-    isBNode(?bNode1)
     (?bNode1 rdf:type ?bNode2)
-    isBNode(?bNode2)
     (?bNode2 owl:withRestrictions ?bNode3)
-    isBNode(?bNode3)
-    (?bNode3 rdf:first ?restriction)
-    (?restriction xsd:maxExclusive ?value)
-    -> (?bNode3 rdf:comment "MAX EXCLUSIVE COMMENT")]
-
-[rule2: (?individual rdf:type owl:NamedIndividual)
-    (?individual rdf:type meta:OptimalCondition)
-    (?individual meta:hasValueConstraint ?bNode1)
-    isBNode(?bNode1)
-    (?bNode1 rdf:type ?bNode2)
-    isBNode(?bNode2)
-    (?bNode2 owl:withRestrictions ?bNode3)
-    isBNode(?bNode3)
     (?bNode3 rdf:first ?restriction)
     (?restriction xsd:minExclusive ?value)
     -> (?bNode3 rdf:comment "MIN EXCLUSIVE COMMENT")]
 
-// this is what a mitigation strategy should look like in TTL
+[rule2: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    (?bNode2 owl:withRestrictions ?bNode3)
+    (?bNode3 rdf:first ?restriction)
+    (?restriction xsd:minInclusive ?value)
+    -> (?bNode3 rdf:comment "MIN INCLUSIVE COMMENT")]
+
+[rule3: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    (?bNode2 owl:withRestrictions ?bNode3)
+    (?bNode3 rdf:first ?restriction)
+    (?restriction xsd:maxExclusive ?value)
+    -> (?bNode3 rdf:comment "MAX EXCLUSIVE COMMENT")]
+
+[rule4: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    (?bNode2 owl:withRestrictions ?bNode3)
+    (?bNode3 rdf:first ?restriction)
+    (?restriction xsd:maxInclusive ?value)
+    -> (?bNode3 rdf:comment "MAX INCLUSIVE COMMENT")]
+
+
+
+// These rules cover individuals with multiple constraints (up to 3 constraints per individual supported).
+
+[rule5: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    (?bNode2 owl:unionOf ?bNode3)
+    (?bNode3 rdf:first ?bNode4)
+    (?bNode4 owl:withRestrictions ?bNode5)
+    (?bNode5 rdf:first ?restriction)
+    (?restriction xsd:minExclusive ?value)
+    -> (?bNode5 rdf:comment "MIN EXCLUSIVE COMMENT")]
+
+[rule6: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    (?bNode2 owl:unionOf ?bNode3)
+    (?bNode3 rdf:first ?bNode4)
+    (?bNode4 owl:withRestrictions ?bNode5)
+    (?bNode5 rdf:first ?restriction)
+    (?restriction xsd:minInclusive ?value)
+    -> (?bNode5 rdf:comment "MIN INCLUSIVE COMMENT")]
+
+[rule7: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    (?bNode2 owl:unionOf ?bNode3)
+    (?bNode3 rdf:first ?bNode4)
+    (?bNode4 owl:withRestrictions ?bNode5)
+    (?bNode5 rdf:first ?restriction)
+    (?restriction xsd:maxExclusive ?value)
+    -> (?bNode5 rdf:comment "MAX EXCLUSIVE COMMENT")]
+
+[rule8: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    (?bNode2 owl:unionOf ?bNode3)
+    (?bNode3 rdf:first ?bNode4)
+    (?bNode4 owl:withRestrictions ?bNode5)
+    (?bNode5 rdf:first ?restriction)
+    (?restriction xsd:maxInclusive ?value)
+    -> (?bNode5 rdf:comment "MAX INCLUSIVE COMMENT")]
+
+[rule9: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    (?bNode2 owl:unionOf ?bNode3)
+    (?bNode3 rdf:rest ?bNode4)
+    (?bNode4 rdf:first ?bNode5)
+    (?bNode5 owl:withRestrictions ?bNode6)
+    (?bNode6 rdf:first ?restriction)
+    (?restriction xsd:minExclusive ?value)
+    -> (?bNode6 rdf:comment "MIN EXCLUSIVE COMMENT")]
+
+[rule10: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    (?bNode2 owl:unionOf ?bNode3)
+    (?bNode3 rdf:rest ?bNode4)
+    (?bNode4 rdf:first ?bNode5)
+    (?bNode5 owl:withRestrictions ?bNode6)
+    (?bNode6 rdf:first ?restriction)
+    (?restriction xsd:minInclusive ?value)
+    -> (?bNode6 rdf:comment "MIN INCLUSIVE COMMENT")]
+
+[rule11: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    (?bNode2 owl:unionOf ?bNode3)
+    (?bNode3 rdf:rest ?bNode4)
+    (?bNode4 rdf:first ?bNode5)
+    (?bNode5 owl:withRestrictions ?bNode6)
+    (?bNode6 rdf:first ?restriction)
+    (?restriction xsd:maxExclusive ?value)
+    -> (?bNode6 rdf:comment "MAX EXCLUSIVE COMMENT")]
+
+[rule12: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    (?bNode2 owl:unionOf ?bNode3)
+    (?bNode3 rdf:rest ?bNode4)
+    (?bNode4 rdf:first ?bNode5)
+    (?bNode5 owl:withRestrictions ?bNode6)
+    (?bNode6 rdf:first ?restriction)
+    (?restriction xsd:maxInclusive ?value)
+    -> (?bNode6 rdf:comment "MAX INCLUSIVE COMMENT")]
+
+[rule13: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    (?bNode2 owl:unionOf ?bNode3)
+    (?bNode3 rdf:rest ?bNode4)
+    (?bNode4 rdf:rest ?bNode5)
+    (?bNode5 rdf:first ?bNode6)
+    (?bNode6 owl:withRestrictions ?bNode7)
+    (?bNode7 rdf:first ?restriction)
+    (?restriction xsd:minExclusive ?value)
+    -> (?bNode6 rdf:comment "MIN EXCLUSIVE COMMENT")]
+
+[rule14: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    (?bNode2 owl:unionOf ?bNode3)
+    (?bNode3 rdf:rest ?bNode4)
+    (?bNode4 rdf:rest ?bNode5)
+    (?bNode5 rdf:first ?bNode6)
+    (?bNode6 owl:withRestrictions ?bNode7)
+    (?bNode7 rdf:first ?restriction)
+    (?restriction xsd:minInclusive ?value)
+    -> (?bNode6 rdf:comment "MIN INCLUSIVE COMMENT")]
+
+[rule15: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    (?bNode2 owl:unionOf ?bNode3)
+    (?bNode3 rdf:rest ?bNode4)
+    (?bNode4 rdf:rest ?bNode5)
+    (?bNode5 rdf:first ?bNode6)
+    (?bNode6 owl:withRestrictions ?bNode7)
+    (?bNode7 rdf:first ?restriction)
+    (?restriction xsd:maxExclusive ?value)
+    -> (?bNode6 rdf:comment "MAX EXCLUSIVE COMMENT")]
+
+[rule16: (?individual rdf:type owl:NamedIndividual)
+    (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:hasValueConstraint ?bNode1)
+    (?bNode1 rdf:type ?bNode2)
+    (?bNode2 owl:unionOf ?bNode3)
+    (?bNode3 rdf:rest ?bNode4)
+    (?bNode4 rdf:rest ?bNode5)
+    (?bNode5 rdf:first ?bNode6)
+    (?bNode6 owl:withRestrictions ?bNode7)
+    (?bNode7 rdf:first ?restriction)
+    (?restriction xsd:maxInclusive ?value)
+    -> (?bNode6 rdf:comment "MAX INCLUSIVE COMMENT")]
+
+// this is what a mitigation strategy should look like in .ttl - keep in mind this can also potentially affect a configurable property
+// instead of or in conjunction with actuating on observable ones
 // ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TestMitigationStrategy
 // :TestMitigationStrategy rdf:type owl:NamedIndividual ,
 //                                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/MitigationStrategy> ;

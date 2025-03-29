@@ -7,7 +7,43 @@
 @base <http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/> .
 
 <http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2> rdf:type owl:Ontology ;
-                                                                    owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation> .
+                                                                    owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation> .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasSeverity
+<http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasSeverity> rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/2002/07/owl#qualifiedCardinality
+owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueConstraint
+<http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueConstraint> rdf:type owl:DatatypeProperty .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/ConfigurableProperty
+<http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/ConfigurableProperty> rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/Decrease
+<http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/Decrease> rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/Increase
+<http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/Increase> rdf:type owl:Class .
+
 
 #################################################################
 #    Individuals
@@ -15,27 +51,16 @@
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/AustevollSite
 :AustevollSite rdf:type owl:NamedIndividual ;
-               <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/optimizesBy> :ValueDecrease ;
                <http://www.w3.org/ns/sosa/hosts> :CustomPieceSoftSensor ,
                                                  :TemperatureSensor1 .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressedTimeSeries
-:CompressedTimeSeries rdf:type owl:NamedIndividual ,
-                               [ rdf:type owl:Restriction ;
-                                 owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
-                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                 owl:onDataRange xsd:base64Binary
-                               ] .
+:CompressedTimeSeries rdf:type owl:NamedIndividual .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatio
-:CompressionRatio rdf:type owl:NamedIndividual ,
-                           [ rdf:type owl:Restriction ;
-                             owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
-                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                             owl:onDataRange xsd:double
-                           ] .
+:CompressionRatio rdf:type owl:NamedIndividual .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm
@@ -43,15 +68,16 @@
                            <http://www.w3.org/ns/ssn/hasInput> :CompressedTimeSeries ,
                                                                :NumberOfBufferedPoints ;
                            <http://www.w3.org/ns/ssn/hasOutput> :CompressionRatio ;
-                           <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasModel> "../compressionRatio.fmu"^^xsd:anyURI .
+                           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "../compressionRatio.fmu"^^xsd:anyURI .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPiece
 :CustomPiece rdf:type owl:NamedIndividual ;
              <http://www.w3.org/ns/ssn/hasInput> :Epsilon ,
-                                                 :NumberOfBufferedPoints ;
+                                                 :NumberOfBufferedPoints ,
+                                                 :TemperatureSensor1MeasuredTemperature ;
              <http://www.w3.org/ns/ssn/hasOutput> :CompressedTimeSeries ;
-             <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasModel> "../customPiece.fmu"^^xsd:anyURI .
+             <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "../customPiece.fmu"^^xsd:anyURI .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor
@@ -62,49 +88,33 @@
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/Epsilon
 :Epsilon rdf:type owl:NamedIndividual ,
-                  <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/ConfigurableProperty> ,
-                  [ rdf:type owl:Restriction ;
-                    owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
-                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                    owl:onDataRange xsd:double
-                  ] ;
-         <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/affectsPropertyWith> :ValueDecrease ,
-                                                                                                    :ValueIncrease ;
+                  <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/ConfigurableProperty> ;
+         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> :ValueDecrease ,
+                                                                                                   :ValueIncrease ;
          <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
-
-
-###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/HighSeverity
-:HighSeverity rdf:type owl:NamedIndividual ;
-              <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueConstraint> "1.0"^^xsd:double .
-
-
-###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/NonOptimalCompressionCondition
-:NonOptimalCompressionCondition rdf:type owl:NamedIndividual ,
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/NonOptimalCondition> ,
-                                         [ rdf:type owl:Restriction ;
-                                           owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueConstraint> ;
-                                           owl:someValuesFrom [ rdf:type rdfs:Datatype ;
-                                                                owl:onDatatype xsd:double ;
-                                                                owl:withRestrictions ( [ xsd:maxInclusive "1.1"^^xsd:double
-                                                                                       ]
-                                                                                     )
-                                                              ]
-                                         ] ;
-                                <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasSeverity> :HighSeverity ;
-                                <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/NumberOfBufferedPoints
 :NumberOfBufferedPoints rdf:type owl:NamedIndividual ,
-                                 <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/ConfigurableProperty> ,
-                                 [ rdf:type owl:Restriction ;
-                                   owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
-                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                   owl:onDataRange xsd:integer
-                                 ] ;
-                        <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/affectsPropertyWith> :ValueDecrease ,
-                                                                                                                   :ValueIncrease ;
+                                 <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/ConfigurableProperty> ;
+                        <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> :ValueDecrease ,
+                                                                                                                  :ValueIncrease ;
                         <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/OptimalCompressionCondition
+:OptimalCompressionCondition rdf:type owl:NamedIndividual ,
+                                      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
+                                      [ rdf:type owl:Restriction ;
+                                        owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueConstraint> ;
+                                        owl:someValuesFrom [ rdf:type rdfs:Datatype ;
+                                                             owl:onDatatype xsd:double ;
+                                                             owl:withRestrictions ( [ xsd:minInclusive "1.1"^^xsd:double
+                                                                                    ]
+                                                                                  )
+                                                           ]
+                                      ] ;
+                             <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1
@@ -114,12 +124,7 @@
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1MeasuredTemperature
-:TemperatureSensor1MeasuredTemperature rdf:type owl:NamedIndividual ,
-                                                [ rdf:type owl:Restriction ;
-                                                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
-                                                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                  owl:onDataRange xsd:double
-                                                ] .
+:TemperatureSensor1MeasuredTemperature rdf:type owl:NamedIndividual .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1Procedure
@@ -129,16 +134,27 @@
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/ValueDecrease
 :ValueDecrease rdf:type owl:NamedIndividual ,
-                        <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/Decrease> ;
-               <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio ,
-                                                      :Epsilon ,
-                                                      :NumberOfBufferedPoints .
+                        <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/Decrease> .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/ValueIncrease
 :ValueIncrease rdf:type owl:NamedIndividual ,
-                        <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/Increase> ;
-               <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
+                        <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/Increase> .
 
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
 
 ###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

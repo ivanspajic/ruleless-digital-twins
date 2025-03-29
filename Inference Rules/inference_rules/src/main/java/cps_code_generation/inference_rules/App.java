@@ -14,14 +14,14 @@ import org.apache.jena.riot.RDFDataMgr;
 
 public class App 
 {
-	private static final String ontologyBasePath = "C:\\dev\\cps-code-generation\\Ontology\\";
-	private static final String instanceBasePath = "C:\\dev\\cps-code-generation\\Instance Models\\";
+	private static final String ontologyBasePath = "C:\\dev\\dt-code-generation\\Ontology\\";
+	private static final String instanceBasePath = "C:\\dev\\dt-code-generation\\Instance Models\\";
 	
     public static void main( String[] args ) throws FileNotFoundException
     {
     	// Load the ontology (meta-model) and instance, and set up an OWL reasoner to use the ontology as a
     	// schema for the instance model.
-    	Model ontology = RDFDataMgr.loadModel(ontologyBasePath + "cps-code-generation.ttl");
+    	Model ontology = RDFDataMgr.loadModel(ontologyBasePath + "dt-code-generation.ttl");
     	Model instanceModel = RDFDataMgr.loadModel(instanceBasePath + "instance-model-1.ttl");
     	Reasoner owlReasoner = ReasonerRegistry.getOWLReasoner()
     			.bindSchema(ontology);

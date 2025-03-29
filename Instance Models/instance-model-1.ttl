@@ -7,97 +7,98 @@
 @base <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#> .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1> rdf:type owl:Ontology ;
-                                                                     owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation> .
+                                                                     owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation> .
 
 #################################################################
 #    Individuals
 #################################################################
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit
-:AirConditioningUnit rdf:type owl:NamedIndividual ;
-                     <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasActuatorState> :AirConditioningUnitStateOn .
+:AirConditioningUnit rdf:type owl:NamedIndividual ,
+                              <http://www.w3.org/ns/sosa/Actuator> ;
+                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState> :AirConditioningUnitStateOn .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnitStateOn
 :AirConditioningUnitStateOn rdf:type owl:NamedIndividual ;
-                            <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/affectsPropertyWith> :ValueDecrease ,
-                                                                                                                       :ValueIncrease ;
+                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> :ValueDecrease ,
+                                                                                                                      :ValueIncrease ;
                             <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#CeilingFan
-:CeilingFan rdf:type owl:NamedIndividual ;
-            <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasActuatorState> :CeilingFanStateHighSpeed ,
-                                                                                                    :CeilingFanStateLowSpeed .
+:CeilingFan rdf:type owl:NamedIndividual ,
+                     <http://www.w3.org/ns/sosa/Actuator> ;
+            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState> :CeilingFanStateHighSpeed ,
+                                                                                                   :CeilingFanStateLowSpeed .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#CeilingFanStateHighSpeed
 :CeilingFanStateHighSpeed rdf:type owl:NamedIndividual ;
-                          <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/affectsPropertyWith> :ValueDecrease ;
+                          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> :ValueDecrease ;
                           <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#CeilingFanStateLowSpeed
 :CeilingFanStateLowSpeed rdf:type owl:NamedIndividual ;
-                         <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/affectsPropertyWith> :ValueDecrease ;
+                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> :ValueDecrease ;
                          <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater
-:Heater rdf:type owl:NamedIndividual ;
-        <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasActuatorState> :HeaterStateMedium ,
-                                                                                                :HeaterStateStrong ,
-                                                                                                :HeaterStateWeak .
+:Heater rdf:type owl:NamedIndividual ,
+                 <http://www.w3.org/ns/sosa/Actuator> ;
+        <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState> :HeaterStateMedium ,
+                                                                                               :HeaterStateStrong ,
+                                                                                               :HeaterStateWeak .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStateMedium
 :HeaterStateMedium rdf:type owl:NamedIndividual ;
-                   <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/affectsPropertyWith> :ValueIncrease ;
+                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> :ValueIncrease ;
                    <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStateStrong
 :HeaterStateStrong rdf:type owl:NamedIndividual ;
-                   <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/affectsPropertyWith> :ValueIncrease ;
+                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> :ValueIncrease ;
                    <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStateWeak
 :HeaterStateWeak rdf:type owl:NamedIndividual ;
-                 <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/affectsPropertyWith> :ValueIncrease ;
+                 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> :ValueIncrease ;
                  <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#NonOptimalCondition1
-:NonOptimalCondition1 rdf:type owl:NamedIndividual ,
-                               <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/NonOptimalCondition> ,
-                               [ rdf:type owl:Restriction ;
-                                 owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueConstraint> ;
-                                 owl:someValuesFrom [ rdf:type rdfs:Datatype ;
-                                                      owl:onDatatype xsd:double ;
-                                                      owl:withRestrictions ( [ xsd:minExclusive "22.0"^^xsd:double
-                                                                             ]
-                                                                           )
-                                                    ]
-                               ] ;
-                      <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasSeverity> :RoomTooColdOrTooHotSeverity ;
-                      <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition1
+:OptimalCondition1 rdf:type owl:NamedIndividual ,
+                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                              owl:someValuesFrom [ rdf:type rdfs:Datatype ;
+                                                   owl:onDatatype xsd:double ;
+                                                   owl:withRestrictions ( [ xsd:maxExclusive "22.0"^^xsd:double
+                                                                          ]
+                                                                        )
+                                                 ]
+                            ] ;
+                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#NonOptimalCondition2
-:NonOptimalCondition2 rdf:type owl:NamedIndividual ,
-                               <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/NonOptimalCondition> ,
-                               [ rdf:type owl:Restriction ;
-                                 owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueConstraint> ;
-                                 owl:someValuesFrom [ rdf:type rdfs:Datatype ;
-                                                      owl:onDatatype xsd:double ;
-                                                      owl:withRestrictions ( [ xsd:maxExclusive "18.0"^^xsd:double
-                                                                             ]
-                                                                           )
-                                                    ]
-                               ] ;
-                      <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasSeverity> :RoomTooColdOrTooHotSeverity ;
-                      <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition2
+:OptimalCondition2 rdf:type owl:NamedIndividual ,
+                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                              owl:someValuesFrom [ rdf:type rdfs:Datatype ;
+                                                   owl:onDatatype xsd:double ;
+                                                   owl:withRestrictions ( [ xsd:minExclusive "18.0"^^xsd:double
+                                                                          ]
+                                                                        )
+                                                 ]
+                            ] ;
+                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomM370
@@ -111,39 +112,25 @@
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature
-:RoomTemperature rdf:type owl:NamedIndividual ,
-                          [ rdf:type owl:Restriction ;
-                            owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
-                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                            owl:onDataRange xsd:double
-                          ] .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTooColdOrTooHotSeverity
-:RoomTooColdOrTooHotSeverity rdf:type owl:NamedIndividual ;
-                             <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueConstraint> "1.0"^^xsd:double .
+:RoomTemperature rdf:type owl:NamedIndividual .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1
-:SoftSensor1 rdf:type owl:NamedIndividual ;
-             <http://www.w3.org/ns/ssn/hasSubSystem> :TemperatureSensor1 ,
-                                                     :TemperatureSensor2 ;
+:SoftSensor1 rdf:type owl:NamedIndividual ,
+                      <http://www.w3.org/ns/sosa/Sensor> ;
              <http://www.w3.org/ns/ssn/implements> :SoftSensor1Algorithm .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm
 :SoftSensor1Algorithm rdf:type owl:NamedIndividual ;
+                      <http://www.w3.org/ns/ssn/hasInput> :TemperatureSensor1MeasuredTemperature ,
+                                                          :TemperatureSensor2MeasuredTemperature ;
                       <http://www.w3.org/ns/ssn/hasOutput> :SoftSensor1Output ;
-                      <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasComputationFMU> "C:/dev/cps-code-generation/test.fmu"^^xsd:anyURI .
+                      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "../test.fmu"^^xsd:anyURI .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Output
-:SoftSensor1Output rdf:type owl:NamedIndividual ,
-                            [ rdf:type owl:Restriction ;
-                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
-                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                              owl:onDataRange xsd:double
-                            ] .
+:SoftSensor1Output rdf:type owl:NamedIndividual .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1
@@ -154,12 +141,7 @@
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1MeasuredTemperature
-:TemperatureSensor1MeasuredTemperature rdf:type owl:NamedIndividual ,
-                                                [ rdf:type owl:Restriction ;
-                                                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
-                                                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                  owl:onDataRange xsd:double
-                                                ] .
+:TemperatureSensor1MeasuredTemperature rdf:type owl:NamedIndividual .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure
@@ -175,12 +157,7 @@
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2MeasuredTemperature
-:TemperatureSensor2MeasuredTemperature rdf:type owl:NamedIndividual ,
-                                                [ rdf:type owl:Restriction ;
-                                                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/hasValueType> ;
-                                                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                  owl:onDataRange xsd:double
-                                                ] .
+:TemperatureSensor2MeasuredTemperature rdf:type owl:NamedIndividual .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure
@@ -190,12 +167,12 @@
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#ValueDecrease
 :ValueDecrease rdf:type owl:NamedIndividual ,
-                        <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/Decrease> .
+                        <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Decrease> .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#ValueIncrease
 :ValueIncrease rdf:type owl:NamedIndividual ,
-                        <http://www.semanticweb.org/ivans/ontologies/2025/cps-code-generation/Increase> .
+                        <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Increase> .
 
 
 ###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

@@ -2,7 +2,9 @@
 @prefix meta: <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/>.
 @include <OWL>.
 
-// These rules cover individuals with single constraints.
+// These rules cover individuals with single constraints. Once an optimal condition constraint has been
+// located, a temporary mark will be placed to allow subsequent rules to match and fire. After firing,
+// the subsequent rules drop the temporary mark statement.
 
 [rule1: (?individual rdf:type owl:NamedIndividual)
     (?individual rdf:type meta:OptimalCondition)
@@ -10,35 +12,27 @@
     (?bNode1 rdf:type ?bNode2)
     (?bNode2 owl:withRestrictions ?bNode3)
     (?bNode3 rdf:first ?restriction)
+    -> (?restriction rdf:comment "opt-cond-mark")]
+
+[rule1b: (?restriction rdf:comment "opt-cond-mark")
     (?restriction xsd:minExclusive ?value)
-    -> (?bNode3 rdf:comment "MIN EXCLUSIVE COMMENT")]
+    -> (?restriction rdf:comment "MIN EXCLUSIVE")
+        drop(0)]
 
-[rule2: (?individual rdf:type owl:NamedIndividual)
-    (?individual rdf:type meta:OptimalCondition)
-    (?individual meta:hasValueConstraint ?bNode1)
-    (?bNode1 rdf:type ?bNode2)
-    (?bNode2 owl:withRestrictions ?bNode3)
-    (?bNode3 rdf:first ?restriction)
+[rule1b: (?restriction rdf:comment "opt-cond-mark")
     (?restriction xsd:minInclusive ?value)
-    -> (?bNode3 rdf:comment "MIN INCLUSIVE COMMENT")]
+    -> (?restriction rdf:comment "MIN INCLUSIVE")
+        drop(0)]
 
-[rule3: (?individual rdf:type owl:NamedIndividual)
-    (?individual rdf:type meta:OptimalCondition)
-    (?individual meta:hasValueConstraint ?bNode1)
-    (?bNode1 rdf:type ?bNode2)
-    (?bNode2 owl:withRestrictions ?bNode3)
-    (?bNode3 rdf:first ?restriction)
+[rule1c: (?restriction rdf:comment "opt-cond-mark")
     (?restriction xsd:maxExclusive ?value)
-    -> (?bNode3 rdf:comment "MAX EXCLUSIVE COMMENT")]
+    -> (?restriction rdf:comment "MAX EXCLUSIVE")
+        drop(0)]
 
-[rule4: (?individual rdf:type owl:NamedIndividual)
-    (?individual rdf:type meta:OptimalCondition)
-    (?individual meta:hasValueConstraint ?bNode1)
-    (?bNode1 rdf:type ?bNode2)
-    (?bNode2 owl:withRestrictions ?bNode3)
-    (?bNode3 rdf:first ?restriction)
+[rule1d: (?restriction rdf:comment "opt-cond-mark")
     (?restriction xsd:maxInclusive ?value)
-    -> (?bNode3 rdf:comment "MAX INCLUSIVE COMMENT")]
+    -> (?restriction rdf:comment "MAX INCLUSIVE")
+        drop(0)]
 
 
 

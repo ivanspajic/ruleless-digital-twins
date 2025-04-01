@@ -30,9 +30,9 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuator
 :hasActuator rdf:type owl:ObjectProperty ;
-             rdfs:domain :MitigationStrategy ;
+             rdfs:domain :Strategy ;
              rdfs:range <http://www.w3.org/ns/sosa/Actuator> ;
-             rdfs:comment "The relation between a MitigationStrategy and an Actuator it uses."@en ;
+             rdfs:comment "The relation between a Strategy and an Actuator it uses."@en ;
              rdfs:label "hasActuator"@en .
 
 
@@ -40,7 +40,7 @@ xsd:duration rdf:type rdfs:Datatype .
 :hasActuatorState rdf:type owl:ObjectProperty ;
                   owl:inverseOf :isStateOf ;
                   rdfs:range :ActuatorState ;
-                  rdfs:comment "The relation between an Actuator and an ActuatorState it uses."@en ;
+                  rdfs:comment "The relation between a thing and an ActuatorState it uses."@en ;
                   rdfs:label "hasActuatorState"@en .
 
 
@@ -90,6 +90,13 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Data properties
 #################################################################
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasIdentifier
+:hasIdentifier rdf:type owl:DatatypeProperty ;
+               rdfs:range xsd:string ;
+               rdfs:comment "Represents a relation from a thing to its identifier."@en ;
+               rdfs:label "hasIdentifier"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel
 :hasModel rdf:type owl:DatatypeProperty ;
           rdfs:domain <http://www.w3.org/ns/sosa/Procedure> ;
@@ -100,7 +107,7 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasTimeLimit
 :hasTimeLimit rdf:type owl:DatatypeProperty ;
-              rdfs:domain :MitigationStrategy ;
+              rdfs:domain :Strategy ;
               rdfs:range xsd:duration ;
               rdfs:comment "Represents a time limit on the duration of the MitigationStrategy."@en ;
               rdfs:label "hasTimeLimit"@en .
@@ -132,6 +139,11 @@ xsd:duration rdf:type rdfs:Datatype .
                                  owl:onClass :Effect
                                ] ,
                                [ rdf:type owl:Restriction ;
+                                 owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
+                                 owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                 owl:onClass <http://www.w3.org/ns/sosa/ObservableProperty>
+                               ] ,
+                               [ rdf:type owl:Restriction ;
                                  owl:onProperty :isStateOf ;
                                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                  owl:onClass <http://www.w3.org/ns/sosa/Actuator>
@@ -161,52 +173,10 @@ xsd:duration rdf:type rdfs:Datatype .
                       rdfs:label "ConfigurableProperty"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Decrease
-:Decrease rdf:type owl:Class ;
-          rdfs:subClassOf :Effect ;
-          rdfs:comment "Represents a decrease in the value of a property."@en ;
-          rdfs:label "Decrease"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Effect
 :Effect rdf:type owl:Class ;
-        rdfs:subClassOf [ rdf:type owl:Restriction ;
-                          owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
-                          owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                          owl:onClass <http://www.w3.org/ns/ssn/Property>
-                        ] ;
         rdfs:comment "The type of effect on the value of a property."@en ;
         rdfs:label "Effect"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Increase
-:Increase rdf:type owl:Class ;
-          rdfs:subClassOf :Effect ;
-          rdfs:comment "Represents an increase in the value of a property."@en ;
-          rdfs:label "Increase"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/MitigationStrategy
-:MitigationStrategy rdf:type owl:Class ;
-                    rdfs:subClassOf [ rdf:type owl:Restriction ;
-                                      owl:onProperty :hasActuator ;
-                                      owl:someValuesFrom <http://www.w3.org/ns/sosa/Actuator>
-                                    ] ,
-                                    [ rdf:type owl:Restriction ;
-                                      owl:onProperty :hasActuatorState ;
-                                      owl:someValuesFrom :ActuatorState
-                                    ] ,
-                                    [ rdf:type owl:Restriction ;
-                                      owl:onProperty <http://www.w3.org/ns/sosa/actsOnProperty> ;
-                                      owl:someValuesFrom :ConfigurableProperty
-                                    ] ,
-                                    [ rdf:type owl:Restriction ;
-                                      owl:onProperty :hasTimeLimit ;
-                                      owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                      owl:onDataRange xsd:duration
-                                    ] ;
-                    rdfs:comment "Represents a strategy for regaining optimal conditions."@en ;
-                    rdfs:label "MitigationStrategy"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition
@@ -225,6 +195,54 @@ xsd:duration rdf:type rdfs:Datatype .
                   rdfs:label "OptimalCondition"@en .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange
+:PropertyChange rdf:type owl:Class ;
+                rdfs:subClassOf [ rdf:type owl:Class ;
+                                  owl:unionOf ( [ owl:intersectionOf ( [ rdf:type owl:Restriction ;
+                                                                         owl:onProperty :affectsPropertyWith ;
+                                                                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                                         owl:onClass :Effect
+                                                                       ]
+                                                                       [ rdf:type owl:Restriction ;
+                                                                         owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
+                                                                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                                         owl:onClass :ConfigurableProperty
+                                                                       ]
+                                                                     ) ;
+                                                  rdf:type owl:Class
+                                                ]
+                                                [ rdf:type owl:Restriction ;
+                                                  owl:onProperty :hasActuatorState ;
+                                                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                  owl:onClass :ActuatorState
+                                                ]
+                                              )
+                                ] ;
+                rdfs:comment "Represents a specific property change in a given system, either via a changed configuration property or an actuation on an observable one."@en ;
+                rdfs:label "PropertyChange"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Strategy
+:Strategy rdf:type owl:Class ;
+          rdfs:subClassOf [ rdf:type owl:Restriction ;
+                            owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
+                            owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                            owl:onClass :PropertyChange
+                          ] ,
+                          [ rdf:type owl:Restriction ;
+                            owl:onProperty :hasIdentifier ;
+                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                            owl:onDataRange xsd:string
+                          ] ,
+                          [ rdf:type owl:Restriction ;
+                            owl:onProperty :hasTimeLimit ;
+                            owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                            owl:onDataRange xsd:duration
+                          ] ;
+          rdfs:comment "Represents a strategy for optimization or regaining optimal conditions."@en ;
+          rdfs:label "Strategy"@en .
+
+
 ###  http://www.w3.org/ns/sosa/Actuator
 <http://www.w3.org/ns/sosa/Actuator> rdfs:subClassOf [ rdf:type owl:Restriction ;
                                                        owl:onProperty :hasActuatorState ;
@@ -238,6 +256,20 @@ xsd:duration rdf:type rdfs:Datatype .
                                                                  owl:onProperty :hasValueType ;
                                                                  owl:cardinality "1"^^xsd:nonNegativeInteger
                                                                ] .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease
+:ValueDecrease rdf:type owl:NamedIndividual ,
+                        :Effect .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease
+:ValueIncrease rdf:type owl:NamedIndividual ,
+                        :Effect .
 
 
 ###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

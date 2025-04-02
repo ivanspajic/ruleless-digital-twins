@@ -45,10 +45,26 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 #    Individuals
 #################################################################
 
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2#EpsilonOptimization
+:EpsilonOptimization rdf:type owl:NamedIndividual ,
+                              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Optimization> ;
+                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
+                     <http://www.w3.org/ns/ssn/forProperty> :Epsilon .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2#NumberOfBufferedPointsOptimization
+:NumberOfBufferedPointsOptimization rdf:type owl:NamedIndividual ,
+                                             <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Optimization> ;
+                                    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
+                                    <http://www.w3.org/ns/ssn/forProperty> :NumberOfBufferedPoints .
+
+
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/AustevollSite
 :AustevollSite rdf:type owl:NamedIndividual ;
                <http://www.w3.org/ns/sosa/hosts> :CustomPieceSoftSensor ,
-                                                 :TemperatureSensor1 .
+                                                 :TemperatureSensor1 ;
+               <http://www.w3.org/ns/ssn/implements> :EpsilonOptimization ,
+                                                     :NumberOfBufferedPointsOptimization .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressedTimeSeries

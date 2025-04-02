@@ -71,14 +71,6 @@ xsd:duration rdf:type rdfs:Datatype .
                rdfs:label "isSubsystemOf"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesBy
-:optimizesBy rdf:type owl:ObjectProperty ;
-             rdfs:domain <http://www.w3.org/ns/sosa/Platform> ;
-             rdfs:range :Effect ;
-             rdfs:comment "Represents a relation between a System and an Effect it optimizes some Property with."@en ;
-             rdfs:label "optimizesBy"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/propertyFor
 :propertyFor rdf:type owl:ObjectProperty ;
              owl:inverseOf <http://www.w3.org/ns/ssn/forProperty> ;
@@ -130,6 +122,25 @@ xsd:duration rdf:type rdfs:Datatype .
 #################################################################
 #    Classes
 #################################################################
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation#Optimization
+:Optimization rdf:type owl:Class ;
+              rdfs:subClassOf [ owl:intersectionOf ( [ rdf:type owl:Restriction ;
+                                                       owl:onProperty :affectsPropertyWith ;
+                                                       owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                       owl:onClass :Effect
+                                                     ]
+                                                     [ rdf:type owl:Restriction ;
+                                                       owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
+                                                       owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                       owl:onClass <http://www.w3.org/ns/ssn/Property>
+                                                     ]
+                                                   ) ;
+                                rdf:type owl:Class
+                              ] ;
+              rdfs:comment "An optimization performed by a platform on some properties."@en ;
+              rdfs:label "Optimization"@en .
+
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState
 :ActuatorState rdf:type owl:Class ;

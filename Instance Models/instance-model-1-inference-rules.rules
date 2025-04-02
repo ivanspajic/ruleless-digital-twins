@@ -1,5 +1,6 @@
 @prefix : <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#>.
 @prefix meta: <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/>.
+@prefix ssn: <http://www.w3.org/ns/ssn/>.
 @include <OWL>.
 
 // The following rule covers individuals with single constraints. Once an OptimalCondition constraint has been
@@ -7,16 +8,18 @@
 
 [singleConstraint: (?individual rdf:type owl:NamedIndividual)
     (?individual rdf:type meta:OptimalCondition)
+    (?individual ssn:forProperty ?observableProperty)
     (?individual meta:hasValueConstraint ?bNode1)
     (?bNode1 rdf:type ?bNode2)
     (?bNode2 owl:withRestrictions ?bNode3)
     (?bNode3 rdf:first ?restriction)
-    -> (?restriction rdf:comment "opt-cond-mark")]
+    -> (?restriction rdf:comment ?observableProperty)]
 
 // The following rules cover individuals with multiple constraints (up to 3 constraints per individual supported).
 
 [multiConstraint1: (?individual rdf:type owl:NamedIndividual)
     (?individual rdf:type meta:OptimalCondition)
+    (?individual meta:forProperty ?property)
     (?individual meta:hasValueConstraint ?bNode1)
     (?bNode1 rdf:type ?bNode2)
     (?bNode2 owl:unionOf ?bNode3)
@@ -51,25 +54,39 @@
 // Upon locating the temporary marks for OptimalCondition constraints, these rules generate corresponding
 // Strategies and remove the marks.
 
-[rule1b: (?restriction rdf:comment "opt-cond-mark")
+[rule1a: (?restriction rdf:comment "opt-cond-mark")
     (?restriction xsd:minExclusive ?value)
+    makeTemp(?x)
     -> (?restriction rdf:comment "MIN EXCLUSIVE")
         drop(0)]
 
-[rule1b: (?restriction rdf:comment "opt-cond-mark")
-    (?restriction xsd:minInclusive ?value)
-    -> (?restriction rdf:comment "MIN INCLUSIVE")
+[rule1b: (?restriction rdf:comment ?observableProperty)
+    (?observableProperty rdf:type owl:NamedIndividual)
+    (?observableProperty meta:propertyFor ?test)
+    makeTemp(?x)
+    -> (?restriction rdf:label "MIN INCLUSIVE")
+        (?restriction rdf:comment ?test)
         drop(0)]
 
 [rule1c: (?restriction rdf:comment "opt-cond-mark")
     (?restriction xsd:maxExclusive ?value)
+    makeTemp(?x)
     -> (?restriction rdf:comment "MAX EXCLUSIVE")
         drop(0)]
 
 [rule1d: (?restriction rdf:comment "opt-cond-mark")
     (?restriction xsd:maxInclusive ?value)
+    makeTemp(?x)
     -> (?restriction rdf:comment "MAX INCLUSIVE")
         drop(0)]
+
+// generative rules for PropertyChanges (fix this comment)
+
+[ruleTest: (?restriction rdf:comment ?test)
+    (?restriction rdf:label "MIN INCLUSIVE")
+    makeTemp(?x)
+    -> (?x rdf:type :PropertyChange)
+        (?x meta:hasActuatorState ?test)]
 
 // this is what a Strategy and PropertyChange should look like in .ttl
 //

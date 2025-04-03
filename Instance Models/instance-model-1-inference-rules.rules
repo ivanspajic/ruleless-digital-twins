@@ -80,7 +80,8 @@
     -> (?restriction rdf:comment "MAX INCLUSIVE")
         drop(0)]
 
-// generative rules for PropertyChanges (fix this comment)
+// generative rules for PropertyChanges (fix this comment) - this needs to account for properties being used
+// by actuator states and optimal conditions
 
 [ruleTest: (?restriction rdf:comment ?test)
     (?restriction rdf:label "MIN INCLUSIVE")
@@ -88,13 +89,14 @@
     -> (?x rdf:type :PropertyChange)
         (?x meta:hasActuatorState ?test)]
 
+
+
 // this is what a Strategy and PropertyChange should look like in .ttl
 //
 // ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TestPropertyChange
 // :TestPropertyChange rdf:type owl:NamedIndividual ,
-//                              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> ;
+//                              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurablePropertyChange> ;
 //                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
-//                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState> :AirConditioningUnitStateOn ;
 //                     <http://www.w3.org/ns/ssn/forProperty> :TestConfigurableProperty .
 
 
@@ -102,5 +104,7 @@
 // :TestStrategy rdf:type owl:NamedIndividual ,
 //                        <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Strategy> ;
 //               <http://www.w3.org/ns/ssn/implements> :TestPropertyChange ;
+//               <http://www.w3.org/ns/ssn/implements> :TestPropertyChange2 ;
+//               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState> :SomeActuatorState
 //               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasIdentifier> "TestIdentifier" ;
 //               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasTimeLimit> ""^^xsd:duration .

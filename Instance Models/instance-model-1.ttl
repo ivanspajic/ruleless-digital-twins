@@ -21,9 +21,8 @@
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnitStateOn
 :AirConditioningUnitStateOn rdf:type owl:NamedIndividual ;
-                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ,
-                                                                                                                      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
-                            <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
+                            <http://www.w3.org/ns/ssn/implements> :RoomTemperatureDecrease ,
+                                                                  :RoomTemperatureIncrease .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#CeilingFan
@@ -35,14 +34,12 @@
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#CeilingFanStateHighSpeed
 :CeilingFanStateHighSpeed rdf:type owl:NamedIndividual ;
-                          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
-                          <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
+                          <http://www.w3.org/ns/ssn/implements> :RoomTemperatureDecrease .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#CeilingFanStateLowSpeed
 :CeilingFanStateLowSpeed rdf:type owl:NamedIndividual ;
-                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
-                         <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
+                         <http://www.w3.org/ns/ssn/implements> :RoomTemperatureDecrease .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Energy
@@ -52,7 +49,7 @@
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyOptimization
 :EnergyOptimization rdf:type owl:NamedIndividual ,
-                             <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Optimization> ;
+                             <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> ;
                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
                     <http://www.w3.org/ns/ssn/forProperty> :Energy .
 
@@ -67,20 +64,17 @@
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStateMedium
 :HeaterStateMedium rdf:type owl:NamedIndividual ;
-                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
-                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
+                   <http://www.w3.org/ns/ssn/implements> :RoomTemperatureIncrease .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStateStrong
 :HeaterStateStrong rdf:type owl:NamedIndividual ;
-                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
-                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
+                   <http://www.w3.org/ns/ssn/implements> :RoomTemperatureIncrease .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStateWeak
 :HeaterStateWeak rdf:type owl:NamedIndividual ;
-                 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
-                 <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
+                 <http://www.w3.org/ns/ssn/implements> :RoomTemperatureIncrease .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition1
@@ -100,6 +94,7 @@
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomM370
 :RoomM370 rdf:type owl:NamedIndividual ;
+          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor> :EnergyOptimization ;
           <http://www.w3.org/ns/sosa/hosts> :AirConditioningUnit ,
                                             :CeilingFan ,
                                             :Heater ,
@@ -110,6 +105,20 @@
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature
 :RoomTemperature rdf:type owl:NamedIndividual .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperatureDecrease
+:RoomTemperatureDecrease rdf:type owl:NamedIndividual ,
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> ;
+                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
+                         <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperatureIncrease
+:RoomTemperatureIncrease rdf:type owl:NamedIndividual ,
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> ;
+                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
+                         <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1
@@ -160,14 +169,6 @@
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure
 :TemperatureSensor2Procedure rdf:type owl:NamedIndividual ;
                              <http://www.w3.org/ns/ssn/hasOutput> :TemperatureSensor2MeasuredTemperature .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TestConfigurableProperty
-:TestConfigurableProperty rdf:type owl:NamedIndividual ,
-                                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurableProperty> ;
-                          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ,
-                                                                                                                    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
-                          <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
 ###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

@@ -65,8 +65,7 @@
     (?observableProperty meta:propertyFor ?test)
     makeTemp(?x)
     -> (?restriction rdf:label "MIN INCLUSIVE")
-        (?restriction rdf:comment ?test)
-        drop(0)]
+        (?restriction rdf:comment ?test)]
 
 [rule1c: (?restriction rdf:comment "opt-cond-mark")
     (?restriction xsd:maxExclusive ?value)
@@ -79,15 +78,6 @@
     makeTemp(?x)
     -> (?restriction rdf:comment "MAX INCLUSIVE")
         drop(0)]
-
-// generative rules for PropertyChanges (fix this comment) - this needs to account for properties being used
-// by actuator states and optimal conditions
-
-[ruleTest: (?restriction rdf:comment ?test)
-    (?restriction rdf:label "MIN INCLUSIVE")
-    makeTemp(?x)
-    -> (?x rdf:type :PropertyChange)
-        (?x meta:hasActuatorState ?test)]
 
 
 

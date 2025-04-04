@@ -22,7 +22,8 @@ public class App
     	// Load the ontology (meta-model) and instance, and set up an OWL reasoner to use the ontology as a
     	// schema for the instance model.
     	Model ontology = RDFDataMgr.loadModel(ontologyBasePath + "dt-code-generation.ttl");
-    	Model instanceModel = RDFDataMgr.loadModel(instanceBasePath + "instance-model-1.ttl");
+    	//Model instanceModel = RDFDataMgr.loadModel(instanceBasePath + "instance-model-1.ttl");
+    	Model instanceModel = RDFDataMgr.loadModel("C:\\Users\\ispa\\OneDrive - Høgskulen på Vestlandet\\Skrivebord\\untitled-ontology-122.ttl");
     	Reasoner owlReasoner = ReasonerRegistry.getOWLReasoner()
     			.bindSchema(ontology);
     	

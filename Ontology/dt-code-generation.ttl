@@ -21,6 +21,14 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Object Properties
 #################################################################
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation#alteredBy
+:alteredBy rdf:type owl:ObjectProperty ;
+           rdfs:domain :PropertyChangeByReconfiguration ;
+           rdfs:range :Effect ;
+           rdfs:comment "Represents a relation between a ConfigurableProperty and an Effect on it that causes a related property to change."@en ;
+           rdfs:label "alteredBy"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith
 :affectsPropertyWith rdf:type owl:ObjectProperty ;
                      rdfs:range :Effect ;
@@ -62,13 +70,6 @@ xsd:duration rdf:type rdfs:Datatype .
 :isStateOf rdf:type owl:ObjectProperty ;
            rdfs:comment "Relation between an ActuatorState and its Actuator."@en ;
            rdfs:label "isStateOf"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/isSubsystemOf
-:isSubsystemOf rdf:type owl:ObjectProperty ;
-               owl:inverseOf <http://www.w3.org/ns/ssn/hasSubSystem> ;
-               rdfs:comment "Relation between a subsystem and its System."@en ;
-               rdfs:label "isSubsystemOf"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor
@@ -131,17 +132,18 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Classes
 #################################################################
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation#PropertyChangeByActuation
+:PropertyChangeByActuation rdf:type owl:Class ;
+                           rdfs:subClassOf :PropertyChange ;
+                           owl:disjointWith :PropertyChangeByReconfiguration .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState
 :ActuatorState rdf:type owl:Class ;
                rdfs:subClassOf [ rdf:type owl:Restriction ;
-                                 owl:onProperty :affectsPropertyWith ;
+                                 owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
                                  owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                 owl:onClass :Effect
-                               ] ,
-                               [ rdf:type owl:Restriction ;
-                                 owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
-                                 owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                 owl:onClass <http://www.w3.org/ns/sosa/ObservableProperty>
+                                 owl:onClass :PropertyChangeByActuation
                                ] ,
                                [ rdf:type owl:Restriction ;
                                  owl:onProperty :isStateOf ;
@@ -156,14 +158,14 @@ xsd:duration rdf:type rdfs:Datatype .
 :ConfigurableProperty rdf:type owl:Class ;
                       rdfs:subClassOf <http://www.w3.org/ns/ssn/Property> ,
                                       [ rdf:type owl:Restriction ;
-                                        owl:onProperty :affectsPropertyWith ;
-                                        owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                        owl:onClass :Effect
-                                      ] ,
-                                      [ rdf:type owl:Restriction ;
                                         owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
                                         owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                         owl:onClass <http://www.w3.org/ns/sosa/ObservableProperty>
+                                      ] ,
+                                      [ rdf:type owl:Restriction ;
+                                        owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
+                                        owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                        owl:onClass :PropertyChangeByReconfiguration
                                       ] ,
                                       [ rdf:type owl:Restriction ;
                                         owl:onProperty :hasValueType ;
@@ -171,24 +173,6 @@ xsd:duration rdf:type rdfs:Datatype .
                                       ] ;
                       rdfs:comment "A property not directly observable or actuatable but rather used for configuring a System or Procedure."@en ;
                       rdfs:label "ConfigurableProperty"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurablePropertyChange
-:ConfigurablePropertyChange rdf:type owl:Class ;
-                            rdfs:subClassOf :PropertyChange ,
-                                            [ owl:intersectionOf ( [ rdf:type owl:Restriction ;
-                                                                     owl:onProperty :affectsPropertyWith ;
-                                                                     owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                                     owl:onClass :Effect
-                                                                   ]
-                                                                   [ rdf:type owl:Restriction ;
-                                                                     owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
-                                                                     owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                                     owl:onClass :ConfigurableProperty
-                                                                   ]
-                                                                 ) ;
-                                              rdf:type owl:Class
-                                            ] .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Effect
@@ -215,37 +199,37 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange
 :PropertyChange rdf:type owl:Class ;
-                rdfs:subClassOf [ owl:intersectionOf ( [ rdf:type owl:Restriction ;
-                                                         owl:onProperty :affectsPropertyWith ;
-                                                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                         owl:onClass :Effect
-                                                       ]
-                                                       [ rdf:type owl:Restriction ;
-                                                         owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
-                                                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                         owl:onClass <http://www.w3.org/ns/ssn/Property>
-                                                       ]
-                                                     ) ;
-                                  rdf:type owl:Class
+                rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                  owl:onProperty :affectsPropertyWith ;
+                                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                  owl:onClass :Effect
+                                ] ,
+                                [ rdf:type owl:Restriction ;
+                                  owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
+                                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                  owl:onClass <http://www.w3.org/ns/ssn/Property>
                                 ] ;
                 rdfs:comment "Represents a specific property change in a given system, either via a changed configuration property or an actuation on an observable one."@en ;
                 rdfs:label "PropertyChange"@en .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration
+:PropertyChangeByReconfiguration rdf:type owl:Class ;
+                                 rdfs:subClassOf :PropertyChange ,
+                                                 [ rdf:type owl:Restriction ;
+                                                   owl:onProperty :alteredBy ;
+                                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                   owl:onClass :Effect
+                                                 ] ;
+                                 rdfs:comment "Represents a specific property change as a result of reconfiguring a related ConfigurableProperty."@en ;
+                                 rdfs:label "PropertyChangeByReconfiguration"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Strategy
 :Strategy rdf:type owl:Class ;
-          rdfs:subClassOf [ rdf:type owl:Class ;
-                            owl:unionOf ( [ rdf:type owl:Restriction ;
-                                            owl:onProperty :hasActuatorState ;
-                                            owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                            owl:onClass :ActuatorState
-                                          ]
-                                          [ rdf:type owl:Restriction ;
-                                            owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
-                                            owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                            owl:onClass :ConfigurablePropertyChange
-                                          ]
-                                        )
+          rdfs:subClassOf [ rdf:type owl:Restriction ;
+                            owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
+                            owl:allValuesFrom :PropertyChange
                           ] ,
                           [ rdf:type owl:Restriction ;
                             owl:onProperty :hasIdentifier ;

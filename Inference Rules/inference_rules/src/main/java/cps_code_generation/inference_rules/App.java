@@ -13,30 +13,26 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 
 public class App 
-{
-	private static final String ontologyBasePath = "C:\\dev\\dt-code-generation\\Ontology\\";
-	private static final String instanceBasePath = "C:\\dev\\dt-code-generation\\Instance Models\\";
-	
+{	
     public static void main( String[] args ) throws FileNotFoundException
     {
-    	// Load the ontology (meta-model) and instance, and set up an OWL reasoner to use the ontology as a
-    	// schema for the instance model.
-    	Model ontology = RDFDataMgr.loadModel(ontologyBasePath + "dt-code-generation.ttl");
-    	//Model instanceModel = RDFDataMgr.loadModel(instanceBasePath + "instance-model-1.ttl");
-    	Model instanceModel = RDFDataMgr.loadModel("C:\\Users\\ispa\\OneDrive - Høgskulen på Vestlandet\\Skrivebord\\untitled-ontology-122.ttl");
-    	Reasoner owlReasoner = ReasonerRegistry.getOWLReasoner()
-    			.bindSchema(ontology);
+    	String ontologyFilePath = args[0];
+    	String instanceModelFilePath = args[1];
+    	String ruleModelFilePath = args[2];
+    	String inferredModelFilePath = args[3];
     	
-    	// Infer the preliminary inferred model from basic OWL rules.
+    	Model myOntology = RDFDataMgr.loadModel(ontologyFilePath);
+    	Model instanceModel = RDFDataMgr.loadModel(instanceModelFilePath);
+    	
+    	Reasoner owlReasoner = ReasonerRegistry.getOWLReasoner()
+    			.bindSchema(myOntology);
     	InfModel basicInferredModel = ModelFactory.createInfModel(owlReasoner, instanceModel);
     	
-    	// Load the list of custom inference rules, instantiate a generic rule reasoner, and infer the final
-    	// model.
-    	List ruleList = Rule.rulesFromURL(instanceBasePath + "instance-model-1-inference-rules.rules");
+    	List ruleList = Rule.rulesFromURL(ruleModelFilePath);
     	GenericRuleReasoner ruleReasoner = new GenericRuleReasoner(ruleList);
     	InfModel finalInferredModel = ModelFactory.createInfModel(ruleReasoner, basicInferredModel);
     	
-    	FileOutputStream fileOutputStream = new FileOutputStream(instanceBasePath + "inferred-model-1.ttl");
+    	FileOutputStream fileOutputStream = new FileOutputStream(inferredModelFilePath);
     	RDFDataMgr.write(fileOutputStream, finalInferredModel, Lang.TTL);
     	
     	System.out.println("Terminated.");

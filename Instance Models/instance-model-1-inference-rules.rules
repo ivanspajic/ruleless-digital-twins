@@ -6,18 +6,19 @@
 // The following rule covers individuals with single constraints. Once an OptimalCondition constraint has been
 // located, a temporary mark will be placed to allow subsequent rules to match and fire.
 
-[singleConstraint: (?individual rdf:type owl:NamedIndividual)
+[rule1a: (?individual rdf:type owl:NamedIndividual)
     (?individual rdf:type meta:OptimalCondition)
     (?individual ssn:forProperty ?observableProperty)
     (?individual meta:hasValueConstraint ?bNode1)
     (?bNode1 rdf:type ?bNode2)
     (?bNode2 owl:withRestrictions ?bNode3)
     (?bNode3 rdf:first ?restriction)
-    -> (?restriction rdf:comment ?observableProperty)]
+    -> (?restriction rdf:comment "opt-cond-mark")
+        (?restriction rdf:comment ?observableProperty)]
 
 // The following rules cover individuals with multiple constraints (up to 3 constraints per individual supported).
 
-[multiConstraint1: (?individual rdf:type owl:NamedIndividual)
+[rule1b: (?individual rdf:type owl:NamedIndividual)
     (?individual rdf:type meta:OptimalCondition)
     (?individual meta:forProperty ?property)
     (?individual meta:hasValueConstraint ?bNode1)
@@ -28,7 +29,7 @@
     (?bNode5 rdf:first ?restriction)
     -> (?restriction rdf:comment "opt-cond-mark")]
 
-[multiConstraint2: (?individual rdf:type owl:NamedIndividual)
+[rule1c: (?individual rdf:type owl:NamedIndividual)
     (?individual rdf:type meta:OptimalCondition)
     (?individual meta:hasValueConstraint ?bNode1)
     (?bNode1 rdf:type ?bNode2)
@@ -39,7 +40,7 @@
     (?bNode6 rdf:first ?restriction)
     -> (?restriction rdf:comment "opt-cond-mark")]
 
-[multiConstraint3: (?individual rdf:type owl:NamedIndividual)
+[rule1d: (?individual rdf:type owl:NamedIndividual)
     (?individual rdf:type meta:OptimalCondition)
     (?individual meta:hasValueConstraint ?bNode1)
     (?bNode1 rdf:type ?bNode2)
@@ -51,51 +52,91 @@
     (?bNode7 rdf:first ?restriction)
     -> (?restriction rdf:comment "opt-cond-mark")]
 
-// Upon locating the temporary marks for OptimalCondition constraints, these rules generate corresponding
-// Strategies and remove the marks.
+// Upon locating the temporary marks for OptimalCondition constraints, these rules find the respective
+// PropertyChanges and set a mark for the required changes to the property in question.
 
-[rule1a: (?restriction rdf:comment "opt-cond-mark")
+[rule2a: (?restriction rdf:comment "opt-cond-mark")
+    (?restriction rdf:comment ?observableProperty)
+    (?observableProperty meta:propertyFor ?propertyChange)
+    (?propertyChange rdf:type meta:PropertyChange)
     (?restriction xsd:minExclusive ?value)
-    makeTemp(?x)
-    -> (?restriction rdf:comment "MIN EXCLUSIVE")
-        drop(0)]
+    -> drop(0, 1)
+        (?restriction rdf:comment "prop-change-inc-mark")
+        (?restriction rdf:comment ?propertyChange)]
 
-[rule1b: (?restriction rdf:comment ?observableProperty)
-    (?observableProperty rdf:type owl:NamedIndividual)
-    (?observableProperty meta:propertyFor ?test)
-    makeTemp(?x)
-    -> (?restriction rdf:label "MIN INCLUSIVE")
-        (?restriction rdf:comment ?test)]
+[rule2b: (?restriction rdf:comment "opt-cond-mark")
+    (?restriction rdf:comment ?observableProperty)
+    (?observableProperty meta:propertyFor ?propertyChange)
+    (?propertyChange rdf:type meta:PropertyChange)
+    (?restriction xsd:minInclusive ?value)
+    -> drop(0, 1)
+        (?restriction rdf:comment "prop-change-inc-mark")
+        (?restriction rdf:comment ?propertyChange)]
 
-[rule1c: (?restriction rdf:comment "opt-cond-mark")
+[rule2c: (?restriction rdf:comment "opt-cond-mark")
+    (?restriction rdf:comment ?observableProperty)
+    (?observableProperty meta:propertyFor ?propertyChange)
+    (?propertyChange rdf:type meta:PropertyChange)
     (?restriction xsd:maxExclusive ?value)
-    makeTemp(?x)
-    -> (?restriction rdf:comment "MAX EXCLUSIVE")
-        drop(0)]
+    -> drop(0, 1)
+        (?restriction rdf:comment "prop-change-dec-mark")
+        (?restriction rdf:comment ?propertyChange)]
 
-[rule1d: (?restriction rdf:comment "opt-cond-mark")
+[rule2d: (?restriction rdf:comment "opt-cond-mark")
+    (?restriction rdf:comment ?observableProperty)
+    (?observableProperty meta:propertyFor ?propertyChange)
+    (?propertyChange rdf:type meta:PropertyChange)
     (?restriction xsd:maxInclusive ?value)
-    makeTemp(?x)
-    -> (?restriction rdf:comment "MAX INCLUSIVE")
-        drop(0)]
+    -> drop(0, 1)
+        (?restriction rdf:comment "prop-change-dec-mark")
+        (?restriction rdf:comment ?propertyChange)]
 
+// 
 
+[rule3a: (?restriction rdf:comment "prop-change-inc-mark")
+    (?restriction rdf:comment ?propertyChange)
+    (?propertyChange meta:enactedBy ?actuatorState)
+    (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
+    (?actuatorState rdf:type meta:ActuatorState)
+    makeTemp(?strategy)
+    -> drop(0, 1)
+        (?strategy rdf:type meta:Strategy)
+        (?strategy ssn:implements ?actuatorState)
+        (?strategy meta:hasIdentifier ?strategy)]
 
-// this is what a Strategy and PropertyChange should look like in .ttl
-//
-// ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TestPropertyChange
-// :TestPropertyChange rdf:type owl:NamedIndividual ,
-//                              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration> ;
-//                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
-//                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/alteredBy> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
-//                     <http://www.w3.org/ns/ssn/forProperty> :TestConfigurableProperty .
+[rule3b: (?restriction rdf:comment "prop-change-dec-mark")
+    (?restriction rdf:comment ?propertyChange)
+    (?propertyChange meta:enactedBy ?actuatorState)
+    (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
+    (?actuatorState rdf:type meta:ActuatorState)
+    makeTemp(?strategy)
+    -> drop(0, 1)
+        (?strategy rdf:type meta:Strategy)
+        (?strategy ssn:implements ?actuatorState)
+        (?strategy meta:hasIdentifier ?strategy)]
 
+[rule3c: (?restriction rdf:comment "prop-change-inc-mark")
+    (?restriction rdf:comment ?propertyChange)
+    (?propertyChange meta:enactedBy ?configurationProperty)
+    (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
+    (?configurationProperty rdf:type meta:ConfigurationProperty)
+    (?configurationProperty meta:alteredBy ?effect)
+    makeTemp(?strategy)
+    -> drop(0, 1)
+        (?strategy rdf:type meta:Strategy)
+        (?strategy ssn:forProperty ?configurationProperty)
+        (?strategy meta:affectsPropertyWith ?effect)
+        (?strategy meta:hasIdentifier ?strategy)]
 
-// ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TestStrategy
-// :TestStrategy rdf:type owl:NamedIndividual ,
-//                        <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Strategy> ;
-//               <http://www.w3.org/ns/ssn/implements> :TestPropertyChange ;
-//               <http://www.w3.org/ns/ssn/implements> :TestPropertyChange2 ;
-//               <http://www.w3.org/ns/ssn/implements> :TestPropertyChange3 ;
-//               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasIdentifier> "TestIdentifier" ;
-//               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasTimeLimit> ""^^xsd:duration .
+[rule3d: (?restriction rdf:comment "prop-change-dec-mark")
+    (?restriction rdf:comment ?propertyChange)
+    (?propertyChange meta:enactedBy ?configurationProperty)
+    (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
+    (?configurationProperty rdf:type meta:ConfigurationProperty)
+    (?configurationProperty meta:alteredBy ?effect)
+    makeTemp(?strategy)
+    -> drop(0, 1)
+        (?strategy rdf:type meta:Strategy)
+        (?strategy ssn:forProperty ?configurationProperty)
+        (?strategy meta:affectsPropertyWith ?effect)
+        (?strategy meta:hasIdentifier ?strategy)]

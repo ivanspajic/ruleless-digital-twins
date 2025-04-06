@@ -131,7 +131,7 @@ xsd:duration rdf:type rdfs:Datatype .
 :hasTimeLimit rdf:type owl:DatatypeProperty ;
               rdfs:domain :Strategy ;
               rdfs:range xsd:duration ;
-              rdfs:comment "Represents a time limit on the duration of the MitigationStrategy."@en ;
+              rdfs:comment "Represents a time limit on the duration of the Strategy."@en ;
               rdfs:label "hasTimeLimit"@en .
 
 
@@ -259,6 +259,11 @@ xsd:duration rdf:type rdfs:Datatype .
                                                                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                                    owl:onClass :ActuatorState
                                                                  ]
+                                                                 [ rdf:type owl:Restriction ;
+                                                                   owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
+                                                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                                   owl:onClass <http://www.w3.org/ns/sosa/Actuator>
+                                                                 ]
                                                                ) ;
                                             rdf:type owl:Class
                                           ]
@@ -276,6 +281,11 @@ xsd:duration rdf:type rdfs:Datatype .
                                                                    owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
                                                                    owl:qualifiedCardinality "0"^^xsd:nonNegativeInteger ;
                                                                    owl:onClass :ActuatorState
+                                                                 ]
+                                                                 [ rdf:type owl:Restriction ;
+                                                                   owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
+                                                                   owl:qualifiedCardinality "0"^^xsd:nonNegativeInteger ;
+                                                                   owl:onClass <http://www.w3.org/ns/sosa/Actuator>
                                                                  ]
                                                                ) ;
                                             rdf:type owl:Class

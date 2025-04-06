@@ -18,8 +18,7 @@
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Energy
-:Energy rdf:type owl:NamedIndividual ,
-                 <http://www.w3.org/ns/sosa/ObservableProperty> .
+:Energy rdf:type owl:NamedIndividual .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyDecrease
@@ -81,7 +80,22 @@
                               owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
                               owl:someValuesFrom [ rdf:type rdfs:Datatype ;
                                                    owl:onDatatype xsd:double ;
-                                                   owl:withRestrictions ( [ xsd:maxInclusive "14.3"^^xsd:double
+                                                   owl:withRestrictions ( [ xsd:maxInclusive "14.9"^^xsd:double
+                                                                          ]
+                                                                        )
+                                                 ]
+                            ] ;
+                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition2
+:OptimalCondition2 rdf:type owl:NamedIndividual ,
+                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                              owl:someValuesFrom [ rdf:type rdfs:Datatype ;
+                                                   owl:onDatatype xsd:double ;
+                                                   owl:withRestrictions ( [ xsd:minExclusive "23.0"^^xsd:double
                                                                           ]
                                                                         )
                                                  ]

@@ -1,0 +1,107 @@
+@prefix : <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#>.
+@prefix meta: <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/>.
+@prefix ssn: <http://www.w3.org/ns/ssn/>.
+@prefix sosa: <http://www.w3.org/ns/sosa/>.
+@include <OWL>.
+
+// The following rule covers individuals with single constraints. Once an OptimalCondition constraint has been
+// located, a temporary mark will be placed to allow subsequent rules to match and fire.
+
+[rule1a:    (?individual rdf:type owl:NamedIndividual)
+            (?individual rdf:type meta:OptimalCondition)
+            (?individual ssn:forProperty ?observableProperty)
+            (?individual meta:hasValueConstraint ?bNode1)
+            (?bNode1 rdf:type ?bNode2)
+            (?bNode2 owl:withRestrictions ?bNode3)
+            (?bNode3 rdf:first ?restriction)
+            ->  (?restriction rdf:comment ?observableProperty)
+]
+
+// Upon locating the temporary marks for OptimalCondition constraints, these rules find the respective
+// PropertyChanges and set a mark for the class of required changes to the property in question.
+
+[rule2a:    (?restriction rdf:comment ?observableProperty)
+            (?observableProperty meta:propertyFor ?propertyChange)
+            (?propertyChange rdf:type meta:PropertyChange)
+            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
+            (?restriction xsd:minExclusive ?value)
+            ->  (?restriction rdf:comment ?propertyChange)
+]
+
+[rule2b:    (?restriction rdf:comment ?observableProperty)
+            (?observableProperty meta:propertyFor ?propertyChange)
+            (?propertyChange rdf:type meta:PropertyChange)
+            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
+            (?restriction xsd:minInclusive ?value)
+            ->  (?restriction rdf:comment ?propertyChange)
+]
+
+[rule2c:    (?restriction rdf:comment ?observableProperty)
+            (?observableProperty meta:propertyFor ?propertyChange)
+            (?propertyChange rdf:type meta:PropertyChange)
+            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
+            (?restriction xsd:maxExclusive ?value)
+            ->  (?restriction rdf:comment ?propertyChange)
+]
+
+[rule2d:    (?restriction rdf:comment ?observableProperty)
+            (?observableProperty meta:propertyFor ?propertyChange)
+            (?propertyChange rdf:type meta:PropertyChange)
+            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
+            (?restriction xsd:maxInclusive ?value)
+            ->  (?restriction rdf:comment ?propertyChange)
+]
+
+// The following rules locate the appropriate property change marks and generate appropriate
+// Strategies for optimal condition mitigation, either based on Actuators and ActuatorStates or 
+// ConfigurableProperty changes.
+
+[rule3a:    (?restriction rdf:comment ?propertyChange)
+            (?propertyChange meta:enactedBy ?actuatorState)
+            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
+            (?actuatorState rdf:type meta:ActuatorState)
+            (?actuatorState meta:isStateOf ?actuator)
+            (?actuator rdf:type sosa:Actuator)
+            makeTemp(?strategy)
+            ->  (?strategy rdf:type meta:Strategy)
+                (?strategy ssn:implements ?actuatorState)
+                (?strategy ssn:implements ?actuator)
+                (?strategy meta:hasIdentifier ?strategy)
+]
+
+[rule3b:    (?restriction rdf:comment ?propertyChange)
+            (?propertyChange meta:enactedBy ?actuatorState)
+            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
+            (?actuatorState rdf:type meta:ActuatorState)
+            (?actuatorState meta:isStateOf ?actuator)
+            (?actuator rdf:type sosa:Actuator)
+            makeTemp(?strategy)
+            ->  (?strategy rdf:type meta:Strategy)
+                (?strategy ssn:implements ?actuatorState)
+                (?strategy ssn:implements ?actuator)
+                (?strategy meta:hasIdentifier ?strategy)
+]
+
+[rule3c:    (?restriction rdf:comment ?propertyChange)
+            (?propertyChange meta:enactedBy ?configurableProperty)
+            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
+            (?configurableProperty rdf:type meta:ConfigurableProperty)
+            (?propertyChange meta:alteredBy ?effect)
+            makeTemp(?strategy)
+            ->  (?strategy rdf:type meta:Strategy)
+                (?strategy ssn:forProperty ?configurableProperty)
+                (?strategy meta:affectsPropertyWith ?effect)
+                (?strategy meta:hasIdentifier ?strategy)
+]
+
+[rule3d:    (?restriction rdf:comment ?propertyChange)
+            (?propertyChange meta:enactedBy ?configurableProperty)
+            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
+            (?configurableProperty rdf:type meta:ConfigurableProperty)
+            (?propertyChange meta:alteredBy ?effect)
+            makeTemp(?strategy)
+            ->  (?strategy rdf:type meta:Strategy)
+                (?strategy ssn:forProperty ?configurableProperty)
+                (?strategy meta:affectsPropertyWith ?effect)
+                (?strategy meta:hasIdentifier ?strategy)
+]

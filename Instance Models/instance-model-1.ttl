@@ -80,7 +80,7 @@
                               owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
                               owl:someValuesFrom [ rdf:type rdfs:Datatype ;
                                                    owl:onDatatype xsd:double ;
-                                                   owl:withRestrictions ( [ xsd:maxInclusive "14.9"^^xsd:double
+                                                   owl:withRestrictions ( [ xsd:minExclusive "35.0"^^xsd:double
                                                                           ]
                                                                         )
                                                  ]
@@ -95,7 +95,52 @@
                               owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
                               owl:someValuesFrom [ rdf:type rdfs:Datatype ;
                                                    owl:onDatatype xsd:double ;
-                                                   owl:withRestrictions ( [ xsd:minExclusive "23.0"^^xsd:double
+                                                   owl:withRestrictions ( [ xsd:maxExclusive "35.0"^^xsd:double
+                                                                          ]
+                                                                        )
+                                                 ]
+                            ] ;
+                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition3
+:OptimalCondition3 rdf:type owl:NamedIndividual ,
+                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                              owl:someValuesFrom [ rdf:type rdfs:Datatype ;
+                                                   owl:onDatatype xsd:double ;
+                                                   owl:withRestrictions ( [ xsd:minInclusive "25.0"^^xsd:double
+                                                                          ]
+                                                                        )
+                                                 ]
+                            ] ;
+                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition4
+:OptimalCondition4 rdf:type owl:NamedIndividual ,
+                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                              owl:someValuesFrom [ rdf:type rdfs:Datatype ;
+                                                   owl:onDatatype xsd:double ;
+                                                   owl:withRestrictions ( [ xsd:maxInclusive "35.0"^^xsd:double
+                                                                          ]
+                                                                        )
+                                                 ]
+                            ] ;
+                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition5
+:OptimalCondition5 rdf:type owl:NamedIndividual ,
+                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                              owl:someValuesFrom [ rdf:type rdfs:Datatype ;
+                                                   owl:onDatatype xsd:double ;
+                                                   owl:withRestrictions ( [ xsd:minInclusive "24.4"^^xsd:double
                                                                           ]
                                                                         )
                                                  ]
@@ -105,7 +150,8 @@
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomM370
 :RoomM370 rdf:type owl:NamedIndividual ;
-          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor> :EnergyDecrease ;
+          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor> :EnergyDecrease ,
+                                                                                             :EnergyIncrease ;
           <http://www.w3.org/ns/sosa/hosts> :Heater ,
                                             :SoftSensor1 ,
                                             :TemperatureSensor1 ,

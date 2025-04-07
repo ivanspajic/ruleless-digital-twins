@@ -4,8 +4,8 @@
 @prefix sosa: <http://www.w3.org/ns/sosa/>.
 @include <OWL>.
 
-// The following rule covers individuals with single constraints. Once an OptimalCondition constraint has been
-// located, a temporary mark will be placed to allow subsequent rules to match and fire.
+// The following rule covers individuals with one or two constraints. Once an OptimalCondition constraint has been
+// located, a mark will be placed to allow subsequent rules to match and fire.
 
 [rule1a:    (?individual rdf:type owl:NamedIndividual)
             (?individual rdf:type meta:OptimalCondition)
@@ -17,15 +17,15 @@
             ->  (?restriction rdf:comment ?observableProperty)
 ]
 
-// Upon locating the temporary marks for OptimalCondition constraints, these rules find the respective
-// PropertyChanges and set a mark for the class of required changes to the property in question.
+// Upon locating the marks for OptimalCondition constraints or optimization targets, these rules find the
+// respective PropertyChanges and set a mark for the class of required changes to the property in question.
 
 [rule2a:    (?restriction rdf:comment ?observableProperty)
             (?observableProperty meta:propertyFor ?propertyChange)
             (?propertyChange rdf:type meta:PropertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             (?restriction xsd:minExclusive ?value)
-            ->  (?restriction rdf:comment ?propertyChange)
+            ->  (_: rdf:comment ?propertyChange)
 ]
 
 [rule2b:    (?restriction rdf:comment ?observableProperty)
@@ -33,7 +33,7 @@
             (?propertyChange rdf:type meta:PropertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             (?restriction xsd:minInclusive ?value)
-            ->  (?restriction rdf:comment ?propertyChange)
+            ->  (_: rdf:comment ?propertyChange)
 ]
 
 [rule2c:    (?restriction rdf:comment ?observableProperty)
@@ -41,7 +41,7 @@
             (?propertyChange rdf:type meta:PropertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             (?restriction xsd:maxExclusive ?value)
-            ->  (?restriction rdf:comment ?propertyChange)
+            ->  (_: rdf:comment ?propertyChange)
 ]
 
 [rule2d:    (?restriction rdf:comment ?observableProperty)
@@ -49,14 +49,18 @@
             (?propertyChange rdf:type meta:PropertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             (?restriction xsd:maxInclusive ?value)
-            ->  (?restriction rdf:comment ?propertyChange)
+            ->  (_: rdf:comment ?propertyChange)
 ]
 
-// The following rules locate the appropriate property change marks and generate appropriate
-// Strategies for optimal condition mitigation, either based on Actuators and ActuatorStates or 
-// ConfigurableProperty changes.
+[rule2e:    (?thing meta:optimizesFor ?propertyChange)
+            ->  (_: rdf:comment ?propertyChange)
+]
 
-[rule3a:    (?restriction rdf:comment ?propertyChange)
+// The following rules locate property change marks and generate appropriate Strategies for optimal condition
+// mitigation, either based on Actuators and ActuatorStates or ConfigurableProperty changes. The last rule
+// also creates a no-op Strategy.
+
+[rule3a:    (?thing rdf:comment ?propertyChange)
             (?propertyChange meta:enactedBy ?actuatorState)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             (?actuatorState rdf:type meta:ActuatorState)
@@ -69,7 +73,7 @@
                 (?strategy meta:hasIdentifier ?strategy)
 ]
 
-[rule3b:    (?restriction rdf:comment ?propertyChange)
+[rule3b:    (?thing rdf:comment ?propertyChange)
             (?propertyChange meta:enactedBy ?actuatorState)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             (?actuatorState rdf:type meta:ActuatorState)
@@ -82,7 +86,7 @@
                 (?strategy meta:hasIdentifier ?strategy)
 ]
 
-[rule3c:    (?restriction rdf:comment ?propertyChange)
+[rule3c:    (?thing rdf:comment ?propertyChange)
             (?propertyChange meta:enactedBy ?configurableProperty)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             (?configurableProperty rdf:type meta:ConfigurableProperty)
@@ -94,7 +98,7 @@
                 (?strategy meta:hasIdentifier ?strategy)
 ]
 
-[rule3d:    (?restriction rdf:comment ?propertyChange)
+[rule3d:    (?thing rdf:comment ?propertyChange)
             (?propertyChange meta:enactedBy ?configurableProperty)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             (?configurableProperty rdf:type meta:ConfigurableProperty)
@@ -105,3 +109,25 @@
                 (?strategy meta:affectsPropertyWith ?effect)
                 (?strategy meta:hasIdentifier ?strategy)
 ]
+
+[rule3e:    makeTemp(?strategy)
+            ->  (?strategy rdf:type meta:Strategy)
+                (?strategy meta:hasIdentifier ?strategy)
+]
+
+// TODO: need to finish the checks for conflicting optimizations and useless OptimalConditions.
+
+[rule4a:    (?thing meta:optimizesFor ?propertyChange1)
+            print(?thing)
+            (?propertyChange1 meta:enactedBy ?property)
+            (?thing meta:optimizesFor ?propertyChange2)
+            notEqual(?propertyChange1, ?propertyChange2)
+            (?propertyChange2 meta:enactedBy ?property)
+            print(?propertyChange1, ?propertyChange2)
+            //(?propertyChange1 meta:affectsPropertyWith meta:ValueIncrease)
+            //(?propertyChange2 meta:affectsPropertyWith meta:ValueDecrease)
+            ->  print("CONTRADICTING OPTIMIZATIONS DETECTED!")
+]
+
+//[rule4b:    
+//]

@@ -25,21 +25,6 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 #    Individuals
 #################################################################
 
-###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2#OptimalCompressionRatio
-:OptimalCompressionRatio rdf:type owl:NamedIndividual ,
-                                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
-                                  [ rdf:type owl:Restriction ;
-                                    owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
-                                    owl:someValuesFrom [ rdf:type rdfs:Datatype ;
-                                                         owl:onDatatype xsd:double ;
-                                                         owl:withRestrictions ( [ xsd:minInclusive "1.1"^^xsd:double
-                                                                                ]
-                                                                              )
-                                                       ]
-                                  ] ;
-                         <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
-
-
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/AustevollSite
 :AustevollSite rdf:type owl:NamedIndividual ;
                <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor> :BucketSizeDecrease ,
@@ -123,6 +108,21 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/alteredBy> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
                  <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/OptimalCompressionRatio
+:OptimalCompressionRatio rdf:type owl:NamedIndividual ,
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
+                                  [ rdf:type owl:Restriction ;
+                                    owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                                    owl:someValuesFrom [ rdf:type rdfs:Datatype ;
+                                                         owl:onDatatype xsd:double ;
+                                                         owl:withRestrictions ( [ xsd:minInclusive "1.1"^^xsd:double
+                                                                                ]
+                                                                              )
+                                                       ]
+                                  ] ;
+                         <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1

@@ -17,6 +17,13 @@
             ->  (?restriction rdf:comment ?observableProperty)
 ]
 
+[rule1b:    (?individual rdf:type owl:NamedIndividual)
+            (?individual rdf:type meta:OptimalCondition)
+            (?individual ssn:forProperty ?observableProperty)
+            (?individual meta:hasValueConstraint ?bNode1)
+            ->  print()
+]
+
 // Upon locating the marks for OptimalCondition constraints or optimization targets, these rules find the
 // respective PropertyChanges and set a mark for the class of required changes to the property in question.
 
@@ -67,7 +74,7 @@
             (?actuatorState meta:isStateOf ?actuator)
             (?actuator rdf:type sosa:Actuator)
             makeTemp(?strategy)
-            ->  (?strategy rdf:type meta:Strategy)
+            ->  (?strategy rdf:type meta:ActuationStrategy)
                 (?strategy meta:hasActuatorState ?actuatorState)
                 (?strategy meta:hasActuator ?actuator)
                 (?strategy meta:hasIdentifier ?strategy)
@@ -80,7 +87,7 @@
             (?actuatorState meta:isStateOf ?actuator)
             (?actuator rdf:type sosa:Actuator)
             makeTemp(?strategy)
-            ->  (?strategy rdf:type meta:Strategy)
+            ->  (?strategy rdf:type meta:ActuationStrategy)
                 (?strategy meta:hasActuatorState ?actuatorState)
                 (?strategy meta:hasActuator ?actuator)
                 (?strategy meta:hasIdentifier ?strategy)
@@ -92,7 +99,7 @@
             (?configurableProperty rdf:type meta:ConfigurableProperty)
             (?propertyChange meta:alteredBy ?effect)
             makeTemp(?strategy)
-            ->  (?strategy rdf:type meta:Strategy)
+            ->  (?strategy rdf:type meta:ReconfigurationStrategy)
                 (?strategy ssn:forProperty ?configurableProperty)
                 (?strategy meta:affectsPropertyWith ?effect)
                 (?strategy meta:hasIdentifier ?strategy)
@@ -104,7 +111,7 @@
             (?configurableProperty rdf:type meta:ConfigurableProperty)
             (?propertyChange meta:alteredBy ?effect)
             makeTemp(?strategy)
-            ->  (?strategy rdf:type meta:Strategy)
+            ->  (?strategy rdf:type meta:ReconfigurationStrategy)
                 (?strategy ssn:forProperty ?configurableProperty)
                 (?strategy meta:affectsPropertyWith ?effect)
                 (?strategy meta:hasIdentifier ?strategy)
@@ -117,16 +124,30 @@
 
 // TODO: need to finish the checks for conflicting optimizations and useless OptimalConditions.
 
-//[rule4a:    (?thing meta:optimizesFor ?propertyChange1)
-//            (?propertyChange1 meta:enactedBy ?property1)
-//            (?thing meta:optimizesFor ?propertyChange2)
-//            (?propertyChange2 meta:enactedBy ?property2)
-//            (?propertyChange1 meta:affectsPropertyWith meta:ValueIncrease)
-//            (?propertyChange2 meta:affectsPropertyWith meta:ValueDecrease)
-//            ->  print("Contradicting optimizations detected!", ?thing, "optimizes for", ?property,
-//                    "with both ValueIncrease and ValueDecrease through the following PropertyChanges:",
-//                    ?propertyChange1, ?propertyChange2)
-//]
+[rule4a:    (?thing1 meta:optimizesFor ?propertyChange1)
+            (?propertyChange1 ssn:forProperty ?property)
+            (?thing2 meta:optimizesFor ?propertyChange2)
+            (?propertyChange2 ssn:forProperty ?property)
+            (?propertyChange1 meta:affectsPropertyWith meta:ValueIncrease)
+            (?propertyChange2 meta:affectsPropertyWith meta:ValueDecrease)
+            ->  print()
+                print("Contradicting optimizations detected!")
+                print()
+                print(?thing1, "optimizes for", ?property, "with ValueIncrease through", ?propertyChange1)
+                print(?thing2, "optimizes for", ?property, "with ValueDecrease through", ?propertyChange2)
+                print()
+]
 
-//[rule4b:    
-//]
+[rule4b:    (?restriction1 rdf:comment ?observableProperty)
+            (?restriction1 xsd:minExclusive ?value)
+            (?restriction2 rdf:comment ?observableProperty)
+            (?restriction2 xsd:maxInclusive ?value)
+            ->  print("found ya1!")
+]
+
+[rule4c:    (?restriction1 rdf:comment ?observableProperty)
+            (?restriction1 xsd:minInclusive ?value)
+            (?restriction2 rdf:comment ?observableProperty)
+            (?restriction2 xsd:maxInclusive ?value)
+            ->  print("found ya2!")
+]

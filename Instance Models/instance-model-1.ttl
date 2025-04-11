@@ -78,21 +78,13 @@
                             <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
                             [ rdf:type owl:Restriction ;
                               owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
-                              owl:someValuesFrom [ rdf:type rdfs:Datatype ;
-                                                   owl:unionOf ( [ rdf:type rdfs:Datatype ;
-                                                                   owl:onDatatype xsd:double ;
-                                                                   owl:withRestrictions ( [ xsd:minExclusive "35.0"^^xsd:double
-                                                                                          ]
-                                                                                        )
-                                                                 ]
-                                                                 [ rdf:type rdfs:Datatype ;
-                                                                   owl:onDatatype xsd:double ;
-                                                                   owl:withRestrictions ( [ xsd:maxInclusive "35.0"^^xsd:double
-                                                                                          ]
-                                                                                        )
-                                                                 ]
-                                                               )
-                                                 ]
+                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange [ rdf:type rdfs:Datatype ;
+                                                owl:onDatatype xsd:double ;
+                                                owl:withRestrictions ( [ xsd:minExclusive "15.0"^^xsd:double
+                                                                       ]
+                                                                     )
+                                              ]
                             ] ;
                    <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 

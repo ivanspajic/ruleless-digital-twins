@@ -80,10 +80,19 @@
                               owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
                               owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                               owl:onDataRange [ rdf:type rdfs:Datatype ;
-                                                owl:onDatatype xsd:double ;
-                                                owl:withRestrictions ( [ xsd:minExclusive "15.0"^^xsd:double
-                                                                       ]
-                                                                     )
+                                                owl:intersectionOf ( [ rdf:type rdfs:Datatype ;
+                                                                       owl:onDatatype xsd:double ;
+                                                                       owl:withRestrictions ( [ xsd:minExclusive "15.0"^^xsd:double
+                                                                                              ]
+                                                                                            )
+                                                                     ]
+                                                                     [ rdf:type rdfs:Datatype ;
+                                                                       owl:onDatatype xsd:double ;
+                                                                       owl:withRestrictions ( [ xsd:maxInclusive "25.0"^^xsd:double
+                                                                                              ]
+                                                                                            )
+                                                                     ]
+                                                                   )
                                               ]
                             ] ;
                    <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .

@@ -27,7 +27,6 @@
             (?bNode4 owl:withRestrictions ?bNode5)
             (?bNode5 rdf:first ?restriction)
             ->  (?restriction rdf:comment ?observableProperty)
-            //->  print("test1")
 ]
 
 [rule1c:    (?individual rdf:type owl:NamedIndividual)
@@ -41,18 +40,21 @@
             (?bNode5 owl:withRestrictions ?bNode6)
             (?bNode6 rdf:first ?restriction)
             ->  (?restriction rdf:comment ?observableProperty)
-            //->  print("test2")
 ]
 
 // Upon locating the marks for OptimalCondition constraints or optimization targets, these rules find the
 // respective PropertyChanges and set a mark for the class of required changes to the property in question.
 
 [rule2a:    (?restriction rdf:comment ?observableProperty)
+            print("test")
             (?observableProperty meta:propertyFor ?propertyChange)
-            (?propertyChange rdf:type meta:PropertyChange)
-            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
-            (?restriction xsd:minExclusive ?value)
-            ->  (_: rdf:comment ?propertyChange)
+            print("test2")
+            //(?propertyChange rdf:type meta:PropertyChange)
+            print("test3")
+            //(?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
+            //(?restriction xsd:minExclusive ?value)
+            //->  (_: rdf:comment ?propertyChange)
+            ->  print("finish")
 ]
 
 [rule2b:    (?restriction rdf:comment ?observableProperty)

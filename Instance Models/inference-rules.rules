@@ -15,7 +15,9 @@
             (?bNode2 owl:withRestrictions ?bNode3)
             (?bNode3 rdf:first ?restriction)
             ->  (?restriction rdf:comment ?observableProperty)
+                print()
                 print("Marked a single-value restriction with ObservableProperty", ?observableProperty)
+                print()
 ]
 
 [rule1b:    (?individual rdf:type owl:NamedIndividual)
@@ -28,7 +30,9 @@
             (?bNode4 owl:withRestrictions ?bNode5)
             (?bNode5 rdf:first ?restriction)
             ->  (?restriction rdf:comment ?observableProperty)
+                print()
                 print("Marked a multi-value restriction with ObservableProperty", ?observableProperty)
+                print()
 ]
 
 [rule1c:    (?individual rdf:type owl:NamedIndividual)
@@ -42,7 +46,9 @@
             (?bNode5 owl:withRestrictions ?bNode6)
             (?bNode6 rdf:first ?restriction)
             ->  (?restriction rdf:comment ?observableProperty)
+                print()
                 print("Marked a multi-value restriction with ObservableProperty", ?observableProperty)
+                print()
 ]
 
 // Upon locating the marks for OptimalCondition constraints or optimization targets, these rules find the
@@ -54,6 +60,11 @@
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             (?restriction xsd:minExclusive ?value)
             ->  (_: rdf:comment ?propertyChange)
+                print()
+                print("Located", ?propertyChange)
+                print("as a relevant PropertyChange for the given constraints on")
+                print(?observableProperty)
+                print()
 ]
 
 [rule2b:    (?restriction rdf:comment ?observableProperty)
@@ -62,6 +73,11 @@
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             (?restriction xsd:minInclusive ?value)
             ->  (_: rdf:comment ?propertyChange)
+                print()
+                print("Located", ?propertyChange)
+                print("as a relevant PropertyChange for the given constraints on")
+                print(?observableProperty)
+                print()
 ]
 
 [rule2c:    (?restriction rdf:comment ?observableProperty)
@@ -70,6 +86,11 @@
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             (?restriction xsd:maxExclusive ?value)
             ->  (_: rdf:comment ?propertyChange)
+                print()
+                print("Located", ?propertyChange)
+                print("as a relevant PropertyChange for the given constraints on")
+                print(?observableProperty)
+                print()
 ]
 
 [rule2d:    (?restriction rdf:comment ?observableProperty)
@@ -78,10 +99,19 @@
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             (?restriction xsd:maxInclusive ?value)
             ->  (_: rdf:comment ?propertyChange)
+                print()
+                print("Located", ?propertyChange)
+                print("as a relevant PropertyChange for the given constraints on")
+                print(?observableProperty)
+                print()
 ]
 
 [rule2e:    (?thing meta:optimizesFor ?propertyChange)
             ->  (_: rdf:comment ?propertyChange)
+                print()
+                print("Located", ?propertyChange)
+                print("as a PropertyChange to optimize for.")
+                print()
 ]
 
 // The following rules locate property change marks and generate appropriate Executions for optimal condition
@@ -99,7 +129,9 @@
                 (?execution meta:hasActuatorState ?actuatorState)
                 (?execution meta:hasActuator ?actuator)
                 (?execution meta:hasIdentifier ?execution)
+                print()
                 print("Generated ActuationExecution", ?execution)
+                print()
 ]
 
 [rule3b:    (?thing rdf:comment ?propertyChange)
@@ -113,7 +145,9 @@
                 (?execution meta:hasActuatorState ?actuatorState)
                 (?execution meta:hasActuator ?actuator)
                 (?execution meta:hasIdentifier ?execution)
+                print()
                 print("Generated ActuationExecution", ?execution)
+                print()
 ]
 
 [rule3c:    (?thing rdf:comment ?propertyChange)
@@ -126,7 +160,9 @@
                 (?execution ssn:forProperty ?configurableProperty)
                 (?execution meta:affectsPropertyWith ?effect)
                 (?execution meta:hasIdentifier ?execution)
+                print()
                 print("Generated ReconfigurationExecution", ?execution)
+                print()
 ]
 
 [rule3d:    (?thing rdf:comment ?propertyChange)
@@ -139,13 +175,17 @@
                 (?execution ssn:forProperty ?configurableProperty)
                 (?execution meta:affectsPropertyWith ?effect)
                 (?execution meta:hasIdentifier ?execution)
+                print()
                 print("Generated ReconfigurationExecution", ?execution)
+                print()
 ]
 
 [rule3e:    makeTemp(?execution)
             ->  (?execution rdf:type meta:Execution)
                 (?execution meta:hasIdentifier ?execution)
+                print()
                 print("Generated no-op Execution", ?execution)
+                print()
 ]
 
 // TODO: need to finish the checks for conflicting optimizations and useless OptimalConditions.
@@ -158,7 +198,6 @@
             (?propertyChange2 meta:affectsPropertyWith meta:ValueDecrease)
             ->  print()
                 print("Contradicting optimizations detected!")
-                print()
                 print(?thing1, "optimizes for", ?property, "with ValueIncrease through", ?propertyChange1)
                 print(?thing2, "optimizes for", ?property, "with ValueDecrease through", ?propertyChange2)
                 print()
@@ -174,7 +213,6 @@
             (?restriction2 xsd:maxInclusive ?value)
             ->  print()
                 print("Useless condition detected!")
-                print()
                 print("Conditions for", ?observableProperty, "are")
                 print("greater than or equal to", ?value)
                 print("and")
@@ -189,7 +227,6 @@
             (?restriction2 xsd:maxExclusive ?value)
             ->  print()
                 print("Useless condition detected!")
-                print()
                 print("Conditions for", ?observableProperty, "are")
                 print("greater than or equal to", ?value)
                 print("and")
@@ -204,7 +241,6 @@
             (?restriction2 xsd:maxInclusive ?value)
             ->  print()
                 print("Useless condition detected!")
-                print()
                 print("Conditions for", ?observableProperty, "are")
                 print("greater than", ?value)
                 print("and")
@@ -221,7 +257,6 @@
             (?bNode2 owl:unionOf ?bNode3)
             ->  print()
                 print("Useless condition detected!")
-                print()
                 print("Conditions for", ?observableProperty)
                 print("contain an OR, which is not a restriction.")
                 print()

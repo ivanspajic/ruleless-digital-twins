@@ -37,40 +37,33 @@
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan
 :Fan rdf:type owl:NamedIndividual ,
-              <http://www.w3.org/ns/sosa/Actuator> ;
-     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState> :FanSpeedHigh .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FanSpeedHigh
-:FanSpeedHigh rdf:type owl:NamedIndividual ;
-              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyIncrease ,
-                                                                                           :RoomTemperatureDecrease .
+              <http://www.w3.org/ns/sosa/Actuator> ,
+              [ rdf:type owl:Restriction ;
+                owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasStateRange> ;
+                owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                owl:onDataRange xsd:boolean
+              ] ;
+     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyIncrease ,
+                                                                                  :RoomTemperatureDecrease .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater
 :Heater rdf:type owl:NamedIndividual ,
-                 <http://www.w3.org/ns/sosa/Actuator> ;
-        <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState> :HeaterStateMedium ,
-                                                                                               :HeaterStateStrong ,
-                                                                                               :HeaterStateWeak .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStateMedium
-:HeaterStateMedium rdf:type owl:NamedIndividual ;
-                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyIncrease ,
-                                                                                                :RoomTemperatureIncrease .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStateStrong
-:HeaterStateStrong rdf:type owl:NamedIndividual ;
-                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyIncrease ,
-                                                                                                :RoomTemperatureIncrease .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStateWeak
-:HeaterStateWeak rdf:type owl:NamedIndividual ;
-                 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyIncrease ,
-                                                                                              :RoomTemperatureIncrease .
+                 <http://www.w3.org/ns/sosa/Actuator> ,
+                 [ rdf:type owl:Restriction ;
+                   owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasStateRange> ;
+                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                   owl:onDataRange [ rdf:type rdfs:Datatype ;
+                                     owl:onDatatype xsd:int ;
+                                     owl:withRestrictions ( [ xsd:minInclusive "1"^^xsd:int
+                                                            ]
+                                                            [ xsd:maxInclusive "3"^^xsd:int
+                                                            ]
+                                                          )
+                                   ]
+                 ] ;
+        <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyIncrease ,
+                                                                                     :RoomTemperatureIncrease .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition1
@@ -81,17 +74,9 @@
                               owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                               owl:onDataRange [ rdf:type rdfs:Datatype ;
                                                 owl:onDatatype xsd:double ;
-                                                owl:withRestrictions ( [ xsd:minExclusive "15.0"^^xsd:double
+                                                owl:withRestrictions ( [ xsd:minInclusive "15.5"^^xsd:double
                                                                        ]
-                                                                     )
-                                              ]
-                            ] ,
-                            [ rdf:type owl:Restriction ;
-                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
-                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                              owl:onDataRange [ rdf:type rdfs:Datatype ;
-                                                owl:onDatatype xsd:double ;
-                                                owl:withRestrictions ( [ xsd:maxInclusive "25.0"^^xsd:double
+                                                                       [ xsd:maxInclusive "25.3"^^xsd:double
                                                                        ]
                                                                      )
                                               ]

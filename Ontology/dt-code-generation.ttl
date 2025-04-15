@@ -39,30 +39,23 @@ xsd:duration rdf:type rdfs:Datatype .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy
 :enactedBy rdf:type owl:ObjectProperty ;
            owl:inverseOf :enacts ;
-           rdfs:comment "Represents a relation between a PropertyChange and a thing, such as a System or ActuatorState."@en ;
+           rdfs:comment "Represents a relation between a PropertyChange and a thing, such as a System or Actuator."@en ;
            rdfs:label "enactedBy"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts
 :enacts rdf:type owl:ObjectProperty ;
         rdfs:range :PropertyChange ;
-        rdfs:comment "Represents a relation between a thing, such as a System or ActuatorState, and a PropertyChange."@en ;
+        rdfs:comment "Represents a relation between a thing, such as a System or Actuator, and a PropertyChange."@en ;
         rdfs:label "enacts"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuator
 :hasActuator rdf:type owl:ObjectProperty ;
+             rdfs:domain :ActuationExecution ;
              rdfs:range <http://www.w3.org/ns/sosa/Actuator> ;
-             rdfs:comment "The relation between a Strategy and an Actuator it uses."@en ;
+             rdfs:comment "The relation between an ActuationExecution and an Actuator it uses."@en ;
              rdfs:label "hasActuator"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState
-:hasActuatorState rdf:type owl:ObjectProperty ;
-                  owl:inverseOf :isStateOf ;
-                  rdfs:range :ActuatorState ;
-                  rdfs:comment "The relation between a thing and an ActuatorState it uses."@en ;
-                  rdfs:label "hasActuatorState"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/isInputOf
@@ -77,12 +70,6 @@ xsd:duration rdf:type rdfs:Datatype .
             owl:inverseOf <http://www.w3.org/ns/ssn/hasOutput> ;
             rdfs:comment "Relation between an Output and its Procedure."@en ;
             rdfs:label "isOutputOf"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/isStateOf
-:isStateOf rdf:type owl:ObjectProperty ;
-           rdfs:comment "Relation between an ActuatorState and its Actuator."@en ;
-           rdfs:label "isStateOf"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizedBy
@@ -126,6 +113,14 @@ xsd:duration rdf:type rdfs:Datatype .
           rdfs:label "hasModel"@en .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasStateRange
+:hasStateRange rdf:type owl:DatatypeProperty ;
+               rdfs:domain <http://www.w3.org/ns/sosa/Actuator> ;
+               rdfs:range rdfs:Literal ;
+               rdfs:comment "Represents the set of possible states an actuator can have."@en ;
+               rdfs:label "hasStateRange"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasTimeLimit
 :hasTimeLimit rdf:type owl:DatatypeProperty ;
               rdfs:range xsd:duration ;
@@ -151,64 +146,16 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Classes
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation#Strategy
-:Strategy rdf:type owl:Class ;
-          rdfs:subClassOf [ rdf:type owl:Class ;
-                            owl:unionOf ( [ rdf:type owl:Restriction ;
-                                            owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
-                                            owl:someValuesFrom :ActuationExecution
-                                          ]
-                                          [ rdf:type owl:Restriction ;
-                                            owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
-                                            owl:someValuesFrom :ReconfigurationExecution
-                                          ]
-                                        )
-                          ] ,
-                          [ rdf:type owl:Restriction ;
-                            owl:onProperty :hasIdentifier ;
-                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                            owl:onDataRange xsd:string
-                          ] ,
-                          [ rdf:type owl:Restriction ;
-                            owl:onProperty :hasTimeLimit ;
-                            owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                            owl:onDataRange xsd:duration
-                          ] ;
-          rdfs:comment "Represents a system-wide strategy, consisting of actuations and/or reconfigurations, for optimizations or regaining optimal conditions."@en ;
-          rdfs:label "Strategy"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationExecution
 :ActuationExecution rdf:type owl:Class ;
                     rdfs:subClassOf [ rdf:type owl:Restriction ;
                                       owl:onProperty :hasActuator ;
                                       owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                       owl:onClass <http://www.w3.org/ns/sosa/Actuator>
-                                    ] ,
-                                    [ rdf:type owl:Restriction ;
-                                      owl:onProperty :hasActuatorState ;
-                                      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                      owl:onClass :ActuatorState
                                     ] ;
                     owl:disjointWith :ReconfigurationExecution ;
                     rdfs:comment "Represents a single system execution with an actuation, either for optimization or regaining optimal conditions."@en ;
                     rdfs:label "ActuationExecution"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState
-:ActuatorState rdf:type owl:Class ;
-               rdfs:subClassOf [ rdf:type owl:Restriction ;
-                                 owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
-                                 owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                 owl:onClass :PropertyChangeByActuation
-                               ] ,
-                               [ rdf:type owl:Restriction ;
-                                 owl:onProperty :isStateOf ;
-                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                 owl:onClass <http://www.w3.org/ns/sosa/Actuator>
-                               ] ;
-               rdfs:comment "The state of a given actuator, such as \"On\" or \"Off\" for a simple cooling fan or a specific temperature setting of an AC unit."@en ;
-               rdfs:label "ActuatorState"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurableProperty
@@ -267,7 +214,12 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation
 :PropertyChangeByActuation rdf:type owl:Class ;
-                           rdfs:subClassOf :PropertyChange ;
+                           rdfs:subClassOf :PropertyChange ,
+                                           [ rdf:type owl:Restriction ;
+                                             owl:onProperty :enactedBy ;
+                                             owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                             owl:onClass <http://www.w3.org/ns/sosa/Actuator>
+                                           ] ;
                            owl:disjointWith :PropertyChangeByReconfiguration .
 
 
@@ -276,7 +228,7 @@ xsd:duration rdf:type rdfs:Datatype .
                                  rdfs:subClassOf :PropertyChange ,
                                                  [ rdf:type owl:Restriction ;
                                                    owl:onProperty :alteredBy ;
-                                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                   owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                    owl:onClass :Effect
                                                  ] ;
                                  rdfs:comment "Represents a specific property change as a result of reconfiguring a related ConfigurableProperty."@en ;
@@ -299,11 +251,37 @@ xsd:duration rdf:type rdfs:Datatype .
                           rdfs:label "ReconfigurationExecution"@en .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Strategy
+:Strategy rdf:type owl:Class ;
+          rdfs:subClassOf [ rdf:type owl:Class ;
+                            owl:unionOf ( [ rdf:type owl:Restriction ;
+                                            owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
+                                            owl:someValuesFrom :ActuationExecution
+                                          ]
+                                          [ rdf:type owl:Restriction ;
+                                            owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
+                                            owl:someValuesFrom :ReconfigurationExecution
+                                          ]
+                                        )
+                          ] ,
+                          [ rdf:type owl:Restriction ;
+                            owl:onProperty :hasIdentifier ;
+                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                            owl:onDataRange xsd:string
+                          ] ,
+                          [ rdf:type owl:Restriction ;
+                            owl:onProperty :hasTimeLimit ;
+                            owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                            owl:onDataRange xsd:duration
+                          ] ;
+          rdfs:comment "Represents a system-wide strategy, consisting of actuations and/or reconfigurations, for optimizations or regaining optimal conditions."@en ;
+          rdfs:label "Strategy"@en .
+
+
 ###  http://www.w3.org/ns/sosa/Actuator
 <http://www.w3.org/ns/sosa/Actuator> rdfs:subClassOf [ rdf:type owl:Restriction ;
-                                                       owl:onProperty :hasActuatorState ;
-                                                       owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                       owl:onClass :ActuatorState
+                                                       owl:onProperty :hasStateRange ;
+                                                       owl:cardinality "1"^^xsd:nonNegativeInteger
                                                      ] .
 
 

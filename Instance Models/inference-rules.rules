@@ -36,11 +36,10 @@
 ]
 
 // Upon locating the marks for OptimalCondition constraints or optimization targets, these rules find the
-// respective PropertyChanges and set a mark for the class of required changes to the property in question.
+// respective PropertyChanges and use them for a temporary mark.
 
 [rule2a:    (?restriction rdf:comment ?observableProperty)
             (?observableProperty meta:propertyFor ?propertyChange)
-            (?propertyChange rdf:type meta:PropertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             (?restriction xsd:minExclusive ?value)
             ->  (_: rdf:comment ?propertyChange)
@@ -53,7 +52,6 @@
 
 [rule2b:    (?restriction rdf:comment ?observableProperty)
             (?observableProperty meta:propertyFor ?propertyChange)
-            (?propertyChange rdf:type meta:PropertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             (?restriction xsd:minInclusive ?value)
             ->  (_: rdf:comment ?propertyChange)
@@ -66,7 +64,6 @@
 
 [rule2c:    (?restriction rdf:comment ?observableProperty)
             (?observableProperty meta:propertyFor ?propertyChange)
-            (?propertyChange rdf:type meta:PropertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             (?restriction xsd:maxExclusive ?value)
             ->  (_: rdf:comment ?propertyChange)
@@ -79,7 +76,6 @@
 
 [rule2d:    (?restriction rdf:comment ?observableProperty)
             (?observableProperty meta:propertyFor ?propertyChange)
-            (?propertyChange rdf:type meta:PropertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             (?restriction xsd:maxInclusive ?value)
             ->  (_: rdf:comment ?propertyChange)
@@ -98,9 +94,10 @@
                 print()
 ]
 
-// The following rules locate property change marks and generate appropriate Executions for optimal condition
-// mitigation, either based on Actuators and ActuatorStates or ConfigurableProperty changes. The last rule
-// also creates a no-op Strategy.
+// The following rules locate PropertyChange marks and generate appropriate Executions, either with Actuators
+// or ConfigurableProperties, if they do not already exist. The last rule also creates a no-op Execution.
+
+// TODO: to remove duplication, use literal names for individuals instead of generated bNodes!!!
 
 [rule3a:    (?thing rdf:comment ?propertyChange)
             (?propertyChange meta:enactedBy ?actuator)

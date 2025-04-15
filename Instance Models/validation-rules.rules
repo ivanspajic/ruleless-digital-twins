@@ -1,0 +1,79 @@
+@prefix : <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#>.
+@prefix meta: <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/>.
+@prefix ssn: <http://www.w3.org/ns/ssn/>.
+@prefix sosa: <http://www.w3.org/ns/sosa/>.
+@include <OWL>.
+
+// The following rules validate that system constraints and optimizations are not conflicting or useless.
+
+[rule4a:    (?thing1 meta:optimizesFor ?propertyChange1)
+            (?propertyChange1 ssn:forProperty ?property)
+            (?thing2 meta:optimizesFor ?propertyChange2)
+            (?propertyChange2 ssn:forProperty ?property)
+            (?propertyChange1 meta:affectsPropertyWith meta:ValueIncrease)
+            (?propertyChange2 meta:affectsPropertyWith meta:ValueDecrease)
+            ->  print()
+                print("Contradicting optimizations detected!")
+                print(?thing1, "optimizes for", ?property, "with ValueIncrease through", ?propertyChange1)
+                print(?thing2, "optimizes for", ?property, "with ValueDecrease through", ?propertyChange2)
+                print()
+]
+
+// Only validating for optimal conditions that are allowed by the reasoner. These rules do not check the combination
+// minExclusive (>) and maxExclusive (<) since this reduces to everything but the excluded value. E.g.,
+// >15 and <15 = !15.
+
+[rule4b:    (?restriction1 rdf:comment ?observableProperty)
+            (?restriction1 xsd:minInclusive ?value)
+            (?restriction2 rdf:comment ?observableProperty)
+            (?restriction2 xsd:maxInclusive ?value)
+            ->  print()
+                print("Useless condition detected!")
+                print("Conditions for", ?observableProperty, "are")
+                print("greater than or equal to", ?value)
+                print("and")
+                print("less than or equal to", ?value)
+                print("at the same time, which is not a restriction.")
+                print()
+]
+
+[rule4c:    (?restriction1 rdf:comment ?observableProperty)
+            (?restriction1 xsd:minInclusive ?value)
+            (?restriction2 rdf:comment ?observableProperty)
+            (?restriction2 xsd:maxExclusive ?value)
+            ->  print()
+                print("Useless condition detected!")
+                print("Conditions for", ?observableProperty, "are")
+                print("greater than or equal to", ?value)
+                print("and")
+                print("less than", ?value)
+                print("at the same time, which is not a restriction.")
+                print()
+]
+
+[rule4d:    (?restriction1 rdf:comment ?observableProperty)
+            (?restriction1 xsd:minExclusive ?value)
+            (?restriction2 rdf:comment ?observableProperty)
+            (?restriction2 xsd:maxInclusive ?value)
+            ->  print()
+                print("Useless condition detected!")
+                print("Conditions for", ?observableProperty, "are")
+                print("greater than", ?value)
+                print("and")
+                print("less than or equal to", ?value)
+                print("at the same time, which is not a restriction.")
+                print()
+]
+
+[rule4e:    (?individual rdf:type owl:NamedIndividual)
+            (?individual rdf:type meta:OptimalCondition)
+            (?individual ssn:forProperty ?observableProperty)
+            (?individual rdf:type ?bNode1)
+            (?bNode1 owl:onDataRange ?bNode2)
+            (?bNode2 owl:unionOf ?bNode3)
+            ->  print()
+                print("Useless condition detected!")
+                print("Conditions for", ?observableProperty)
+                print("contain an OR, which is not a restriction.")
+                print()
+]

@@ -96,64 +96,37 @@
 
 // The following rules locate PropertyChange marks and generate appropriate Executions, either with Actuators
 // or ConfigurableProperties, if they do not already exist. The last rule also creates a no-op Execution.
-
-// TODO: to remove duplication, use literal names for individuals instead of generated bNodes!!!
+// URI concatinations are used for generating unique names for unique combinations of elements in an Execution.
+// This ensures that no duplicate Executions are generated in cases of, e.g., multiple actuators causing
+// different PropertyChanges which are all relevant for OptimalConditions or optimizations.
 
 [rule3a:    (?thing rdf:comment ?propertyChange)
             (?propertyChange meta:enactedBy ?actuator)
-            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             (?actuator rdf:type sosa:Actuator)
-            makeTemp(?execution)
-            ->  (?execution rdf:type meta:ActuationExecution)
-                (?execution meta:hasActuator ?actuator)
+            uriConcat(?actuator, meta:ActuationExecution, ?executionName)
+            ->  (?executionName rdf:type meta:ActuationExecution)
+                (?executionName meta:hasActuator ?actuator)
                 print()
-                print("Generated ActuationExecution", ?execution)
-                print()
-]
-
-[rule3b:    (?thing rdf:comment ?propertyChange)
-            (?propertyChange meta:enactedBy ?actuator)
-            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
-            (?actuator rdf:type sosa:Actuator)
-            makeTemp(?execution)
-            ->  (?execution rdf:type meta:ActuationExecution)
-                (?execution meta:hasActuator ?actuator)
-                print()
-                print("Generated ActuationExecution", ?execution)
+                print("Generated ActuationExecution", ?executionName)
                 print()
 ]
 
 [rule3c:    (?thing rdf:comment ?propertyChange)
             (?propertyChange meta:enactedBy ?configurableProperty)
-            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             (?configurableProperty rdf:type meta:ConfigurableProperty)
             (?propertyChange meta:alteredBy ?effect)
-            makeTemp(?execution)
-            ->  (?execution rdf:type meta:ReconfigurationExecution)
-                (?execution ssn:forProperty ?configurableProperty)
-                (?execution meta:affectsPropertyWith ?effect)
+            uriConcat(?configurableProperty, ?effect, meta:ReconfigurationExecution, ?executionName)
+            ->  (?executionName rdf:type meta:ReconfigurationExecution)
+                (?executionName ssn:forProperty ?configurableProperty)
+                (?executionName meta:affectsPropertyWith ?effect)
                 print()
-                print("Generated ReconfigurationExecution", ?execution)
+                print("Generated ReconfigurationExecution", ?executionName)
                 print()
 ]
 
-[rule3d:    (?thing rdf:comment ?propertyChange)
-            (?propertyChange meta:enactedBy ?configurableProperty)
-            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
-            (?configurableProperty rdf:type meta:ConfigurableProperty)
-            (?propertyChange meta:alteredBy ?effect)
-            makeTemp(?execution)
-            ->  (?execution rdf:type meta:ReconfigurationExecution)
-                (?execution ssn:forProperty ?configurableProperty)
-                (?execution meta:affectsPropertyWith ?effect)
+[rule3e:    uriConcat("no-op", meta:Execution, ?executionName)
+            ->  (?executionName rdf:type meta:Execution)
                 print()
-                print("Generated ReconfigurationExecution", ?execution)
-                print()
-]
-
-[rule3e:    makeTemp(?execution)
-            ->  (?execution rdf:type meta:Execution)
-                print()
-                print("Generated no-op Execution", ?execution)
+                print("Generated no-op Execution", ?executionName)
                 print()
 ]

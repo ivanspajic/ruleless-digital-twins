@@ -47,6 +47,18 @@
                                                                                   :RoomTemperatureDecrease .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeatPump
+:HeatPump rdf:type owl:NamedIndividual ,
+                   <http://www.w3.org/ns/sosa/Actuator> ,
+                   [ rdf:type owl:Restriction ;
+                     owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasStateRange> ;
+                     owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                     owl:onDataRange xsd:boolean
+                   ] ;
+          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyIncrease ,
+                                                                                       :RoomTemperatureIncrease .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater
 :Heater rdf:type owl:NamedIndividual ,
                  <http://www.w3.org/ns/sosa/Actuator> ,
@@ -87,7 +99,9 @@
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomM370
 :RoomM370 rdf:type owl:NamedIndividual ;
           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor> :EnergyDecrease ;
-          <http://www.w3.org/ns/sosa/hosts> :Heater ,
+          <http://www.w3.org/ns/sosa/hosts> :Fan ,
+                                            :HeatPump ,
+                                            :Heater ,
                                             :SoftSensor1 ,
                                             :TemperatureSensor1 ,
                                             :TemperatureSensor2 .
@@ -114,6 +128,7 @@
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1
 :SoftSensor1 rdf:type owl:NamedIndividual ,
                       <http://www.w3.org/ns/sosa/Sensor> ;
+             <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor> :EnergyIncrease ;
              <http://www.w3.org/ns/ssn/implements> :SoftSensor1Algorithm .
 
 

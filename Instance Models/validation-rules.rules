@@ -64,16 +64,3 @@
                 print("at the same time, which is not a restriction.")
                 print()
 ]
-
-[rule4e:    (?individual rdf:type owl:NamedIndividual)
-            (?individual rdf:type meta:OptimalCondition)
-            (?individual ssn:forProperty ?observableProperty)
-            (?individual rdf:type ?bNode1)
-            (?bNode1 owl:onDataRange ?bNode2)
-            (?bNode2 owl:unionOf ?bNode3)
-            ->  print()
-                print("Useless condition detected!")
-                print("Conditions for", ?observableProperty)
-                print("contain an OR, which is not a restriction.")
-                print()
-]

@@ -98,7 +98,7 @@
 // or ConfigurableProperties, if they do not already exist. The last rule also creates a no-op Execution.
 // URI concatinations are used for generating unique names for unique combinations of elements in an Execution.
 // This ensures that no duplicate Executions are generated in cases of, e.g., multiple actuators causing
-// different PropertyChanges which are all relevant for OptimalConditions or optimizations.
+// multiple different PropertyChanges.
 
 [rule3a:    (?thing rdf:comment ?propertyChange)
             (?propertyChange meta:enactedBy ?actuator)
@@ -111,7 +111,7 @@
                 print()
 ]
 
-[rule3c:    (?thing rdf:comment ?propertyChange)
+[rule3b:    (?thing rdf:comment ?propertyChange)
             (?propertyChange meta:enactedBy ?configurableProperty)
             (?configurableProperty rdf:type meta:ConfigurableProperty)
             (?propertyChange meta:alteredBy ?effect)
@@ -124,7 +124,7 @@
                 print()
 ]
 
-[rule3e:    uriConcat("no-op", meta:Execution, ?executionName)
+[rule3c:    uriConcat("no-op", meta:Execution, ?executionName)
             ->  (?executionName rdf:type meta:Execution)
                 print()
                 print("Generated no-op Execution", ?executionName)

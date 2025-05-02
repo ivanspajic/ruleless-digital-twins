@@ -1,6 +1,6 @@
 ﻿namespace Models
 {
-    internal enum Effect
+    public enum Effect
     {
         ValueDecrease,
         ValueIncrease

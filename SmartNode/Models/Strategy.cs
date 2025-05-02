@@ -1,14 +1,13 @@
-﻿namespace Models
+﻿using Models.Executions;
+
+namespace Models
 {
     public class Strategy
     {
-        private readonly IReadOnlyList<Execution> _executions;
+        public required IReadOnlyList<Execution> Executions { get; init; }
 
-        public Strategy(List<Execution> executions)
-        {
-            _executions = executions;
-        }
+        public TimeSpan TimeLimit { get; init; }
 
-        public IReadOnlyList<Execution> Executions => _executions;
+        public required string Identifier { get; init; }
     }
 }

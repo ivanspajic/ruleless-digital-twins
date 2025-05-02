@@ -138,8 +138,8 @@ xsd:duration rdf:type rdfs:Datatype .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueType
 :hasValueType rdf:type owl:DatatypeProperty ;
               rdfs:range rdfs:Literal ;
-              rdfs:comment "Describes a relation to a specific value type used by a property or an input/output parameter."@en ;
-              rdfs:label "hasValueType"@en .
+              rdfs:comment "Describes a relation to a specific value (of a specific type) contained by a property or an input/output parameter."@en ;
+              rdfs:label "hasValue"@en .
 
 
 #################################################################
@@ -148,7 +148,8 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationExecution
 :ActuationExecution rdf:type owl:Class ;
-                    rdfs:subClassOf [ rdf:type owl:Restriction ;
+                    rdfs:subClassOf :Execution ,
+                                    [ rdf:type owl:Restriction ;
                                       owl:onProperty :hasActuator ;
                                       owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                       owl:onClass <http://www.w3.org/ns/sosa/Actuator>
@@ -178,6 +179,12 @@ xsd:duration rdf:type rdfs:Datatype .
 :Effect rdf:type owl:Class ;
         rdfs:comment "The type of effect on the value of a property."@en ;
         rdfs:label "Effect"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Execution
+:Execution rdf:type owl:Class ;
+           rdfs:comment "Represents a single system execution."@en ;
+           rdfs:label "Execution"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition
@@ -230,6 +237,11 @@ xsd:duration rdf:type rdfs:Datatype .
                                                    owl:onProperty :alteredBy ;
                                                    owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                    owl:onClass :Effect
+                                                 ] ,
+                                                 [ rdf:type owl:Restriction ;
+                                                   owl:onProperty :enactedBy ;
+                                                   owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                   owl:onClass :ConfigurableProperty
                                                  ] ;
                                  rdfs:comment "Represents a specific property change as a result of reconfiguring a related ConfigurableProperty."@en ;
                                  rdfs:label "PropertyChangeByReconfiguration"@en .
@@ -237,7 +249,8 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationExecution
 :ReconfigurationExecution rdf:type owl:Class ;
-                          rdfs:subClassOf [ rdf:type owl:Restriction ;
+                          rdfs:subClassOf :Execution ,
+                                          [ rdf:type owl:Restriction ;
                                             owl:onProperty :affectsPropertyWith ;
                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                             owl:onClass :Effect
@@ -253,16 +266,9 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Strategy
 :Strategy rdf:type owl:Class ;
-          rdfs:subClassOf [ rdf:type owl:Class ;
-                            owl:unionOf ( [ rdf:type owl:Restriction ;
-                                            owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
-                                            owl:someValuesFrom :ActuationExecution
-                                          ]
-                                          [ rdf:type owl:Restriction ;
-                                            owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
-                                            owl:someValuesFrom :ReconfigurationExecution
-                                          ]
-                                        )
+          rdfs:subClassOf [ rdf:type owl:Restriction ;
+                            owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
+                            owl:someValuesFrom :Execution
                           ] ,
                           [ rdf:type owl:Restriction ;
                             owl:onProperty :hasIdentifier ;
@@ -290,6 +296,19 @@ xsd:duration rdf:type rdfs:Datatype .
                                                                  owl:onProperty :hasValueType ;
                                                                  owl:cardinality "1"^^xsd:nonNegativeInteger
                                                                ] .
+
+
+###  http://www.w3.org/ns/sosa/Platform
+<http://www.w3.org/ns/sosa/Platform> rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                                       owl:onProperty :optimizesFor ;
+                                                       owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                       owl:onClass :PropertyChange
+                                                     ] ,
+                                                     [ rdf:type owl:Restriction ;
+                                                       owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
+                                                       owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                       owl:onClass :OptimalCondition
+                                                     ] .
 
 
 #################################################################

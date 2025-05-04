@@ -4,8 +4,8 @@ namespace Models
 {
     public class Platform
     {
-        public required IReadOnlyCollection<Devices.System> Devices { get; init; }
+        public required IReadOnlyCollection<Devices.System> HostedDevices { get; init; }
 
-        public required Property OptimizedProperty { get; init; }
+        public required Property OptimizationTarget { get; init; }
     }
 }

@@ -1,7 +1,12 @@
-﻿namespace Models.Devices
+﻿using Models.Properties;
+using System.Numerics;
+
+namespace Models.Devices
 {
-    public class Sensor : System
+    public class Sensor<T> where T : INumber<T>
     {
-        // This can include sensor specifics like precision, resolution, etc.
+        public required string Name { get; init; }
+
+        public required ObservableProperty<T> ObservableProperty { get; init; }
     }
 }

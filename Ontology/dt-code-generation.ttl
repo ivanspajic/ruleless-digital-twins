@@ -98,6 +98,13 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Data properties
 #################################################################
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation#hasActuatorState
+:hasActuatorState rdf:type owl:DatatypeProperty ;
+                  rdfs:range rdfs:Literal ;
+                  rdfs:comment "Represents a relation between an Actuator and a literal value representing its current state."@en ;
+                  rdfs:label "hasActuatorState"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasIdentifier
 :hasIdentifier rdf:type owl:DatatypeProperty ;
                rdfs:range xsd:string ;
@@ -153,6 +160,10 @@ xsd:duration rdf:type rdfs:Datatype .
                                       owl:onProperty :hasActuator ;
                                       owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                       owl:onClass <http://www.w3.org/ns/sosa/Actuator>
+                                    ] ,
+                                    [ rdf:type owl:Restriction ;
+                                      owl:onProperty :hasActuatorState ;
+                                      owl:cardinality "1"^^xsd:nonNegativeInteger
                                     ] ;
                     owl:disjointWith :ReconfigurationExecution ;
                     rdfs:comment "Represents a single system execution with an actuation, either for optimization or regaining optimal conditions."@en ;
@@ -271,11 +282,6 @@ xsd:duration rdf:type rdfs:Datatype .
                             owl:someValuesFrom :Execution
                           ] ,
                           [ rdf:type owl:Restriction ;
-                            owl:onProperty :hasIdentifier ;
-                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                            owl:onDataRange xsd:string
-                          ] ,
-                          [ rdf:type owl:Restriction ;
                             owl:onProperty :hasTimeLimit ;
                             owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                             owl:onDataRange xsd:duration
@@ -286,6 +292,10 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.w3.org/ns/sosa/Actuator
 <http://www.w3.org/ns/sosa/Actuator> rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                                       owl:onProperty :hasActuatorState ;
+                                                       owl:cardinality "1"^^xsd:nonNegativeInteger
+                                                     ] ,
+                                                     [ rdf:type owl:Restriction ;
                                                        owl:onProperty :hasStateRange ;
                                                        owl:cardinality "1"^^xsd:nonNegativeInteger
                                                      ] .

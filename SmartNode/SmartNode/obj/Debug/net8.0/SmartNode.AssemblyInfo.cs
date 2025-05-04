@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SmartNode")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+308a53cee52e58377c6697f36172de7de1c330b9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2642fb2f12cc5b60186747e0490f65db60849479")]
 [assembly: System.Reflection.AssemblyProductAttribute("SmartNode")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SmartNode")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -94,20 +94,19 @@
                 print()
 ]
 
-// The following rules locate PropertyChange marks and generate appropriate Executions, either with Actuators
-// or ConfigurableProperties, if they do not already exist. The last rule also creates a no-op Execution.
-// URI concatinations are used for generating unique names for unique combinations of elements in an Execution.
-// This ensures that no duplicate Executions are generated in cases of, e.g., multiple actuators causing
-// multiple different PropertyChanges.
+// The following rules locate PropertyChange marks and generate appropriate ExecutionPlans, either with ActuatorStates
+// or ConfigurableProperties. The last rule also creates a no-op ExecutionPlan. URI concatinations are used for
+// generating unique names for unique combinations of elements in an ExecutionPlan. This ensures that no duplicate
+// ExecutionPlans are generated in cases of, e.g., multiple actuators causing multiple different PropertyChanges.
 
 [rule3a:    (?thing rdf:comment ?propertyChange)
-            (?propertyChange meta:enactedBy ?actuator)
-            (?actuator rdf:type sosa:Actuator)
-            uriConcat(?actuator, meta:ActuationExecution, ?executionName)
-            ->  (?executionName rdf:type meta:ActuationExecution)
-                (?executionName meta:hasActuator ?actuator)
+            (?propertyChange meta:enactedBy ?actuatorState)
+            (?actuatorState rdf:type meta:ActuatorState)
+            uriConcat(?actuatorState, meta:ActuationExecutionPlan, ?executionName)
+            ->  (?executionName rdf:type meta:ActuationExecutionPlan)
+                (?executionName meta:hasActuatorState ?actuatorState)
                 print()
-                print("Generated ActuationExecution", ?executionName)
+                print("Generated ActuationExecutionPlan", ?executionName)
                 print()
 ]
 
@@ -115,18 +114,18 @@
             (?propertyChange meta:enactedBy ?configurableProperty)
             (?configurableProperty rdf:type meta:ConfigurableProperty)
             (?propertyChange meta:alteredBy ?effect)
-            uriConcat(?configurableProperty, ?effect, meta:ReconfigurationExecution, ?executionName)
-            ->  (?executionName rdf:type meta:ReconfigurationExecution)
+            uriConcat(?configurableProperty, ?effect, meta:ReconfigurationExecutionPlan, ?executionName)
+            ->  (?executionName rdf:type meta:ReconfigurationExecutionPlan)
                 (?executionName ssn:forProperty ?configurableProperty)
                 (?executionName meta:affectsPropertyWith ?effect)
                 print()
-                print("Generated ReconfigurationExecution", ?executionName)
+                print("Generated ReconfigurationExecutionPlan", ?executionName)
                 print()
 ]
 
-[rule3c:    uriConcat("no-op", meta:Execution, ?executionName)
-            ->  (?executionName rdf:type meta:Execution)
+[rule3c:    uriConcat("no-op", meta:ExecutionPlan, ?executionName)
+            ->  (?executionName rdf:type meta:ExecutionPlan)
                 print()
-                print("Generated no-op Execution", ?executionName)
+                print("Generated no-op ExecutionPlan", ?executionName)
                 print()
 ]

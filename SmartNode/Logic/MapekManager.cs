@@ -1,12 +1,18 @@
-﻿namespace Logic
+﻿using Microsoft.Extensions.Logging;
+
+namespace Logic
 {
     public class MapekManager : IMapekManager
     {
+        private readonly ILogger<MapekManager> _logger;
+
         private bool _isLoopActive = false;
 
-        public MapekManager()
+        public MapekManager(ILogger<MapekManager> logger)
         {
+            _logger = logger;
 
+            _logger.LogInformation("test log, lelelelelele");
         }
 
         public void StartLoop()
@@ -23,18 +29,18 @@
 
         private void RunMapekLoop()
         {
-            InitializePlatform();
+            InitializeGraph();
 
             while (_isLoopActive)
             {
-                // Monitor - should return properties and executions
-                // Analyze - use the properties and executions to narrow down and return the relevant executions
-                // Plan - plan for a strategy with specific executions from the optimization information from the instance model
-                // Execute - send the strategy for execution to the respective actuators or reconfiguration property updaters
+                // Monitor
+                // Analyze
+                // Plan
+                // Execute
             }
         }
 
-        private void InitializePlatform()
+        private void InitializeGraph()
         {
 
         }

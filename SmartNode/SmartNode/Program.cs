@@ -1,3 +1,4 @@
+using Logic;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -13,7 +14,12 @@ namespace SmartNode
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
-            await builder.Build().RunAsync();
+            builder.Services.AddLogging(builder => builder.AddConsole());
+            builder.Services.AddSingleton<IMapekManager, MapekManager>();
+
+            var webAssemblyHost = builder.Build();
+
+            await webAssemblyHost.RunAsync();
         }
     }
 }

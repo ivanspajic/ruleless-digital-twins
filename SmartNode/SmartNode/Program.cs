@@ -14,10 +14,17 @@ namespace SmartNode
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
-            builder.Services.AddLogging(builder => builder.AddConsole());
-            builder.Services.AddSingleton<IMapekManager, MapekManager>();
+            // Add all the required services.
+            builder.Services.AddLogging();
+            builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceProvider =>
+            {
+                return new MapekManager(serviceProvider.GetRequiredService<ILogger<MapekManager>>());
+            });
 
             var webAssemblyHost = builder.Build();
+
+            // Instantiate the MAPE-K loop.
+            webAssemblyHost.Services.GetRequiredService<IMapekManager>();
 
             await webAssemblyHost.RunAsync();
         }

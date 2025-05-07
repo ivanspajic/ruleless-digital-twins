@@ -112,6 +112,14 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Data properties
 #################################################################
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation#reachedInMaximumSeconds
+:reachedInMaximumSeconds rdf:type owl:DatatypeProperty ;
+                         rdfs:domain :OptimalCondition ;
+                         rdfs:range xsd:int ;
+                         rdfs:comment "Represents the maximum amount of time in seconds to reach an OptimalCondition."@en ;
+                         rdfs:label "reachedInMaximumSeconds"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasIdentifier
 :hasIdentifier rdf:type owl:DatatypeProperty ;
                rdfs:range xsd:string ;
@@ -231,6 +239,11 @@ xsd:duration rdf:type rdfs:Datatype .
                                   [ rdf:type owl:Restriction ;
                                     owl:onProperty :hasValueConstraint ;
                                     owl:cardinality "1"^^xsd:nonNegativeInteger
+                                  ] ,
+                                  [ rdf:type owl:Restriction ;
+                                    owl:onProperty :reachedInMaximumSeconds ;
+                                    owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                    owl:onDataRange xsd:int
                                   ] ;
                   rdfs:comment "An optimal property condition, such as a desired value range definition. For example, an optimal temperature condition of a room could be defined as values greater than 18 and lower than 22 degrees Celsius."@en ;
                   rdfs:label "OptimalCondition"@en .

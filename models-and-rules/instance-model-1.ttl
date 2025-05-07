@@ -33,22 +33,22 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 :AverageRoomTemperature rdf:type owl:NamedIndividual .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Energy
-:Energy rdf:type owl:NamedIndividual .
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption
+:EnergyConsumption rdf:type owl:NamedIndividual .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyDecrease
-:EnergyDecrease rdf:type owl:NamedIndividual ,
-                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> ;
-                <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
-                <http://www.w3.org/ns/ssn/forProperty> :Energy .
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionDecrease
+:EnergyConsumptionDecrease rdf:type owl:NamedIndividual ,
+                                    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> ;
+                           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
+                           <http://www.w3.org/ns/ssn/forProperty> :EnergyConsumption .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyIncrease
-:EnergyIncrease rdf:type owl:NamedIndividual ,
-                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> ;
-                <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
-                <http://www.w3.org/ns/ssn/forProperty> :Energy .
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionIncrease
+:EnergyConsumptionIncrease rdf:type owl:NamedIndividual ,
+                                    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> ;
+                           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
+                           <http://www.w3.org/ns/ssn/forProperty> :EnergyConsumption .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan
@@ -59,7 +59,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FanOn
 :FanOn rdf:type owl:NamedIndividual ,
                 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState> ;
-       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyIncrease ,
+       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyConsumptionIncrease ,
                                                                                     :RoomTemperatureDecrease .
 
 
@@ -71,21 +71,21 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterMedium
 :HeaterMedium rdf:type owl:NamedIndividual ,
                        <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState> ;
-              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyIncrease ,
+              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyConsumptionIncrease ,
                                                                                            :RoomTemperatureIncrease .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStrong
 :HeaterStrong rdf:type owl:NamedIndividual ,
                        <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState> ;
-              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyIncrease ,
+              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyConsumptionIncrease ,
                                                                                            :RoomTemperatureIncrease .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterWeak
 :HeaterWeak rdf:type owl:NamedIndividual ,
                      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState> ;
-            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyIncrease ,
+            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyConsumptionIncrease ,
                                                                                          :RoomTemperatureIncrease .
 
 
@@ -104,12 +104,13 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                                                      )
                                               ]
                             ] ;
-                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
+                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
+                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds> 3600 .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomM370
 :RoomM370 rdf:type owl:NamedIndividual ;
-          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor> :EnergyDecrease ;
+          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor> :EnergyConsumptionDecrease ;
           <http://www.w3.org/ns/sosa/hosts> :Fan ,
                                             :Heater ,
                                             :SoftSensor1 ,
@@ -182,11 +183,8 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                              <http://www.w3.org/ns/ssn/hasOutput> :TemperatureSensor2MeasuredTemperature .
 
 
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
-] .
-
 [ xsd:minInclusive "1"^^xsd:int
- ] .
+] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
@@ -195,6 +193,9 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
  ] .
 
 [ xsd:maxInclusive "3"^^xsd:int
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
 ###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

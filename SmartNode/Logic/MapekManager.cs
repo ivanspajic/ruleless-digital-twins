@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Logic.DeviceInterfaces;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 
@@ -6,13 +8,21 @@ namespace Logic
 {
     public class MapekManager : IMapekManager
     {
-        private readonly ILogger<MapekManager> _logger;
+        private const string DtPrefix = "http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation:";
+        private const string SosaPrefix = "sosa:";
+        private const string SsnPrefix = "ssn:";
+        private const string RdfPrefix = "rdf:";
+        private const string OwlPrefix = "owl:";
 
         private bool _isLoopActive = false;
 
-        public MapekManager(ILogger<MapekManager> logger)
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<MapekManager> _logger;
+
+        public MapekManager(IServiceProvider serviceProvider)
         {
-            _logger = logger;
+            _serviceProvider = serviceProvider;
+            _logger = _serviceProvider.GetService<ILogger<MapekManager>>()!;
         }
 
         public void StartLoop(string filePath)
@@ -41,9 +51,11 @@ namespace Logic
                 return;
             }
 
+            var sensorMap = InitializeSensors(graph);
+
             while (_isLoopActive)
             {
-                var propertyValueMap = Monitor(graph);
+                var propertyValueMap = Monitor(graph, sensorMap);
                 // Monitor
                 // Analyze
                 // Plan
@@ -72,7 +84,23 @@ namespace Logic
             return graph;
         }
 
-        private IDictionary<string, object> Monitor(IGraph graph)
+        private IDictionary<string, ISensor> InitializeSensors(IGraph graph)
+        {
+            var sensorMap = new Dictionary<string, ISensor>();
+
+            var rdfType = graph.CreateUriNode(RdfPrefix + "type");
+            var propertyClass = graph.CreateUriNode(SsnPrefix + "Property");
+            var triples = graph.GetTriplesWithPredicateObject(rdfType, propertyClass);
+
+            foreach (var triple in triples)
+            {
+                var propertyName = triple.Subject.ToString();
+
+                // TODO: we can call the service provider after registering a factory for our sensors..
+            }
+        }
+
+        private IDictionary<string, object> Monitor(IGraph graph, IDictionary<string, ISensor> sensorMap)
         {
             // query the graph and initialize the dictionary of properties
             // get the values for the properties from the corresponding sensors

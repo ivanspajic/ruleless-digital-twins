@@ -2,10 +2,16 @@
 
 namespace Logic.DeviceInterfaces
 {
-    public interface ISensor<T> where T : INumber<T>
+    /// <summary>
+    /// Having a base interface without the generic type simplifies handling these types in collections.
+    /// </summary>
+    public interface ISensor
     {
         public string Name { get; init; }
+    }
 
+    public interface ISensor<T> : ISensor where T : INumber<T>
+    {
         /// <summary>
         /// Observes the relevant property's value.
         /// </summary>

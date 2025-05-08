@@ -1,6 +1,8 @@
 using Logic;
+using Logic.DeviceInterfaces;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using SensorActuatorImplementations;
 
 namespace SmartNode
 {
@@ -18,8 +20,9 @@ namespace SmartNode
             builder.Services.AddLogging();
             builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceProvider =>
             {
-                return new MapekManager(serviceProvider.GetRequiredService<ILogger<MapekManager>>());
+                return new MapekManager(serviceProvider);
             });
+            // TODO: we need to register a factory for our sensors here
 
             var webAssemblyHost = builder.Build();
 

@@ -9,6 +9,8 @@
         /// </summary>
         /// <param name="state">The state of the actuator.</param>
         /// <param name="stateValue">The optional state value.</param>
-        public void Actuate(int state, int? stateValue = null); // TODO: consider this setup further. Actuations might return some information.
+        /// 
+        /// This setup could be further considered. Actuations might also need to return some information.
+        public void Actuate(int state, int? stateValue = null);
     }
 }

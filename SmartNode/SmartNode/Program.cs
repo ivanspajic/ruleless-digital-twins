@@ -22,7 +22,16 @@ namespace SmartNode
             {
                 return new MapekManager(serviceProvider);
             });
-            // TODO: we need to register a factory for our sensors here
+            builder.Services.AddScoped(serviceProvider =>
+            {
+                return new Func<string, ISensor>(name =>
+                {
+                    return new ExampleSensorDoubleValues
+                    {
+                        Name = name
+                    };
+                });
+            });
 
             var webAssemblyHost = builder.Build();
 

@@ -2,9 +2,7 @@
 
 namespace Logic.DeviceInterfaces
 {
-    /// <summary>
-    /// Having a base interface without the generic type simplifies handling these types in collections.
-    /// </summary>
+    // Having a base interface without the generic type simplifies handling these types in collections.
     public interface ISensor
     {
         public string Name { get; init; }

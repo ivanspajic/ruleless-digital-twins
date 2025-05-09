@@ -3,14 +3,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using VDS.RDF;
 using VDS.RDF.Parsing;
+using VDS.RDF.Query;
 
 namespace Logic
 {
     public class MapekManager : IMapekManager
     {
-        private const string DtPrefix = "http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation:";
-        private const string SosaPrefix = "sosa:";
-        private const string SsnPrefix = "ssn:";
+        private const string DtPrefix = "http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/";
+        private const string SosaPrefix = "http://www.w3.org/ns/sosa/";
+        private const string SsnPrefix = "http://www.w3.org/ns/ssn/";
         private const string RdfPrefix = "rdf:";
         private const string OwlPrefix = "owl:";
 
@@ -18,11 +19,13 @@ namespace Logic
 
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<MapekManager> _logger;
+        private readonly Func<string, ISensor> _sensorFactory;
 
         public MapekManager(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _logger = _serviceProvider.GetService<ILogger<MapekManager>>()!;
+            _logger = _serviceProvider.GetRequiredService<ILogger<MapekManager>>();
+            _sensorFactory = _serviceProvider.GetRequiredService<Func<string, ISensor>>();
         }
 
         public void StartLoop(string filePath)
@@ -41,21 +44,20 @@ namespace Logic
         {
             _logger.LogInformation("Starting the MAPE-K loop...");
 
+            // Load the instance model into a graph object.
             IGraph graph = InitializeGraph(filePath);
             
             // If nothing was loaded, simply return.
             if (graph.IsEmpty)
             {
-                _logger.LogInformation("There is nothing in the graph.");
+                _logger.LogInformation("There is nothing in the graph. Terminated MAPE-K loop.");
 
                 return;
             }
 
-            var sensorMap = InitializeSensors(graph);
-
             while (_isLoopActive)
             {
-                var propertyValueMap = Monitor(graph, sensorMap);
+                var propertyValuesTuple = Monitor(graph);
                 // Monitor
                 // Analyze
                 // Plan
@@ -84,28 +86,33 @@ namespace Logic
             return graph;
         }
 
-        private IDictionary<string, ISensor> InitializeSensors(IGraph graph)
+
+        private Tuple<IDictionary<string, Tuple<object, object>>, IDictionary<string, object>> Monitor(IGraph graph)
         {
-            var sensorMap = new Dictionary<string, ISensor>();
+            // Two collections of property values are necessary since properties observed by hard sensors will only have
+            // estimated values within some range, as dictated by the devices that measure it. For example, a room
+            // temperature could be measured by two sensors, each reporting a slightly different value. In our ontology
+            // (SOSA/SSN), these measured property values are Outputs of Procedures implemented by Sensors. As a result,
+            // the original observed room temperature property would have a possible value range between a minimum and a
+            // maximum, as dictated by the two slightly different sensor measurements.
+            var observablePropertyMap = new Dictionary<string, Tuple<object, object>>();
+            var computedPropertyMap = new Dictionary<string, object>();
+            var propertyValuesTuple = new Tuple<IDictionary<string, Tuple<object, object>>,
+                IDictionary<string, object>>(observablePropertyMap, computedPropertyMap);
 
-            var rdfType = graph.CreateUriNode(RdfPrefix + "type");
-            var propertyClass = graph.CreateUriNode(SsnPrefix + "Property");
-            var triples = graph.GetTriplesWithPredicateObject(rdfType, propertyClass);
+            // TODO: try to query with sparql, otherwise, make use of the standard library - should work the same
+            var sparqlProcessor = new LeviathanQueryProcessor();
+            var resultSet = graph.ExecuteQuery()
 
-            foreach (var triple in triples)
-            {
-                var propertyName = triple.Subject.ToString();
-
-                // TODO: we can call the service provider after registering a factory for our sensors..
-            }
-        }
-
-        private IDictionary<string, object> Monitor(IGraph graph, IDictionary<string, ISensor> sensorMap)
-        {
-            // query the graph and initialize the dictionary of properties
             // get the values for the properties from the corresponding sensors
             // execute the soft sensors with some properties as inputs
                 // keep executing this as long as there are inputs remaining 
+
+            // step 1: find all sensors
+            // step 2: find all observable properties
+            // step 3: find all remaining properties
+            // maybe the dictionaries of properties can hold nullable values and they can be filled in as soon as they're computed/measured
+            // otherwise, we can put them in the dictionary only when they have a value.. let's consider and see
         }
     }
 }

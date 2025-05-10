@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 using VDS.RDF.Query;
+using VDS.RDF.Query.Datasets;
 
 namespace Logic
 {
@@ -30,6 +31,8 @@ namespace Logic
 
         public void StartLoop(string filePath)
         {
+            _logger.LogInformation("the path is {path}", filePath);
+
             _isLoopActive = true;
 
             RunMapekLoop(filePath);
@@ -47,12 +50,12 @@ namespace Logic
             // Load the instance model into a graph object.
             IGraph graph = InitializeGraph(filePath);
             
-            // If nothing was loaded, simply return.
+            // If nothing was loaded, don't start the loop.
             if (graph.IsEmpty)
             {
                 _logger.LogInformation("There is nothing in the graph. Terminated MAPE-K loop.");
 
-                return;
+                _isLoopActive = false;
             }
 
             while (_isLoopActive)
@@ -76,7 +79,7 @@ namespace Logic
 
             try
             {
-                turtleParser.Load(graph, filePath);
+                turtleParser.Load(graph, filePath); // we have to ditch webassembly for this to work. docker would make more sense
             }
             catch (Exception exception)
             {    
@@ -92,27 +95,22 @@ namespace Logic
             // Two collections of property values are necessary since properties observed by hard sensors will only have
             // estimated values within some range, as dictated by the devices that measure it. For example, a room
             // temperature could be measured by two sensors, each reporting a slightly different value. In our ontology
-            // (SOSA/SSN), these measured property values are Outputs of Procedures implemented by Sensors. As a result,
-            // the original observed room temperature property would have a possible value range between a minimum and a
-            // maximum, as dictated by the two slightly different sensor measurements.
+            // (based on SOSA/SSN), these measured property values are Outputs of Procedures implemented by Sensors. As
+            // a result, the original observed room temperature property would have a possible value range between a
+            // minimum and a maximum, as dictated by the two slightly different sensor measurements.
             var observablePropertyMap = new Dictionary<string, Tuple<object, object>>();
             var computedPropertyMap = new Dictionary<string, object>();
             var propertyValuesTuple = new Tuple<IDictionary<string, Tuple<object, object>>,
                 IDictionary<string, object>>(observablePropertyMap, computedPropertyMap);
 
-            // TODO: try to query with sparql, otherwise, make use of the standard library - should work the same
-            var sparqlProcessor = new LeviathanQueryProcessor();
-            var resultSet = graph.ExecuteQuery()
+            var queryResult = (SparqlResultSet)graph.ExecuteQuery("SELECT ?observableProperty WHERE" +
+                "?observableProperty rdf:type Property." +
+                "?observableProperty sosa:isObservedBy ?sensor." +
+                "?sensor rdf:type Sensor.");
 
-            // get the values for the properties from the corresponding sensors
-            // execute the soft sensors with some properties as inputs
-                // keep executing this as long as there are inputs remaining 
 
-            // step 1: find all sensors
-            // step 2: find all observable properties
-            // step 3: find all remaining properties
-            // maybe the dictionaries of properties can hold nullable values and they can be filled in as soon as they're computed/measured
-            // otherwise, we can put them in the dictionary only when they have a value.. let's consider and see
+
+            return propertyValuesTuple;
         }
     }
 }

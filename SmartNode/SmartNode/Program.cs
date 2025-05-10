@@ -22,7 +22,7 @@ namespace SmartNode
             {
                 return new MapekManager(serviceProvider);
             });
-            builder.Services.AddScoped(serviceProvider =>
+            builder.Services.AddSingleton(serviceProvider =>
             {
                 return new Func<string, ISensor>(name =>
                 {
@@ -36,7 +36,8 @@ namespace SmartNode
             var webAssemblyHost = builder.Build();
 
             // Instantiate the MAPE-K loop.
-            webAssemblyHost.Services.GetRequiredService<IMapekManager>();
+            var mapekManager = webAssemblyHost.Services.GetRequiredService<IMapekManager>();
+            mapekManager.StartLoop("C:/dev/dt-code-generation/models-and-rules/inferred-model-1.ttl");
 
             await webAssemblyHost.RunAsync();
         }

@@ -112,14 +112,6 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Data properties
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation#reachedInMaximumSeconds
-:reachedInMaximumSeconds rdf:type owl:DatatypeProperty ;
-                         rdfs:domain :OptimalCondition ;
-                         rdfs:range xsd:int ;
-                         rdfs:comment "Represents the maximum amount of time in seconds to reach an OptimalCondition."@en ;
-                         rdfs:label "reachedInMaximumSeconds"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasIdentifier
 :hasIdentifier rdf:type owl:DatatypeProperty ;
                rdfs:range xsd:string ;
@@ -142,6 +134,13 @@ xsd:duration rdf:type rdfs:Datatype .
               rdfs:label "hasTimeLimit"@en .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue
+:hasValue rdf:type owl:DatatypeProperty ;
+          rdfs:range rdfs:Literal ;
+          rdfs:comment "Describes a relation to a specific value (of a specific type) contained by a property or an input/output parameter."@en ;
+          rdfs:label "hasValue"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint
 :hasValueConstraint rdf:type owl:DatatypeProperty ;
                     rdfs:range xsd:double ;
@@ -149,11 +148,12 @@ xsd:duration rdf:type rdfs:Datatype .
                     rdfs:label "hasValueConstraint"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueType
-:hasValueType rdf:type owl:DatatypeProperty ;
-              rdfs:range rdfs:Literal ;
-              rdfs:comment "Describes a relation to a specific value (of a specific type) contained by a property or an input/output parameter."@en ;
-              rdfs:label "hasValue"@en .
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds
+:reachedInMaximumSeconds rdf:type owl:DatatypeProperty ;
+                         rdfs:domain :OptimalCondition ;
+                         rdfs:range xsd:int ;
+                         rdfs:comment "Represents the maximum amount of time in seconds to reach an OptimalCondition."@en ;
+                         rdfs:label "reachedInMaximumSeconds"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/withStateValueRange
@@ -209,7 +209,7 @@ xsd:duration rdf:type rdfs:Datatype .
                                         owl:onClass :PropertyChangeByReconfiguration
                                       ] ,
                                       [ rdf:type owl:Restriction ;
-                                        owl:onProperty :hasValueType ;
+                                        owl:onProperty :hasValue ;
                                         owl:cardinality "1"^^xsd:nonNegativeInteger
                                       ] ;
                       rdfs:comment "A property not directly observable or actuatable but rather used for configuring a System or Procedure."@en ;
@@ -337,7 +337,7 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.w3.org/ns/sosa/ObservableProperty
 <http://www.w3.org/ns/sosa/ObservableProperty> rdfs:subClassOf [ rdf:type owl:Restriction ;
-                                                                 owl:onProperty :hasValueType ;
+                                                                 owl:onProperty :hasValue ;
                                                                  owl:cardinality "1"^^xsd:nonNegativeInteger
                                                                ] .
 
@@ -353,6 +353,20 @@ xsd:duration rdf:type rdfs:Datatype .
                                                        owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                        owl:onClass :OptimalCondition
                                                      ] .
+
+
+###  http://www.w3.org/ns/ssn/Input
+<http://www.w3.org/ns/ssn/Input> rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                                   owl:onProperty :hasValue ;
+                                                   owl:cardinality "1"^^xsd:nonNegativeInteger
+                                                 ] .
+
+
+###  http://www.w3.org/ns/ssn/Output
+<http://www.w3.org/ns/ssn/Output> rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                                    owl:onProperty :hasValue ;
+                                                    owl:cardinality "1"^^xsd:nonNegativeInteger
+                                                  ] .
 
 
 #################################################################

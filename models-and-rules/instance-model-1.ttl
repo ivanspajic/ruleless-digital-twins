@@ -30,11 +30,22 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 #################################################################
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageRoomTemperature
-:AverageRoomTemperature rdf:type owl:NamedIndividual .
+:AverageRoomTemperature rdf:type owl:NamedIndividual ,
+                                 [ rdf:type owl:Restriction ;
+                                   owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                   owl:onDataRange xsd:double
+                                 ] .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption
-:EnergyConsumption rdf:type owl:NamedIndividual .
+:EnergyConsumption rdf:type owl:NamedIndividual ,
+                            <http://www.w3.org/ns/sosa/ObservableProperty> ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange xsd:double
+                            ] .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionDecrease
@@ -120,7 +131,13 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature
-:RoomTemperature rdf:type owl:NamedIndividual .
+:RoomTemperature rdf:type owl:NamedIndividual ,
+                          <http://www.w3.org/ns/sosa/ObservableProperty> ,
+                          [ rdf:type owl:Restriction ;
+                            owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                            owl:onDataRange xsd:double
+                          ] .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperatureDecrease
@@ -159,7 +176,12 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1MeasuredTemperature
-:TemperatureSensor1MeasuredTemperature rdf:type owl:NamedIndividual .
+:TemperatureSensor1MeasuredTemperature rdf:type owl:NamedIndividual ,
+                                                [ rdf:type owl:Restriction ;
+                                                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                                                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                  owl:onDataRange xsd:double
+                                                ] .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure
@@ -175,7 +197,12 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2MeasuredTemperature
-:TemperatureSensor2MeasuredTemperature rdf:type owl:NamedIndividual .
+:TemperatureSensor2MeasuredTemperature rdf:type owl:NamedIndividual ,
+                                                [ rdf:type owl:Restriction ;
+                                                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                                                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                  owl:onDataRange xsd:double
+                                                ] .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure
@@ -183,16 +210,28 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                              <http://www.w3.org/ns/ssn/hasOutput> :TemperatureSensor2MeasuredTemperature .
 
 
-[ xsd:minInclusive "1"^^xsd:int
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
 ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ xsd:minInclusive "1"^^xsd:int
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
 [ xsd:maxInclusive "3"^^xsd:int
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger

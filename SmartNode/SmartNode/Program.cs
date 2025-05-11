@@ -1,45 +1,46 @@
-using Logic;
+﻿using Logic;
 using Logic.DeviceInterfaces;
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using SensorActuatorImplementations;
+using System.Numerics;
 
 namespace SmartNode
 {
-    public class Program
+    internal class Program
     {
-        public static async Task Main(string[] args)
+        static void Main(string[] args)
         {
-            var builder = WebAssemblyHostBuilder.CreateDefault(args);
-            builder.RootComponents.Add<App>("#app");
-            builder.RootComponents.Add<HeadOutlet>("head::after");
+            var builder = Host.CreateApplicationBuilder(args);
 
-            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-
-            // Add all the required services.
-            builder.Services.AddLogging();
-            builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceProvider =>
+            // Register services here.
+            builder.Services.AddLogging(loggingBuilder =>
             {
-                return new MapekManager(serviceProvider);
+                loggingBuilder.AddConsole();
             });
+            builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceprovider =>
+            {
+                return new MapekManager(serviceprovider);
+            });
+            // Register a sensor factory to allow for dynamic constructor argument passing through DI.
             builder.Services.AddSingleton(serviceProvider =>
             {
-                return new Func<string, ISensor>(name =>
+                return new Func<string, ISensor>(sensorName =>
                 {
-                    return new ExampleSensorDoubleValues
+                    return new ExampleSensor
                     {
-                        Name = name
+                        Name = sensorName
                     };
                 });
             });
 
-            var webAssemblyHost = builder.Build();
+            using var host = builder.Build();
 
-            // Instantiate the MAPE-K loop.
-            var mapekManager = webAssemblyHost.Services.GetRequiredService<IMapekManager>();
-            mapekManager.StartLoop("C:/dev/dt-code-generation/models-and-rules/inferred-model-1.ttl");
+            var mapekManager = host.Services.GetRequiredService<IMapekManager>();
+            mapekManager.StartLoop(@"C:\dev\dt-code-generation\models-and-rules\inferred-model-1.ttl");
 
-            await webAssemblyHost.RunAsync();
+            host.Run();
         }
     }
 }

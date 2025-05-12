@@ -26,6 +26,7 @@ namespace SmartNode
             // Register a sensor factory to allow for dynamic constructor argument passing through DI.
             builder.Services.AddSingleton(serviceProvider =>
             {
+                // In theory, this function can return various Sensors depending on the input name.
                 return new Func<string, ISensor>(sensorName =>
                 {
                     return new ExampleSensor
@@ -38,6 +39,7 @@ namespace SmartNode
             using var host = builder.Build();
 
             var mapekManager = host.Services.GetRequiredService<IMapekManager>();
+            // TODO: get rid of the hard-coded string.
             mapekManager.StartLoop(@"C:\dev\dt-code-generation\models-and-rules\inferred-model-1.ttl");
 
             host.Run();

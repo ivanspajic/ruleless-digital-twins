@@ -1,4 +1,5 @@
 ﻿using Logic.DeviceInterfaces;
+using Logic.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using VDS.RDF;
@@ -20,8 +21,7 @@ namespace Logic
         private const string OwlPrefix = "owl";
         private const string OwlUri = "http://www.w3.org/2002/07/owl#";
 
-        private const string IntegerTypeName = "int";
-        private const string DoubleTypeName = "double";
+        private const int SleepyTimeMilliseconds = 5_000;
 
         private bool _isLoopActive = false;
 
@@ -64,9 +64,9 @@ namespace Logic
                 // If nothing was loaded, don't start the loop.
                 if (graph.IsEmpty)
                 {
-                    _logger.LogInformation("There is nothing in the graph. Terminated MAPE-K loop.");
+                    _logger.LogError("There is nothing in the graph. Terminated MAPE-K loop.");
 
-                    _isLoopActive = false;
+                    throw new Exception("The graph is empty.");
                 }
 
                 var propertyValuesTuple = Monitor(graph);
@@ -74,7 +74,7 @@ namespace Logic
                 // Plan
                 // Execute
 
-                // this should probably include some form of sleepy time
+                Thread.Sleep(SleepyTimeMilliseconds);
             }
         }
 
@@ -92,6 +92,8 @@ namespace Logic
             catch (Exception exception)
             {    
                 _logger.LogError(exception, "Exception while loading file contents: {exceptionMessage}", exception.Message);
+
+                throw;
             }
 
             return graph;
@@ -137,7 +139,7 @@ namespace Logic
                 PopulateMeasuredPropertyMap(measuredProperty, graph, query, measuredPropertyMap);
             }
 
-            PopulateObservablePropertyMap(graph, query, observablePropertyMap);
+            PopulateObservablePropertyMap(graph, query, observablePropertyMap, measuredPropertyMap);
 
             return propertyValuesTuple;
         }
@@ -205,17 +207,29 @@ namespace Logic
             IDictionary<string, object> measuredPropertyMap)
         {
             // Get all ObservableProperties.
-            query.CommandText = @"SELECT ?observableProperty ?valueType WHERE {
+            query.CommandText = @"SELECT DISTINCT ?observableProperty ?valueType WHERE {
                 ?sensor rdf:type sosa:Sensor .
                 ?sensor sosa:observes ?observableProperty . 
-                ?observableProperty meta:hasValue ?valueType . }";
+                ?observableProperty rdf:type ?bNode .
+                ?bNode owl:onProperty meta:hasValue .
+                ?bNode owl:onDataRange ?valueType . }";
 
             var queryResult = (SparqlResultSet)graph.ExecuteQuery(query);
 
             foreach (var result in queryResult.Results)
             {
                 var observableProperty = result["observableProperty"];
-                var valueType = result["valueType"].ToString();
+                var valueTypeSchema = result["valueType"].ToString();
+                var valueType = valueTypeSchema.Split('#')[1];
+
+                var sensorValueHandler = SensorValueHandlerFactory.GetSensorValueHandler(valueType);
+
+                if (sensorValueHandler is null)
+                {
+                    _logger.LogError("No supported .NET type implementation found for XML/RDF/OWL type {type}.", valueType);
+
+                    throw new Exception("Unsupported type encountered.");
+                }
 
                 // Get all measured Properties that are Outputs of Sensor Procedures measuring the current ObservableProperty.
                 query.CommandText = @"SELECT ?measuredProperty WHERE {
@@ -226,26 +240,10 @@ namespace Logic
                 query.SetParameter("observableProperty", observableProperty);
 
                 var innerQueryResult = (SparqlResultSet)graph.ExecuteQuery(query);
-                var rangeTuple = FindObservablePropertyValueRange(innerQueryResult, valueType, measuredPropertyMap);
+                var rangeTuple = sensorValueHandler.FindObservablePropertyValueRange(innerQueryResult, "measuredProperty", measuredPropertyMap);
 
                 observablePropertyMap.Add(observableProperty.ToString(), rangeTuple);
             }
-        }
-
-        private Tuple<object, object> FindObservablePropertyValueRange(SparqlResultSet queryResult,
-            string valueType,
-            IDictionary<string, object> measuredPropertyMap)
-        {
-            if (valueType == IntegerTypeName)
-            {
-
-            }
-            else if (valueType == DoubleTypeName)
-            {
-
-            }
-
-            // TODO: finish this range finder in a scalable way...
         }
     }
 }

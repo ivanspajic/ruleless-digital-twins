@@ -48,15 +48,23 @@ namespace Logic
         private readonly Dictionary<string, Tuple<object, object>> _observablePropertyValues = [];
         private readonly Dictionary<string, object> _measuredPropertyValues = [];
 
-        private bool _isLoopActive = false;
+        private readonly Graph _instanceModelGraph = new();
+        private readonly SparqlParameterizedString _query = new();
 
-        private Graph _instanceModelGraph = new();
+        private bool _isLoopActive = false;
 
         public MapekManager(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             _logger = _serviceProvider.GetRequiredService<ILogger<MapekManager>>();
             _sensorFactory = _serviceProvider.GetRequiredService<Func<string, ISensor>>();
+
+            // Register the relevant prefixes for the queries to come.
+            _query.Namespaces.AddNamespace(DtPrefix, new Uri(DtUri));
+            _query.Namespaces.AddNamespace(SosaPrefix, new Uri(SosaUri));
+            _query.Namespaces.AddNamespace(SsnPrefix, new Uri(SsnUri));
+            _query.Namespaces.AddNamespace(RdfPrefix, new Uri(RdfUri));
+            _query.Namespaces.AddNamespace(OwlPrefix, new Uri(OwlUri));
         }
 
         public void StartLoop(string filePath)
@@ -129,37 +137,25 @@ namespace Logic
         {
             _logger.LogInformation("Starting the Monitor phase.");
 
-            
-            var observablePropertyMap = new Dictionary<string, Tuple<object, object>>();
-            var measuredPropertyMap = new Dictionary<string, object>();
-            var propertyValuesTuple = new Tuple<IDictionary<string, Tuple<object, object>>,
-                IDictionary<string, object>>(observablePropertyMap, measuredPropertyMap);
-
-            var query = new SparqlParameterizedString();
-
-            query.Namespaces.AddNamespace(DtPrefix, new Uri(DtUri));
-            query.Namespaces.AddNamespace(SosaPrefix, new Uri(SosaUri));
-            query.Namespaces.AddNamespace(SsnPrefix, new Uri(SsnUri));
-            query.Namespaces.AddNamespace(RdfPrefix, new Uri(RdfUri));
-            query.Namespaces.AddNamespace(OwlPrefix, new Uri(OwlUri));
-
             // Get all measured Properties that aren't inputs to other soft sensors. Since soft Sensors may use other
             // Sensors' Outputs as their own Inputs, this query effectively gets the roots of the Sensor trees in the system.
-            query.CommandText = @"SELECT ?measuredProperty WHERE {
+            _query.CommandText = @"SELECT ?measuredProperty WHERE {
                 ?sensor rdf:type sosa:Sensor .
                 ?sensor ssn:implements ?procedure .
                 ?procedure ssn:hasOutput ?measuredProperty .
                 FILTER NOT EXISTS { ?measuredProperty meta:isInputOf ?otherProcedure } . }";
 
-            var queryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(query);
+            var queryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
 
+            // Get the values of all measured Properties and populate the cache.
             foreach (var result in queryResult.Results)
             {
                 var measuredProperty = result["measuredProperty"];
-                PopulateMeasuredPropertyMap(measuredProperty, query);
+                PopulateMeasuredPropertyMap(measuredProperty, _query);
             }
 
-            PopulateObservablePropertyMap(query);
+            // Get the values of all ObservableProperties and populate the cache.
+            PopulateObservablePropertyMap(_query);
         }
 
         private void PopulateMeasuredPropertyMap(INode measuredProperty, SparqlParameterizedString query)
@@ -221,7 +217,7 @@ namespace Logic
             // Get all ObservableProperties.
             query.CommandText = @"SELECT DISTINCT ?observableProperty ?valueType WHERE {
                 ?sensor rdf:type sosa:Sensor .
-                ?sensor sosa:observes ?observableProperty . 
+                ?sensor sosa:observes ?observableProperty .
                 ?observableProperty rdf:type ?bNode .
                 ?bNode owl:onProperty meta:hasValue .
                 ?bNode owl:onDataRange ?valueType . }";
@@ -265,6 +261,8 @@ namespace Logic
         #region Analyze
         public void Analyze()
         {
+
+
             // Figure out where we are with respect to the OptimalConditions.
             // Depending on the effect needed, filter out the irrelevant ExecutionPlans.
         }

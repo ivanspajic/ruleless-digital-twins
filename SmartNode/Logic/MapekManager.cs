@@ -1,5 +1,6 @@
 ﻿using Logic.DeviceInterfaces;
-using Logic.Utilities;
+using Logic.SensorValueHandlers;
+using Lucene.Net.Search;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using VDS.RDF;
@@ -23,12 +24,33 @@ namespace Logic
 
         private const int SleepyTimeMilliseconds = 5_000;
 
-        private bool _isLoopActive = false;
-
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<MapekManager> _logger;
 
         private readonly Func<string, ISensor> _sensorFactory;
+
+        // Contains supported XMl/RDF/OWL types and their respective value handlers. As new types
+        // become supported, their name/implementation instance pair is simply added to the collection.
+        private readonly Dictionary<string, ISensorValueHandler> _sensorValueHandlers = new()
+        {
+            { "int", new SensorIntValueHandler() },
+            { "double", new SensorDoubleValueHandler() }
+        };
+
+        // Store Property values in collections for caching to avoid re-querying.
+        //
+        // Two collections of property values are necessary since properties observed by hard sensors will only have
+        // estimated values within some range, as dictated by the devices that measure it. For example, a room
+        // temperature could be measured by two sensors, each reporting a slightly different value. In our ontology
+        // (based on SOSA/SSN), these measured property values are Outputs of Procedures implemented by Sensors. As
+        // a result, the original observed room temperature property would have a possible value range between a
+        // minimum and a maximum, as dictated by the two slightly different sensor measurements.
+        private readonly Dictionary<string, Tuple<object, object>> _observablePropertyValues = [];
+        private readonly Dictionary<string, object> _measuredPropertyValues = [];
+
+        private bool _isLoopActive = false;
+
+        private Graph _instanceModelGraph = new();
 
         public MapekManager(IServiceProvider serviceProvider)
         {
@@ -59,18 +81,20 @@ namespace Logic
             {
                 // Load the instance model into a graph object. Doing this inside the loop allows for dynamic model updates at
                 // runtime.
-                IGraph graph = InitializeGraph(filePath);
+                Initialize(filePath);
 
                 // If nothing was loaded, don't start the loop.
-                if (graph.IsEmpty)
+                if (_instanceModelGraph.IsEmpty)
                 {
                     _logger.LogError("There is nothing in the graph. Terminated MAPE-K loop.");
 
                     throw new Exception("The graph is empty.");
                 }
 
-                var propertyValuesTuple = Monitor(graph);
-                // Analyze
+                // Observe all hard and soft Sensor values.
+                Monitor();
+                // Out of all possible ExecutionPlans, filter out the irrelevant ones based on current Property values.
+                Analyze();
                 // Plan
                 // Execute
 
@@ -78,16 +102,19 @@ namespace Logic
             }
         }
 
-        private IGraph InitializeGraph(string filePath)
-        {
-            var turtleParser = new TurtleParser();
-            var graph = new Graph();
+        private void Initialize(string filePath)
+        {            
+            // Reset the cache.
+            _instanceModelGraph.Clear();
+            _observablePropertyValues.Clear();
+            _measuredPropertyValues.Clear();
 
             _logger.LogInformation("Loading instance model file contents from {filePath}.", filePath);
 
+            var turtleParser = new TurtleParser();
             try
             {
-                turtleParser.Load(graph, filePath);
+                turtleParser.Load(_instanceModelGraph, filePath);
             }
             catch (Exception exception)
             {    
@@ -95,21 +122,14 @@ namespace Logic
 
                 throw;
             }
-
-            return graph;
         }
 
-
-        private Tuple<IDictionary<string, Tuple<object, object>>, IDictionary<string, object>> Monitor(IGraph graph)
+        #region Monitor
+        private void Monitor()
         {
             _logger.LogInformation("Starting the Monitor phase.");
 
-            // Two collections of property values are necessary since properties observed by hard sensors will only have
-            // estimated values within some range, as dictated by the devices that measure it. For example, a room
-            // temperature could be measured by two sensors, each reporting a slightly different value. In our ontology
-            // (based on SOSA/SSN), these measured property values are Outputs of Procedures implemented by Sensors. As
-            // a result, the original observed room temperature property would have a possible value range between a
-            // minimum and a maximum, as dictated by the two slightly different sensor measurements.
+            
             var observablePropertyMap = new Dictionary<string, Tuple<object, object>>();
             var measuredPropertyMap = new Dictionary<string, object>();
             var propertyValuesTuple = new Tuple<IDictionary<string, Tuple<object, object>>,
@@ -131,28 +151,23 @@ namespace Logic
                 ?procedure ssn:hasOutput ?measuredProperty .
                 FILTER NOT EXISTS { ?measuredProperty meta:isInputOf ?otherProcedure } . }";
 
-            var queryResult = (SparqlResultSet)graph.ExecuteQuery(query);
+            var queryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(query);
 
             foreach (var result in queryResult.Results)
             {
                 var measuredProperty = result["measuredProperty"];
-                PopulateMeasuredPropertyMap(measuredProperty, graph, query, measuredPropertyMap);
+                PopulateMeasuredPropertyMap(measuredProperty, query);
             }
 
-            PopulateObservablePropertyMap(graph, query, observablePropertyMap, measuredPropertyMap);
-
-            return propertyValuesTuple;
+            PopulateObservablePropertyMap(query);
         }
 
-        private void PopulateMeasuredPropertyMap(INode measuredProperty,
-            IGraph graph,
-            SparqlParameterizedString query,
-            IDictionary<string, object> measuredPropertyMap)
+        private void PopulateMeasuredPropertyMap(INode measuredProperty, SparqlParameterizedString query)
         {
             // Simply return if the current measured Property already exists in the map. This is necessary to avoid
             // unnecessary multiple executions of the same Sensors since a single measured Property can be an Input to
             // multiple soft Sensors.
-            if (measuredPropertyMap.ContainsKey(measuredProperty.ToString()))
+            if (_measuredPropertyValues.ContainsKey(measuredProperty.ToString()))
                 return;
 
             // Get all Sensors that have @measuredProperty as their Output. SOSA/SSN theoretically allows for multiple
@@ -165,7 +180,7 @@ namespace Logic
 
             query.SetParameter("measuredProperty", measuredProperty);
 
-            var queryResult = (SparqlResultSet)graph.ExecuteQuery(query);
+            var queryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(query);
 
             foreach (var result in queryResult.Results)
             {
@@ -180,7 +195,7 @@ namespace Logic
 
                 query.SetParameter("sensor", sensorNode);
 
-                var innerQueryResult = (SparqlResultSet)graph.ExecuteQuery(query);
+                var innerQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(query);
 
                 // Construct the required input Property array.
                 var inputProperties = new object[innerQueryResult.Count];
@@ -190,21 +205,18 @@ namespace Logic
                 for (var i = 0; i < innerQueryResult.Results.Count; i++)
                 {
                     var inputProperty = innerQueryResult.Results[i]["inputProperty"];
-                    PopulateMeasuredPropertyMap(inputProperty, graph, query, measuredPropertyMap);
+                    PopulateMeasuredPropertyMap(inputProperty, query);
 
-                    inputProperties[i] = measuredPropertyMap[inputProperty.ToString()];
+                    inputProperties[i] = _measuredPropertyValues[inputProperty.ToString()];
                 }
 
                 // Invoke the Sensor with the corresponding Inputs and save the returned value in the map.
                 var measuredPropertyValue = sensor.ObservePropertyValue(inputProperties);
-                measuredPropertyMap.Add(measuredProperty.ToString(), measuredPropertyValue);
+                _measuredPropertyValues.Add(measuredProperty.ToString(), measuredPropertyValue);
             }
         }
 
-        private void PopulateObservablePropertyMap(IGraph graph,
-            SparqlParameterizedString query,
-            IDictionary<string, Tuple<object, object>> observablePropertyMap,
-            IDictionary<string, object> measuredPropertyMap)
+        private void PopulateObservablePropertyMap(SparqlParameterizedString query)
         {
             // Get all ObservableProperties.
             query.CommandText = @"SELECT DISTINCT ?observableProperty ?valueType WHERE {
@@ -214,7 +226,7 @@ namespace Logic
                 ?bNode owl:onProperty meta:hasValue .
                 ?bNode owl:onDataRange ?valueType . }";
 
-            var queryResult = (SparqlResultSet)graph.ExecuteQuery(query);
+            var queryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(query);
 
             foreach (var result in queryResult.Results)
             {
@@ -222,13 +234,16 @@ namespace Logic
                 var valueTypeSchema = result["valueType"].ToString();
                 var valueType = valueTypeSchema.Split('#')[1];
 
-                var sensorValueHandler = SensorValueHandlerFactory.GetSensorValueHandler(valueType);
-
-                if (sensorValueHandler is null)
+                ISensorValueHandler sensorValueHandler;
+                try
                 {
-                    _logger.LogError("No supported .NET type implementation found for XML/RDF/OWL type {type}.", valueType);
+                    sensorValueHandler = _sensorValueHandlers[valueType];
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogError(exception, "No supported .NET type implementation found for XML/RDF/OWL type {type}.", valueType);
 
-                    throw new Exception("Unsupported type encountered.");
+                    throw;
                 }
 
                 // Get all measured Properties that are Outputs of Sensor Procedures measuring the current ObservableProperty.
@@ -239,11 +254,20 @@ namespace Logic
 
                 query.SetParameter("observableProperty", observableProperty);
 
-                var innerQueryResult = (SparqlResultSet)graph.ExecuteQuery(query);
-                var rangeTuple = sensorValueHandler.FindObservablePropertyValueRange(innerQueryResult, "measuredProperty", measuredPropertyMap);
+                var innerQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(query);
+                var rangeTuple = sensorValueHandler.FindObservablePropertyValueRange(innerQueryResult, "measuredProperty", _measuredPropertyValues);
 
-                observablePropertyMap.Add(observableProperty.ToString(), rangeTuple);
+                _observablePropertyValues.Add(observableProperty.ToString(), rangeTuple);
             }
         }
+        #endregion
+
+        #region Analyze
+        public void Analyze()
+        {
+            // Figure out where we are with respect to the OptimalConditions.
+            // Depending on the effect needed, filter out the irrelevant ExecutionPlans.
+        }
+        #endregion
     }
 }

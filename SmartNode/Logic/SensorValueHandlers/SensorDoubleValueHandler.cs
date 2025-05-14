@@ -1,6 +1,6 @@
 ﻿using VDS.RDF.Query;
 
-namespace Logic.Utilities
+namespace Logic.SensorValueHandlers
 {
     internal class SensorDoubleValueHandler : ISensorValueHandler
     {

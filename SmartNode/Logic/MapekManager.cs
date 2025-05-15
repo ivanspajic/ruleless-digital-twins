@@ -3,7 +3,6 @@ using Logic.SensorValueHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Models;
-using System;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 using VDS.RDF.Query;
@@ -28,10 +27,10 @@ namespace Logic
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<MapekManager> _logger;
 
-        private readonly Func<string, ISensor> _sensorFactory;
+        private readonly Func<string, string, ISensor> _sensorFactory;
 
-        // Contains supported XMl/RDF/OWL types and their respective value handlers. As new types
-        // become supported, their name/implementation instance pair is simply added to the collection.
+        // Contains supported XMl/RDF/OWL types and their respective value handlers. As new types become supported, their
+        // name/implementation instance pair is simply added to the collection.
         private readonly Dictionary<string, ISensorValueHandler> _sensorValueHandlers = new()
         {
             { "int", new SensorIntValueHandler() },
@@ -43,6 +42,12 @@ namespace Logic
         private readonly Dictionary<string, InputOutput> _inputOutputs = [];
         private readonly Dictionary<string, ConfigurableParameter> _configurableParameters = [];
 
+        // A cache of Properties from the previous loop round. This could instead be saved in a more persistent way as
+        // historical data.
+        private readonly Dictionary<string, ObservableProperty> _oldObservableProperties = [];
+        private readonly Dictionary<string, InputOutput> _oldInputOutputs = [];
+        private readonly Dictionary<string, ConfigurableParameter> _oldConfigurableParameters = [];
+
         private readonly Graph _instanceModelGraph = new();
         private readonly SparqlParameterizedString _query = new();
 
@@ -52,7 +57,7 @@ namespace Logic
         {
             _serviceProvider = serviceProvider;
             _logger = _serviceProvider.GetRequiredService<ILogger<MapekManager>>();
-            _sensorFactory = _serviceProvider.GetRequiredService<Func<string, ISensor>>();
+            _sensorFactory = _serviceProvider.GetRequiredService<Func<string, string, ISensor>>();
 
             // Register the relevant prefixes for the queries to come.
             _query.Namespaces.AddNamespace(DtPrefix, new Uri(DtUri));
@@ -62,13 +67,11 @@ namespace Logic
             _query.Namespaces.AddNamespace(OwlPrefix, new Uri(OwlUri));
         }
 
-        public void StartLoop(string filePath)
+        public void StartLoop(string instanceModelFilePath)
         {
-            _logger.LogInformation("the path is {path}", filePath);
-
             _isLoopActive = true;
 
-            RunMapekLoop(filePath);
+            RunMapekLoop(instanceModelFilePath);
         }
 
         public void StopLoop()
@@ -76,7 +79,7 @@ namespace Logic
             _isLoopActive = false;
         }
 
-        private void RunMapekLoop(string filePath)
+        private void RunMapekLoop(string instanceModelFilePath)
         {
             _logger.LogInformation("Starting the MAPE-K loop.");
 
@@ -84,7 +87,7 @@ namespace Logic
             {
                 // Load the instance model into a graph object. Doing this inside the loop allows for dynamic model updates at
                 // runtime.
-                Initialize(filePath);
+                Initialize(instanceModelFilePath);
 
                 // If nothing was loaded, don't start the loop.
                 if (_instanceModelGraph.IsEmpty)
@@ -105,19 +108,20 @@ namespace Logic
             }
         }
 
-        private void Initialize(string filePath)
+        private void Initialize(string instanceModelFilePath)
         {            
-            // Reset the cache.
+            // Reset the caches.
             _instanceModelGraph.Clear();
             _observableProperties.Clear();
             _inputOutputs.Clear();
+            _configurableParameters.Clear();
 
-            _logger.LogInformation("Loading instance model file contents from {filePath}.", filePath);
+            _logger.LogInformation("Loading instance model file contents from {filePath}.", instanceModelFilePath);
 
             var turtleParser = new TurtleParser();
             try
             {
-                turtleParser.Load(_instanceModelGraph, filePath);
+                turtleParser.Load(_instanceModelGraph, instanceModelFilePath);
             }
             catch (Exception exception)
             {    
@@ -147,18 +151,20 @@ namespace Logic
             foreach (var result in queryResult.Results)
             {
                 var property = result["property"];
-                PopulateInputOutputsCache(property);
+                PopulateInputOutputsAndConfigurableParametersCaches(property);
             }
 
             // Get the values of all ObservableProperties and populate the cache.
             PopulateObservablePropertiesCache();
         }
 
-        private void PopulateInputOutputsCache(INode propertyNode)
+        private void PopulateInputOutputsAndConfigurableParametersCaches(INode propertyNode)
         {
+            var propertyName = propertyNode.ToString();
+
             // Simply return if the current Property already exists in the cache. This is necessary to avoid unnecessary multiple
             // executions of the same Sensors since a single Property can be an Input to multiple soft Sensors.
-            if (_inputOutputs.ContainsKey(propertyNode.ToString()))
+            if (_inputOutputs.ContainsKey(propertyName) || _configurableParameters.ContainsKey(propertyName))
                 return;
 
             // Get the type of the Property.
@@ -172,7 +178,7 @@ namespace Logic
 
             if (propertyTypeQueryResult.IsEmpty)
             {
-                _logger.LogError("The Property {property} has no value type.", propertyNode.ToString());
+                _logger.LogError("The Property {property} has no value type.", propertyName);
 
                 throw new Exception("A property was found without a value type.");
             }
@@ -180,40 +186,82 @@ namespace Logic
             var propertyValueType = propertyTypeQueryResult.Results[0]["valueType"].ToString();
             propertyValueType = propertyValueType.Split('#')[1];
 
-            // Get all Sensors that have @property as their Output. SOSA/SSN theoretically allows for multiple Sensors (Procedures)
+            // Get all Procedures (in Sensors) that have @property as their Output. SOSA/SSN theoretically allows for multiple Procedures
             // to have the same Output due to a lack of cardinality restrictions on the inverse predicate of 'has output' in the
             // definition of Output.
-            _query.CommandText = @"SELECT ?sensor WHERE {
-                ?sensor rdf:type sosa:Sensor .
+            _query.CommandText = @"SELECT ?procedure ?sensor WHERE {
+                ?procedure ssn:hasOutput @property .
                 ?sensor ssn:implements ?procedure .
-                ?procedure ssn:hasOutput @property . }";
+                ?sensor rdf:type sosa:Sensor . }";
 
             _query.SetParameter("property", propertyNode);
 
-            var sensorQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+            var procedureQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
             
-            // If the current Property is not an Output of any other Procedures (soft Sensors), then it must be a
-            // ConfigurableParameter.
-            if (sensorQueryResult.IsEmpty)
+            // If the current Property is not an Output of any other Procedures, then it must be a ConfigurableParameter.
+            if (procedureQueryResult.IsEmpty)
             {
+                _query.CommandText = @"SELECT ?lowerLimit ?upperLimit ?valueIncrements WHERE {
+                    @property rdf:type meta:ConfigurableParameter .
+                    @property meta:hasLowerLimitValue ?lowerLimit .
+                    @property meta:hasUpperLimitValue ?upperLimit .
+                    @property meta:hasValueIncrements ?valueIncrements . }";
 
-                _configurableParameters.Add("", new ConfigurableParameter { LowerLimitValue = 0, Name = "", UpperLimitValue = 0, Value = 0, ValueIncrement = 0.4 });
+                _query.SetParameter("property", propertyNode);
+
+                var configurableParameterQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                // If the Property isn't a ConfigurableParameter, throw an error.
+                if (configurableParameterQueryResult.IsEmpty)
+                {
+                    _logger.LogError("The Property {property} was not found as an Output nor as a ConfigurableParameter.", propertyName);
+
+                    throw new Exception("The Property must exist as an ObservableProperty, an Output, or a ConfigurableParameter.");
+                }
+
+                if (_oldConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? value))
+                {
+                    _configurableParameters.Add(propertyName, value);
+
+                    return;
+                }
+
+                var lowerLimit = configurableParameterQueryResult.Results[0]["lowerLimit"].ToString();
+                lowerLimit = lowerLimit.Split('^')[0];
+                var upperLimit = configurableParameterQueryResult.Results[0]["upperLimit"].ToString();
+                upperLimit = upperLimit.Split('^')[0];
+                var valueIncrements = configurableParameterQueryResult.Results[0]["valueIncrements"].ToString();
+                valueIncrements = valueIncrements.Split('^')[0];
+
+                // Instantiate the new ConfigurableParameter with its lower limit as its value and add it to the cache.
+                var configurableParameter = new ConfigurableParameter
+                {
+                    Name = propertyName,
+                    LowerLimitValue = lowerLimit,
+                    UpperLimitValue = upperLimit,
+                    ValueIncrements = valueIncrements,
+                    Value = lowerLimit
+                };
+
+                _configurableParameters.Add(propertyName, configurableParameter);
 
                 return;
             }
 
-            // Otherwise, for each Sensor, find the Inputs.
-            foreach (var result in sensorQueryResult.Results)
+            // Otherwise, for each Procedure, find the Inputs.
+            foreach (var result in procedureQueryResult.Results)
             {
+                var procedureNode = result["procedure"];
                 var sensorNode = result["sensor"];
                 // Get an instance of a Sensor from the Sensor factory.
-                var sensor = _sensorFactory(sensorNode.ToString());
+                var sensor = _sensorFactory(sensorNode.ToString(), procedureNode.ToString());
 
                 // Get all measured Properties this Sensor uses as its Inputs.
                 _query.CommandText = @"SELECT ?inputProperty WHERE {
-                    @sensor ssn:implements ?procedure .
-                    ?procedure ssn:hasInput ?inputProperty . }";
+                    @procedure ssn:hasInput ?inputProperty .
+                    @sensor ssn:implements @procedure . }";
 
+                _query.SetParameter("procedure", procedureNode);
                 _query.SetParameter("sensor", sensorNode);
 
                 var innerQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
@@ -226,10 +274,18 @@ namespace Logic
                 for (var i = 0; i < innerQueryResult.Results.Count; i++)
                 {
                     var inputProperty = innerQueryResult.Results[i]["inputProperty"];
-                    PopulateInputOutputsCache(inputProperty);
+                    PopulateInputOutputsAndConfigurableParametersCaches(inputProperty);
 
-                    // TODO: check for both caches before adding to the array or throwing an exception!
-                    inputProperties[i] = _inputOutputs[inputProperty.ToString()].Value;
+                    if (_inputOutputs.ContainsKey(inputProperty.ToString()))
+                        inputProperties[i] = _inputOutputs[inputProperty.ToString()].Value;
+                    else if (_configurableParameters.ContainsKey(inputProperty.ToString()))
+                        inputProperties[i] = _configurableParameters[inputProperty.ToString()].Value;
+                    else
+                    {
+                        _logger.LogError("The Input Property {property} was not found in the respective Property caches.", inputProperty.ToString());
+
+                        throw new Exception("The Property tree traversal didn't populate the caches with all properties.");
+                    }
                 }
 
                 // Invoke the Sensor with the corresponding Inputs and save the returned value in the map.

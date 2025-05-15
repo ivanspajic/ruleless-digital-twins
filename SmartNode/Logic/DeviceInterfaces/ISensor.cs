@@ -2,7 +2,9 @@
 {
     public interface ISensor
     {
-        public string Name { get; init; }
+        public string SensorName { get; init; }
+
+        public string ProcedureName { get; init; }
 
         /// <summary>
         /// Observes the relevant property's value. This assumes that Sensors will not handle different Input

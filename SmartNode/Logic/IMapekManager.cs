@@ -2,7 +2,7 @@
 {
     public interface IMapekManager
     {
-        public void StartLoop(string filePath);
+        public void StartLoop(string instanceModelFilePath);
 
         public void StopLoop();
     }

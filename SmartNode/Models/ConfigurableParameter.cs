@@ -4,7 +4,7 @@
     {
         public required object Value { get; init; }
 
-        public required object ValueIncrement { get; init; }
+        public required object ValueIncrements { get; init; }
 
         public required object LowerLimitValue { get; init; }
 

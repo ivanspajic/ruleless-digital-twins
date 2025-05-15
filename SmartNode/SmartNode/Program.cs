@@ -26,11 +26,12 @@ namespace SmartNode
             builder.Services.AddSingleton(serviceProvider =>
             {
                 // In theory, this function can return various Sensors depending on the input name.
-                return new Func<string, ISensor>(sensorName =>
+                return new Func<string, string, ISensor>((sensorName, procedureName) =>
                 {
                     return new ExampleSensor
                     {
-                        Name = sensorName
+                        SensorName = sensorName,
+                        ProcedureName = procedureName
                     };
                 });
             });
@@ -39,7 +40,7 @@ namespace SmartNode
 
             var mapekManager = host.Services.GetRequiredService<IMapekManager>();
             // TODO: get rid of the hard-coded string.
-            mapekManager.StartLoop(@"C:\dev\dt-code-generation\models-and-rules\inferred-model-2.ttl");
+            mapekManager.StartLoop(@"C:\dev\dt-code-generation\models-and-rules\inferred-model-1.ttl");
 
             host.Run();
         }

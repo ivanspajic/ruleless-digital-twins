@@ -1,4 +1,5 @@
-﻿using VDS.RDF.Query;
+﻿using Models;
+using VDS.RDF.Query;
 
 namespace Logic.SensorValueHandlers
 {
@@ -6,7 +7,7 @@ namespace Logic.SensorValueHandlers
     {
         public Tuple<object, object> FindObservablePropertyValueRange(SparqlResultSet queryResult,
             string queryVariableName,
-            IDictionary<string, object> measuredPropertyMap)
+            IDictionary<string, InputOutput> inputOutputs)
         {
             var lowestValue = double.MaxValue;
             var highestValue = double.MinValue;
@@ -14,7 +15,7 @@ namespace Logic.SensorValueHandlers
             foreach (var result in queryResult.Results)
             {
                 var propertyName = result[queryVariableName].ToString();
-                var propertyValue = (double)measuredPropertyMap[propertyName];
+                var propertyValue = (double)inputOutputs[propertyName].Value;
 
                 if (propertyValue < lowestValue)
                     lowestValue = propertyValue;

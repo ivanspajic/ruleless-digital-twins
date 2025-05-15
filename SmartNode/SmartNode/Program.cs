@@ -39,7 +39,7 @@ namespace SmartNode
 
             var mapekManager = host.Services.GetRequiredService<IMapekManager>();
             // TODO: get rid of the hard-coded string.
-            mapekManager.StartLoop(@"C:\dev\dt-code-generation\models-and-rules\inferred-model-1.ttl");
+            mapekManager.StartLoop(@"C:\dev\dt-code-generation\models-and-rules\inferred-model-2.ttl");
 
             host.Run();
         }

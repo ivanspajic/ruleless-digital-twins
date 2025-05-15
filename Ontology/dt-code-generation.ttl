@@ -119,6 +119,14 @@ xsd:duration rdf:type rdfs:Datatype .
                rdfs:label "hasIdentifier"@en .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasLowerLimitValue
+:hasLowerLimitValue rdf:type owl:DatatypeProperty ;
+                    rdfs:subPropertyOf owl:topDataProperty ;
+                    rdfs:range rdfs:Literal ;
+                    rdfs:comment "Describes a relation to a specific value's lower limit (of a specific type) contained by a property or an Input/Output parameter."@en ;
+                    rdfs:label "hasLowerLimitValue"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel
 :hasModel rdf:type owl:DatatypeProperty ;
           rdfs:domain <http://www.w3.org/ns/sosa/Procedure> ;
@@ -134,18 +142,34 @@ xsd:duration rdf:type rdfs:Datatype .
               rdfs:label "hasTimeLimit"@en .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasUpperLimitValue
+:hasUpperLimitValue rdf:type owl:DatatypeProperty ;
+                    rdfs:subPropertyOf owl:topDataProperty ;
+                    rdfs:range rdfs:Literal ;
+                    rdfs:comment "Describes a relation to a specific value's upper limit (of a specific type) contained by a property or an Input/Output parameter."@en ;
+                    rdfs:label "hasUpperLimitValue"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue
 :hasValue rdf:type owl:DatatypeProperty ;
           rdfs:range rdfs:Literal ;
-          rdfs:comment "Describes a relation to a specific value (of a specific type) contained by a property or an input/output parameter."@en ;
+          rdfs:comment "Describes a relation to a specific value (of a specific type) contained by a property or an Input/Output parameter."@en ;
           rdfs:label "hasValue"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint
 :hasValueConstraint rdf:type owl:DatatypeProperty ;
-                    rdfs:range xsd:double ;
+                    rdfs:range rdfs:Literal ;
                     rdfs:comment "Represents the relation between a thing and its defined range of values."@en ;
                     rdfs:label "hasValueConstraint"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueIncrements
+:hasValueIncrements rdf:type owl:DatatypeProperty ;
+                    rdfs:subPropertyOf owl:topDataProperty ;
+                    rdfs:range rdfs:Literal ;
+                    rdfs:comment "Represents a relation between a thing and the increments in which its value can be adjusted."@en ;
+                    rdfs:label "hasValueIncrements"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds
@@ -200,20 +224,28 @@ xsd:duration rdf:type rdfs:Datatype .
                rdfs:label "ActuatorState"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurableProperty
-:ConfigurableProperty rdf:type owl:Class ;
-                      rdfs:subClassOf <http://www.w3.org/ns/ssn/Property> ,
-                                      [ rdf:type owl:Restriction ;
-                                        owl:onProperty :enacts ;
-                                        owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                        owl:onClass :PropertyChangeByReconfiguration
-                                      ] ,
-                                      [ rdf:type owl:Restriction ;
-                                        owl:onProperty :hasValue ;
-                                        owl:cardinality "1"^^xsd:nonNegativeInteger
-                                      ] ;
-                      rdfs:comment "A property not directly observable or actuatable but rather used for configuring a System or Procedure."@en ;
-                      rdfs:label "ConfigurableProperty"@en .
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurableParameter
+:ConfigurableParameter rdf:type owl:Class ;
+                       rdfs:subClassOf <http://www.w3.org/ns/ssn/Input> ,
+                                       [ rdf:type owl:Restriction ;
+                                         owl:onProperty :enacts ;
+                                         owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                         owl:onClass :PropertyChangeByReconfiguration
+                                       ] ,
+                                       [ rdf:type owl:Restriction ;
+                                         owl:onProperty :hasLowerLimitValue ;
+                                         owl:cardinality "1"^^xsd:nonNegativeInteger
+                                       ] ,
+                                       [ rdf:type owl:Restriction ;
+                                         owl:onProperty :hasUpperLimitValue ;
+                                         owl:cardinality "1"^^xsd:nonNegativeInteger
+                                       ] ,
+                                       [ rdf:type owl:Restriction ;
+                                         owl:onProperty :hasValueIncrements ;
+                                         owl:cardinality "1"^^xsd:nonNegativeInteger
+                                       ] ;
+                       rdfs:comment "A parameter not directly observable or actuatable but rather used for configuring an an Input to a System or Procedure."@en ;
+                       rdfs:label "ConfigurableParameter"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Effect
@@ -289,7 +321,7 @@ xsd:duration rdf:type rdfs:Datatype .
                                                  [ rdf:type owl:Restriction ;
                                                    owl:onProperty :enactedBy ;
                                                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                   owl:onClass :ConfigurableProperty
+                                                   owl:onClass :ConfigurableParameter
                                                  ] ;
                                  rdfs:comment "Represents a specific PropertyChange as a result of reconfiguring a related ConfigurableProperty."@en ;
                                  rdfs:label "PropertyChangeByReconfiguration"@en .
@@ -306,7 +338,7 @@ xsd:duration rdf:type rdfs:Datatype .
                                               [ rdf:type owl:Restriction ;
                                                 owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
                                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                owl:onClass :ConfigurableProperty
+                                                owl:onClass :ConfigurableParameter
                                               ] ;
                               rdfs:comment "Represents a single system execution plan with a property reconfiguration, either for optimization or regaining optimal conditions."@en ;
                               rdfs:label "ReconfigurationExecutionPlan"@en .
@@ -337,7 +369,11 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.w3.org/ns/sosa/ObservableProperty
 <http://www.w3.org/ns/sosa/ObservableProperty> rdfs:subClassOf [ rdf:type owl:Restriction ;
-                                                                 owl:onProperty :hasValue ;
+                                                                 owl:onProperty :hasLowerLimitValue ;
+                                                                 owl:cardinality "1"^^xsd:nonNegativeInteger
+                                                               ] ,
+                                                               [ rdf:type owl:Restriction ;
+                                                                 owl:onProperty :hasUpperLimitValue ;
                                                                  owl:cardinality "1"^^xsd:nonNegativeInteger
                                                                ] .
 
@@ -356,14 +392,16 @@ xsd:duration rdf:type rdfs:Datatype .
 
 
 ###  http://www.w3.org/ns/ssn/Input
-<http://www.w3.org/ns/ssn/Input> rdfs:subClassOf [ rdf:type owl:Restriction ;
+<http://www.w3.org/ns/ssn/Input> rdfs:subClassOf <http://www.w3.org/ns/ssn/Property> ,
+                                                 [ rdf:type owl:Restriction ;
                                                    owl:onProperty :hasValue ;
                                                    owl:cardinality "1"^^xsd:nonNegativeInteger
                                                  ] .
 
 
 ###  http://www.w3.org/ns/ssn/Output
-<http://www.w3.org/ns/ssn/Output> rdfs:subClassOf [ rdf:type owl:Restriction ;
+<http://www.w3.org/ns/ssn/Output> rdfs:subClassOf <http://www.w3.org/ns/ssn/Property> ,
+                                                  [ rdf:type owl:Restriction ;
                                                     owl:onProperty :hasValue ;
                                                     owl:cardinality "1"^^xsd:nonNegativeInteger
                                                   ] .

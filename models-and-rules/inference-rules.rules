@@ -95,7 +95,7 @@
 ]
 
 // The following rules locate PropertyChange marks and generate appropriate ExecutionPlans, either with ActuatorStates
-// or ConfigurableProperties. The last rule also creates a no-op ExecutionPlan. URI concatinations are used for
+// or ConfigurableParameters. The last rule also creates a no-op ExecutionPlan. URI concatinations are used for
 // generating unique names for unique combinations of elements in an ExecutionPlan. This ensures that no duplicate
 // ExecutionPlans are generated in cases of, e.g., multiple actuators causing multiple different PropertyChanges.
 
@@ -111,12 +111,12 @@
 ]
 
 [rule3b:    (?thing rdf:comment ?propertyChange)
-            (?propertyChange meta:enactedBy ?configurableProperty)
-            (?configurableProperty rdf:type meta:ConfigurableProperty)
+            (?propertyChange meta:enactedBy ?configurableParameter)
+            (?configurableParameter rdf:type meta:ConfigurableParameter)
             (?propertyChange meta:alteredBy ?effect)
-            uriConcat(?configurableProperty, ?effect, meta:ReconfigurationExecutionPlan, ?executionName)
+            uriConcat(?configurableParameter, ?effect, meta:ReconfigurationExecutionPlan, ?executionName)
             ->  (?executionName rdf:type meta:ReconfigurationExecutionPlan)
-                (?executionName ssn:forProperty ?configurableProperty)
+                (?executionName ssn:forProperty ?configurableParameter)
                 (?executionName meta:affectsPropertyWith ?effect)
                 print()
                 print("Generated ReconfigurationExecutionPlan", ?executionName)

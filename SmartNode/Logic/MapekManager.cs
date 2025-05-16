@@ -168,23 +168,7 @@ namespace Logic
                 return;
 
             // Get the type of the Property.
-            _query.CommandText = @"SELECT ?valueType WHERE {
-                @property rdf:type ?bNode .
-                ?bNode owl:onProperty meta:hasValue .
-                ?bNode owl:onDataRange ?valueType . }";
-            _query.SetParameter("property", propertyNode);
-
-            var propertyTypeQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
-
-            if (propertyTypeQueryResult.IsEmpty)
-            {
-                _logger.LogError("The Property {property} has no value type.", propertyName);
-
-                throw new Exception("A property was found without a value type.");
-            }
-
-            var propertyValueType = propertyTypeQueryResult.Results[0]["valueType"].ToString();
-            propertyValueType = propertyValueType.Split('#')[1];
+            var propertyValueType = GetPropertyValueType(propertyNode);
 
             // Get all Procedures (in Sensors) that have @property as their Output. SOSA/SSN theoretically allows for multiple Procedures
             // to have the same Output due to a lack of cardinality restrictions on the inverse predicate of 'has output' in the
@@ -201,49 +185,7 @@ namespace Logic
             // If the current Property is not an Output of any other Procedures, then it must be a ConfigurableParameter.
             if (procedureQueryResult.IsEmpty)
             {
-                _query.CommandText = @"SELECT ?lowerLimit ?upperLimit ?valueIncrements WHERE {
-                    @property rdf:type meta:ConfigurableParameter .
-                    @property meta:hasLowerLimitValue ?lowerLimit .
-                    @property meta:hasUpperLimitValue ?upperLimit .
-                    @property meta:hasValueIncrements ?valueIncrements . }";
-
-                _query.SetParameter("property", propertyNode);
-
-                var configurableParameterQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
-
-                // If the Property isn't a ConfigurableParameter, throw an error.
-                if (configurableParameterQueryResult.IsEmpty)
-                {
-                    _logger.LogError("The Property {property} was not found as an Output nor as a ConfigurableParameter.", propertyName);
-
-                    throw new Exception("The Property must exist as an ObservableProperty, an Output, or a ConfigurableParameter.");
-                }
-
-                if (_oldConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? value))
-                {
-                    _configurableParameters.Add(propertyName, value);
-
-                    return;
-                }
-
-                var lowerLimit = configurableParameterQueryResult.Results[0]["lowerLimit"].ToString();
-                lowerLimit = lowerLimit.Split('^')[0];
-                var upperLimit = configurableParameterQueryResult.Results[0]["upperLimit"].ToString();
-                upperLimit = upperLimit.Split('^')[0];
-                var valueIncrements = configurableParameterQueryResult.Results[0]["valueIncrements"].ToString();
-                valueIncrements = valueIncrements.Split('^')[0];
-
-                // Instantiate the new ConfigurableParameter with its lower limit as its value and add it to the cache.
-                var configurableParameter = new ConfigurableParameter
-                {
-                    Name = propertyName,
-                    LowerLimitValue = lowerLimit,
-                    UpperLimitValue = upperLimit,
-                    ValueIncrements = valueIncrements,
-                    Value = lowerLimit
-                };
-
-                _configurableParameters.Add(propertyName, configurableParameter);
+                AddConfigurableParameterToCache(propertyNode);
 
                 return;
             }
@@ -301,9 +243,78 @@ namespace Logic
             }
         }
 
+        private string GetPropertyValueType(INode propertyNode)
+        {
+            _query.CommandText = @"SELECT ?valueType WHERE {
+                @property rdf:type ?bNode .
+                ?bNode owl:onProperty meta:hasValue .
+                ?bNode owl:onDataRange ?valueType . }";
+            _query.SetParameter("property", propertyNode);
+
+            var propertyTypeQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+            if (propertyTypeQueryResult.IsEmpty)
+            {
+                _logger.LogError("The Property {property} has no value type.", propertyNode.ToString());
+
+                throw new Exception("A property was found without a value type.");
+            }
+
+            var propertyValueType = propertyTypeQueryResult.Results[0]["valueType"].ToString();
+            return propertyValueType.Split('#')[1];
+        }
+
+        private void AddConfigurableParameterToCache(INode propertyNode)
+        {
+            var propertyName = propertyNode.ToString();
+
+            _query.CommandText = @"SELECT ?lowerLimit ?upperLimit ?valueIncrements WHERE {
+                    @property rdf:type meta:ConfigurableParameter .
+                    @property meta:hasLowerLimitValue ?lowerLimit .
+                    @property meta:hasUpperLimitValue ?upperLimit .
+                    @property meta:hasValueIncrements ?valueIncrements . }";
+
+            _query.SetParameter("property", propertyNode);
+
+            var configurableParameterQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+            // If the Property isn't a ConfigurableParameter, throw an error.
+            if (configurableParameterQueryResult.IsEmpty)
+            {
+                _logger.LogError("The Property {property} was not found as an Output nor as a ConfigurableParameter.", propertyName);
+
+                throw new Exception("The Property must exist as an ObservableProperty, an Output, or a ConfigurableParameter.");
+            }
+
+            if (_oldConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? value))
+            {
+                _configurableParameters.Add(propertyName, value);
+
+                return;
+            }
+
+            var lowerLimit = configurableParameterQueryResult.Results[0]["lowerLimit"].ToString();
+            lowerLimit = lowerLimit.Split('^')[0];
+            var upperLimit = configurableParameterQueryResult.Results[0]["upperLimit"].ToString();
+            upperLimit = upperLimit.Split('^')[0];
+            var valueIncrements = configurableParameterQueryResult.Results[0]["valueIncrements"].ToString();
+            valueIncrements = valueIncrements.Split('^')[0];
+
+            // Instantiate the new ConfigurableParameter with its lower limit as its value and add it to the cache.
+            var configurableParameter = new ConfigurableParameter
+            {
+                Name = propertyName,
+                LowerLimitValue = lowerLimit,
+                UpperLimitValue = upperLimit,
+                ValueIncrements = valueIncrements,
+                Value = lowerLimit
+            };
+
+            _configurableParameters.Add(propertyName, configurableParameter);
+        }
+
         private void PopulateObservablePropertiesCache()
         {
-            // Get all ObservableProperties.
             _query.CommandText = @"SELECT DISTINCT ?observableProperty ?valueType WHERE {
                 ?sensor rdf:type sosa:Sensor .
                 ?sensor sosa:observes ?observableProperty .

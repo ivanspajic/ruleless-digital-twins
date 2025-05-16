@@ -3,6 +3,7 @@ using Logic.SensorValueHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Models;
+using System.Linq.Expressions;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 using VDS.RDF.Query;
@@ -109,12 +110,8 @@ namespace Logic
         }
 
         private void Initialize(string instanceModelFilePath)
-        {            
-            // Reset the caches.
-            _instanceModelGraph.Clear();
-            _observableProperties.Clear();
-            _inputOutputs.Clear();
-            _configurableParameters.Clear();
+        {
+            ResetCaches();
 
             _logger.LogInformation("Loading instance model file contents from {filePath}.", instanceModelFilePath);
 
@@ -129,6 +126,14 @@ namespace Logic
 
                 throw;
             }
+        }
+
+        private void ResetCaches()
+        {
+            _instanceModelGraph.Clear();
+            _observableProperties.Clear();
+            _inputOutputs.Clear();
+            _configurableParameters.Clear();
         }
 
         #region Monitor
@@ -370,9 +375,38 @@ namespace Logic
         {
             _logger.LogInformation("Starting the Analyze phase.");
 
-            _query.CommandText = @"SELECT ";
-            // Figure out where we are with respect to the OptimalConditions.
-            // Depending on the effect needed, filter out the irrelevant ExecutionPlans.
+            _query.CommandText = @"SELECT ?optimalCondition ?property WHERE {
+                ?optimalCondition rdf:type meta:OptimalCondition .
+                ?optimalCondition ssn:forProperty ?property . }";
+
+            var queryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+            foreach (var result in queryResult.Results)
+            {
+                var optimalConditionName = result["optimalCondition"].ToString();
+                var propertyName = result["property"].ToString();
+
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition ";
+
+                // TODO: get the constraint, represent it via a standardized way (probably expressions) and execute it through the
+                // specific type value handlers to validate it against the current value(s) of the respective property. depending on
+                // this result, you can query for the right kind of executionplan and save it in the cache.
+                //
+                // TODO: make the executionplan cache!!
+            }
+
+            // get optimal conditions together with their properties
+            // compare the values of each optimal condition to the values of the respective property
+            // depending on the status, get the right kind of executionplan by comparing their effects with what is needed
+            // these may include both optimizing plans as well as plans for regaining optimal conditions
+
+            // this is done best by looking at each constraint in each optimal condition on its own
+            // by evaluating each constraint separately, it becomes clear where with respect to the constraint ranges we are and thus what
+            // kind of executionplans need to be included
+
+            
         }
         #endregion
     }

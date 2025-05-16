@@ -19,9 +19,9 @@
                 print()
 ]
 
-// Only validating for optimal conditions that are allowed by the reasoner. These rules do not check the combination
-// minExclusive (>) and maxExclusive (<) since this reduces to everything but the excluded value. E.g.,
-// >15 and <15 = !15.
+// The rules only validate against OptimalConditions that are allowed by Proteges reasoner. These rules do
+// not check the combination of minExclusive (>) and maxExclusive (<) since this reduces to everything but
+// the excluded value. E.g., >15 and <15 = !15.
 
 [rule4b:    (?restriction1 rdf:comment ?observableProperty)
             (?restriction1 xsd:minInclusive ?value)
@@ -63,4 +63,9 @@
                 print("less than or equal to", ?value)
                 print("at the same time, which is not a restriction.")
                 print()
+]
+
+// These rules check that there exist no (completely) contradicting OptimalCondition ranges through the use
+// of negation. E.g., OptimalCondition1 being >15 and <20 while OptimalCondition2 is not (>15 and <20).
+[rule4e:    // TODO: check for the negation label and then compare it against another non-negated value of the same type
 ]

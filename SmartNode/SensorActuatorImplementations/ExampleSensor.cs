@@ -10,8 +10,10 @@ namespace SensorActuatorImplementations
 
         public object ObservePropertyValue(params object[] inputs)
         {
-            // Test value.
-            return 15.3;
+            var random = new Random();
+
+            // Return a fake calculation as a bare minimum.
+            return random.NextDouble() * 15;
         }
     }
 }

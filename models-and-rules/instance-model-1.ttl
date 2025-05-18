@@ -109,7 +109,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                               owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                               owl:onDataRange [ rdf:type rdfs:Datatype ;
                                                 owl:onDatatype xsd:double ;
-                                                owl:withRestrictions ( [ xsd:maxInclusive "10.5"^^xsd:double
+                                                owl:withRestrictions ( [ xsd:minInclusive "19.8"^^xsd:double
                                                                        ]
                                                                      )
                                               ]
@@ -121,15 +121,17 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition2
 :OptimalCondition2 rdf:type owl:NamedIndividual ,
                             <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
-                            [ rdf:type owl:Restriction ;
-                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
-                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                              owl:onDataRange [ rdf:type rdfs:Datatype ;
-                                                owl:onDatatype xsd:double ;
-                                                owl:withRestrictions ( [ xsd:minInclusive "15.5"^^xsd:double
-                                                                       ]
-                                                                     )
-                                              ]
+                            [ rdf:type owl:Class ;
+                              owl:complementOf [ rdf:type owl:Restriction ;
+                                                 owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                 owl:onDataRange [ rdf:type rdfs:Datatype ;
+                                                                   owl:onDatatype xsd:double ;
+                                                                   owl:withRestrictions ( [ xsd:minExclusive "30.4"^^xsd:double
+                                                                                          ]
+                                                                                        )
+                                                                 ]
+                                               ]
                             ] ;
                    <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
                    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds> "3600"^^xsd:int .
@@ -143,46 +145,12 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                               owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                               owl:onDataRange [ rdf:type rdfs:Datatype ;
                                                 owl:onDatatype xsd:double ;
-                                                owl:withRestrictions ( [ xsd:minInclusive "15.5"^^xsd:double
+                                                owl:withRestrictions ( [ xsd:minInclusive "13.8"^^xsd:double
                                                                        ]
-                                                                       [ xsd:maxInclusive "25.3"^^xsd:double
+                                                                       [ xsd:maxExclusive "25.5"^^xsd:double
                                                                        ]
                                                                      )
                                               ]
-                            ] ;
-                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
-                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds> "3600"^^xsd:int .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition4
-:OptimalCondition4 rdf:type owl:NamedIndividual ,
-                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
-                            [ rdf:type owl:Class ;
-                              owl:complementOf [ rdf:type owl:Restriction ;
-                                                 owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
-                                                 owl:hasValue "19.8"^^xsd:double
-                                               ]
-                            ] ;
-                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
-                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds> "3600"^^xsd:int .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition5
-:OptimalCondition5 rdf:type owl:NamedIndividual ,
-                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
-                            [ rdf:type owl:Class ;
-                              owl:complementOf [ rdf:type owl:Restriction ;
-                                                 owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
-                                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                 owl:onDataRange [ rdf:type rdfs:Datatype ;
-                                                                   owl:onDatatype xsd:double ;
-                                                                   owl:withRestrictions ( [ xsd:minInclusive "15.5"^^xsd:double
-                                                                                          ]
-                                                                                          [ xsd:maxInclusive "25.3"^^xsd:double
-                                                                                          ]
-                                                                                        )
-                                                                 ]
-                                               ]
                             ] ;
                    <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
                    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds> "3600"^^xsd:int .
@@ -199,8 +167,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                             :TemperatureSensor2 ;
           <http://www.w3.org/ns/ssn/implements> :OptimalCondition1 ,
                                                 :OptimalCondition2 ,
-                                                :OptimalCondition3 ,
-                                                :OptimalCondition4 .
+                                                :OptimalCondition3 .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature
@@ -293,6 +260,9 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
 ] .
 
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
 [ xsd:maxInclusive "3"^^xsd:int
  ] .
 
@@ -305,16 +275,13 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
 [ xsd:minInclusive "1"^^xsd:int
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
 ###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

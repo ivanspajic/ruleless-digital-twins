@@ -3,7 +3,6 @@ using Logic.SensorValueHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Models;
-using System.Linq.Expressions;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 using VDS.RDF.Query;
@@ -34,8 +33,8 @@ namespace Logic
         // name/implementation instance pair is simply added to the collection.
         private readonly Dictionary<string, ISensorValueHandler> _sensorValueHandlers = new()
         {
-            { "int", new SensorIntValueHandler() },
-            { "double", new SensorDoubleValueHandler() }
+            { "double", new SensorDoubleValueHandler() },
+            { "int", new SensorIntValueHandler() }
         };
 
         // Store Property values in collections for caching to avoid re-querying.

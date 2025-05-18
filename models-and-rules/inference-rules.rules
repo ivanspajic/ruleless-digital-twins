@@ -5,96 +5,223 @@
 @include <OWL>.
 @include <validation-rules.rules>.
 
-// The following rule covers individuals with one or two constraints. Once an OptimalCondition constraint has been
-// located, a mark will be placed to allow subsequent rules to match and fire.
+
+
+// The following rules cover individuals with one or two value constraints. Once an OptimalCondition constraint
+// has been located, a mark will be placed to allow subsequent rules to match and fire.
 
 [rule1a:    (?individual rdf:type owl:NamedIndividual)
             (?individual rdf:type meta:OptimalCondition)
-            (?individual ssn:forProperty ?observableProperty)
+            (?individual ssn:forProperty ?property)
+            (?individual rdf:type ?bNode1)
+            (?bNode1 owl:hasValue ?restriction)
+            ->  (?bNode1 rdf:comment ?property)
+                print()
+                print("Marked a value restriction with Property", ?property)
+                print()
+]
+
+[rule1b:    (?individual rdf:type owl:NamedIndividual)
+            (?individual rdf:type meta:OptimalCondition)
+            (?individual ssn:forProperty ?property)
+            (?individual rdf:type ?bNode1)
+            (?bNode1 owl:complementOf ?bNode2)
+            (?bNode2 owl:hasValue ?restriction)
+            ->  (?bNode2 rdf:comment ?property)
+                (?bNode2 rdf:comment "negation")
+                print()
+                print("Marked a value restriction (negation) with Property", ?property)
+                print()
+]
+
+[rule1c:    (?individual rdf:type owl:NamedIndividual)
+            (?individual rdf:type meta:OptimalCondition)
+            (?individual ssn:forProperty ?property)
             (?individual rdf:type ?bNode1)
             (?bNode1 owl:onDataRange ?bNode2)
             (?bNode2 owl:withRestrictions ?bNode3)
             (?bNode3 rdf:first ?restriction)
-            ->  (?restriction rdf:comment ?observableProperty)
+            ->  (?restriction rdf:comment ?property)
                 print()
-                print("Marked a value restriction with ObservableProperty", ?observableProperty)
+                print("Marked a value restriction with Property", ?property)
                 print()
 ]
 
-[rule1b:   (?individual rdf:type owl:NamedIndividual)
+[rule1d:    (?individual rdf:type owl:NamedIndividual)
             (?individual rdf:type meta:OptimalCondition)
-            (?individual ssn:forProperty ?observableProperty)
+            (?individual ssn:forProperty ?property)
             (?individual rdf:type ?bNode1)
             (?bNode1 owl:onDataRange ?bNode2)
             (?bNode2 owl:withRestrictions ?bNode3)
             (?bNode3 rdf:rest ?bNode4)
             (?bNode4 rdf:first ?restriction)
-            ->  (?restriction rdf:comment ?observableProperty)
+            ->  (?restriction rdf:comment ?property)
                 print()
-                print("Marked a value restriction with ObservableProperty", ?observableProperty)
+                print("Marked a value restriction with Property", ?property)
                 print()
 ]
 
-// TODO: add a rule for labeling negations alongside properties. this will help detect contradictions during validation
+[rule1e:    (?individual rdf:type owl:NamedIndividual)
+            (?individual rdf:type meta:OptimalCondition)
+            (?individual ssn:forProperty ?property)
+            (?individual rdf:type ?bNode1)
+            (?bNode1 owl:complementOf ?bNode2)
+            (?bNode2 owl:onDataRange ?bNode3)
+            (?bNode3 owl:withRestrictions ?bNode4)
+            (?bNode4 rdf:first ?restriction)
+            ->  (?restriction rdf:comment ?property)
+                (?restriction rdf:comment "negation")
+                print()
+                print("Marked a value restriction (negation) with Property", ?property)
+                print()
+]
+
+[rule1f:    (?individual rdf:type owl:NamedIndividual)
+            (?individual rdf:type meta:OptimalCondition)
+            (?individual ssn:forProperty ?property)
+            (?individual rdf:type ?bNode1)
+            (?bNode1 owl:complementOf ?bNode2)
+            (?bNode2 owl:onDataRange ?bNode3)
+            (?bNode3 owl:withRestrictions ?bNode4)
+            (?bNode4 rdf:rest ?bNode5)
+            (?bNode5 rdf:first ?restriction)
+            ->  (?restriction rdf:comment ?property)
+                (?restriction rdf:comment "negation")
+                print()
+                print("Marked a value restriction (negation) with Property", ?property)
+                print()
+]
+
+
 
 // Upon locating the marks for OptimalCondition constraints or optimization targets, these rules find the
-// respective PropertyChanges and use them for a temporary mark.
+// relevant PropertyChanges and use them for a temporary mark.
 
-[rule2a:    (?restriction rdf:comment ?observableProperty)
-            (?observableProperty meta:propertyFor ?propertyChange)
+[rule2a:    (?bNode rdf:comment ?property)
+            (?property meta:propertyFor ?propertyChange)
+            (?propertyChange meta:affectsPropertyWith ?someChange)
+            (?bNode owl:hasValue ?value)
+            ->  (_: rdf:comment ?propertyChange)
+                print()
+                print("Located", ?propertyChange)
+                print("as a relevant PropertyChange for the given constraint(s) on")
+                print(?property)
+                print()
+]
+
+[rule2b:    (?restriction rdf:comment ?property)
+            noValue(?restriction rdf:comment "negation")
+            (?property meta:propertyFor ?propertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             (?restriction xsd:minExclusive ?value)
             ->  (_: rdf:comment ?propertyChange)
                 print()
                 print("Located", ?propertyChange)
-                print("as a relevant PropertyChange for the given constraints on")
-                print(?observableProperty)
+                print("as a relevant PropertyChange for the given constraint(s) on")
+                print(?property)
                 print()
 ]
 
-[rule2b:    (?restriction rdf:comment ?observableProperty)
-            (?observableProperty meta:propertyFor ?propertyChange)
+[rule2c:    (?restriction rdf:comment ?property)
+            noValue(?restriction rdf:comment "negation")
+            (?property meta:propertyFor ?propertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             (?restriction xsd:minInclusive ?value)
             ->  (_: rdf:comment ?propertyChange)
                 print()
                 print("Located", ?propertyChange)
-                print("as a relevant PropertyChange for the given constraints on")
-                print(?observableProperty)
+                print("as a relevant PropertyChange for the given constraint(s) on")
+                print(?property)
                 print()
 ]
 
-[rule2c:    (?restriction rdf:comment ?observableProperty)
-            (?observableProperty meta:propertyFor ?propertyChange)
+[rule2d:    (?restriction rdf:comment ?property)
+            noValue(?restriction rdf:comment "negation")
+            (?property meta:propertyFor ?propertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             (?restriction xsd:maxExclusive ?value)
             ->  (_: rdf:comment ?propertyChange)
                 print()
                 print("Located", ?propertyChange)
-                print("as a relevant PropertyChange for the given constraints on")
-                print(?observableProperty)
+                print("as a relevant PropertyChange for the given constraint(s) on")
+                print(?property)
                 print()
 ]
 
-[rule2d:    (?restriction rdf:comment ?observableProperty)
-            (?observableProperty meta:propertyFor ?propertyChange)
+[rule2e:    (?restriction rdf:comment ?property)
+            noValue(?restriction rdf:comment "negation")
+            (?property meta:propertyFor ?propertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             (?restriction xsd:maxInclusive ?value)
             ->  (_: rdf:comment ?propertyChange)
                 print()
                 print("Located", ?propertyChange)
-                print("as a relevant PropertyChange for the given constraints on")
-                print(?observableProperty)
+                print("as a relevant PropertyChange for the given constraint(s) on")
+                print(?property)
                 print()
 ]
 
-[rule2e:    (?thing meta:optimizesFor ?propertyChange)
+[rule2f:    (?restriction rdf:comment ?property)
+            (?restriction rdf:comment "negation")
+            (?property meta:propertyFor ?propertyChange)
+            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
+            (?restriction xsd:minExclusive ?value)
+            ->  (_: rdf:comment ?propertyChange)
+                print()
+                print("Located", ?propertyChange)
+                print("as a relevant PropertyChange for the given constraint(s) on")
+                print(?property)
+                print()
+]
+
+[rule2g:    (?restriction rdf:comment ?property)
+            (?restriction rdf:comment "negation")
+            (?property meta:propertyFor ?propertyChange)
+            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
+            (?restriction xsd:minInclusive ?value)
+            ->  (_: rdf:comment ?propertyChange)
+                print()
+                print("Located", ?propertyChange)
+                print("as a relevant PropertyChange for the given constraint(s) on")
+                print(?property)
+                print()
+]
+
+[rule2h:    (?restriction rdf:comment ?property)
+            (?restriction rdf:comment "negation")
+            (?property meta:propertyFor ?propertyChange)
+            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
+            (?restriction xsd:maxExclusive ?value)
+            ->  (_: rdf:comment ?propertyChange)
+                print()
+                print("Located", ?propertyChange)
+                print("as a relevant PropertyChange for the given constraint(s) on")
+                print(?property)
+                print()
+]
+
+[rule2i:    (?restriction rdf:comment ?property)
+            (?restriction rdf:comment "negation")
+            (?property meta:propertyFor ?propertyChange)
+            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
+            (?restriction xsd:maxInclusive ?value)
+            ->  (_: rdf:comment ?propertyChange)
+                print()
+                print("Located", ?propertyChange)
+                print("as a relevant PropertyChange for the given constraint(s) on")
+                print(?property)
+                print()
+]
+
+[rule2j:    (?thing meta:optimizesFor ?propertyChange)
             ->  (_: rdf:comment ?propertyChange)
                 print()
                 print("Located", ?propertyChange)
                 print("as a PropertyChange to optimize for.")
                 print()
 ]
+
+
 
 // The following rules locate PropertyChange marks and generate appropriate ExecutionPlans, either with ActuatorStates
 // or ConfigurableParameters. The last rule also creates a no-op ExecutionPlan. URI concatinations are used for
@@ -104,11 +231,11 @@
 [rule3a:    (?thing rdf:comment ?propertyChange)
             (?propertyChange meta:enactedBy ?actuatorState)
             (?actuatorState rdf:type meta:ActuatorState)
-            uriConcat(?actuatorState, meta:ActuationExecutionPlan, ?executionName)
-            ->  (?executionName rdf:type meta:ActuationExecutionPlan)
-                (?executionName meta:hasActuatorState ?actuatorState)
+            uriConcat(?actuatorState, meta:ActuationExecutionPlan, ?executionPlanName)
+            ->  (?executionPlanName rdf:type meta:ActuationExecutionPlan)
+                (?executionPlanName meta:hasActuatorState ?actuatorState)
                 print()
-                print("Generated ActuationExecutionPlan", ?executionName)
+                print("Generated ActuationExecutionPlan", ?executionPlanName)
                 print()
 ]
 
@@ -116,18 +243,18 @@
             (?propertyChange meta:enactedBy ?configurableParameter)
             (?configurableParameter rdf:type meta:ConfigurableParameter)
             (?propertyChange meta:alteredBy ?effect)
-            uriConcat(?configurableParameter, ?effect, meta:ReconfigurationExecutionPlan, ?executionName)
-            ->  (?executionName rdf:type meta:ReconfigurationExecutionPlan)
-                (?executionName ssn:forProperty ?configurableParameter)
-                (?executionName meta:affectsPropertyWith ?effect)
+            uriConcat(?configurableParameter, ?effect, meta:ReconfigurationExecutionPlan, ?executionPlanName)
+            ->  (?executionPlanName rdf:type meta:ReconfigurationExecutionPlan)
+                (?executionPlanName ssn:forProperty ?configurableParameter)
+                (?executionPlanName meta:affectsPropertyWith ?effect)
                 print()
-                print("Generated ReconfigurationExecutionPlan", ?executionName)
+                print("Generated ReconfigurationExecutionPlan", ?executionPlanName)
                 print()
 ]
 
-[rule3c:    uriConcat("no-op", meta:ExecutionPlan, ?executionName)
-            ->  (?executionName rdf:type meta:ExecutionPlan)
+[rule3c:    uriConcat("no-op", meta:ExecutionPlan, ?executionPlanName)
+            ->  (?executionPlanName rdf:type meta:ExecutionPlan)
                 print()
-                print("Generated no-op ExecutionPlan", ?executionName)
+                print("Generated no-op ExecutionPlan", ?executionPlanName)
                 print()
 ]

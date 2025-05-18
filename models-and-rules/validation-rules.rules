@@ -19,17 +19,19 @@
                 print()
 ]
 
+
+
 // The rules only validate against OptimalConditions that are allowed by Proteges reasoner. These rules do
 // not check the combination of minExclusive (>) and maxExclusive (<) since this reduces to everything but
 // the excluded value. E.g., >15 and <15 = !15.
 
-[rule4b:    (?restriction1 rdf:comment ?observableProperty)
+[rule4b:    (?restriction1 rdf:comment ?property)
             (?restriction1 xsd:minInclusive ?value)
-            (?restriction2 rdf:comment ?observableProperty)
+            (?restriction2 rdf:comment ?property)
             (?restriction2 xsd:maxInclusive ?value)
             ->  print()
                 print("Useless condition detected!")
-                print("Conditions for", ?observableProperty, "are")
+                print("Conditions for", ?property, "are")
                 print("greater than or equal to", ?value)
                 print("and")
                 print("less than or equal to", ?value)
@@ -37,13 +39,13 @@
                 print()
 ]
 
-[rule4c:    (?restriction1 rdf:comment ?observableProperty)
+[rule4c:    (?restriction1 rdf:comment ?property)
             (?restriction1 xsd:minInclusive ?value)
-            (?restriction2 rdf:comment ?observableProperty)
+            (?restriction2 rdf:comment ?property)
             (?restriction2 xsd:maxExclusive ?value)
             ->  print()
                 print("Useless condition detected!")
-                print("Conditions for", ?observableProperty, "are")
+                print("Conditions for", ?property, "are")
                 print("greater than or equal to", ?value)
                 print("and")
                 print("less than", ?value)
@@ -51,13 +53,13 @@
                 print()
 ]
 
-[rule4d:    (?restriction1 rdf:comment ?observableProperty)
+[rule4d:    (?restriction1 rdf:comment ?property)
             (?restriction1 xsd:minExclusive ?value)
-            (?restriction2 rdf:comment ?observableProperty)
+            (?restriction2 rdf:comment ?property)
             (?restriction2 xsd:maxInclusive ?value)
             ->  print()
                 print("Useless condition detected!")
-                print("Conditions for", ?observableProperty, "are")
+                print("Conditions for", ?property, "are")
                 print("greater than", ?value)
                 print("and")
                 print("less than or equal to", ?value)
@@ -65,7 +67,95 @@
                 print()
 ]
 
-// These rules check that there exist no (completely) contradicting OptimalCondition ranges through the use
-// of negation. E.g., OptimalCondition1 being >15 and <20 while OptimalCondition2 is not (>15 and <20).
-[rule4e:    // TODO: check for the negation label and then compare it against another non-negated value of the same type
+
+
+// These rules check for any contradicting OptimalCondition ranges through the use of negation. E.g.,
+// OptimalCondition1 being >15 and OptimalCondition2 being not(>15) for the same Property.
+
+[rule4e:    (?bNode1 rdf:comment ?property)
+            (?bNode1 owl:hasValue ?value)
+            (?bNode2 rdf:comment ?property)
+            (?bNode2 owl:hasValue ?value)
+            (?bNode2 rdf:comment "negation")
+            notEqual(?bNode1, ?bNode2)
+            notEqual(?property, "negation")
+            ->  print()
+                print("Conflicting condition detected!")
+                print("Conditions for", ?property, "are")
+                print(?value)
+                print("and")
+                print("not", ?value)
+                print("at the same time.")
+                print()
 ]
+
+[rule4f:    (?restriction1 rdf:comment ?property)
+            (?restriction1 xsd:minExclusive ?value)
+            (?restriction2 rdf:comment ?property)
+            (?restriction2 xsd:minExclusive ?value)
+            (?restriction2 rdf:comment "negation")
+            notEqual(?restriction1, ?restriction2)
+            ->  print()
+                print("Conflicting condition detected!")
+                print("Conditions for", ?property, "are")
+                print(?value)
+                print("and")
+                print("not", ?value)
+                print("at the same time.")
+                print()
+]
+
+[rule4g:    (?restriction1 rdf:comment ?property)
+            (?restriction1 xsd:minInclusive ?value)
+            (?restriction2 rdf:comment ?property)
+            (?restriction2 xsd:minInclusive ?value)
+            (?restriction2 rdf:comment "negation")
+            notEqual(?restriction1, ?restriction2)
+            ->  print()
+                print("Conflicting condition detected!")
+                print("Conditions for", ?property, "are")
+                print(?value)
+                print("and")
+                print("not", ?value)
+                print("at the same time.")
+                print()
+]
+
+[rule4h:    (?restriction1 rdf:comment ?property)
+            (?restriction1 xsd:maxExclusive ?value)
+            (?restriction2 rdf:comment ?property)
+            (?restriction2 xsd:maxExclusive ?value)
+            (?restriction2 rdf:comment "negation")
+            notEqual(?restriction1, ?restriction2)
+            ->  print()
+                print("Conflicting condition detected!")
+                print("Conditions for", ?property, "are")
+                print(?value)
+                print("and")
+                print("not", ?value)
+                print("at the same time.")
+                print()
+]
+
+[rule4I:    (?restriction1 rdf:comment ?property)
+            (?restriction1 xsd:maxInclusive ?value)
+            (?restriction2 rdf:comment ?property)
+            (?restriction2 xsd:maxInclusive ?value)
+            (?restriction2 rdf:comment "negation")
+            notEqual(?restriction1, ?restriction2)
+            ->  print()
+                print("Conflicting condition detected!")
+                print("Conditions for", ?property, "are")
+                print(?value)
+                print("and")
+                print("not", ?value)
+                print("at the same time.")
+                print()
+]
+
+
+
+// NB: Additional validation rules may be added to cover more specific cases, such as for more specific
+// types. E.g., OptimalCondition1 may be defined as >14 and <16 on an integer range for a given property.
+// Simultaneously, OptimalCondition2 may be defined as not(15) for the same property, thus resulting in
+// a conflict.

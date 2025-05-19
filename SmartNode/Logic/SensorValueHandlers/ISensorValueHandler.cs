@@ -9,6 +9,6 @@ namespace Logic.SensorValueHandlers
             string queryVariableName,
             IDictionary<string, InputOutput> inputOutputs);
 
-        public bool EvaluateConstraint(object sensorValue, Tuple<ConstraintOperator, object> constraint);
+        public bool EvaluateConstraint(object sensorValue, Tuple<ConstraintOperator, string> constraint);
     }
 }

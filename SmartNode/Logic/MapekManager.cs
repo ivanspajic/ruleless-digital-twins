@@ -1,10 +1,8 @@
-﻿using J2N.Numerics;
-using Logic.DeviceInterfaces;
+﻿using Logic.DeviceInterfaces;
 using Logic.SensorValueHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Models;
-using System.Runtime.InteropServices;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 using VDS.RDF.Query;
@@ -23,6 +21,8 @@ namespace Logic
         private const string RdfUri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
         private const string OwlPrefix = "owl";
         private const string OwlUri = "http://www.w3.org/2002/07/owl#";
+        private const string XsdPrefix = "xsd";
+        private const string XsdUri = "http://www.w3.org/2001/XMLSchema#";
 
         private const int SleepyTimeMilliseconds = 5_000;
 
@@ -69,6 +69,7 @@ namespace Logic
             _query.Namespaces.AddNamespace(SsnPrefix, new Uri(SsnUri));
             _query.Namespaces.AddNamespace(RdfPrefix, new Uri(RdfUri));
             _query.Namespaces.AddNamespace(OwlPrefix, new Uri(OwlUri));
+            _query.Namespaces.AddNamespace(XsdPrefix, new Uri(XsdUri));
         }
 
         public void StartLoop(string instanceModelFilePath)
@@ -381,6 +382,7 @@ namespace Logic
         {
             _logger.LogInformation("Starting the Analyze phase.");
 
+            // Get all OptimalConditions.
             _query.CommandText = @"SELECT ?optimalCondition ?property ?reachedInMaximumSeconds WHERE {
                 ?optimalCondition rdf:type meta:OptimalCondition .
                 ?optimalCondition ssn:forProperty ?property .
@@ -390,17 +392,19 @@ namespace Logic
 
             foreach (var result in queryResult.Results)
             {
-                var constraints = new List<INode>();
+                var constraints = new List<Tuple<ConstraintOperator, string>>();
 
                 var optimalCondition = result["optimalCondition"];
                 var property = result["property"];
                 var reachedInMaximumSeconds = result["reachedInMaximumSeconds"];
 
+                string valueType;
+
                 _query.SetParameter("optimalCondition", optimalCondition);
                 _query.SetParameter("property", property);
                 _query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                // Check if there is a single-valued constraint.
+                // Check if the OptimalCondition has a single-valued constraint.
                 _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
                     @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
@@ -413,9 +417,201 @@ namespace Logic
                 if (!singleValueQueryResult.IsEmpty)
                 {
                     // Reasoners (such as Protege's) should only allow one single value constraint per OptimalCondition.
-                    var constraint = singleValueQueryResult.Results[0]["constraint"];
+                    var constraint = singleValueQueryResult.Results[0]["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
 
-                    constraints.Add(constraint);
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.EqualTo, constraint);
+                    constraints.Add(tuple);
+                }
+
+                // Get all first values of constraint ranges with a '>' operator. This kind of query covers both
+                // single-valued (e.g., >15) and double-valued (e.g. >15, <25) constraints.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onProperty meta:hasValueConstraint .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:withRestrictions ?bNode3 . 
+                    ?bNode3 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minExclusive ?constraint . }";
+
+                var firstValueMinExclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in firstValueMinExclusiveQueryResult)
+                {
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.GreaterThan, constraint);
+                    constraints.Add(tuple);
+                }
+
+                // Get all first values of constraint ranges with a '>=' operator.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onProperty meta:hasValueConstraint .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:withRestrictions ?bNode3 . 
+                    ?bNode3 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minInclusive ?constraint . }";
+
+                var firstValueMinInclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in firstValueMinInclusiveQueryResult)
+                {
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.GreaterThanOrEqualTo, constraint);
+                    constraints.Add(tuple);
+                }
+
+                // Get all first values of constraint ranges with a '<' operator.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onProperty meta:hasValueConstraint .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:withRestrictions ?bNode3 . 
+                    ?bNode3 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxExclusive ?constraint . }";
+
+                var firstValueMaxExclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in firstValueMaxExclusiveQueryResult)
+                {
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.LessThan, constraint);
+                    constraints.Add(tuple);
+                }
+
+                // Get all first values of constraint ranges with a '<=' operator.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onProperty meta:hasValueConstraint .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:withRestrictions ?bNode3 . 
+                    ?bNode3 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxInclusive ?constraint . }";
+
+                var firstValueMaxInclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in firstValueMaxInclusiveQueryResult)
+                {
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.LessThanOrEqualTo, constraint);
+                    constraints.Add(tuple);
+                }
+
+                // Get all second values of constraint ranges with a '>' operator.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onProperty meta:hasValueConstraint .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:withRestrictions ?bNode3 . 
+                    ?bNode3 rdf:rest ?bNode4 .
+                    ?bNode4 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minExclusive ?constraint . }";
+
+                var secondValueMinExclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in secondValueMinExclusiveQueryResult)
+                {
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.GreaterThan, constraint);
+                    constraints.Add(tuple);
+                }
+
+                // Get all second values of constraint ranges with a '>=' operator.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onProperty meta:hasValueConstraint .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:withRestrictions ?bNode3 . 
+                    ?bNode3 rdf:rest ?bNode4 .
+                    ?bNode4 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minInclusive ?constraint . }";
+
+                var secondValueMinInclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in secondValueMinInclusiveQueryResult)
+                {
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.GreaterThanOrEqualTo, constraint);
+                    constraints.Add(tuple);
+                }
+
+                // Get all second values of constraint ranges with a '<' operator.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onProperty meta:hasValueConstraint .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:withRestrictions ?bNode3 . 
+                    ?bNode3 rdf:rest ?bNode4 .
+                    ?bNode4 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxExclusive ?constraint . }";
+
+                var secondValueMaxExclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in secondValueMaxExclusiveQueryResult)
+                {
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.LessThan, constraint);
+                    constraints.Add(tuple);
+                }
+
+                // Get all second values of constraint ranges with a '<=' operator.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onProperty meta:hasValueConstraint .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:withRestrictions ?bNode3 . 
+                    ?bNode3 rdf:rest ?bNode4 .
+                    ?bNode4 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxInclusive ?constraint . }";
+
+                var secondValueMaxInclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in secondValueMaxInclusiveQueryResult)
+                {
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.LessThanOrEqualTo, constraint);
+                    constraints.Add(tuple);
                 }
 
                 // Get all negated single value constraints.
@@ -427,36 +623,216 @@ namespace Logic
                     ?bNode2 owl:onProperty meta:hasValueConstraint .
                     ?bNode2 owl:hasValue ?constraint . }";
 
-                var singleNegatedValueQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+                var negatedSingleValueQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
 
-                foreach (var innerResult in singleNegatedValueQueryResult.Results)
+                foreach (var innerResult in negatedSingleValueQueryResult.Results)
                 {
-                    var constraint = innerResult["constraint"];
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
 
-                    constraints.Add(constraint);
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.NotEqualTo, constraint);
+                    constraints.Add(tuple);
                 }
 
-                // Get all single-valued range constraints.
+                // Get all negated first values of constraint ranges with a '>' operator. This kind of query covers both
+                // single-valued (e.g., not(>15)) and double-valued (e.g. not(>15, <25)) constraints.
                 _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
                     @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
                     @optimalCondition rdf:type ?bNode1 .
-                    ?bNode1 owl:onProperty meta:hasValueConstraint .
-                    ?bNode1 owl:onDataRange ?bNode2 .
-                    ?bNode2 owl:withRestrictions ?bNode3 .
-                    ?bNode3 rdf:first ?constraint . }";
+                    ?bNode1 owl:complementOf ?bNode2 .
+                    ?bNode2 owl:onProperty meta:hasValueConstraint .
+                    ?bNode2 owl:onDataRange ?bNode3 .
+                    ?bNode3 owl:withRestrictions ?bNode4 . 
+                    ?bNode4 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minExclusive ?constraint . }";
 
-                var singleValuedRangeQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+                var negatedFirstValueMinExclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
 
-                foreach (var innerResult in singleValuedRangeQueryResult)
+                foreach (var innerResult in negatedFirstValueMinExclusiveQueryResult)
                 {
-                    var constraint = innerResult["constraint"];
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.LessThanOrEqualTo, constraint);
+                    constraints.Add(tuple);
                 }
 
-                // TODO: get the constraint, represent it via a standardized way and execute it through the
-                // specific type value handlers to validate it against the current value(s) of the respective property. depending on
-                // this result, you can query for the right kind of executionplan and save it in the cache.
-                //
+                // Get all negated first values of constraint ranges with a '>=' operator.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:complementOf ?bNode2 .
+                    ?bNode2 owl:onProperty meta:hasValueConstraint .
+                    ?bNode2 owl:onDataRange ?bNode3 .
+                    ?bNode3 owl:withRestrictions ?bNode4 . 
+                    ?bNode4 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minInclusive ?constraint . }";
+
+                var negatedFirstValueMinInclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in negatedFirstValueMinInclusiveQueryResult)
+                {
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.LessThan, constraint);
+                    constraints.Add(tuple);
+                }
+
+                // Get all negated first values of constraint ranges with a '<' operator.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:complementOf ?bNode2 .
+                    ?bNode2 owl:onProperty meta:hasValueConstraint .
+                    ?bNode2 owl:onDataRange ?bNode3 .
+                    ?bNode3 owl:withRestrictions ?bNode4 . 
+                    ?bNode4 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxExclusive ?constraint . }";
+
+                var negatedFirstValueMaxExclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in negatedFirstValueMaxExclusiveQueryResult)
+                {
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.GreaterThanOrEqualTo, constraint);
+                    constraints.Add(tuple);
+                }
+
+                // Get all negated first values of constraint ranges with a '<=' operator.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:complementOf ?bNode2 .
+                    ?bNode2 owl:onProperty meta:hasValueConstraint .
+                    ?bNode2 owl:onDataRange ?bNode3 .
+                    ?bNode3 owl:withRestrictions ?bNode4 . 
+                    ?bNode4 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxInclusive ?constraint . }";
+
+                var negatedFirstValueMaxInclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in negatedFirstValueMaxInclusiveQueryResult)
+                {
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.GreaterThan, constraint);
+                    constraints.Add(tuple);
+                }
+
+                // Get all negated second values of constraint ranges with a '>' operator.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:complementOf ?bNode2 .
+                    ?bNode2 owl:onProperty meta:hasValueConstraint .
+                    ?bNode2 owl:onDataRange ?bNode3 .
+                    ?bNode3 owl:withRestrictions ?bNode4 . 
+                    ?bNode4 rdf:rest ?bNode5 .
+                    ?bNode5 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minExclusive ?constraint . }";
+
+                var negatedSecondValueMinExclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in negatedSecondValueMinExclusiveQueryResult)
+                {
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.LessThanOrEqualTo, constraint);
+                    constraints.Add(tuple);
+                }
+
+                // Get all negated second values of constraint ranges with a '>=' operator.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:complementOf ?bNode2 .
+                    ?bNode2 owl:onProperty meta:hasValueConstraint .
+                    ?bNode2 owl:onDataRange ?bNode3 .
+                    ?bNode3 owl:withRestrictions ?bNode4 . 
+                    ?bNode4 rdf:rest ?bNode5 .
+                    ?bNode5 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minInclusive ?constraint . }";
+
+                var negatedSecondValueMinInclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in negatedSecondValueMinInclusiveQueryResult)
+                {
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.LessThan, constraint);
+                    constraints.Add(tuple);
+                }
+
+                // Get all negated second values of constraint ranges with a '<' operator.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:complementOf ?bNode2 .
+                    ?bNode2 owl:onProperty meta:hasValueConstraint .
+                    ?bNode2 owl:onDataRange ?bNode3 .
+                    ?bNode3 owl:withRestrictions ?bNode4 . 
+                    ?bNode4 rdf:rest ?bNode5 .
+                    ?bNode5 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxExclusive ?constraint . }";
+
+                var negatedSecondValueMaxExclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in negatedSecondValueMaxExclusiveQueryResult)
+                {
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.GreaterThanOrEqualTo, constraint);
+                    constraints.Add(tuple);
+                }
+
+                // Get all negated second values of constraint ranges with a '<=' operator.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:complementOf ?bNode2 .
+                    ?bNode2 owl:onProperty meta:hasValueConstraint .
+                    ?bNode2 owl:onDataRange ?bNode3 .
+                    ?bNode3 owl:withRestrictions ?bNode4 . 
+                    ?bNode4 rdf:rest ?bNode5 .
+                    ?bNode5 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxInclusive ?constraint . }";
+
+                var negatedSecondValueMaxInclusiveQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in negatedSecondValueMaxInclusiveQueryResult)
+                {
+                    var constraint = innerResult["constraint"].ToString();
+                    valueType = constraint.Split('#')[1];
+                    constraint = constraint.Split('^')[0];
+
+                    var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.GreaterThan, constraint);
+                    constraints.Add(tuple);
+                }
+
+                // TODO: organize this better!
                 // TODO: make the executionplan cache!!
             }            
         }

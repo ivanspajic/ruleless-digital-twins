@@ -3,6 +3,7 @@
     public enum ConstraintOperator
     {
         EqualTo,
+        NotEqualTo,
         GreaterThan,
         GreaterThanOrEqualTo,
         LessThan,

@@ -13,7 +13,7 @@ namespace Logic.SensorValueHandlers
             throw new NotImplementedException();
         }
 
-        public bool EvaluateConstraint(object sensorValue, Tuple<ConstraintOperator, object> constraint)
+        public bool EvaluateConstraint(object sensorValue, Tuple<ConstraintOperator, string> constraint)
         {
             throw new NotImplementedException();
         }

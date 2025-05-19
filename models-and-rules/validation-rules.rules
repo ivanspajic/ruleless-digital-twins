@@ -30,7 +30,7 @@
             (?restriction2 rdf:comment ?property)
             (?restriction2 xsd:maxInclusive ?value)
             ->  print()
-                print("Useless condition detected!")
+                print("Useless conditions detected!")
                 print("Conditions for", ?property, "are")
                 print("greater than or equal to", ?value)
                 print("and")
@@ -44,7 +44,7 @@
             (?restriction2 rdf:comment ?property)
             (?restriction2 xsd:maxExclusive ?value)
             ->  print()
-                print("Useless condition detected!")
+                print("Useless conditions detected!")
                 print("Conditions for", ?property, "are")
                 print("greater than or equal to", ?value)
                 print("and")
@@ -58,7 +58,7 @@
             (?restriction2 rdf:comment ?property)
             (?restriction2 xsd:maxInclusive ?value)
             ->  print()
-                print("Useless condition detected!")
+                print("Useless conditions detected!")
                 print("Conditions for", ?property, "are")
                 print("greater than", ?value)
                 print("and")
@@ -69,10 +69,58 @@
 
 
 
-// These rules check for any contradicting OptimalCondition ranges through the use of negation. E.g.,
-// OptimalCondition1 being >15 and OptimalCondition2 being not(>15) for the same Property.
+// These rules check for any contradicting OptimalCondition ranges through the use of a simple,
+// single-valued constraint or negations. E.g., OptimalCondition1 being >15 and OptimalCondition2
+// being not(>15) for the same Property or OptimalCondition1 being 15 and OptimalCondition2
+// being >15 for the same Property.
 
 [rule4e:    (?bNode1 rdf:comment ?property)
+            (?bNode1 owl:hasValue ?value1)
+            (?bNode2 rdf:comment ?property)
+            (?bNode2 owl:hasValue ?value2)
+            notEqual(?bNode1, ?bNode2)
+            notEqual(?value1, ?value2)
+            noValue(?bNode1, rdf:comment, "negation")
+            noValue(?bNode2, rdf:comment, "negation")
+            ->  print()
+                print("Conflicting conditions detected!")
+                print("Conditions for", ?property, "are")
+                print(?value1)
+                print("and")
+                print(?value2)
+                print("at the same time.")
+                print()
+]
+
+[rule4f:    (?bNode rdf:comment ?property)
+            (?bNode owl:hasValue ?value)
+            (?restriction rdf:comment ?property)
+            (?restriction xsd:minExclusive ?value)
+            ->  print()
+                print("Conflicting conditions detected!")
+                print("Conditions for", ?property, "are")
+                print(?value)
+                print("and")
+                print("greater than", ?value)
+                print("at the same time.")
+                print()
+]
+
+[rule4g:    (?bNode rdf:comment ?property)
+            (?bNode owl:hasValue ?value)
+            (?restriction rdf:comment ?property)
+            (?restriction xsd:maxExclusive ?value)
+            ->  print()
+                print("Conflicting conditions detected!")
+                print("Conditions for", ?property, "are")
+                print(?value)
+                print("and")
+                print("less than", ?value)
+                print("at the same time.")
+                print()
+]
+
+[rule4h:    (?bNode1 rdf:comment ?property)
             (?bNode1 owl:hasValue ?value)
             (?bNode2 rdf:comment ?property)
             (?bNode2 owl:hasValue ?value)
@@ -80,7 +128,7 @@
             notEqual(?bNode1, ?bNode2)
             notEqual(?property, "negation")
             ->  print()
-                print("Conflicting condition detected!")
+                print("Conflicting conditions detected!")
                 print("Conditions for", ?property, "are")
                 print(?value)
                 print("and")
@@ -89,14 +137,14 @@
                 print()
 ]
 
-[rule4f:    (?restriction1 rdf:comment ?property)
+[rule4i:    (?restriction1 rdf:comment ?property)
             (?restriction1 xsd:minExclusive ?value)
             (?restriction2 rdf:comment ?property)
             (?restriction2 xsd:minExclusive ?value)
             (?restriction2 rdf:comment "negation")
             notEqual(?restriction1, ?restriction2)
             ->  print()
-                print("Conflicting condition detected!")
+                print("Conflicting conditions detected!")
                 print("Conditions for", ?property, "are")
                 print(?value)
                 print("and")
@@ -105,14 +153,14 @@
                 print()
 ]
 
-[rule4g:    (?restriction1 rdf:comment ?property)
+[rule4j:    (?restriction1 rdf:comment ?property)
             (?restriction1 xsd:minInclusive ?value)
             (?restriction2 rdf:comment ?property)
             (?restriction2 xsd:minInclusive ?value)
             (?restriction2 rdf:comment "negation")
             notEqual(?restriction1, ?restriction2)
             ->  print()
-                print("Conflicting condition detected!")
+                print("Conflicting conditions detected!")
                 print("Conditions for", ?property, "are")
                 print(?value)
                 print("and")
@@ -121,14 +169,14 @@
                 print()
 ]
 
-[rule4h:    (?restriction1 rdf:comment ?property)
+[rule4k:    (?restriction1 rdf:comment ?property)
             (?restriction1 xsd:maxExclusive ?value)
             (?restriction2 rdf:comment ?property)
             (?restriction2 xsd:maxExclusive ?value)
             (?restriction2 rdf:comment "negation")
             notEqual(?restriction1, ?restriction2)
             ->  print()
-                print("Conflicting condition detected!")
+                print("Conflicting conditions detected!")
                 print("Conditions for", ?property, "are")
                 print(?value)
                 print("and")
@@ -137,14 +185,14 @@
                 print()
 ]
 
-[rule4I:    (?restriction1 rdf:comment ?property)
+[rule4l:    (?restriction1 rdf:comment ?property)
             (?restriction1 xsd:maxInclusive ?value)
             (?restriction2 rdf:comment ?property)
             (?restriction2 xsd:maxInclusive ?value)
             (?restriction2 rdf:comment "negation")
             notEqual(?restriction1, ?restriction2)
             ->  print()
-                print("Conflicting condition detected!")
+                print("Conflicting conditions detected!")
                 print("Conditions for", ?property, "are")
                 print(?value)
                 print("and")

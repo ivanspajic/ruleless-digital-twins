@@ -1,8 +1,10 @@
-﻿using Logic.DeviceInterfaces;
+﻿using J2N.Numerics;
+using Logic.DeviceInterfaces;
 using Logic.SensorValueHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Models;
+using System.Runtime.InteropServices;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 using VDS.RDF.Query;
@@ -37,16 +39,18 @@ namespace Logic
             { "int", new SensorIntValueHandler() }
         };
 
-        // Store Property values in collections for caching to avoid re-querying.
+        // Store objects in the cache to avoid re-querying.
         private readonly Dictionary<string, ObservableProperty> _observableProperties = [];
         private readonly Dictionary<string, InputOutput> _inputOutputs = [];
         private readonly Dictionary<string, ConfigurableParameter> _configurableParameters = [];
+        private readonly Dictionary<string, OptimalCondition> _unfulfilledOptimalConditions = [];
 
         // A cache of Properties from the previous loop round. This could instead be saved in a more persistent way as
         // historical data.
         private readonly Dictionary<string, ObservableProperty> _oldObservableProperties = [];
         private readonly Dictionary<string, InputOutput> _oldInputOutputs = [];
         private readonly Dictionary<string, ConfigurableParameter> _oldConfigurableParameters = [];
+        private readonly Dictionary<string, OptimalCondition> _oldUnfulfilledOptimalConditions = [];
 
         private readonly Graph _instanceModelGraph = new();
         private readonly SparqlParameterizedString _query = new();
@@ -253,6 +257,7 @@ namespace Logic
                 @property rdf:type ?bNode .
                 ?bNode owl:onProperty meta:hasValue .
                 ?bNode owl:onDataRange ?valueType . }";
+
             _query.SetParameter("property", propertyNode);
 
             var propertyTypeQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
@@ -272,6 +277,7 @@ namespace Logic
         {
             var propertyName = propertyNode.ToString();
 
+            // Get all ConfigurableParameters.
             _query.CommandText = @"SELECT ?lowerLimit ?upperLimit ?valueIncrements WHERE {
                     @property rdf:type meta:ConfigurableParameter .
                     @property meta:hasLowerLimitValue ?lowerLimit .
@@ -319,6 +325,7 @@ namespace Logic
 
         private void PopulateObservablePropertiesCache()
         {
+            // Get all ObservableProperties.
             _query.CommandText = @"SELECT DISTINCT ?observableProperty ?valueType WHERE {
                 ?sensor rdf:type sosa:Sensor .
                 ?sensor sosa:observes ?observableProperty .
@@ -374,38 +381,84 @@ namespace Logic
         {
             _logger.LogInformation("Starting the Analyze phase.");
 
-            _query.CommandText = @"SELECT ?optimalCondition ?property WHERE {
+            _query.CommandText = @"SELECT ?optimalCondition ?property ?reachedInMaximumSeconds WHERE {
                 ?optimalCondition rdf:type meta:OptimalCondition .
-                ?optimalCondition ssn:forProperty ?property . }";
+                ?optimalCondition ssn:forProperty ?property .
+                ?optimalCondition meta:reachedInMaximumSeconds ?reachedInMaximumSeconds . }";
 
             var queryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
 
             foreach (var result in queryResult.Results)
             {
-                var optimalConditionName = result["optimalCondition"].ToString();
-                var propertyName = result["property"].ToString();
+                var constraints = new List<INode>();
 
+                var optimalCondition = result["optimalCondition"];
+                var property = result["property"];
+                var reachedInMaximumSeconds = result["reachedInMaximumSeconds"];
+
+                _query.SetParameter("optimalCondition", optimalCondition);
+                _query.SetParameter("property", property);
+                _query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+                // Check if there is a single-valued constraint.
                 _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
-                    @optimalCondition ";
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onProperty meta:hasValueConstraint .
+                    ?bNode1 owl:hasValue ?constraint . }";
 
-                // TODO: get the constraint, represent it via a standardized way (probably expressions) and execute it through the
+                var singleValueQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                if (!singleValueQueryResult.IsEmpty)
+                {
+                    // Reasoners (such as Protege's) should only allow one single value constraint per OptimalCondition.
+                    var constraint = singleValueQueryResult.Results[0]["constraint"];
+
+                    constraints.Add(constraint);
+                }
+
+                // Get all negated single value constraints.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:complementOf ?bNode2 .
+                    ?bNode2 owl:onProperty meta:hasValueConstraint .
+                    ?bNode2 owl:hasValue ?constraint . }";
+
+                var singleNegatedValueQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in singleNegatedValueQueryResult.Results)
+                {
+                    var constraint = innerResult["constraint"];
+
+                    constraints.Add(constraint);
+                }
+
+                // Get all single-valued range constraints.
+                _query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onProperty meta:hasValueConstraint .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:withRestrictions ?bNode3 .
+                    ?bNode3 rdf:first ?constraint . }";
+
+                var singleValuedRangeQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+
+                foreach (var innerResult in singleValuedRangeQueryResult)
+                {
+                    var constraint = innerResult["constraint"];
+                }
+
+                // TODO: get the constraint, represent it via a standardized way and execute it through the
                 // specific type value handlers to validate it against the current value(s) of the respective property. depending on
                 // this result, you can query for the right kind of executionplan and save it in the cache.
                 //
                 // TODO: make the executionplan cache!!
-            }
-
-            // get optimal conditions together with their properties
-            // compare the values of each optimal condition to the values of the respective property
-            // depending on the status, get the right kind of executionplan by comparing their effects with what is needed
-            // these may include both optimizing plans as well as plans for regaining optimal conditions
-
-            // this is done best by looking at each constraint in each optimal condition on its own
-            // by evaluating each constraint separately, it becomes clear where with respect to the constraint ranges we are and thus what
-            // kind of executionplans need to be included
-
-            
+            }            
         }
         #endregion
     }

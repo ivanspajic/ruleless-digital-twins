@@ -156,6 +156,51 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds> "3600"^^xsd:int .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition4
+:OptimalCondition4 rdf:type owl:NamedIndividual ,
+                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
+                            [ rdf:type owl:Class ;
+                              owl:complementOf [ rdf:type owl:Restriction ;
+                                                 owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                                                 owl:hasValue "19.3"^^xsd:double
+                                               ]
+                            ] ;
+                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
+                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds> "3600"^^xsd:int .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition5
+:OptimalCondition5 rdf:type owl:NamedIndividual ,
+                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                              owl:hasValue "19.2"^^xsd:double
+                            ] ;
+                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
+                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds> "3600"^^xsd:int .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition6
+:OptimalCondition6 rdf:type owl:NamedIndividual ,
+                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
+                            [ rdf:type owl:Class ;
+                              owl:complementOf [ rdf:type owl:Restriction ;
+                                                 owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                 owl:onDataRange [ rdf:type rdfs:Datatype ;
+                                                                   owl:onDatatype xsd:double ;
+                                                                   owl:withRestrictions ( [ xsd:minInclusive "11.8"^^xsd:double
+                                                                                          ]
+                                                                                          [ xsd:maxExclusive "29.5"^^xsd:double
+                                                                                          ]
+                                                                                        )
+                                                                 ]
+                                               ]
+                            ] ;
+                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
+                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds> "3600"^^xsd:int .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomM370
 :RoomM370 rdf:type owl:NamedIndividual ,
                    <http://www.w3.org/ns/sosa/Platform> ;
@@ -167,7 +212,9 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                             :TemperatureSensor2 ;
           <http://www.w3.org/ns/ssn/implements> :OptimalCondition1 ,
                                                 :OptimalCondition2 ,
-                                                :OptimalCondition3 .
+                                                :OptimalCondition3 ,
+                                                :OptimalCondition4 ,
+                                                :OptimalCondition5 .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature
@@ -260,22 +307,22 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
 ] .
 
+[ xsd:minInclusive "1"^^xsd:int
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
 [ xsd:maxInclusive "3"^^xsd:int
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ xsd:minInclusive "1"^^xsd:int
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger

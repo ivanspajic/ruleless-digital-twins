@@ -3,28 +3,19 @@ using VDS.RDF.Query;
 
 namespace Logic.SensorValueHandlers
 {
+    // Example int Sensor value handler implementation.
     internal class SensorIntValueHandler : ISensorValueHandler
     {
         public Tuple<object, object> FindObservablePropertyValueRange(SparqlResultSet queryResult,
             string queryVariableName,
             IDictionary<string, InputOutput> inputOutputs)
         {
-            var lowestValue = int.MaxValue;
-            var highestValue = int.MinValue;
+            throw new NotImplementedException();
+        }
 
-            foreach (var result in queryResult.Results)
-            {
-                var propertyName = result[queryVariableName].ToString();
-                var propertyValue = (int)inputOutputs[propertyName].Value;
-
-                if (propertyValue < lowestValue)
-                    lowestValue = propertyValue;
-
-                if (propertyValue > highestValue)
-                    highestValue = propertyValue;
-            }
-
-            return new Tuple<object, object>(lowestValue, highestValue);
+        public bool EvaluateConstraint(object sensorValue, Tuple<ConstraintOperator, object> constraint)
+        {
+            throw new NotImplementedException();
         }
     }
 }

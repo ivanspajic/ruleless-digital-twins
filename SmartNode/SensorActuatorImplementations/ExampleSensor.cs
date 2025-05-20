@@ -13,7 +13,8 @@ namespace SensorActuatorImplementations
             var random = new Random();
 
             // Return a fake calculation as a bare minimum.
-            return random.NextDouble() * 15;
+            //return random.NextDouble() * 15;
+            return 15;
         }
     }
 }

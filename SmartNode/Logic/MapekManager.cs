@@ -3,7 +3,6 @@ using Logic.SensorValueHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Models;
-using System;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 using VDS.RDF.Query;
@@ -178,7 +177,7 @@ namespace Logic
                 return;
 
             // Get the type of the Property.
-            var propertyValueType = GetPropertyValueType(propertyNode);
+            var propertyValueType = GetInputOutputValueType(propertyNode);
 
             // Get all Procedures (in Sensors) that have @property as their Output. SOSA/SSN theoretically allows for multiple Procedures
             // to have the same Output due to a lack of cardinality restrictions on the inverse predicate of 'has output' in the
@@ -253,14 +252,30 @@ namespace Logic
             }
         }
 
-        private string GetPropertyValueType(INode propertyNode)
+        private string GetInputOutputValueType(INode propertyNode)
         {
             _query.CommandText = @"SELECT ?valueType WHERE {
                 @property rdf:type ?bNode .
                 ?bNode owl:onProperty meta:hasValue .
                 ?bNode owl:onDataRange ?valueType . }";
 
-            _query.SetParameter("property", propertyNode);
+            return GetPropertyValueType("property", propertyNode);
+        }
+
+        private string GetObservablePropertyValueType(INode propertyNode)
+        {
+            _query.CommandText = @"SELECT ?valueType WHERE {
+                @property rdf:type sosa:ObservableProperty .
+                @property rdf:type ?bNode .
+                ?bNode owl:onProperty meta:hasUpperLimitValue .
+                ?bNode owl:onDataRange ?valueType . }";
+
+            return GetPropertyValueType("property", propertyNode);
+        }
+
+        private string GetPropertyValueType(string parameterName, INode propertyNode)
+        {
+            _query.SetParameter(parameterName, propertyNode);
 
             var propertyTypeQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
 
@@ -395,81 +410,93 @@ namespace Logic
 
             foreach (var result in queryResult.Results)
             {
-                var constraints = new List<Tuple<ConstraintOperator, string>>();
-
                 var optimalCondition = result["optimalCondition"];
                 var property = result["property"];
                 var reachedInMaximumSeconds = result["reachedInMaximumSeconds"];
-
-                var valueType = string.Empty;
+                var valueType = GetObservablePropertyValueType(property);
 
                 _query.SetParameter("optimalCondition", optimalCondition);
                 _query.SetParameter("property", property);
                 _query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                // Check if the OptimalCondition has a single-valued constraint.
-                ProcessSingleValueEqualsConstraint(constraints, ref valueType);
-
-                // Get all first values of constraint ranges with a '>' operator. This kind of query covers both
-                // single-valued (e.g., >15) and double-valued (e.g. >15, <25) constraints.
-                ProcessFirstValueGreaterThanConstraints(constraints, ref valueType);
-
-                // Get all first values of constraint ranges with a '>=' operator.
-                ProcessFirstValueGreaterThanOrEqualToConstraints(constraints, ref valueType);
-
-                // Get all first values of constraint ranges with a '<' operator.
-                ProcessFirstValueLessThanConstraints(constraints, ref valueType);
-
-                // Get all first values of constraint ranges with a '<=' operator.
-                ProcessFirstValueLessThanOrEqualToConstraints(constraints, ref valueType);
-
-                // Get all second values of constraint ranges with a '>' operator.
-                ProcessSecondValueGreaterThanConstraints(constraints, ref valueType);
-
-                // Get all second values of constraint ranges with a '>=' operator.
-                ProcessSecondValueGreaterThanOrEqualToConstraints(constraints, ref valueType);
-
-                // Get all second values of constraint ranges with a '<' operator.
-                ProcessSecondValueLessThanConstraints(constraints, ref valueType);
-
-                // Get all second values of constraint ranges with a '<=' operator.
-                ProcessSecondValueLessThanOrEqualToConstraints(constraints, ref valueType);
-
-                // Get all negated single value constraints.
-                ProcessNegatedSingleValueConstraints(constraints, ref valueType);
-
-                // Get all negated first values of constraint ranges with a '>' operator. This kind of query covers both
-                // single-valued (e.g., not(>15)) and double-valued (e.g. not(>15, <25)) constraints.
-                ProcessNegatedFirstValueGreaterThanConstraint(constraints, ref valueType);
-
-                // Get all negated first values of constraint ranges with a '>=' operator.
-                ProcessNegatedFirstValueGreaterThanOrEqualToConstraint(constraints, ref valueType);
-
-                // Get all negated first values of constraint ranges with a '<' operator.
-                ProcessNegatedFirstValueLessThanConstraint(constraints, ref valueType);
-
-                // Get all negated first values of constraint ranges with a '<=' operator.
-                ProcessNegatedFirstValueLessThanOrEqualToConstraint(constraints, ref valueType);
-
-                // Get all negated second values of constraint ranges with a '>' operator.
-                ProcessNegatedSecondValueGreaterThanConstraint(constraints, ref valueType);
-
-                // Get all negated second values of constraint ranges with a '>=' operator.
-                ProcessNegatedSecondValueGreaterThanOrEqualToConstraint(constraints, ref valueType);
-
-                // Get all negated second values of constraint ranges with a '<' operator.
-                ProcessNegatedSecondValueLessThanConstraint(constraints, ref valueType);
-
-                // Get all negated second values of constraint ranges with a '<=' operator.
-                ProcessNegatedSecondValueLessThanOrEqualToConstraint(constraints, ref valueType);
-
-
-
-                // TODO: make the executionplan cache!!
+                var constraints = ProcessConstraintQueries(result);
+                EvaluateConstraints(property, constraints);
+                // find the property value from the caches and use it for evaluation
+                
+                // evaluate all the constraints present, and add the optimal condition to the cache
+                // in case of at least one constraint not being fulfilled.
+                // in case of adding an optimal condition to the cache, query for all execution plans
+                // that support regaining optimal conditions   
             }
+
+            // TODO: make the executionplan cache!!
+            // query for execution plans that optimize for stuff...
         }
 
-        private void ProcessSingleValueEqualsConstraint(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private List<Tuple<ConstraintOperator, string>> ProcessConstraintQueries(ISparqlResult result)
+        {
+            var constraints = new List<Tuple<ConstraintOperator, string>>();
+
+            // Check if the OptimalCondition has a single-valued constraint.
+            ProcessSingleValueEqualsConstraint(constraints);
+
+            // Get all first values of constraint ranges with a '>' operator. This kind of query covers both
+            // single-valued (e.g., >15) and double-valued (e.g. >15, <25) constraints.
+            ProcessFirstValueGreaterThanConstraints(constraints);
+
+            // Get all first values of constraint ranges with a '>=' operator.
+            ProcessFirstValueGreaterThanOrEqualToConstraints(constraints);
+
+            // Get all first values of constraint ranges with a '<' operator.
+            ProcessFirstValueLessThanConstraints(constraints);
+
+            // Get all first values of constraint ranges with a '<=' operator.
+            ProcessFirstValueLessThanOrEqualToConstraints(constraints);
+
+            // Get all second values of constraint ranges with a '>' operator.
+            ProcessSecondValueGreaterThanConstraints(constraints);
+
+            // Get all second values of constraint ranges with a '>=' operator.
+            ProcessSecondValueGreaterThanOrEqualToConstraints(constraints);
+
+            // Get all second values of constraint ranges with a '<' operator.
+            ProcessSecondValueLessThanConstraints(constraints);
+
+            // Get all second values of constraint ranges with a '<=' operator.
+            ProcessSecondValueLessThanOrEqualToConstraints(constraints);
+
+            // Get all negated single value constraints.
+            ProcessNegatedSingleValueConstraints(constraints);
+
+            // Get all negated first values of constraint ranges with a '>' operator. This kind of query covers both
+            // single-valued (e.g., not(>15)) and double-valued (e.g. not(>15, <25)) constraints.
+            ProcessNegatedFirstValueGreaterThanConstraint(constraints);
+
+            // Get all negated first values of constraint ranges with a '>=' operator.
+            ProcessNegatedFirstValueGreaterThanOrEqualToConstraint(constraints);
+
+            // Get all negated first values of constraint ranges with a '<' operator.
+            ProcessNegatedFirstValueLessThanConstraint(constraints);
+
+            // Get all negated first values of constraint ranges with a '<=' operator.
+            ProcessNegatedFirstValueLessThanOrEqualToConstraint(constraints);
+
+            // Get all negated second values of constraint ranges with a '>' operator.
+            ProcessNegatedSecondValueGreaterThanConstraint(constraints);
+
+            // Get all negated second values of constraint ranges with a '>=' operator.
+            ProcessNegatedSecondValueGreaterThanOrEqualToConstraint(constraints);
+
+            // Get all negated second values of constraint ranges with a '<' operator.
+            ProcessNegatedSecondValueLessThanConstraint(constraints);
+
+            // Get all negated second values of constraint ranges with a '<=' operator.
+            ProcessNegatedSecondValueLessThanOrEqualToConstraint(constraints);
+
+            return constraints;
+        }
+
+        private void ProcessSingleValueEqualsConstraint(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -484,7 +511,6 @@ namespace Logic
             {
                 // Reasoners (such as Protege's) should only allow one single value constraint per OptimalCondition.
                 var constraint = singleValueQueryResult.Results[0]["constraint"].ToString();
-                valueType = constraint.Split('#')[1];
                 constraint = constraint.Split('^')[0];
 
                 var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.EqualTo, constraint);
@@ -492,7 +518,7 @@ namespace Logic
             }
         }
 
-        private void ProcessFirstValueGreaterThanConstraints(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessFirstValueGreaterThanConstraints(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -504,10 +530,10 @@ namespace Logic
                     ?bNode3 rdf:first ?anonymousNode .
                     ?anonymousNode xsd:minExclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.GreaterThan);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.GreaterThan);
         }
 
-        private void ProcessFirstValueGreaterThanOrEqualToConstraints(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessFirstValueGreaterThanOrEqualToConstraints(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -519,10 +545,10 @@ namespace Logic
                     ?bNode3 rdf:first ?anonymousNode .
                     ?anonymousNode xsd:minInclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.GreaterThanOrEqualTo);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.GreaterThanOrEqualTo);
         }
 
-        private void ProcessFirstValueLessThanConstraints(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessFirstValueLessThanConstraints(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -534,10 +560,10 @@ namespace Logic
                     ?bNode3 rdf:first ?anonymousNode .
                     ?anonymousNode xsd:maxExclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.LessThan);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.LessThan);
         }
 
-        private void ProcessFirstValueLessThanOrEqualToConstraints(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessFirstValueLessThanOrEqualToConstraints(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -549,10 +575,10 @@ namespace Logic
                     ?bNode3 rdf:first ?anonymousNode .
                     ?anonymousNode xsd:maxInclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.LessThanOrEqualTo);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.LessThanOrEqualTo);
         }
 
-        private void ProcessSecondValueGreaterThanConstraints(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessSecondValueGreaterThanConstraints(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -565,10 +591,10 @@ namespace Logic
                     ?bNode4 rdf:first ?anonymousNode .
                     ?anonymousNode xsd:minExclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.GreaterThan);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.GreaterThan);
         }
 
-        private void ProcessSecondValueGreaterThanOrEqualToConstraints(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessSecondValueGreaterThanOrEqualToConstraints(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -581,10 +607,10 @@ namespace Logic
                     ?bNode4 rdf:first ?anonymousNode .
                     ?anonymousNode xsd:minInclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.GreaterThanOrEqualTo);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.GreaterThanOrEqualTo);
         }
 
-        private void ProcessSecondValueLessThanConstraints(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessSecondValueLessThanConstraints(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -597,10 +623,10 @@ namespace Logic
                     ?bNode4 rdf:first ?anonymousNode .
                     ?anonymousNode xsd:maxExclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.LessThan);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.LessThan);
         }
 
-        private void ProcessSecondValueLessThanOrEqualToConstraints(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessSecondValueLessThanOrEqualToConstraints(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -613,10 +639,10 @@ namespace Logic
                     ?bNode4 rdf:first ?anonymousNode .
                     ?anonymousNode xsd:maxInclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.LessThanOrEqualTo);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.LessThanOrEqualTo);
         }
 
-        private void ProcessNegatedSingleValueConstraints(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessNegatedSingleValueConstraints(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -626,10 +652,10 @@ namespace Logic
                     ?bNode2 owl:onProperty meta:hasValueConstraint .
                     ?bNode2 owl:hasValue ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.NotEqualTo);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.NotEqualTo);
         }
 
-        private void ProcessNegatedFirstValueGreaterThanConstraint(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessNegatedFirstValueGreaterThanConstraint(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                 @optimalCondition ssn:forProperty @property .
@@ -642,10 +668,10 @@ namespace Logic
                 ?bNode4 rdf:first ?anonymousNode .
                 ?anonymousNode xsd:minExclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.LessThanOrEqualTo);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.LessThanOrEqualTo);
         }
 
-        private void ProcessNegatedFirstValueGreaterThanOrEqualToConstraint(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessNegatedFirstValueGreaterThanOrEqualToConstraint(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -658,10 +684,10 @@ namespace Logic
                     ?bNode4 rdf:first ?anonymousNode .
                     ?anonymousNode xsd:minInclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.LessThan);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.LessThan);
         }
 
-        private void ProcessNegatedFirstValueLessThanConstraint(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessNegatedFirstValueLessThanConstraint(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -674,10 +700,10 @@ namespace Logic
                     ?bNode4 rdf:first ?anonymousNode .
                     ?anonymousNode xsd:maxExclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.GreaterThanOrEqualTo);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.GreaterThanOrEqualTo);
         }
 
-        private void ProcessNegatedFirstValueLessThanOrEqualToConstraint(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessNegatedFirstValueLessThanOrEqualToConstraint(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -690,10 +716,10 @@ namespace Logic
                     ?bNode4 rdf:first ?anonymousNode .
                     ?anonymousNode xsd:maxInclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.GreaterThan);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.GreaterThan);
         }
 
-        private void ProcessNegatedSecondValueGreaterThanConstraint(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessNegatedSecondValueGreaterThanConstraint(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -707,10 +733,10 @@ namespace Logic
                     ?bNode5 rdf:first ?anonymousNode .
                     ?anonymousNode xsd:minExclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.LessThanOrEqualTo);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.LessThanOrEqualTo);
         }
 
-        private void ProcessNegatedSecondValueGreaterThanOrEqualToConstraint(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessNegatedSecondValueGreaterThanOrEqualToConstraint(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -724,10 +750,10 @@ namespace Logic
                     ?bNode5 rdf:first ?anonymousNode .
                     ?anonymousNode xsd:minInclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.LessThan);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.LessThan);
         }
 
-        private void ProcessNegatedSecondValueLessThanConstraint(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessNegatedSecondValueLessThanConstraint(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -741,10 +767,10 @@ namespace Logic
                     ?bNode5 rdf:first ?anonymousNode .
                     ?anonymousNode xsd:maxExclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.GreaterThanOrEqualTo);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.GreaterThanOrEqualTo);
         }
 
-        private void ProcessNegatedSecondValueLessThanOrEqualToConstraint(List<Tuple<ConstraintOperator, string>> constraints, ref string valueType)
+        private void ProcessNegatedSecondValueLessThanOrEqualToConstraint(List<Tuple<ConstraintOperator, string>> constraints)
         {
             _query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
@@ -758,11 +784,10 @@ namespace Logic
                     ?bNode5 rdf:first ?anonymousNode .
                     ?anonymousNode xsd:maxInclusive ?constraint . }";
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ref valueType, ConstraintOperator.GreaterThan);
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(constraints, ConstraintOperator.GreaterThan);
         }
 
         private void ExecuteAndProcessOptimalConditionConstraintQueryResult(List<Tuple<ConstraintOperator, string>> constraints,
-            ref string valueType,
             ConstraintOperator constraintOperator)
         {
             var queryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
@@ -770,13 +795,16 @@ namespace Logic
             foreach (var innerResult in queryResult)
             {
                 var constraint = innerResult["constraint"].ToString();
-                // Assign a value to valueType for later OptimalCondition object building.
-                valueType = constraint.Split('#')[1];
                 constraint = constraint.Split('^')[0];
 
                 var tuple = new Tuple<ConstraintOperator, string>(constraintOperator, constraint);
                 constraints.Add(tuple);
             }
+        }
+
+        private void EvaluateConstraints(INode propertyNode, List<Tuple<ConstraintOperator, string>> constraints)
+        {
+
         }
 
         #endregion

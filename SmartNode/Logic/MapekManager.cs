@@ -420,7 +420,7 @@ namespace Logic
                 _query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
                 var constraints = ProcessConstraintQueries(result);
-                EvaluateConstraints(property, constraints);
+                EvaluateConstraints(property, valueType, constraints);
                 // find the property value from the caches and use it for evaluation
                 
                 // evaluate all the constraints present, and add the optimal condition to the cache
@@ -802,9 +802,28 @@ namespace Logic
             }
         }
 
-        private void EvaluateConstraints(INode propertyNode, List<Tuple<ConstraintOperator, string>> constraints)
+        private void EvaluateConstraints(INode propertyNode, string valueType, List<Tuple<ConstraintOperator, string>> constraints)
         {
+            var propertyName = propertyNode.ToString();
 
+            if (_configurableParameters.TryGetValue(propertyName, out ConfigurableParameter configurableParameter))
+            {
+
+            }
+            else if (_inputOutputs.TryGetValue(propertyName, out InputOutput inputOutput))
+            {
+
+            }
+            else if (_observableProperties.TryGetValue(propertyName, out ObservableProperty observableProperty))
+            {
+                
+            }
+            else
+            {
+                _logger.LogError("Property {property} was not found in the system.", propertyName);
+
+                throw new Exception("The Property must be in the system to be a part of an OptimalCondition.");
+            }
         }
 
         #endregion

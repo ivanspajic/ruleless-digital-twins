@@ -19,14 +19,6 @@ namespace Logic.Mapek
         private readonly IMapekPlan _mapekPlan;
         private readonly IMapekExecute _mapekExecute;
 
-        // Contains supported XMl/RDF/OWL types and their respective value handlers. As new types become supported, their
-        // name/implementation instance pair is simply added to the collection.
-        private readonly Dictionary<string, ISensorValueHandler> _sensorValueHandlers = new()
-        {
-            { "double", new SensorDoubleValueHandler() },
-            { "int", new SensorIntValueHandler() }
-        };
-
         private bool _isLoopActive = false;
 
         public MapekManager(IServiceProvider serviceProvider)
@@ -68,14 +60,14 @@ namespace Logic.Mapek
                     throw new Exception("The graph is empty.");
                 }
 
-                ResetCaches();
-
                 // Observe all hard and soft Sensor values.
-                Monitor();
+                var propertyCache = _mapekMonitor.Monitor(instanceModel);
                 // Out of all possible ExecutionPlans, filter out the irrelevant ones based on current Property values.
-                Analyze();
+                //var optimalConditionAndExecutionPlanTuple = _mapekAnalyze.Analyze(instanceModel, propertyCache);
                 // Plan
+                //var executionPlans = _mapekPlan.Plan(optimalConditionAndExecutionPlanTuple.Item1, optimalConditionAndExecutionPlanTuple.Item2);
                 // Execute
+                //var somethingToReturn = _mapekPlan.Execute(executionPlans);
 
                 Thread.Sleep(SleepyTimeMilliseconds);
             }
@@ -100,14 +92,6 @@ namespace Logic.Mapek
             }
 
             return instanceModel;
-        }
-
-        private void ResetCaches()
-        {
-            _instanceModelGraph.Clear();
-            _observableProperties.Clear();
-            _inputOutputs.Clear();
-            _configurableParameters.Clear();
         }
 
         #region Analyze

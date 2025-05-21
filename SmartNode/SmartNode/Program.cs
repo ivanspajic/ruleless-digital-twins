@@ -1,9 +1,7 @@
 ﻿using Logic.Mapek;
-using Logic.DeviceInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using SensorActuatorImplementations;
 using Logic.FactoryInterface;
 
 namespace SmartNode
@@ -29,7 +27,6 @@ namespace SmartNode
             builder.Services.AddSingleton<IMapekAnalyze, MapekAnalyze>();
             builder.Services.AddSingleton<IMapekPlan, MapekPlan>();
             builder.Services.AddSingleton<IMapekExecute, MapekExecute>();
-            builder.Services.AddSingleton<IMapekCache, MapekCache>();
 
             using var host = builder.Build();
 

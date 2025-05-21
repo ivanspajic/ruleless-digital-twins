@@ -1,4 +1,5 @@
 ﻿using Logic.DeviceInterfaces;
+using Logic.FactoryInterface;
 using Logic.SensorValueHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,14 +13,12 @@ namespace Logic.Mapek
     public class MapekMonitor : IMapekMonitor
     {
         private readonly ILogger<MapekMonitor> _logger;
-        private readonly Func<string, string, ISensor> _sensorFactory;
-        private readonly Func<string, ISensorValueHandler> _sensorValueHandlerFactory;
+        private readonly IFactory _factory;
 
         public MapekMonitor(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekMonitor>>();
-            _sensorFactory = serviceProvider.GetRequiredService<Func<string, string, ISensor>>();
-            _sensorValueHandlerFactory = serviceProvider.GetRequiredService<Func<string, ISensorValueHandler>>();
+            _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
         public PropertyCache Monitor(IGraph instanceModel)
@@ -54,7 +53,7 @@ namespace Logic.Mapek
             }
 
             // Get the values of all ObservableProperties and populate the cache.
-            PopulateObservablePropertiesCache();
+            PopulateObservablePropertiesCache(instanceModel, propertyCache);
 
             return propertyCache;
         }
@@ -88,7 +87,7 @@ namespace Logic.Mapek
             // If the current Property is not an Output of any other Procedures, then it must be a ConfigurableParameter.
             if (procedureQueryResult.IsEmpty)
             {
-                AddConfigurableParameterToCache(propertyNode);
+                AddConfigurableParameterToCache(instanceModel, propertyNode, propertyCache);
 
                 return;
             }
@@ -98,8 +97,8 @@ namespace Logic.Mapek
             {
                 var procedureNode = result["procedure"];
                 var sensorNode = result["sensor"];
-                // Get an instance of a Sensor from the Sensor factory.
-                var sensor = _sensorFactory(sensorNode.ToString(), procedureNode.ToString());
+                // Get an instance of a Sensor from the factory.
+                var sensor = _factory.GetSensorImplementation(sensorNode.ToString(), procedureNode.ToString());
 
                 query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -148,20 +147,22 @@ namespace Logic.Mapek
             }
         }
 
-        private void AddConfigurableParameterToCache(INode propertyNode)
+        private void AddConfigurableParameterToCache(IGraph instanceModel, INode propertyNode, PropertyCache propertyCache)
         {
             var propertyName = propertyNode.ToString();
 
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
             // Get all ConfigurableParameters.
-            _query.CommandText = @"SELECT ?lowerLimit ?upperLimit ?valueIncrements WHERE {
+            query.CommandText = @"SELECT ?lowerLimit ?upperLimit ?valueIncrements WHERE {
                     @property rdf:type meta:ConfigurableParameter .
                     @property meta:hasLowerLimitValue ?lowerLimit .
                     @property meta:hasUpperLimitValue ?upperLimit .
                     @property meta:hasValueIncrements ?valueIncrements . }";
 
-            _query.SetParameter("property", propertyNode);
+            query.SetParameter("property", propertyNode);
 
-            var configurableParameterQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+            var configurableParameterQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
 
             // If the Property isn't a ConfigurableParameter, throw an error.
             if (configurableParameterQueryResult.IsEmpty)
@@ -173,7 +174,7 @@ namespace Logic.Mapek
 
             if (_oldConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? value))
             {
-                _configurableParameters.Add(propertyName, value);
+                propertyCache.ConfigurableParameters.Add(propertyName, value);
 
                 return;
             }
@@ -195,20 +196,22 @@ namespace Logic.Mapek
                 Value = lowerLimit
             };
 
-            _configurableParameters.Add(propertyName, configurableParameter);
+            propertyCache.ConfigurableParameters.Add(propertyName, configurableParameter);
         }
 
-        private void PopulateObservablePropertiesCache()
+        private void PopulateObservablePropertiesCache(IGraph instanceModel, PropertyCache propertyCache)
         {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
             // Get all ObservableProperties.
-            _query.CommandText = @"SELECT DISTINCT ?observableProperty ?valueType WHERE {
+            query.CommandText = @"SELECT DISTINCT ?observableProperty ?valueType WHERE {
                 ?sensor rdf:type sosa:Sensor .
                 ?sensor sosa:observes ?observableProperty .
                 ?observableProperty rdf:type ?bNode .
                 ?bNode owl:onProperty meta:hasValue .
                 ?bNode owl:onDataRange ?valueType . }";
 
-            var queryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
+            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
 
             foreach (var result in queryResult.Results)
             {
@@ -219,7 +222,7 @@ namespace Logic.Mapek
                 ISensorValueHandler sensorValueHandler;
                 try
                 {
-                    sensorValueHandler = _sensorValueHandlers[valueType];
+                    sensorValueHandler = _factory.GetSensorValueHandlerImplementation(valueType);
                 }
                 catch (Exception exception)
                 {
@@ -229,15 +232,15 @@ namespace Logic.Mapek
                 }
 
                 // Get all measured Properties that are Outputs of Sensor Procedures measuring the current ObservableProperty.
-                _query.CommandText = @"SELECT ?measuredProperty WHERE {
+                query.CommandText = @"SELECT ?measuredProperty WHERE {
                     ?sensor sosa:observes @observableProperty .
                     ?sensor ssn:implements ?procedure .
                     ?procedure ssn:hasOutput ?measuredProperty . }";
 
-                _query.SetParameter("observableProperty", observablePropertyNode);
+                query.SetParameter("observableProperty", observablePropertyNode);
 
-                var innerQueryResult = (SparqlResultSet)_instanceModelGraph.ExecuteQuery(_query);
-                var rangeTuple = sensorValueHandler.FindObservablePropertyValueRange(innerQueryResult, "measuredProperty", _inputOutputs);
+                var innerQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+                var rangeTuple = sensorValueHandler.FindObservablePropertyValueRange(innerQueryResult, "measuredProperty", propertyCache.ComputableProperties);
                 var observableProperty = new ObservableProperty
                 {
                     Name = observablePropertyNode.ToString(),
@@ -246,7 +249,7 @@ namespace Logic.Mapek
                     UpperLimitValue = rangeTuple.Item2
                 };
 
-                _observableProperties.Add(observablePropertyNode.ToString(), observableProperty);
+                propertyCache.ObservableProperties.Add(observablePropertyNode.ToString(), observableProperty);
             }
         }
     }

@@ -1,9 +1,10 @@
-﻿using Logic;
+﻿using Logic.Mapek;
 using Logic.DeviceInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SensorActuatorImplementations;
+using Logic.FactoryInterface;
 
 namespace SmartNode
 {
@@ -22,19 +23,13 @@ namespace SmartNode
             {
                 return new MapekManager(serviceprovider);
             });
-            // Register a sensor factory to allow for dynamic constructor argument passing through DI.
-            builder.Services.AddSingleton(serviceProvider =>
-            {
-                // In theory, this function can return various Sensors depending on the input name.
-                return new Func<string, string, ISensor>((sensorName, procedureName) =>
-                {
-                    return new ExampleSensor
-                    {
-                        SensorName = sensorName,
-                        ProcedureName = procedureName
-                    };
-                });
-            });
+            // Register a factory to allow for dynamic constructor argument passing through DI.
+            builder.Services.AddSingleton<IFactory, Factory>();
+            builder.Services.AddSingleton<IMapekMonitor, MapekMonitor>();
+            builder.Services.AddSingleton<IMapekAnalyze, MapekAnalyze>();
+            builder.Services.AddSingleton<IMapekPlan, MapekPlan>();
+            builder.Services.AddSingleton<IMapekExecute, MapekExecute>();
+            builder.Services.AddSingleton<IMapekCache, MapekCache>();
 
             using var host = builder.Build();
 

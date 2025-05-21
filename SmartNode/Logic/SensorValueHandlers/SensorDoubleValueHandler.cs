@@ -3,7 +3,7 @@ using VDS.RDF.Query;
 
 namespace Logic.SensorValueHandlers
 {
-    internal class SensorDoubleValueHandler : ISensorValueHandler
+    public class SensorDoubleValueHandler : ISensorValueHandler
     {
         private static readonly Dictionary<ConstraintOperator, Func<double, double, bool>> _expressionDelegateMap = new()
         {

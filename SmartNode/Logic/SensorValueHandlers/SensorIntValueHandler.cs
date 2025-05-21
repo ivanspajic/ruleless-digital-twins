@@ -4,7 +4,7 @@ using VDS.RDF.Query;
 namespace Logic.SensorValueHandlers
 {
     // Example int Sensor value handler implementation.
-    internal class SensorIntValueHandler : ISensorValueHandler
+    public class SensorIntValueHandler : ISensorValueHandler
     {
         public Tuple<object, object> FindObservablePropertyValueRange(SparqlResultSet queryResult,
             string queryVariableName,

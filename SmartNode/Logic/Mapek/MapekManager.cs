@@ -73,7 +73,7 @@ namespace Logic.Mapek
             }
         }
 
-        private IGraph Initialize(string instanceModelFilePath)
+        private Graph Initialize(string instanceModelFilePath)
         {
             _logger.LogInformation("Loading instance model file contents from {filePath}.", instanceModelFilePath);
 

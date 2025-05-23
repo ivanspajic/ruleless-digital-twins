@@ -4,6 +4,6 @@
     {
         public required object Value { get; init; }
 
-        public required string OwlType { get; set; }
+        public required string OwlType { get; init; }
     }
 }

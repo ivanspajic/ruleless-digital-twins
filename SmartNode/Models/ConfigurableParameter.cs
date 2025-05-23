@@ -9,5 +9,7 @@
         public required object LowerLimitValue { get; init; }
 
         public required object UpperLimitValue { get; init; }
+
+        public required string OwlType { get; init; }
     }
 }

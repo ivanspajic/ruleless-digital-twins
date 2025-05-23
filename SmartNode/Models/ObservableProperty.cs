@@ -12,6 +12,6 @@
 
         public required object UpperLimitValue { get; init; }
 
-        public required string OwlType { get; set; }
+        public required string OwlType { get; init; }
     }
 }

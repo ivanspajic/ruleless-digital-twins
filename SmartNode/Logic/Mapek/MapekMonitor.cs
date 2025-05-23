@@ -78,7 +78,7 @@ namespace Logic.Mapek
                 return;
 
             // Get the type of the Property.
-            var propertyValueType = MapekUtilities.GetInputOutputValueType(instanceModel, propertyNode);
+            var propertyType = MapekUtilities.GetPropertyValueType(instanceModel, propertyNode);
 
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -97,7 +97,7 @@ namespace Logic.Mapek
             // If the current Property is not an Output of any other Procedures, then it must be a ConfigurableParameter.
             if (procedureQueryResult.IsEmpty)
             {
-                AddConfigurableParameterToCache(instanceModel, propertyNode, propertyCache);
+                AddConfigurableParameterToCache(instanceModel, propertyNode, propertyType, propertyCache);
 
                 return;
             }
@@ -138,7 +138,8 @@ namespace Logic.Mapek
                         inputProperties[i] = propertyCache.ConfigurableParameters[inputProperty.ToString()].Value;
                     else
                     {
-                        _logger.LogError("The Input Property {property} was not found in the respective Property caches.", inputProperty.ToString());
+                        _logger.LogError("The Input Property {property} was not found in the respective Property caches.",
+                            inputProperty.ToString());
 
                         throw new Exception("The Property tree traversal didn't populate the caches with all properties.");
                     }
@@ -149,7 +150,7 @@ namespace Logic.Mapek
                 var property = new InputOutput
                 {
                     Name = propertyNode.ToString(),
-                    OwlType = propertyValueType,
+                    OwlType = propertyType,
                     Value = propertyValue
                 };
 
@@ -157,7 +158,10 @@ namespace Logic.Mapek
             }
         }
 
-        private void AddConfigurableParameterToCache(IGraph instanceModel, INode propertyNode, PropertyCache propertyCache)
+        private void AddConfigurableParameterToCache(IGraph instanceModel,
+            INode propertyNode,
+            string propertyType,
+            PropertyCache propertyCache)
         {
             var propertyName = propertyNode.ToString();
 
@@ -203,7 +207,8 @@ namespace Logic.Mapek
                 LowerLimitValue = lowerLimit,
                 UpperLimitValue = upperLimit,
                 ValueIncrements = valueIncrements,
-                Value = lowerLimit
+                Value = lowerLimit,
+                OwlType = propertyType
             };
 
             propertyCache.ConfigurableParameters.Add(propertyName, configurableParameter);
@@ -217,9 +222,12 @@ namespace Logic.Mapek
             query.CommandText = @"SELECT DISTINCT ?observableProperty ?valueType WHERE {
                 ?sensor rdf:type sosa:Sensor .
                 ?sensor sosa:observes ?observableProperty .
-                ?observableProperty rdf:type ?bNode .
-                ?bNode owl:onProperty meta:hasValue .
-                ?bNode owl:onDataRange ?valueType . }";
+                ?observableProperty rdf:type ?bNode1 .
+                ?bNode1 owl:onProperty meta:hasUpperLimitValue .
+                ?observableProperty rdf:type ?bNode2 .
+                ?bNode2 owl:onProperty meta:hasLowerLimitValue .
+                ?bNode1 owl:onDataRange ?valueType .
+                ?bNode2 owl:onDataRange ?valueType . }";
 
             var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
 

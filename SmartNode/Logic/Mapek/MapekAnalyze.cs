@@ -44,7 +44,7 @@ namespace Logic.Mapek
                 var valueType = MapekUtilities.GetObservablePropertyValueType(instanceModel, property);
 
                 var constraints = ProcessConstraintQueries(instanceModel, optimalCondition, property, reachedInMaximumSeconds);
-                //EvaluateConstraints(property, valueType, propertyCache, constraints);
+                EvaluateConstraints(property, valueType, propertyCache, constraints);
                 // find the property value from the caches and use it for evaluation
 
                 // evaluate all the constraints present, and add the optimal condition to the cache
@@ -607,7 +607,7 @@ namespace Logic.Mapek
 
             if (propertyCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter configurableParameter))
             {
-
+                
             }
             else if (propertyCache.ComputableProperties.TryGetValue(propertyName, out InputOutput inputOutput))
             {

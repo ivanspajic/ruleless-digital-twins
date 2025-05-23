@@ -33,7 +33,7 @@ namespace Logic.Mapek
             return query;
         }
 
-        public static string GetPropertyValueType(IGraph instanceModel, INode propertyNode)
+        public static string GetPropertyType(IGraph instanceModel, INode propertyNode)
         {
             var query = GetParameterizedStringQuery();
 

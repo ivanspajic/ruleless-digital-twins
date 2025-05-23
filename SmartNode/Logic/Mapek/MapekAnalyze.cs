@@ -24,7 +24,7 @@ namespace Logic.Mapek
             _logger.LogInformation("Starting the Analyze phase.");
 
             var optimalConditions = new List<OptimalCondition>();
-            var executionPlans = new List<ExecutionPlan>();
+            var finalExecutionPlans = new List<ExecutionPlan>();
 
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -36,15 +36,57 @@ namespace Logic.Mapek
 
             var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
 
+            // For each OptimalCondition, process its respective constraints and get the appropriate Execution Plans
+            // for mitigation.
             foreach (var result in queryResult.Results)
             {
                 var optimalCondition = result["optimalCondition"];
                 var property = result["property"];
+                var propertyName = property.ToString();
                 var reachedInMaximumSeconds = result["reachedInMaximumSeconds"];
-                var valueType = MapekUtilities.GetObservablePropertyValueType(instanceModel, property);
-
                 var constraints = ProcessConstraintQueries(instanceModel, optimalCondition, property, reachedInMaximumSeconds);
-                EvaluateConstraints(property, valueType, propertyCache, constraints);
+
+                List<ExecutionPlan> executionPlans;
+
+                if (propertyCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter configurableParameter))
+                {
+                    executionPlans = EvaluateConstraintsAndGetExecutionPlans(configurableParameter.Value, constraints);
+                }
+                else if (propertyCache.ComputableProperties.TryGetValue(propertyName, out InputOutput inputOutput))
+                {
+                    executionPlans = EvaluateConstraintsAndGetExecutionPlans(inputOutput.Value, constraints);
+                }
+                else if (propertyCache.ObservableProperties.TryGetValue(propertyName, out ObservableProperty observableProperty))
+                {
+                    executionPlans = EvaluateConstraintsAndGetExecutionPlans(observableProperty.LowerLimitValue,
+                        observableProperty.UpperLimitValue,
+                        constraints);
+                }
+                else
+                {
+                    _logger.LogError("Property {property} was not found in the system.", propertyName);
+
+                    throw new Exception("The Property must be in the system to be a part of an OptimalCondition.");
+                }
+
+                if (executionPlans.Count > 0)
+                {
+                    var reachedInMaximumSecondsValue = reachedInMaximumSeconds.ToString().Split('^')[0];
+
+                    var propertyType = MapekUtilities.GetPropertyType(instanceModel, property);
+
+                    optimalConditions.Add(new OptimalCondition()
+                    {
+                        Constraints = constraints,
+                        ConstraintValueType = propertyType,
+                        Name = optimalCondition.ToString(),
+                        Property = property.ToString(),
+                        ReachedInMaximumSeconds = int.Parse(reachedInMaximumSecondsValue)
+                    });
+                }
+
+                finalExecutionPlans.AddRange(executionPlans);
+
                 // find the property value from the caches and use it for evaluation
 
                 // evaluate all the constraints present, and add the optimal condition to the cache
@@ -56,7 +98,7 @@ namespace Logic.Mapek
             // TODO: make the executionplan cache!!
             // query for execution plans that optimize for stuff...
 
-            return new Tuple<List<OptimalCondition>, List<ExecutionPlan>>(optimalConditions, executionPlans);
+            return new Tuple<List<OptimalCondition>, List<ExecutionPlan>>(optimalConditions, finalExecutionPlans);
         }
 
         private List<Tuple<ConstraintOperator, string>> ProcessConstraintQueries(IGraph instanceModel,
@@ -598,31 +640,19 @@ namespace Logic.Mapek
             }
         }
 
-        private void EvaluateConstraints(INode propertyNode,
-            string valueType,
-            PropertyCache propertyCache,
+        private List<ExecutionPlan> EvaluateConstraintsAndGetExecutionPlans(object propertyValue,
             List<Tuple<ConstraintOperator, string>> constraints)
         {
-            var propertyName = propertyNode.ToString();
+            // TODO: finish the constraint evaluation and executionplan querying!
+            return new List<ExecutionPlan>();
+        }
 
-            if (propertyCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter configurableParameter))
-            {
-                
-            }
-            else if (propertyCache.ComputableProperties.TryGetValue(propertyName, out InputOutput inputOutput))
-            {
-
-            }
-            else if (propertyCache.ObservableProperties.TryGetValue(propertyName, out ObservableProperty observableProperty))
-            {
-
-            }
-            else
-            {
-                _logger.LogError("Property {property} was not found in the system.", propertyName);
-
-                throw new Exception("The Property must be in the system to be a part of an OptimalCondition.");
-            }
+        private List<ExecutionPlan> EvaluateConstraintsAndGetExecutionPlans(object propertyLowerLimitValue,
+            object propertyUpperLimitValue,
+            List<Tuple<ConstraintOperator, string>> constraints)
+        {
+            // TODO: finish the constraint evaluation and executionplan querying!
+            return new List<ExecutionPlan>();
         }
     }
 }

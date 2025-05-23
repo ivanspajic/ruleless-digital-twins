@@ -78,7 +78,7 @@ namespace Logic.Mapek
                 return;
 
             // Get the type of the Property.
-            var propertyType = MapekUtilities.GetPropertyValueType(instanceModel, propertyNode);
+            var propertyType = MapekUtilities.GetPropertyType(instanceModel, propertyNode);
 
             var query = MapekUtilities.GetParameterizedStringQuery();
 

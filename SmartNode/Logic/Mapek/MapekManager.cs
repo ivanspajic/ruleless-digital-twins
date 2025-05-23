@@ -58,9 +58,9 @@ namespace Logic.Mapek
                     throw new Exception("The graph is empty.");
                 }
 
-                // Observe all hard and soft Sensor values.
+                // Monitor - Observe all hard and soft Sensor values.
                 var propertyCache = _mapekMonitor.Monitor(instanceModel);
-                // Out of all possible ExecutionPlans, filter out the irrelevant ones based on current Property values.
+                // Analyze - Out of all possible ExecutionPlans, filter out the irrelevant ones based on current Property values.
                 var optimalConditionAndExecutionPlanTuple = _mapekAnalyze.Analyze(instanceModel, propertyCache);
                 // Plan
                 //var executionPlans = _mapekPlan.Plan(optimalConditionAndExecutionPlanTuple.Item1, optimalConditionAndExecutionPlanTuple.Item2);

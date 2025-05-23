@@ -1,5 +1,4 @@
-﻿using Logic.DeviceInterfaces;
-using Logic.FactoryInterface;
+﻿using Logic.FactoryInterface;
 using Logic.SensorValueHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,10 +14,19 @@ namespace Logic.Mapek
         private readonly ILogger<MapekMonitor> _logger;
         private readonly IFactory _factory;
 
+        private PropertyCache _oldPropertyCache;
+
         public MapekMonitor(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekMonitor>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
+
+            _oldPropertyCache = new PropertyCache
+            {
+                ComputableProperties = new Dictionary<string, InputOutput>(),
+                ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
+                ObservableProperties = new Dictionary<string, ObservableProperty>()
+            };
         }
 
         public PropertyCache Monitor(IGraph instanceModel)
@@ -54,6 +62,8 @@ namespace Logic.Mapek
 
             // Get the values of all ObservableProperties and populate the cache.
             PopulateObservablePropertiesCache(instanceModel, propertyCache);
+
+            _oldPropertyCache = propertyCache;
 
             return propertyCache;
         }
@@ -172,7 +182,7 @@ namespace Logic.Mapek
                 throw new Exception("The Property must exist as an ObservableProperty, an Output, or a ConfigurableParameter.");
             }
 
-            if (_oldConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? value))
+            if (_oldPropertyCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? value))
             {
                 propertyCache.ConfigurableParameters.Add(propertyName, value);
 

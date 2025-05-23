@@ -11,12 +11,29 @@ namespace SmartNode
         private readonly Dictionary<(string, string), ISensor> _sensors = new()
         {
             {
-                ("test", "test"), new ExampleSensor
+                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1",
+                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm"), new ExampleSensor
                 {
-                    ProcedureName = "test",
-                    SensorName = "test"
+                    ProcedureName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm",
+                    SensorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1"
                 }
-            }
+            },
+            {
+                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2",
+                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure"), new ExampleSensor
+                {
+                    ProcedureName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure",
+                    SensorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2"
+                }
+            },
+            {
+                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1",
+                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure"), new ExampleSensor
+                {
+                    ProcedureName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure",
+                    SensorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1"
+                }
+            },
         };
 
         private readonly Dictionary<string, ISensorValueHandler> _sensorValueHandlers = new()

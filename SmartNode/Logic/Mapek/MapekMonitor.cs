@@ -220,10 +220,9 @@ namespace Logic.Mapek
             var query = MapekUtilities.GetParameterizedStringQuery();
 
             // Get all ObservableProperties.
-            query.CommandText = @"SELECT DISTINCT ?observableProperty WHERE {
+            query.CommandText = @"SELECT DISTINCT ?observableProperty ?valueType WHERE {
                 ?sensor rdf:type sosa:Sensor .
                 ?sensor sosa:observes ?observableProperty .
-                ?sensor ssn:implements ?procedure .
                 ?observableProperty rdf:type ?bNode .
                 ?bNode owl:onProperty meta:hasValue .
                 ?bNode owl:onDataRange ?valueType . }";
@@ -232,22 +231,38 @@ namespace Logic.Mapek
 
             foreach (var result in queryResult.Results)
             {
-                // TODO: get the relevant procedures, then get their outputs, then find these outputs in the property
-                // cache and add them to a list which you can send to the outsourced logic-handling delegate
-
-                var observablePropertyName = result["observableProperty"].ToString();
-                var sensorName = result["sensor"].ToString();
-                var procedureName = result["procedure"].ToString();
+                var observablePropertyNode = result["observableProperty"];
+                var observablePropertyName = observablePropertyNode.ToString();
                 var valueType = result["valueType"].ToString();
                 valueType = valueType.Split('#')[1];
 
-                var sensor = _factory.GetSensorImplementation(sensorName, procedureName);
+                var measuredPropertyList = new List<Property>();
+
+                var innerQuery = MapekUtilities.GetParameterizedStringQuery();
+
+                innerQuery.CommandText = @"SELECT ?outputProperty WHERE {
+                    ?sensor sosa:observes @observableProperty .
+                    ?sensor ssn:implements ?procedure .
+                    ?procedure ssn:hasOutput ?outputProperty . }";
+
+                innerQuery.SetParameter("observableProperty", observablePropertyNode);
+
+                var innerQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(innerQuery);
+
+                foreach (var innerResult in innerQueryResult.Results)
+                {
+                    var propertyName = innerResult["outputProperty"].ToString();
+
+                    if (propertyCache.Properties.TryGetValue(propertyName, out Property property))
+                        measuredPropertyList.Add(property);
+                }
 
                 var observableProperty = new Property
                 {
                     Name = observablePropertyName,
                     OwlType = valueType,
-                    Value = sensor.ObservePropertyValue()
+                    Value = 10.2// TODO: calc the average of the measured properties for now, but leave it up to any other
+                                // outsourced, user-defined logic
                 };
 
                 propertyCache.Properties.Add(observablePropertyName, observableProperty);

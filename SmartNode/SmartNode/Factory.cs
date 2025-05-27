@@ -1,7 +1,8 @@
 ﻿using Logic.DeviceInterfaces;
 using Logic.FactoryInterface;
 using Logic.SensorValueHandlers;
-using SensorActuatorImplementations;
+using SensorActuatorImplementations.Sensors;
+using SensorActuatorImplementations.ValueHandlers;
 
 namespace SmartNode
 {
@@ -36,6 +37,7 @@ namespace SmartNode
             },
         };
 
+        // The keys represent the OWL (RDF/XSD) types supported by Protege, and the values are user implementations.
         private readonly Dictionary<string, ISensorValueHandler> _sensorValueHandlers = new()
         {
             { "double", new SensorDoubleValueHandler() },

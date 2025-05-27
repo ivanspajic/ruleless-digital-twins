@@ -40,27 +40,36 @@ namespace Logic.Mapek
             // for mitigation.
             foreach (var result in queryResult.Results)
             {
-                var optimalCondition = result["optimalCondition"];
-                var property = result["property"];
-                var propertyName = property.ToString();
+                var optimalConditionNode = result["optimalCondition"];
+                var propertyNode = result["property"];
+                var propertyName = propertyNode.ToString();
                 var reachedInMaximumSeconds = result["reachedInMaximumSeconds"];
-                var constraints = ProcessConstraintQueries(instanceModel, optimalCondition, property, reachedInMaximumSeconds);
+                var reachedInMaximumSecondsValue = reachedInMaximumSeconds.ToString().Split('^')[0];
+                var propertyType = MapekUtilities.GetPropertyType(instanceModel, propertyNode);
+
+                // Process all the constraints this OptimalCondition might have.
+                var constraints = ProcessConstraintQueries(instanceModel, optimalConditionNode, propertyNode, reachedInMaximumSeconds);
+
+                var optimalCondition = new OptimalCondition()
+                {
+                    Constraints = constraints,
+                    ConstraintValueType = propertyType,
+                    Name = optimalConditionNode.ToString(),
+                    Property = propertyNode.ToString(),
+                    ReachedInMaximumSeconds = int.Parse(reachedInMaximumSecondsValue)
+                };
 
                 List<ExecutionPlan> executionPlans;
 
                 if (propertyCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter configurableParameter))
                 {
-                    executionPlans = EvaluateConstraintsAndGetExecutionPlans(configurableParameter.Value, constraints);
+                    executionPlans = EvaluateConstraintsAndGetExecutionPlans(instanceModel,
+                        optimalCondition,
+                        configurableParameter.Value);
                 }
-                else if (propertyCache.ComputableProperties.TryGetValue(propertyName, out InputOutput inputOutput))
+                else if (propertyCache.Properties.TryGetValue(propertyName, out Property property))
                 {
-                    executionPlans = EvaluateConstraintsAndGetExecutionPlans(inputOutput.Value, constraints);
-                }
-                else if (propertyCache.ObservableProperties.TryGetValue(propertyName, out ObservableProperty observableProperty))
-                {
-                    executionPlans = EvaluateConstraintsAndGetExecutionPlans(observableProperty.LowerLimitValue,
-                        observableProperty.UpperLimitValue,
-                        constraints);
+                    executionPlans = EvaluateConstraintsAndGetExecutionPlans(instanceModel, optimalCondition, property.Value);
                 }
                 else
                 {
@@ -69,33 +78,13 @@ namespace Logic.Mapek
                     throw new Exception("The Property must be in the system to be a part of an OptimalCondition.");
                 }
 
+                // If there were any unsatisfied constraints, add the current OptimalCondition to the cache.
                 if (executionPlans.Count > 0)
-                {
-                    var reachedInMaximumSecondsValue = reachedInMaximumSeconds.ToString().Split('^')[0];
-
-                    var propertyType = MapekUtilities.GetPropertyType(instanceModel, property);
-
-                    optimalConditions.Add(new OptimalCondition()
-                    {
-                        Constraints = constraints,
-                        ConstraintValueType = propertyType,
-                        Name = optimalCondition.ToString(),
-                        Property = property.ToString(),
-                        ReachedInMaximumSeconds = int.Parse(reachedInMaximumSecondsValue)
-                    });
-                }
+                    optimalConditions.Add(optimalCondition);
 
                 finalExecutionPlans.AddRange(executionPlans);
-
-                // find the property value from the caches and use it for evaluation
-
-                // evaluate all the constraints present, and add the optimal condition to the cache
-                // in case of at least one constraint not being fulfilled.
-                // in case of adding an optimal condition to the cache, query for all execution plans
-                // that support regaining optimal conditions   
             }
 
-            // TODO: make the executionplan cache!!
             // query for execution plans that optimize for stuff...
 
             return new Tuple<List<OptimalCondition>, List<ExecutionPlan>>(optimalConditions, finalExecutionPlans);
@@ -640,19 +629,78 @@ namespace Logic.Mapek
             }
         }
 
-        private List<ExecutionPlan> EvaluateConstraintsAndGetExecutionPlans(object propertyValue,
-            List<Tuple<ConstraintOperator, string>> constraints)
+        private List<ExecutionPlan> EvaluateConstraintsAndGetExecutionPlans(IGraph instanceModel,
+            OptimalCondition optimalCondition,
+            object propertyValue)
         {
-            // TODO: finish the constraint evaluation and executionplan querying!
-            return new List<ExecutionPlan>();
+            var relevantExecutionPlans = new List<ExecutionPlan>();
+
+            var sensorValueHandler = _factory.GetSensorValueHandlerImplementation(optimalCondition.ConstraintValueType);
+
+            foreach (var constraint in optimalCondition.Constraints)
+            {
+                // Evaluate the constraint against the current Property value.
+                if (!sensorValueHandler.EvaluateConstraint(propertyValue, constraint))
+                {
+                    _logger.LogInformation(@"OptimalCondition {optimalCondition} with constraint {restriction} {value} is unsatisfied due
+                        to Property {property}'s value being {propertyValue}.",
+                        optimalCondition.Name,
+                        constraint.Item1.ToString(),
+                        constraint.Item2,
+                        optimalCondition.Property,
+                        propertyValue.ToString());
+
+                    // In case of the constraint not being satisfied, get the relevant kind of ExecutionPlans from the instance model.
+                    var executionPlans = GetRelevantExecutionPlansFromUnsatisfiedConstraint(instanceModel,
+                        optimalCondition.Property,
+                        constraint.Item1);
+                    relevantExecutionPlans.AddRange(executionPlans);
+                }
+            }
+
+            return relevantExecutionPlans;
         }
 
-        private List<ExecutionPlan> EvaluateConstraintsAndGetExecutionPlans(object propertyLowerLimitValue,
-            object propertyUpperLimitValue,
-            List<Tuple<ConstraintOperator, string>> constraints)
+        private List<ExecutionPlan> GetRelevantExecutionPlansFromUnsatisfiedConstraint(IGraph instanceModel,
+            string propertyName,
+            ConstraintOperator constraintOperator)
         {
-            // TODO: finish the constraint evaluation and executionplan querying!
-            return new List<ExecutionPlan>();
+            var executionPlans = new List<ExecutionPlan>();
+
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            query.CommandText = @"SELECT ?executionPlan WHERE {
+                ?executionPlan rdf:type meta:ExecutionPlan . }";
+
+            var propertyChange = string.Empty;
+
+            switch (constraintOperator)
+            {
+                // In case the unsatisfied constraint is LessThan or LessThanOrEqualTo, any appropriate ExecutionPlan
+                // will need to result in a PropertyChange with a ValueDecrease to mitigate it.
+                case ConstraintOperator.LessThan:
+                case ConstraintOperator.LessThanOrEqualTo:
+                    propertyChange = "meta:ValueDecrease";
+
+                    break;
+                // In case the unsatisfied constraint is GreaterThan or GreaterThanOrEqualTo, any appropriate ExecutionPlan
+                // will need to result in a PropertyChange with a ValueIncrease to mitigate it.
+                case ConstraintOperator.GreaterThan:
+                case ConstraintOperator.GreaterThanOrEqualTo:
+                    propertyChange = "meta:ValueIncrease";
+
+                    break;
+                // Constraints like Equals and NotEquals can be mitigated through both ValueIncrease and ValueDecrease, so
+                // they fall under the default case.
+                default:
+                    propertyChange = "";
+
+                    break;
+            }
+
+            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+
+            return executionPlans;
         }
     }
 }

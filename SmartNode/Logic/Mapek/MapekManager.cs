@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Models;
 using VDS.RDF;
 using VDS.RDF.Parsing;
-using VDS.RDF.Query;
 
 namespace Logic.Mapek
 {

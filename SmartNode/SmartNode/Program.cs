@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Logic.FactoryInterface;
+using System.Reflection;
 
 namespace SmartNode
 {
@@ -31,8 +32,14 @@ namespace SmartNode
             using var host = builder.Build();
 
             var mapekManager = host.Services.GetRequiredService<IMapekManager>();
-            // TODO: get rid of the hard-coded string.
-            mapekManager.StartLoop(@"C:\dev\dt-code-generation\models-and-rules\inferred-model-1.ttl");
+
+            // Get executing assembly path.
+            var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            // Combine it with the relative path of the inferred model file.
+            var modelFilePath = Path.Combine(executingAssemblyPath, @"..\..\..\..\..\models-and-rules\inferred-model-1.ttl");
+            // Make it system-agnostic.
+            modelFilePath = Path.GetFullPath(modelFilePath);
+            mapekManager.StartLoop(modelFilePath);
 
             host.Run();
         }

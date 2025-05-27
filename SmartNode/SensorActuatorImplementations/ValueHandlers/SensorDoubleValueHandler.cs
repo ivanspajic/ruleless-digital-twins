@@ -1,7 +1,7 @@
-﻿using Models;
-using VDS.RDF.Query;
+﻿using Logic.SensorValueHandlers;
+using Models;
 
-namespace Logic.SensorValueHandlers
+namespace SensorActuatorImplementations.ValueHandlers
 {
     public class SensorDoubleValueHandler : ISensorValueHandler
     {
@@ -14,28 +14,6 @@ namespace Logic.SensorValueHandlers
             { ConstraintOperator.LessThan, EvaluateLessThan },
             { ConstraintOperator.LessThanOrEqualTo, EvaluateLessThanOrEqualTo }
         };
-
-        public Tuple<object, object> FindObservablePropertyValueRange(SparqlResultSet queryResult,
-            string queryVariableName,
-            IDictionary<string, InputOutput> inputOutputs)
-        {
-            var lowestValue = double.MaxValue;
-            var highestValue = double.MinValue;
-
-            foreach (var result in queryResult.Results)
-            {
-                var propertyName = result[queryVariableName].ToString();
-                var propertyValue = (double)inputOutputs[propertyName].Value;
-
-                if (propertyValue < lowestValue)
-                    lowestValue = propertyValue;
-
-                if (propertyValue > highestValue)
-                    highestValue = propertyValue;
-            }
-
-            return new Tuple<object, object>(lowestValue, highestValue);
-        }
 
         public bool EvaluateConstraint(object sensorValue, Tuple<ConstraintOperator, string> constraint)
         {

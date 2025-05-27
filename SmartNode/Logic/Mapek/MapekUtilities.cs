@@ -42,12 +42,12 @@ namespace Logic.Mapek
                 ?bNode owl:onProperty meta:hasValue .
                 ?bNode owl:onDataRange ?valueType . }";
 
-            return GetPropertyValueType(query, instanceModel, "property", propertyNode);
-        }
+            var propertyType = GetPropertyValueType(query, instanceModel, "property", propertyNode);
 
-        public static string GetObservablePropertyValueType(IGraph instanceModel, INode propertyNode)
-        {
-            var query = GetParameterizedStringQuery();
+            if (!string.IsNullOrEmpty(propertyType))
+                return propertyType;
+
+            query = GetParameterizedStringQuery();
 
             query.CommandText = @"SELECT ?valueType WHERE {
                 @property rdf:type sosa:ObservableProperty .
@@ -55,7 +55,12 @@ namespace Logic.Mapek
                 ?bNode owl:onProperty meta:hasUpperLimitValue .
                 ?bNode owl:onDataRange ?valueType . }";
 
-            return GetPropertyValueType(query, instanceModel, "property", propertyNode);
+            propertyType = GetPropertyValueType(query, instanceModel, "property", propertyNode);
+
+            if (!string.IsNullOrEmpty(propertyType))
+                return propertyType;
+
+            throw new Exception("The property " + propertyNode.ToString() + " was found without a value type.");
         }
 
         private static string GetPropertyValueType(SparqlParameterizedString query, IGraph instanceModel, string parameterName, INode propertyNode)
@@ -65,9 +70,7 @@ namespace Logic.Mapek
             var propertyTypeQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
 
             if (propertyTypeQueryResult.IsEmpty)
-            {
-                throw new Exception("The property " + propertyNode.ToString() + " was found without a value type.");
-            }
+                return string.Empty;
 
             var propertyValueType = propertyTypeQueryResult.Results[0]["valueType"].ToString();
             return propertyValueType.Split('#')[1];

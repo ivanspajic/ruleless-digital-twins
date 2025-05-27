@@ -1,6 +1,6 @@
 ﻿using Logic.DeviceInterfaces;
 
-namespace SensorActuatorImplementations
+namespace SensorActuatorImplementations.Sensors
 {
     public class ExampleSensor : ISensor
     {
@@ -14,7 +14,7 @@ namespace SensorActuatorImplementations
 
             // Return a fake calculation as a bare minimum.
             //return random.NextDouble() * 15;
-            return 15.0;
+            return 30.5;
         }
     }
 }

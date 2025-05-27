@@ -1,5 +1,4 @@
 ﻿using Logic.FactoryInterface;
-using Logic.SensorValueHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Models;
@@ -23,9 +22,8 @@ namespace Logic.Mapek
 
             _oldPropertyCache = new PropertyCache
             {
-                ComputableProperties = new Dictionary<string, InputOutput>(),
-                ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
-                ObservableProperties = new Dictionary<string, ObservableProperty>()
+                Properties = new Dictionary<string, Property>(),
+                ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
             };
         }
 
@@ -35,9 +33,8 @@ namespace Logic.Mapek
 
             var propertyCache = new PropertyCache
             {
-                ComputableProperties = new Dictionary<string, InputOutput>(),
-                ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
-                ObservableProperties = new Dictionary<string, ObservableProperty>()
+                Properties = new Dictionary<string, Property>(),
+                ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
             };
 
             var query = MapekUtilities.GetParameterizedStringQuery();
@@ -74,7 +71,7 @@ namespace Logic.Mapek
 
             // Simply return if the current Property already exists in the cache. This is necessary to avoid unnecessary multiple
             // executions of the same Sensors since a single Property can be an Input to multiple soft Sensors.
-            if (propertyCache.ComputableProperties.ContainsKey(propertyName) || propertyCache.ConfigurableParameters.ContainsKey(propertyName))
+            if (propertyCache.Properties.ContainsKey(propertyName) || propertyCache.ConfigurableParameters.ContainsKey(propertyName))
                 return;
 
             // Get the type of the Property.
@@ -132,8 +129,8 @@ namespace Logic.Mapek
                     var inputProperty = innerQueryResult.Results[i]["inputProperty"];
                     PopulateInputOutputsAndConfigurableParametersCaches(instanceModel, inputProperty, propertyCache);
 
-                    if (propertyCache.ComputableProperties.ContainsKey(inputProperty.ToString()))
-                        inputProperties[i] = propertyCache.ComputableProperties[inputProperty.ToString()].Value;
+                    if (propertyCache.Properties.ContainsKey(inputProperty.ToString()))
+                        inputProperties[i] = propertyCache.Properties[inputProperty.ToString()].Value;
                     else if (propertyCache.ConfigurableParameters.ContainsKey(inputProperty.ToString()))
                         inputProperties[i] = propertyCache.ConfigurableParameters[inputProperty.ToString()].Value;
                     else
@@ -147,14 +144,16 @@ namespace Logic.Mapek
 
                 // Invoke the Sensor with the corresponding Inputs and save the returned value in the map.
                 var propertyValue = sensor.ObservePropertyValue(inputProperties);
-                var property = new InputOutput
+                var property = new Property
                 {
                     Name = propertyNode.ToString(),
                     OwlType = propertyType,
                     Value = propertyValue
                 };
 
-                propertyCache.ComputableProperties.Add(property.Name, property);
+                propertyCache.Properties.Add(property.Name, property);
+
+                _logger.LogInformation("Added computable Property (Input/Output) {property} to the cache.", propertyName);
             }
         }
 
@@ -212,6 +211,8 @@ namespace Logic.Mapek
             };
 
             propertyCache.ConfigurableParameters.Add(propertyName, configurableParameter);
+
+            _logger.LogInformation("Added ConfigurableParameter {configurableParameter} to the cache.", propertyName);
         }
 
         private void PopulateObservablePropertiesCache(IGraph instanceModel, PropertyCache propertyCache)
@@ -219,55 +220,39 @@ namespace Logic.Mapek
             var query = MapekUtilities.GetParameterizedStringQuery();
 
             // Get all ObservableProperties.
-            query.CommandText = @"SELECT DISTINCT ?observableProperty ?valueType WHERE {
+            query.CommandText = @"SELECT DISTINCT ?observableProperty WHERE {
                 ?sensor rdf:type sosa:Sensor .
                 ?sensor sosa:observes ?observableProperty .
-                ?observableProperty rdf:type ?bNode1 .
-                ?bNode1 owl:onProperty meta:hasUpperLimitValue .
-                ?observableProperty rdf:type ?bNode2 .
-                ?bNode2 owl:onProperty meta:hasLowerLimitValue .
-                ?bNode1 owl:onDataRange ?valueType .
-                ?bNode2 owl:onDataRange ?valueType . }";
+                ?sensor ssn:implements ?procedure .
+                ?observableProperty rdf:type ?bNode .
+                ?bNode owl:onProperty meta:hasValue .
+                ?bNode owl:onDataRange ?valueType . }";
 
             var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
 
             foreach (var result in queryResult.Results)
             {
-                var observablePropertyNode = result["observableProperty"];
+                // TODO: get the relevant procedures, then get their outputs, then find these outputs in the property
+                // cache and add them to a list which you can send to the outsourced logic-handling delegate
+
+                var observablePropertyName = result["observableProperty"].ToString();
+                var sensorName = result["sensor"].ToString();
+                var procedureName = result["procedure"].ToString();
                 var valueType = result["valueType"].ToString();
                 valueType = valueType.Split('#')[1];
 
-                ISensorValueHandler sensorValueHandler;
-                try
+                var sensor = _factory.GetSensorImplementation(sensorName, procedureName);
+
+                var observableProperty = new Property
                 {
-                    sensorValueHandler = _factory.GetSensorValueHandlerImplementation(valueType);
-                }
-                catch (Exception exception)
-                {
-                    _logger.LogError(exception, "No supported .NET type implementation found for XML/RDF/OWL type {type}.", valueType);
-
-                    throw;
-                }
-
-                // Get all measured Properties that are Outputs of Sensor Procedures measuring the current ObservableProperty.
-                query.CommandText = @"SELECT ?measuredProperty WHERE {
-                    ?sensor sosa:observes @observableProperty .
-                    ?sensor ssn:implements ?procedure .
-                    ?procedure ssn:hasOutput ?measuredProperty . }";
-
-                query.SetParameter("observableProperty", observablePropertyNode);
-
-                var innerQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
-                var rangeTuple = sensorValueHandler.FindObservablePropertyValueRange(innerQueryResult, "measuredProperty", propertyCache.ComputableProperties);
-                var observableProperty = new ObservableProperty
-                {
-                    Name = observablePropertyNode.ToString(),
+                    Name = observablePropertyName,
                     OwlType = valueType,
-                    LowerLimitValue = rangeTuple.Item1,
-                    UpperLimitValue = rangeTuple.Item2
+                    Value = sensor.ObservePropertyValue()
                 };
 
-                propertyCache.ObservableProperties.Add(observablePropertyNode.ToString(), observableProperty);
+                propertyCache.Properties.Add(observablePropertyName, observableProperty);
+
+                _logger.LogInformation("Added ObservableProperty {observableProperty} to the cache.", observablePropertyName);
             }
         }
     }

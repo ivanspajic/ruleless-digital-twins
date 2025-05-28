@@ -5,18 +5,18 @@ namespace Logic.Mapek
 {
     internal static class MapekUtilities
     {
-        private const string DtPrefix = "meta";
-        private const string DtUri = "http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/";
-        private const string SosaPrefix = "sosa";
-        private const string SosaUri = "http://www.w3.org/ns/sosa/";
-        private const string SsnPrefix = "ssn";
-        private const string SsnUri = "http://www.w3.org/ns/ssn/";
-        private const string RdfPrefix = "rdf";
-        private const string RdfUri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-        private const string OwlPrefix = "owl";
-        private const string OwlUri = "http://www.w3.org/2002/07/owl#";
-        private const string XsdPrefix = "xsd";
-        private const string XsdUri = "http://www.w3.org/2001/XMLSchema#";
+        public const string DtPrefix = "meta";
+        public const string DtUri = "http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/";
+        public const string SosaPrefix = "sosa";
+        public const string SosaUri = "http://www.w3.org/ns/sosa/";
+        public const string SsnPrefix = "ssn";
+        public const string SsnUri = "http://www.w3.org/ns/ssn/";
+        public const string RdfPrefix = "rdf";
+        public const string RdfUri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+        public const string OwlPrefix = "owl";
+        public const string OwlUri = "http://www.w3.org/2002/07/owl#";
+        public const string XsdPrefix = "xsd";
+        public const string XsdUri = "http://www.w3.org/2001/XMLSchema#";
 
         public static SparqlParameterizedString GetParameterizedStringQuery()
         {

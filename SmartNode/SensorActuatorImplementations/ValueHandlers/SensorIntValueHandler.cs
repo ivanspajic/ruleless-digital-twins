@@ -10,5 +10,10 @@ namespace SensorActuatorImplementations.ValueHandlers
         {
             throw new NotImplementedException();
         }
+
+        public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -667,11 +667,6 @@ namespace Logic.Mapek
         {
             var executionPlans = new List<ExecutionPlan>();
 
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            query.CommandText = @"SELECT ?executionPlan WHERE {
-                ?executionPlan rdf:type meta:ExecutionPlan . }";
-
             var propertyChange = string.Empty;
 
             switch (constraintOperator)
@@ -680,14 +675,14 @@ namespace Logic.Mapek
                 // will need to result in a PropertyChange with a ValueDecrease to mitigate it.
                 case ConstraintOperator.LessThan:
                 case ConstraintOperator.LessThanOrEqualTo:
-                    propertyChange = "meta:ValueDecrease";
+                    propertyChange = "ValueDecrease";
 
                     break;
                 // In case the unsatisfied constraint is GreaterThan or GreaterThanOrEqualTo, any appropriate ExecutionPlan
                 // will need to result in a PropertyChange with a ValueIncrease to mitigate it.
                 case ConstraintOperator.GreaterThan:
                 case ConstraintOperator.GreaterThanOrEqualTo:
-                    propertyChange = "meta:ValueIncrease";
+                    propertyChange = "ValueIncrease";
 
                     break;
                 // Constraints like Equals and NotEquals can be mitigated through both ValueIncrease and ValueDecrease, so
@@ -698,7 +693,19 @@ namespace Logic.Mapek
                     break;
             }
 
-            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+            var actuationExecutionQuery = MapekUtilities.GetParameterizedStringQuery();
+
+            actuationExecutionQuery.CommandText = @"SELECT ?actuationExecutionPlan WHERE {
+                ?actuationExecutionPlan rdf:type meta:ActuationExecutionPlan .
+                ?actuationExecutionPlan meta:hasActuatorState ?actuatorState .
+                ?actuatorState meta:enacts ?propertyChange .
+                ?propertyChange ssn:forProperty @property .
+                ?propertyChange meta:affectsPropertyWith @propertyChange . }";
+
+            actuationExecutionQuery.SetUri("property", new Uri(propertyName));
+            actuationExecutionQuery.SetUri("propertyChange", new Uri(MapekUtilities.DtUri + propertyChange));
+
+            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(actuationExecutionQuery);
 
             return executionPlans;
         }

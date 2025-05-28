@@ -52,7 +52,7 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuator
 :hasActuator rdf:type owl:ObjectProperty ;
-             rdfs:domain :ActuationExecutionPlan ;
+             rdfs:domain :ActuationAction ;
              rdfs:range <http://www.w3.org/ns/sosa/Actuator> ;
              rdfs:comment "The relation between an ActuationExecution and an Actuator it uses."@en ;
              rdfs:label "hasActuator"@en .
@@ -191,17 +191,23 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Classes
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationExecutionPlan
-:ActuationExecutionPlan rdf:type owl:Class ;
-                        rdfs:subClassOf :ExecutionPlan ,
-                                        [ rdf:type owl:Restriction ;
-                                          owl:onProperty :hasActuatorState ;
-                                          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                          owl:onClass :ActuatorState
-                                        ] ;
-                        owl:disjointWith :ReconfigurationExecutionPlan ;
-                        rdfs:comment "Represents a single system execution plan with an actuation or property reconfiguration, either for optimization or regaining optimal conditions."@en ;
-                        rdfs:label "ActuationExecutionPlan"@en .
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action
+:Action rdf:type owl:Class ;
+        rdfs:comment "Represents a single system Action."@en ;
+        rdfs:label "Action"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction
+:ActuationAction rdf:type owl:Class ;
+                 rdfs:subClassOf :Action ,
+                                 [ rdf:type owl:Restriction ;
+                                   owl:onProperty :hasActuatorState ;
+                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                   owl:onClass :ActuatorState
+                                 ] ;
+                 owl:disjointWith :ReconfigurationAction ;
+                 rdfs:comment "Represents a single system Action with an actuation, either for optimization or regaining optimal conditions."@en ;
+                 rdfs:label "ActuationAction"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState
@@ -254,12 +260,6 @@ xsd:duration rdf:type rdfs:Datatype .
         rdfs:label "Effect"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ExecutionPlan
-:ExecutionPlan rdf:type owl:Class ;
-               rdfs:comment "Represents a single system execution plan."@en ;
-               rdfs:label "ExecutionPlan"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition
 :OptimalCondition rdf:type owl:Class ;
                   rdfs:subClassOf <http://www.w3.org/ns/ssn/systems/Condition> ,
@@ -279,6 +279,21 @@ xsd:duration rdf:type rdfs:Datatype .
                                   ] ;
                   rdfs:comment "An optimal property condition, such as a desired value range definition. For example, an optimal temperature condition of a room could be defined as values greater than 18 and lower than 22 degrees Celsius."@en ;
                   rdfs:label "OptimalCondition"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Plan
+:Plan rdf:type owl:Class ;
+      rdfs:subClassOf [ rdf:type owl:Restriction ;
+                        owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
+                        owl:someValuesFrom :Action
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty :hasTimeLimit ;
+                        owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                        owl:onDataRange xsd:duration
+                      ] ;
+      rdfs:comment "Represents a system-wide Plan, consisting of actuations and/or reconfigurations, for optimizations or regaining optimal conditions."@en ;
+      rdfs:label "Plan"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange
@@ -327,36 +342,21 @@ xsd:duration rdf:type rdfs:Datatype .
                                  rdfs:label "PropertyChangeByReconfiguration"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationExecutionPlan
-:ReconfigurationExecutionPlan rdf:type owl:Class ;
-                              rdfs:subClassOf :ExecutionPlan ,
-                                              [ rdf:type owl:Restriction ;
-                                                owl:onProperty :affectsPropertyWith ;
-                                                owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                owl:onClass :Effect
-                                              ] ,
-                                              [ rdf:type owl:Restriction ;
-                                                owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
-                                                owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                owl:onClass :ConfigurableParameter
-                                              ] ;
-                              rdfs:comment "Represents a single system execution plan with a property reconfiguration, either for optimization or regaining optimal conditions."@en ;
-                              rdfs:label "ReconfigurationExecutionPlan"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Strategy
-:Strategy rdf:type owl:Class ;
-          rdfs:subClassOf [ rdf:type owl:Restriction ;
-                            owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
-                            owl:someValuesFrom :ExecutionPlan
-                          ] ,
-                          [ rdf:type owl:Restriction ;
-                            owl:onProperty :hasTimeLimit ;
-                            owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                            owl:onDataRange xsd:duration
-                          ] ;
-          rdfs:comment "Represents a system-wide strategy, consisting of actuations and/or reconfigurations, for optimizations or regaining optimal conditions."@en ;
-          rdfs:label "Strategy"@en .
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationAction
+:ReconfigurationAction rdf:type owl:Class ;
+                       rdfs:subClassOf :Action ,
+                                       [ rdf:type owl:Restriction ;
+                                         owl:onProperty :affectsPropertyWith ;
+                                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                         owl:onClass :Effect
+                                       ] ,
+                                       [ rdf:type owl:Restriction ;
+                                         owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
+                                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                         owl:onClass :ConfigurableParameter
+                                       ] ;
+                       rdfs:comment "Represents a single system Action with a parameter reconfiguration, either for optimization or regaining optimal conditions."@en ;
+                       rdfs:label "ReconfigurationAction"@en .
 
 
 ###  http://www.w3.org/ns/sosa/Actuator

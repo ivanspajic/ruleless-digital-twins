@@ -236,8 +236,6 @@ namespace Logic.Mapek
                 var valueType = result["valueType"].ToString();
                 valueType = valueType.Split('#')[1];
 
-                var measuredPropertyList = new List<Property>();
-
                 var innerQuery = MapekUtilities.GetParameterizedStringQuery();
 
                 innerQuery.CommandText = @"SELECT ?outputProperty WHERE {
@@ -249,20 +247,23 @@ namespace Logic.Mapek
 
                 var innerQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(innerQuery);
 
-                foreach (var innerResult in innerQueryResult.Results)
+                var measuredPropertyValues = new object[innerQueryResult.Results.Count];
+
+                for (var i = 0; i < measuredPropertyValues.Length; i++)
                 {
-                    var propertyName = innerResult["outputProperty"].ToString();
+                    var propertyName = innerQueryResult.Results[i]["outputProperty"].ToString();
 
                     if (propertyCache.Properties.TryGetValue(propertyName, out Property property))
-                        measuredPropertyList.Add(property);
+                        measuredPropertyValues[i] = property.Value;
                 }
 
+                var sensorValueHandler = _factory.GetSensorValueHandlerImplementation(valueType);
+                var observablePropertyValue = sensorValueHandler.GetObservablePropertyValueFromMeasuredPropertyValues(measuredPropertyValues);
                 var observableProperty = new Property
                 {
                     Name = observablePropertyName,
                     OwlType = valueType,
-                    Value = 10.2// TODO: calc the average of the measured properties for now, but leave it up to any other
-                                // outsourced, user-defined logic
+                    Value = observablePropertyValue
                 };
 
                 propertyCache.Properties.Add(observablePropertyName, observableProperty);

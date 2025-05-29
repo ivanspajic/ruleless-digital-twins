@@ -1,6 +1,6 @@
 ﻿namespace Models
 {
-    public class ReconfigurationExecutionPlan : ExecutionPlan
+    public class ReconfigurationAction : Action
     {
         public required ConfigurableParameter ConfigurableParameter { get; init; }
 

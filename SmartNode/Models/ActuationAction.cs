@@ -1,6 +1,6 @@
 ﻿namespace Models
 {
-    public class ActuationExecutionPlan : ExecutionPlan
+    public class ActuationAction : Action
     {
         public required ActuatorState ActuatorState { get; init; }
     }

@@ -19,12 +19,12 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public Tuple<List<OptimalCondition>, List<ExecutionPlan>> Analyze(IGraph instanceModel, PropertyCache propertyCache)
+        public Tuple<List<OptimalCondition>, List<Models.Action>> Analyze(IGraph instanceModel, PropertyCache propertyCache)
         {
             _logger.LogInformation("Starting the Analyze phase.");
 
             var optimalConditions = new List<OptimalCondition>();
-            var finalExecutionPlans = new List<ExecutionPlan>();
+            var finalActions = new List<Models.Action>();
 
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -59,17 +59,17 @@ namespace Logic.Mapek
                     ReachedInMaximumSeconds = int.Parse(reachedInMaximumSecondsValue)
                 };
 
-                List<ExecutionPlan> executionPlans;
+                List<Models.Action> actions;
 
                 if (propertyCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter configurableParameter))
                 {
-                    executionPlans = EvaluateConstraintsAndGetExecutionPlans(instanceModel,
+                    actions = EvaluateConstraintsAndGetActions(instanceModel,
                         optimalCondition,
                         configurableParameter.Value);
                 }
                 else if (propertyCache.Properties.TryGetValue(propertyName, out Property property))
                 {
-                    executionPlans = EvaluateConstraintsAndGetExecutionPlans(instanceModel, optimalCondition, property.Value);
+                    actions = EvaluateConstraintsAndGetActions(instanceModel, optimalCondition, property.Value);
                 }
                 else
                 {
@@ -79,15 +79,15 @@ namespace Logic.Mapek
                 }
 
                 // If there were any unsatisfied constraints, add the current OptimalCondition to the cache.
-                if (executionPlans.Count > 0)
+                if (actions.Count > 0)
                     optimalConditions.Add(optimalCondition);
 
-                finalExecutionPlans.AddRange(executionPlans);
+                finalActions.AddRange(actions);
             }
 
             // query for execution plans that optimize for stuff...
 
-            return new Tuple<List<OptimalCondition>, List<ExecutionPlan>>(optimalConditions, finalExecutionPlans);
+            return new Tuple<List<OptimalCondition>, List<Models.Action>>(optimalConditions, finalActions);
         }
 
         private List<Tuple<ConstraintOperator, string>> ProcessConstraintQueries(IGraph instanceModel,
@@ -629,11 +629,11 @@ namespace Logic.Mapek
             }
         }
 
-        private List<ExecutionPlan> EvaluateConstraintsAndGetExecutionPlans(IGraph instanceModel,
+        private List<Models.Action> EvaluateConstraintsAndGetActions(IGraph instanceModel,
             OptimalCondition optimalCondition,
             object propertyValue)
         {
-            var relevantExecutionPlans = new List<ExecutionPlan>();
+            var relevantActions = new HashSet<Models.Action>();
 
             var sensorValueHandler = _factory.GetSensorValueHandlerImplementation(optimalCondition.ConstraintValueType);
 
@@ -650,64 +650,85 @@ namespace Logic.Mapek
                         optimalCondition.Property,
                         propertyValue.ToString());
 
-                    // In case of the constraint not being satisfied, get the relevant kind of ExecutionPlans from the instance model.
-                    var executionPlans = GetRelevantExecutionPlansFromUnsatisfiedConstraint(instanceModel,
+                    // In case of the constraint not being satisfied, get the relevant Actions from the instance model.
+                    var actions = GetRelevantActionsFromUnsatisfiedConstraint(instanceModel,
                         optimalCondition.Property,
                         constraint.Item1);
-                    relevantExecutionPlans.AddRange(executionPlans);
+
+                    relevantActions.UnionWith(actions);
                 }
             }
 
-            return relevantExecutionPlans;
+            return relevantActions.ToList();
         }
 
-        private List<ExecutionPlan> GetRelevantExecutionPlansFromUnsatisfiedConstraint(IGraph instanceModel,
+        private List<Models.Action> GetRelevantActionsFromUnsatisfiedConstraint(IGraph instanceModel,
             string propertyName,
             ConstraintOperator constraintOperator)
         {
-            var executionPlans = new List<ExecutionPlan>();
+            var actions = new List<Models.Action>();
 
-            var propertyChange = string.Empty;
+            var filter = string.Empty;
 
             switch (constraintOperator)
             {
-                // In case the unsatisfied constraint is LessThan or LessThanOrEqualTo, any appropriate ExecutionPlan
-                // will need to result in a PropertyChange with a ValueDecrease to mitigate it.
+                // In case the unsatisfied constraint is LessThan or LessThanOrEqualTo, any appropriate Action will need
+                // to result in a PropertyChange with a ValueDecrease to mitigate it.
                 case ConstraintOperator.LessThan:
                 case ConstraintOperator.LessThanOrEqualTo:
-                    propertyChange = "ValueDecrease";
+                    filter = "?propertyChange meta:affectsPropertyWith meta:ValueDecrease .";
 
                     break;
-                // In case the unsatisfied constraint is GreaterThan or GreaterThanOrEqualTo, any appropriate ExecutionPlan
-                // will need to result in a PropertyChange with a ValueIncrease to mitigate it.
+                // In case the unsatisfied constraint is GreaterThan or GreaterThanOrEqualTo, any appropriate Action will
+                // need to result in a PropertyChange with a ValueIncrease to mitigate it.
                 case ConstraintOperator.GreaterThan:
                 case ConstraintOperator.GreaterThanOrEqualTo:
-                    propertyChange = "ValueIncrease";
+                    filter = "?propertyChange meta:affectsPropertyWith meta:ValueIncrease .";
 
                     break;
                 // Constraints like Equals and NotEquals can be mitigated through both ValueIncrease and ValueDecrease, so
                 // they fall under the default case.
                 default:
-                    propertyChange = "";
-
                     break;
             }
 
             var actuationExecutionQuery = MapekUtilities.GetParameterizedStringQuery();
 
-            actuationExecutionQuery.CommandText = @"SELECT ?actuationExecutionPlan WHERE {
-                ?actuationExecutionPlan rdf:type meta:ActuationExecutionPlan .
-                ?actuationExecutionPlan meta:hasActuatorState ?actuatorState .
+            actuationExecutionQuery.CommandText = @"SELECT ?actuationAction ?actuatorState ?actuator ?stateValueRange WHERE {
+                ?actuationAction rdf:type meta:ActuationAction.
+                ?actuationAction meta:hasActuatorState ?actuatorState .
                 ?actuatorState meta:enacts ?propertyChange .
+                ?actuator meta:hasActuatorState ?actuatorState .
                 ?propertyChange ssn:forProperty @property .
-                ?propertyChange meta:affectsPropertyWith @propertyChange . }";
+                " + filter + "}";
 
             actuationExecutionQuery.SetUri("property", new Uri(propertyName));
-            actuationExecutionQuery.SetUri("propertyChange", new Uri(MapekUtilities.DtUri + propertyChange));
 
             var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(actuationExecutionQuery);
 
-            return executionPlans;
+            foreach (var result in queryResult.Results)
+            {
+                var actionName = result["actuationAction"].ToString();
+                var actuatorStateName = result["actuatorState"].ToString();
+                var actuatorName = result["actuator"].ToString();
+                var stateValueRange = result["stateValueRange"].ToString();
+
+                var actuatorState = new ActuatorState
+                {
+                    Actuator = actuatorName,
+                    StateValueRange = "temp" // TODO: finish this!
+                };
+
+                var action = new ActuationAction()
+                {
+                    Name = actionName,
+                    ActuatorState = actuatorState
+                };
+
+                actions.Add(action);
+            }
+
+            return actions;
         }
     }
 }

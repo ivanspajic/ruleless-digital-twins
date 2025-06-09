@@ -238,6 +238,7 @@ namespace Logic.Mapek
 
                 var innerQuery = MapekUtilities.GetParameterizedStringQuery();
 
+                // Get all measured Properties that are results of observing ObservableProperties.
                 innerQuery.CommandText = @"SELECT ?outputProperty WHERE {
                     ?sensor sosa:observes @observableProperty .
                     ?sensor ssn:implements ?procedure .
@@ -249,12 +250,22 @@ namespace Logic.Mapek
 
                 var measuredPropertyValues = new object[innerQueryResult.Results.Count];
 
+                // Populate the input value array with measured Property values.
                 for (var i = 0; i < measuredPropertyValues.Length; i++)
                 {
                     var propertyName = innerQueryResult.Results[i]["outputProperty"].ToString();
 
                     if (propertyCache.Properties.TryGetValue(propertyName, out Property property))
+                    {
                         measuredPropertyValues[i] = property.Value;
+                    }
+                    else
+                    {
+                        _logger.LogError("Property {propertyName} not found in property cache.", propertyName);
+
+                        throw new Exception("A measured Property must exist in the cache if it is to be used as a source of value " +
+                            "for an ObservableProperty.");
+                    }
                 }
 
                 var sensorValueHandler = _factory.GetSensorValueHandlerImplementation(valueType);

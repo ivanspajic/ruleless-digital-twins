@@ -181,13 +181,6 @@ xsd:duration rdf:type rdfs:Datatype .
                          rdfs:label "reachedInMaximumSeconds"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/withStateValueRange
-:withStateValueRange rdf:type owl:DatatypeProperty ;
-                     rdfs:range rdfs:Literal ;
-                     rdfs:comment "Represents the set of possible diferent values an ActuatorState can have. For example, an AC unit's state \"On\" might have various values for different temperature settings."@en ;
-                     rdfs:label "withStateValueRange"@en .
-
-
 #################################################################
 #    Classes
 #################################################################
@@ -222,10 +215,6 @@ xsd:duration rdf:type rdfs:Datatype .
                                  owl:onProperty :isActuatorStateOf ;
                                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                  owl:onClass <http://www.w3.org/ns/sosa/Actuator>
-                               ] ,
-                               [ rdf:type owl:Restriction ;
-                                 owl:onProperty :withStateValueRange ;
-                                 owl:maxCardinality "1"^^xsd:nonNegativeInteger
                                ] ;
                rdfs:comment "Represents a given state of an Actuator with a possible range of values."@en ;
                rdfs:label "ActuatorState"@en .

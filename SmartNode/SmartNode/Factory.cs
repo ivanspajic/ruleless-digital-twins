@@ -13,7 +13,7 @@ namespace SmartNode
         {
             {
                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1",
-                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm"), new ExampleSensor
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm"), new ExampleSensor
                 {
                     ProcedureName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm",
                     SensorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1"
@@ -21,7 +21,7 @@ namespace SmartNode
             },
             {
                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2",
-                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure"), new ExampleSensor
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure"), new ExampleSensor
                 {
                     ProcedureName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure",
                     SensorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2"
@@ -29,12 +29,36 @@ namespace SmartNode
             },
             {
                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1",
-                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure"), new ExampleSensor
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure"), new ExampleSensor
                 {
                     ProcedureName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure",
                     SensorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1"
                 }
             },
+            {
+                ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
+                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm"), new ExampleSensor
+                {
+                    ProcedureName = "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm",
+                    SensorName = "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor"
+                }
+            },
+            {
+                ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
+                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPiece"), new ExampleSensor
+                {
+                    ProcedureName = "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPiece",
+                    SensorName = "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor"
+                }
+            },
+            {
+                ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1",
+                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1Procedure"), new ExampleSensor
+                {
+                    ProcedureName = "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1Procedure",
+                    SensorName = "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1"
+                }
+            }
         };
 
         // The keys represent the OWL (RDF/XSD) types supported by Protege, and the values are user implementations.

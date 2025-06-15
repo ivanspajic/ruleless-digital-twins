@@ -7,6 +7,8 @@ namespace Logic.FactoryInterface
     {
         public ISensor GetSensorImplementation(string sensorName, string procedureName);
 
+        public IActuator GetActuatorImplementation(string actuatorName);
+
         public ISensorValueHandler GetSensorValueHandlerImplementation(string owlType);
     }
 }

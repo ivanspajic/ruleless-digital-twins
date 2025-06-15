@@ -13,6 +13,8 @@ namespace Logic.Mapek
         private readonly ILogger<MapekMonitor> _logger;
         private readonly IFactory _factory;
 
+        // Used to keep copies of ConfigurableParameters and other Properties if need be. A second PropertyCache is used to allow
+        // for checking of existing/non-existing Properties in the cache every MAPE-K cycle.
         private PropertyCache _oldPropertyCache;
 
         public MapekMonitor(IServiceProvider serviceProvider)
@@ -60,6 +62,7 @@ namespace Logic.Mapek
             // Get the values of all ObservableProperties and populate the cache.
             PopulateObservablePropertiesCache(instanceModel, propertyCache);
 
+            // Keep a reference for the old cache.
             _oldPropertyCache = propertyCache;
 
             return propertyCache;

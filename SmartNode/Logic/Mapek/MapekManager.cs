@@ -59,11 +59,11 @@ namespace Logic.Mapek
                 // Monitor - Observe all hard and soft Sensor values.
                 var propertyCache = _mapekMonitor.Monitor(instanceModel);
                 // Analyze - Out of all possible Actions, filter out the irrelevant ones based on current Property values.
-                var optimalConditionAndActionTuple = _mapekAnalyze.Analyze(instanceModel, propertyCache);
-                // Plan
-                //var actions = _mapekPlan.Plan(optimalConditionAndActionTuple.Item1, optimalConditionAndActionTuple.Item2);
-                // Execute
-                //var somethingToReturn = _mapekPlan.Execute(actions);
+                var mitigationAndOptimizationTuple = _mapekAnalyze.Analyze(instanceModel, propertyCache);
+                // Plan - Simulate all Actions and create a Plan for mitigations and/or optimizations.
+                var plan = _mapekPlan.Plan(mitigationAndOptimizationTuple);
+                // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
+                _mapekExecute.Execute(plan);
 
                 Thread.Sleep(SleepyTimeMilliseconds);
             }

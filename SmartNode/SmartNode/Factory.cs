@@ -1,6 +1,7 @@
 ﻿using Logic.DeviceInterfaces;
 using Logic.FactoryInterface;
 using Logic.SensorValueHandlers;
+using SensorActuatorImplementations.Actuators;
 using SensorActuatorImplementations.Sensors;
 using SensorActuatorImplementations.ValueHandlers;
 
@@ -61,6 +62,16 @@ namespace SmartNode
             }
         };
 
+        private readonly Dictionary<string, IActuator> _actuators = new()
+        {
+            {
+                "Heater", new ExampleActuator()
+                {
+                    ActuatorName = "Heater"
+                }
+            }
+        };
+
         // The keys represent the OWL (RDF/XSD) types supported by Protege, and the values are user implementations.
         private readonly Dictionary<string, ISensorValueHandler> _sensorValueHandlers = new()
         {
@@ -74,6 +85,14 @@ namespace SmartNode
                 return sensor;
 
             throw new Exception($"No implementation was found for Sensor {sensorName} with Procedure {procedureName}.");
+        }
+
+        public IActuator GetActuatorImplementation(string actuatorName)
+        {
+            if (_actuators.TryGetValue(actuatorName, out IActuator actuator))
+                return actuator;
+
+            throw new Exception($"No implementation was found for Actuator {actuator}.");
         }
 
         public ISensorValueHandler GetSensorValueHandlerImplementation(string owlType)

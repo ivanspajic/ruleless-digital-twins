@@ -19,27 +19,28 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public Tuple<List<OptimalCondition>, List<Models.Action>> Analyze(IGraph instanceModel, PropertyCache propertyCache)
+        public Tuple<List<Mitigation>, List<Models.Action>> Analyze(IGraph instanceModel, PropertyCache propertyCache)
         {
             _logger.LogInformation("Starting the Analyze phase.");
 
-            var optimalConditions = new List<OptimalCondition>();
-            var finalActions = new List<Models.Action>();
+            // Get the relevant Actions as mitigations for unsatisfied OptimalConditions as well as those used for optimizations.
+            var mitigations = GetRelevantActionsFromUnsatisfiedOptimalConditions(instanceModel, propertyCache);
+            var optimizationActions = GetRelevantActionsFromDesiredOptimizations(instanceModel, propertyCache);
 
-            GetRelevantActionsFromUnsatisfiedOptimalConditions(instanceModel, propertyCache, optimalConditions, finalActions);
-            GetRelevantActionsFromDesiredOptimizations(instanceModel, propertyCache, finalActions);
+            // Filter out Actions from the optimization collection in case they are already found in the mitigation collection.
+            optimizationActions = optimizationActions.Where(optimizationAction =>
+                !mitigations.Any(mitigation =>
+                    mitigation.MitigationActions.Any(innerAction =>
+                        string.Equals(innerAction.Name, optimizationAction.Name))))
+                .ToList();
 
-            // Filter out duplicate Actions.
-            finalActions = finalActions.DistinctBy(x => x.Name).ToList();
-
-            return new Tuple<List<OptimalCondition>, List<Models.Action>>(optimalConditions, finalActions);
+            return new Tuple<List<Mitigation>, List<Models.Action>>(mitigations, optimizationActions);
         }
 
-        private void GetRelevantActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel,
-            PropertyCache propertyCache,
-            List<OptimalCondition> optimalConditions,
-            List<Models.Action> finalActions)
+        private List<Mitigation> GetRelevantActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel, PropertyCache propertyCache)
         {
+            var mitigations = new List<Mitigation>();
+
             var query = MapekUtilities.GetParameterizedStringQuery();
 
             // Get all OptimalConditions.
@@ -92,14 +93,24 @@ namespace Logic.Mapek
 
                 // If there were any unsatisfied constraints, add the current OptimalCondition to the cache.
                 if (actions.Count > 0)
-                    optimalConditions.Add(optimalCondition);
+                {
+                    var mitigation = new Mitigation()
+                    {
+                        UnsatisfiedOptimalCondition = optimalCondition,
+                        MitigationActions = actions,
+                    };
 
-                finalActions.AddRange(actions);
+                    mitigations.Add(mitigation);
+                }
             }
+
+            return mitigations;
         }
 
-        private void GetRelevantActionsFromDesiredOptimizations(IGraph instanceModel, PropertyCache propertyCache, List<Models.Action> actions)
+        private List<Models.Action> GetRelevantActionsFromDesiredOptimizations(IGraph instanceModel, PropertyCache propertyCache)
         {
+            var actions = new List<Models.Action>();
+
             var actuationQuery = MapekUtilities.GetParameterizedStringQuery();
 
             // Get all ActuationActions, their ActuatorStates, and their Actuators that cause PropertyChanges equal to those that the system
@@ -144,6 +155,8 @@ namespace Logic.Mapek
                     "effect",
                     propertyCache);
             }
+
+            return actions;
         }
 
         private List<Tuple<ConstraintOperator, string>> ProcessConstraintQueries(IGraph instanceModel,

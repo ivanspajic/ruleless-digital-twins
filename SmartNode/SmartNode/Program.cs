@@ -31,6 +31,7 @@ namespace SmartNode
 
             using var host = builder.Build();
 
+            // Get an instance of the MAPE-K manager.
             var mapekManager = host.Services.GetRequiredService<IMapekManager>();
 
             // Get executing assembly path.
@@ -39,6 +40,8 @@ namespace SmartNode
             var modelFilePath = Path.Combine(executingAssemblyPath, @"..\..\..\..\..\models-and-rules\inferred-model-1.ttl");
             // Make it system-agnostic.
             modelFilePath = Path.GetFullPath(modelFilePath);
+
+            // Start the loop.
             mapekManager.StartLoop(modelFilePath);
 
             host.Run();

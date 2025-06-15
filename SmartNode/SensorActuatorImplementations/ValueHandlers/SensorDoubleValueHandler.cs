@@ -20,7 +20,7 @@ namespace SensorActuatorImplementations.ValueHandlers
         {
             if (_expressionDelegateMap.TryGetValue(constraint.Item1, out Func<double, double, bool>? evaluator))
                 // The constraint value comes directly from the graph as a string.
-                return evaluator(double.Parse(constraint.Item2, CultureInfo.InvariantCulture), (double)sensorValue);
+                return evaluator((double)sensorValue, double.Parse(constraint.Item2, CultureInfo.InvariantCulture));
 
             throw new Exception("Unsupported constraint operator.");
         }

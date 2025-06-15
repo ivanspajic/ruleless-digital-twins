@@ -1,5 +1,4 @@
 ﻿using Logic.FactoryInterface;
-using Lucene.Net.Search;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Models;
@@ -28,7 +27,7 @@ namespace Logic.Mapek
             var finalActions = new List<Models.Action>();
 
             GetRelevantActionsFromUnsatisfiedOptimalConditions(instanceModel, propertyCache, optimalConditions, finalActions);
-            GetRelevantActionsFromOptimizationPropertyChanges(instanceModel, propertyCache, finalActions);
+            GetRelevantActionsFromDesiredOptimizations(instanceModel, propertyCache, finalActions);
 
             // Filter out duplicate Actions.
             finalActions = finalActions.DistinctBy(x => x.Name).ToList();
@@ -99,7 +98,7 @@ namespace Logic.Mapek
             }
         }
 
-        private void GetRelevantActionsFromOptimizationPropertyChanges(IGraph instanceModel, PropertyCache propertyCache, List<Models.Action> actions)
+        private void GetRelevantActionsFromDesiredOptimizations(IGraph instanceModel, PropertyCache propertyCache, List<Models.Action> actions)
         {
             var actuationQuery = MapekUtilities.GetParameterizedStringQuery();
 

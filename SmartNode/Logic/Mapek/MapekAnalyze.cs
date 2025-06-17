@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.MapekModels;
+using System.Text;
 using VDS.RDF;
 using VDS.RDF.Query;
 
@@ -105,12 +106,25 @@ namespace Logic.Mapek
         {
             var actions = new List<Models.Action>();
 
-            // TODO: basically filter out all optimization actions by checking that they don't cause propertychanges
-            // for the same property as contained by any mitigation. this works because both identical and different effects
-            // for the same property in a propertychange cannot be included in an optimization action when one already exists
-            // as a mitigation
-            //
-            // it's possible to format this list into a string to include in the query as a filter
+            var filterString = new StringBuilder();
+            for (var i = 0; i < mitigations.Count; i++)
+            {
+                if (i == 0)
+                {
+                    filterString.Append("FILTER(?property NOT IN (");
+                }
+
+                filterString.Append(mitigations[i].UnsatisfiedOptimalCondition.Property);
+
+                if (i < mitigations.Count - 1)
+                {
+                    filterString.Append(",");
+                }
+                else
+                {
+                    filterString.Append("))");
+                }
+            }
 
             var actuationQuery = MapekUtilities.GetParameterizedStringQuery();
 
@@ -123,7 +137,8 @@ namespace Logic.Mapek
                 ?actuator rdf:type sosa:Actuator .
                 ?actuatorState meta:enacts ?propertyChange .
                 ?platform rdf:type sosa:Platform .
-                ?platform meta:optimizesFor ?propertyChange . }";
+                ?platform meta:optimizesFor ?propertyChange .
+                " + filterString.ToString() + " }";
 
             var actuationQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(actuationQuery);
 
@@ -143,7 +158,8 @@ namespace Logic.Mapek
                 ?configurableParameter meta:enacts ?propertyChange .
                 ?propertyChange meta:alteredBy ?effect .
                 ?platform rdf:type sosa:Platform .
-                ?platform meta:optimizesFor ?propertyChange . }";
+                ?platform meta:optimizesFor ?propertyChange .
+                " + filterString.ToString() + " }";
 
             var reconfigurationQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(reconfigurationQuery);
 
@@ -776,7 +792,7 @@ namespace Logic.Mapek
                 ?actuator meta:hasActuatorState ?actuatorState .
                 ?actuator rdf:type sosa:Actuator .
                 ?propertyChange ssn:forProperty @property .
-                " + filter + "}";
+                " + filter + " }";
 
             actuationQuery.SetUri("property", new Uri(propertyName));
 
@@ -799,7 +815,7 @@ namespace Logic.Mapek
                 ?reconfigurationAction meta:affectsPropertyWith ?effect .
                 ?configurableParameter meta:enacts ?propertyChange .
                 ?propertyChange ssn:forProperty @property .
-                " + filter + "}";
+                " + filter + " }";
 
             reconfigurationQuery.SetUri("property", new Uri(propertyName));
 

@@ -28,8 +28,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/AustevollSite
 :AustevollSite rdf:type owl:NamedIndividual ,
                         <http://www.w3.org/ns/sosa/Platform> ;
-               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor> :CompressionRatioDecreaseBucketSizeDecrease ,
-                                                                                                  :CompressionRatioDecreaseEpsilonDecrease ;
+               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor> :CompressionRatioDecreaseValueDecrease ;
                <http://www.w3.org/ns/sosa/hosts> :CustomPieceSoftSensor ,
                                                  :TemperatureSensor1 .
 
@@ -77,40 +76,24 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "../compressionRatio.fmu"^^xsd:anyURI .
 
 
-###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioDecreaseBucketSizeDecrease
-:CompressionRatioDecreaseBucketSizeDecrease rdf:type owl:NamedIndividual ,
-                                                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration> ;
-                                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
-                                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/alteredBy> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
-                                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy> :BucketSize ;
-                                            <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioDecreaseValueDecrease
+:CompressionRatioDecreaseValueDecrease rdf:type owl:NamedIndividual ,
+                                                <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration> ;
+                                       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
+                                       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/alteredBy> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
+                                       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy> :BucketSize ,
+                                                                                                                       :Epsilon ;
+                                       <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
 
 
-###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioDecreaseEpsilonDecrease
-:CompressionRatioDecreaseEpsilonDecrease rdf:type owl:NamedIndividual ,
-                                                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration> ;
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/alteredBy> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy> :Epsilon ;
-                                         <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
-
-
-###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioIncreaseBucketSizeIncrease
-:CompressionRatioIncreaseBucketSizeIncrease rdf:type owl:NamedIndividual ,
-                                                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration> ;
-                                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
-                                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/alteredBy> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
-                                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy> :BucketSize ;
-                                            <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
-
-
-###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioIncreaseEpsilonIncrease
-:CompressionRatioIncreaseEpsilonIncrease rdf:type owl:NamedIndividual ,
-                                                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration> ;
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/alteredBy> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy> :Epsilon ;
-                                         <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioIncreaseValueIncrease
+:CompressionRatioIncreaseValueIncrease rdf:type owl:NamedIndividual ,
+                                                <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration> ;
+                                       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
+                                       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/alteredBy> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
+                                       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy> :BucketSize ,
+                                                                                                                       :Epsilon ;
+                                       <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPiece

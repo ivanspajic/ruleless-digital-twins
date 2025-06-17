@@ -75,7 +75,9 @@ namespace Logic.Mapek
             // Simply return if the current Property already exists in the cache. This is necessary to avoid unnecessary multiple
             // executions of the same Sensors since a single Property can be an Input to multiple soft Sensors.
             if (propertyCache.Properties.ContainsKey(propertyName) || propertyCache.ConfigurableParameters.ContainsKey(propertyName))
+            {
                 return;
+            }   
 
             // Get the type of the Property.
             var propertyType = MapekUtilities.GetPropertyType(instanceModel, propertyNode);
@@ -133,15 +135,16 @@ namespace Logic.Mapek
                     PopulateInputOutputsAndConfigurableParametersCaches(instanceModel, inputProperty, propertyCache);
 
                     if (propertyCache.Properties.ContainsKey(inputProperty.ToString()))
+                    {
                         inputProperties[i] = propertyCache.Properties[inputProperty.ToString()].Value;
+                    }
                     else if (propertyCache.ConfigurableParameters.ContainsKey(inputProperty.ToString()))
+                    {
                         inputProperties[i] = propertyCache.ConfigurableParameters[inputProperty.ToString()].Value;
+                    }
                     else
                     {
-                        _logger.LogError("The Input Property {property} was not found in the respective Property caches.",
-                            inputProperty.ToString());
-
-                        throw new Exception("The Property tree traversal didn't populate the caches with all properties.");
+                        throw new Exception($"The Input Property {inputProperty.ToString()} was not found in the respective Property caches.");
                     }
                 }
 
@@ -183,9 +186,7 @@ namespace Logic.Mapek
             // If the Property isn't a ConfigurableParameter, throw an error.
             if (configurableParameterQueryResult.IsEmpty)
             {
-                _logger.LogError("The Property {property} was not found as an Output nor as a ConfigurableParameter.", propertyName);
-
-                throw new Exception("The Property must exist as an ObservableProperty, an Output, or a ConfigurableParameter.");
+                throw new Exception($"The Property {propertyName} was not found as an Output nor as a ConfigurableParameter.");
             }
 
             if (_oldPropertyCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? value))
@@ -264,10 +265,7 @@ namespace Logic.Mapek
                     }
                     else
                     {
-                        _logger.LogError("Property {propertyName} not found in property cache.", propertyName);
-
-                        throw new Exception("A measured Property must exist in the cache if it is to be used as a source of value " +
-                            "for an ObservableProperty.");
+                        throw new Exception($"Property {propertyName} not found in property cache.");
                     }
                 }
 

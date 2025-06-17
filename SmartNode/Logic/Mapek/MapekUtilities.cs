@@ -45,7 +45,9 @@ namespace Logic.Mapek
             var propertyType = GetPropertyValueType(query, instanceModel, "property", propertyNode);
 
             if (!string.IsNullOrEmpty(propertyType))
+            {
                 return propertyType;
+            }
 
             query = GetParameterizedStringQuery();
 
@@ -58,7 +60,9 @@ namespace Logic.Mapek
             propertyType = GetPropertyValueType(query, instanceModel, "property", propertyNode);
 
             if (!string.IsNullOrEmpty(propertyType))
+            {
                 return propertyType;
+            }
 
             throw new Exception("The property " + propertyNode.ToString() + " was found without a value type.");
         }
@@ -70,7 +74,9 @@ namespace Logic.Mapek
             var propertyTypeQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
 
             if (propertyTypeQueryResult.IsEmpty)
+            {
                 return string.Empty;
+            }
 
             var propertyValueType = propertyTypeQueryResult.Results[0]["valueType"].ToString();
             return propertyValueType.Split('#')[1];

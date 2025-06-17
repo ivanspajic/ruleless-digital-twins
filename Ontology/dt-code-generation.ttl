@@ -113,6 +113,14 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Data properties
 #################################################################
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/altersBy
+:altersBy rdf:type owl:DatatypeProperty ;
+          rdfs:domain :ReconfigurationAction ;
+          rdfs:range rdfs:Literal ;
+          rdfs:comment "Represents the relation between a ReconfiguationAction and the literal (value) it alters a ConfigurableParameter with."@en ;
+          rdfs:label "altersBy"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasIdentifier
 :hasIdentifier rdf:type owl:DatatypeProperty ;
                rdfs:range xsd:string ;
@@ -276,11 +284,6 @@ xsd:duration rdf:type rdfs:Datatype .
       rdfs:subClassOf [ rdf:type owl:Restriction ;
                         owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
                         owl:someValuesFrom :Action
-                      ] ,
-                      [ rdf:type owl:Restriction ;
-                        owl:onProperty :hasTimeLimit ;
-                        owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                        owl:onDataRange xsd:duration
                       ] ;
       rdfs:comment "Represents a system-wide Plan, consisting of actuations and/or reconfigurations, for optimizations or regaining optimal conditions."@en ;
       rdfs:label "Plan"@en .
@@ -319,14 +322,14 @@ xsd:duration rdf:type rdfs:Datatype .
 :PropertyChangeByReconfiguration rdf:type owl:Class ;
                                  rdfs:subClassOf :PropertyChange ,
                                                  [ rdf:type owl:Restriction ;
+                                                   owl:onProperty :enactedBy ;
+                                                   owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                   owl:onClass :ConfigurableParameter
+                                                 ] ,
+                                                 [ rdf:type owl:Restriction ;
                                                    owl:onProperty :alteredBy ;
                                                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                    owl:onClass :Effect
-                                                 ] ,
-                                                 [ rdf:type owl:Restriction ;
-                                                   owl:onProperty :enactedBy ;
-                                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                   owl:onClass :ConfigurableParameter
                                                  ] ;
                                  rdfs:comment "Represents a specific PropertyChange as a result of reconfiguring a related ConfigurableProperty."@en ;
                                  rdfs:label "PropertyChangeByReconfiguration"@en .
@@ -344,6 +347,10 @@ xsd:duration rdf:type rdfs:Datatype .
                                          owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
                                          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                          owl:onClass :ConfigurableParameter
+                                       ] ,
+                                       [ rdf:type owl:Restriction ;
+                                         owl:onProperty :altersBy ;
+                                         owl:cardinality "1"^^xsd:nonNegativeInteger
                                        ] ;
                        rdfs:comment "Represents a single system Action with a parameter reconfiguration, either for optimization or regaining optimal conditions."@en ;
                        rdfs:label "ReconfigurationAction"@en .

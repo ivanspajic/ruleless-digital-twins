@@ -61,7 +61,6 @@ namespace SmartNode
                 }
             }
         };
-
         private readonly Dictionary<string, IActuator> _actuators = new()
         {
             {
@@ -82,7 +81,9 @@ namespace SmartNode
         public ISensor GetSensorImplementation(string sensorName, string procedureName)
         {
             if (_sensors.TryGetValue((sensorName, procedureName), out ISensor sensor))
+            {
                 return sensor;
+            }
 
             throw new Exception($"No implementation was found for Sensor {sensorName} with Procedure {procedureName}.");
         }
@@ -90,7 +91,9 @@ namespace SmartNode
         public IActuator GetActuatorImplementation(string actuatorName)
         {
             if (_actuators.TryGetValue(actuatorName, out IActuator actuator))
+            {
                 return actuator;
+            }
 
             throw new Exception($"No implementation was found for Actuator {actuator}.");
         }
@@ -98,7 +101,9 @@ namespace SmartNode
         public ISensorValueHandler GetSensorValueHandlerImplementation(string owlType)
         {
             if (_sensorValueHandlers.TryGetValue(owlType, out ISensorValueHandler sensorValueHandler))
+            {
                 return sensorValueHandler;
+            }
 
             throw new Exception($"No implementation was found for Sensor value handler for OWL type {owlType}.");
         }

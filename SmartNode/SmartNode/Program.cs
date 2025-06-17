@@ -31,18 +31,29 @@ namespace SmartNode
 
             using var host = builder.Build();
 
+            var logger = host.Services.GetRequiredService<ILogger<Program>>();
+
             // Get an instance of the MAPE-K manager.
             var mapekManager = host.Services.GetRequiredService<IMapekManager>();
 
             // Get executing assembly path.
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             // Combine it with the relative path of the inferred model file.
-            var modelFilePath = Path.Combine(executingAssemblyPath, @"..\..\..\..\..\models-and-rules\inferred-model-1.ttl");
+            var modelFilePath = Path.Combine(executingAssemblyPath, @"..\..\..\..\..\models-and-rules\inferred-model-2.ttl");
             // Make it system-agnostic.
             modelFilePath = Path.GetFullPath(modelFilePath);
 
             // Start the loop.
-            mapekManager.StartLoop(modelFilePath);
+            try
+            {
+                mapekManager.StartLoop(modelFilePath);
+            }
+            catch (Exception exception)
+            {
+                logger.LogCritical(exception, "Exception");
+
+                throw;
+            }
 
             host.Run();
         }

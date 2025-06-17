@@ -3,8 +3,7 @@ using Models;
 
 namespace SensorActuatorImplementations.ValueHandlers
 {
-    // Example int Sensor value handler implementation.
-    public class SensorIntValueHandler : ISensorValueHandler
+    public class SensorTimespanValueHandler : ISensorValueHandler
     {
         public object ChangeValueByAmount(object value, object amountToChangeBy, Effect typeOfChange)
         {

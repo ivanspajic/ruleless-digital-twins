@@ -242,19 +242,16 @@
 [rule3b:    (?thing rdf:comment ?propertyChange)
             (?propertyChange meta:enactedBy ?configurableParameter)
             (?configurableParameter rdf:type meta:ConfigurableParameter)
+            (?configurableParameter rdf:type ?bNode)
+            (?bNode owl:onProperty meta:hasValue)
+            (?bNode owl:onDataRange ?valueType)
             (?propertyChange meta:alteredBy ?effect)
             uriConcat(?configurableParameter, ?effect, meta:ReconfigurationAction, ?actionName)
             ->  (?actionName rdf:type meta:ReconfigurationAction)
                 (?actionName ssn:forProperty ?configurableParameter)
                 (?actionName meta:affectsPropertyWith ?effect)
+                (?actionName rdf:type ?bNode)
                 print()
                 print("Generated ReconfigurationAction", ?actionName)
-                print()
-]
-
-[rule3c:    uriConcat("no-op", meta:Action, ?actionName)
-            ->  (?actionName rdf:type meta:Action)
-                print()
-                print("Generated no-op Action", ?actionName)
                 print()
 ]

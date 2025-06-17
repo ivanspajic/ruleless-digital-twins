@@ -7,7 +7,7 @@ namespace Logic.Mapek
 {
     public class MapekManager : IMapekManager
     {
-        private const int SleepyTimeMilliseconds = 5_000;
+        private const int SleepyTimeMilliseconds = 2_000;
 
         private readonly ILogger<MapekManager> _logger;
         private readonly IMapekMonitor _mapekMonitor;
@@ -51,9 +51,7 @@ namespace Logic.Mapek
                 // If nothing was loaded, don't start the loop.
                 if (instanceModel.IsEmpty)
                 {
-                    _logger.LogError("There is nothing in the graph. Terminated MAPE-K loop.");
-
-                    throw new Exception("The graph is empty.");
+                    throw new Exception("There is nothing in the instance model graph.");
                 }
 
                 // Monitor - Observe all hard and soft Sensor values.
@@ -63,7 +61,7 @@ namespace Logic.Mapek
                 // Plan - Simulate all Actions and create a Plan for mitigations and/or optimizations.
                 var plan = _mapekPlan.Plan(mitigationAndOptimizationTuple);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
-                _mapekExecute.Execute(plan);
+                _mapekExecute.Execute(plan, propertyCache);
 
                 Thread.Sleep(SleepyTimeMilliseconds);
             }
@@ -76,16 +74,7 @@ namespace Logic.Mapek
             var instanceModel = new Graph();
 
             var turtleParser = new TurtleParser();
-            try
-            {
-                turtleParser.Load(instanceModel, instanceModelFilePath);
-            }
-            catch (Exception exception)
-            {    
-                _logger.LogError(exception, "Exception while loading file contents: {exceptionMessage}", exception.Message);
-
-                throw;
-            }
+            turtleParser.Load(instanceModel, instanceModelFilePath);
 
             return instanceModel;
         }

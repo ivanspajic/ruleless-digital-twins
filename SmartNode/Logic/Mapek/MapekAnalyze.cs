@@ -25,14 +25,7 @@ namespace Logic.Mapek
 
             // Get the relevant Actions as mitigations for unsatisfied OptimalConditions as well as those used for optimizations.
             var mitigations = GetRelevantActionsFromUnsatisfiedOptimalConditions(instanceModel, propertyCache);
-            var optimizationActions = GetRelevantActionsFromDesiredOptimizations(instanceModel, propertyCache);
-
-            // Filter out Actions from the optimization collection in case they are already found in the mitigation collection.
-            optimizationActions = optimizationActions.Where(optimizationAction =>
-                !mitigations.Any(mitigation =>
-                    mitigation.MitigationActions.Any(innerAction =>
-                        string.Equals(innerAction.Name, optimizationAction.Name))))
-                .ToList();
+            var optimizationActions = GetRelevantActionsFromDesiredOptimizations(instanceModel, propertyCache, mitigations);
 
             return new Tuple<List<Mitigation>, List<Models.Action>>(mitigations, optimizationActions);
         }
@@ -86,12 +79,11 @@ namespace Logic.Mapek
                 }
                 else
                 {
-                    _logger.LogError("Property {property} was not found in the system.", propertyName);
-
-                    throw new Exception("The Property must be in the system to be a part of an OptimalCondition.");
+                    throw new Exception($"Property {propertyName} was not found in the system.");
                 }
 
-                // If there were any unsatisfied constraints, add the current OptimalCondition to the cache.
+                // If there were any unsatisfied constraints, add the current OptimalCondition to the cache and link it to
+                // its respective Actions.
                 if (actions.Count > 0)
                 {
                     var mitigation = new Mitigation()
@@ -107,9 +99,18 @@ namespace Logic.Mapek
             return mitigations;
         }
 
-        private List<Models.Action> GetRelevantActionsFromDesiredOptimizations(IGraph instanceModel, PropertyCache propertyCache)
+        private List<Models.Action> GetRelevantActionsFromDesiredOptimizations(IGraph instanceModel,
+            PropertyCache propertyCache,
+            List<Mitigation> mitigations)
         {
             var actions = new List<Models.Action>();
+
+            // TODO: basically filter out all optimization actions by checking that they don't cause propertychanges
+            // for the same property as contained by any mitigation. this works because both identical and different effects
+            // for the same property in a propertychange cannot be included in an optimization action when one already exists
+            // as a mitigation
+            //
+            // it's possible to format this list into a string to include in the query as a filter
 
             var actuationQuery = MapekUtilities.GetParameterizedStringQuery();
 
@@ -852,16 +853,12 @@ namespace Logic.Mapek
 
             if (!propertyCache.ConfigurableParameters.TryGetValue(configurableParameterName, out ConfigurableParameter configurableParameter))
             {
-                _logger.LogError("ConfigurableParameter {configurableParameterName} was not found in the Property cache.", configurableParameterName);
-
-                throw new Exception("ConfigurableParameters must be present in the Property cache after the Monitor phase.");
+                throw new Exception($"ConfigurableParameter {configurableParameterName} was not found in the Property cache.");
             }
 
             if (!Enum.TryParse(effectName, out Effect effect))
             {
-                _logger.LogError("Enum value {enumValue} is not supported.", effectName);
-
-                throw new Exception("Parsed string values of PropertyChange Effects must be supported.");
+                throw new Exception($"Enum value {effectName} is not supported.");
             }
 
             var reconfigurationAction = new ReconfigurationAction

@@ -26,43 +26,16 @@ namespace Logic.Mapek
             // 2. check the results of all remaining simulations at the end of the whole duration (e.g., 1h) and
             // pick those whose results meet their respective optimalconditions
             // 3. put them in a plan and return the plan for execution
-                // the plan should have an execution duration limit linked to the maximum amount of time required for
-                // reaching the relevant optimalconditions
 
-            
-
-            return new Plan()
+            foreach (var mitigation in mitigationAndOptimizationTuple.Item1)
             {
-                Actions = new List<Models.Action>()
-                {
-                    new ActuationAction
-                    {
-                        ActuatorState = new ActuatorState
-                        {
-                            Actuator = "Heater",
-                            Name = "something"
-                        },
-                        Name = "something"
-                    },
-                    new ReconfigurationAction
-                    {
-                        ConfigurableParameter = new ConfigurableParameter
-                        {
-                            LowerLimitValue = 0.5,
-                            Name = "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/Epsilon",
-                            OwlType = "double",
-                            UpperLimitValue = 10.5,
-                            Value = 19.5,
-                            ValueIncrements = 0.5
-                        },
-                        Effect = Effect.ValueIncrease,
-                        Name = "something",
-                        AltersBy = 12.52
-                    }
-                }
-            };
+                var actionsThatReachOptimalConditions = SimulateActionAndCompareToOptimalCondition(mitigation);
+            }
         }
 
+        private List<Models.Action> SimulateActionAndCompareToOptimalCondition(Mitigation mitigation)
+        {
 
+        }
     }
 }

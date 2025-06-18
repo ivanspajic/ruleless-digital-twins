@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Models;
 using Models.MapekModels;
 
 namespace Logic.Mapek
@@ -14,7 +13,7 @@ namespace Logic.Mapek
             _logger = serviceProvider.GetRequiredService<ILogger<MapekPlan>>();
         }
 
-        public Plan Plan(Tuple<List<Mitigation>, List<Models.Action>> mitigationAndOptimizationTuple)
+        public List<Models.Action> Plan(Tuple<List<Mitigation>, List<Models.Action>> mitigationAndOptimizationTuple)
         {
             _logger.LogInformation("Starting the Plan phase.");
 

@@ -26,6 +26,8 @@ namespace Logic.Mapek
             // pick those whose results meet their respective optimalconditions
             // 3. put them in a plan and return the plan for execution
 
+
+
             return new List<Models.Action>();
         }
     }

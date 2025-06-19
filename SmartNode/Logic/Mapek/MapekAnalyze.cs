@@ -102,6 +102,7 @@ namespace Logic.Mapek
                     throw new Exception($"Property {optimalCondition.Property} was not found in the system.");
                 }
 
+                // If a constraint isn't satisfied, add the OptimalCondition to the collection.
                 foreach (var constraint in optimalCondition.Constraints)
                 {
                     if (!sensorValueHandler.EvaluateConstraint(propertyValue, constraint))

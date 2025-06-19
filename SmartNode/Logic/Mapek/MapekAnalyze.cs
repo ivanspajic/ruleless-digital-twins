@@ -24,16 +24,11 @@ namespace Logic.Mapek
         {
             _logger.LogInformation("Starting the Analyze phase.");
 
-            // Get all OptimalConditions.
             var optimalConditions = GetAllOptimalConditions(instanceModel, propertyCache);
-            // Get all OptimalConditions whose constraints are unsatisfied due to current Property values.
             var unsatisfiedOptimalConditions = GetAllUnsatisfiedOptimalConditions(optimalConditions, propertyCache);
-            // Get the relevant mitigation Actions from the unsatisfied OptimalCondition constraints.
             var mitigationActions = GetMitigationActionsFromUnsatisfiedOptimalConditions(instanceModel,
                 propertyCache,
                 unsatisfiedOptimalConditions);
-            // Get any additional Actions the system might use for desired optimizations. These Actions will not be
-            // duplicates or contradicting to the mitigation Actions.
             var optimizationActions = GetOptimizationActions(instanceModel, propertyCache, mitigationActions);
 
             // Combine the Action collections into one.

@@ -17,11 +17,11 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public void Execute(Plan plan, PropertyCache propertyCache)
+        public void Execute(List<Models.Action> actions, PropertyCache propertyCache)
         {
             _logger.LogInformation("Starting the Execute phase.");
 
-            foreach (var action in plan.Actions)
+            foreach (var action in actions)
             {
                 if (action is ActuationAction actuationAction)
                 {

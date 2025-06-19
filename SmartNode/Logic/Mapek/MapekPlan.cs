@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Models.MapekModels;
+using Models;
 
 namespace Logic.Mapek
 {
@@ -13,7 +13,7 @@ namespace Logic.Mapek
             _logger = serviceProvider.GetRequiredService<ILogger<MapekPlan>>();
         }
 
-        public List<Models.Action> Plan(Tuple<List<Mitigation>, List<Models.Action>> mitigationAndOptimizationTuple)
+        public List<Models.Action> Plan(Tuple<List<OptimalCondition>, List<Models.Action>> mitigationAndOptimizationTuple)
         {
             _logger.LogInformation("Starting the Plan phase.");
 
@@ -26,15 +26,7 @@ namespace Logic.Mapek
             // pick those whose results meet their respective optimalconditions
             // 3. put them in a plan and return the plan for execution
 
-            foreach (var mitigation in mitigationAndOptimizationTuple.Item1)
-            {
-                var actionsThatReachOptimalConditions = SimulateActionAndCompareToOptimalCondition(mitigation);
-            }
-        }
-
-        private List<Models.Action> SimulateActionAndCompareToOptimalCondition(Mitigation mitigation)
-        {
-
+            return new List<Models.Action>();
         }
     }
 }

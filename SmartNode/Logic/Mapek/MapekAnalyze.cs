@@ -20,20 +20,31 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public Tuple<List<Mitigation>, List<Models.Action>> Analyze(IGraph instanceModel, PropertyCache propertyCache)
+        public Tuple<List<OptimalCondition>, List<Models.Action>> Analyze(IGraph instanceModel, PropertyCache propertyCache)
         {
             _logger.LogInformation("Starting the Analyze phase.");
 
-            // Get the relevant Actions as mitigations for unsatisfied OptimalConditions as well as those used for optimizations.
-            var mitigations = GetRelevantActionsFromUnsatisfiedOptimalConditions(instanceModel, propertyCache);
-            var optimizationActions = GetRelevantActionsFromDesiredOptimizations(instanceModel, propertyCache, mitigations);
+            // Get all OptimalConditions.
+            var optimalConditions = GetAllOptimalConditions(instanceModel, propertyCache);
+            // Get all OptimalConditions whose constraints are unsatisfied due to current Property values.
+            var unsatisfiedOptimalConditions = GetAllUnsatisfiedOptimalConditions(optimalConditions, propertyCache);
+            // Get the relevant mitigation Actions from the unsatisfied OptimalCondition constraints.
+            var mitigationActions = GetMitigationActionsFromUnsatisfiedOptimalConditions(instanceModel,
+                propertyCache,
+                unsatisfiedOptimalConditions);
+            // Get any additional Actions the system might use for desired optimizations. These Actions will not be
+            // duplicates or contradicting to the mitigation Actions.
+            var optimizationActions = GetOptimizationActions(instanceModel, propertyCache, mitigationActions);
 
-            return new Tuple<List<Mitigation>, List<Models.Action>>(mitigations, optimizationActions);
+            // Combine the Action collections into one.
+            mitigationActions.AddRange(optimizationActions);
+
+            return new Tuple<List<OptimalCondition>, List<Models.Action>>(optimalConditions, mitigationActions);
         }
 
-        private List<Mitigation> GetRelevantActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel, PropertyCache propertyCache)
+        private List<OptimalCondition> GetAllOptimalConditions(IGraph instanceModel, PropertyCache propertyCache)
         {
-            var mitigations = new List<Mitigation>();
+            var optimalConditions = new List<OptimalCondition>();
 
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -45,7 +56,7 @@ namespace Logic.Mapek
 
             var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
 
-            // For each OptimalCondition, process its respective constraints and get the appropriate Execution Plans
+            // For each OptimalCondition, process its respective constraints and get the appropriate Actions
             // for mitigation.
             foreach (var result in queryResult.Results)
             {
@@ -68,46 +79,65 @@ namespace Logic.Mapek
                     ReachedInMaximumSeconds = int.Parse(reachedInMaximumSecondsValue)
                 };
 
-                List<Models.Action> actions;
+                optimalConditions.Add(optimalCondition);
+            }
 
-                if (propertyCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter configurableParameter))
+            return optimalConditions;
+        }
+
+        private List<OptimalCondition> GetAllUnsatisfiedOptimalConditions(List<OptimalCondition> optimalConditions, PropertyCache propertyCache)
+        {
+            var unsatisfiedOptimalConditions = new List<OptimalCondition>();
+
+            foreach (var optimalCondition in optimalConditions)
+            {
+                var sensorValueHandler = _factory.GetSensorValueHandlerImplementation(optimalCondition.ConstraintValueType);
+                object propertyValue;
+
+                if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property, out ConfigurableParameter configurableParameter))
                 {
-                    actions = EvaluateConstraintsAndGetActions(instanceModel, optimalCondition, configurableParameter.Value, propertyCache);
+                    propertyValue = configurableParameter.Value;
                 }
-                else if (propertyCache.Properties.TryGetValue(propertyName, out Property property))
+                else if (propertyCache.Properties.TryGetValue(optimalCondition.Property, out Property property))
                 {
-                    actions = EvaluateConstraintsAndGetActions(instanceModel, optimalCondition, property.Value, propertyCache);
+                    propertyValue = property.Value;
                 }
                 else
                 {
-                    throw new Exception($"Property {propertyName} was not found in the system.");
+                    throw new Exception($"Property {optimalCondition.Property} was not found in the system.");
                 }
 
-                // If there were any unsatisfied constraints, add the current OptimalCondition to the cache and link it to
-                // its respective Actions.
-                if (actions.Count > 0)
+                foreach (var constraint in optimalCondition.Constraints)
                 {
-                    var mitigation = new Mitigation()
+                    if (!sensorValueHandler.EvaluateConstraint(propertyValue, constraint))
                     {
-                        UnsatisfiedOptimalCondition = optimalCondition,
-                        MitigationActions = actions,
-                    };
+                        _logger.LogInformation(@"OptimalCondition {optimalCondition} with constraint {restriction} {value} is unsatisfied due
+                            to Property {property}'s value being {propertyValue}.",
+                            optimalCondition.Name,
+                            constraint.Item1.ToString(),
+                            constraint.Item2,
+                            optimalCondition.Property,
+                            propertyValue.ToString());
 
-                    mitigations.Add(mitigation);
+                        unsatisfiedOptimalConditions.Add(optimalCondition);
+                    }
                 }
             }
 
-            return mitigations;
+            // Each OptimalCondition might have had multiple unsatisfied constraints, so they could've been added
+            // multiple times, so we return a distinct collection.
+            return unsatisfiedOptimalConditions.DistinctBy(x => x.Name)
+                .ToList();
         }
 
-        private List<Models.Action> GetRelevantActionsFromDesiredOptimizations(IGraph instanceModel,
+        private List<Models.Action> GetOptimizationActions(IGraph instanceModel,
             PropertyCache propertyCache,
-            List<Mitigation> mitigations)
+            List<Models.Action> mitigationActions)
         {
             var actions = new List<Models.Action>();
 
             // Construct a filter for eliminating Actions that are duplicate or contradicting to those
-            // already in the mitigation collection.
+            // already in the mitigation Action collection.
             //
             // Duplicate Actions are those whose PropertyChanges' Properties and Effects are the same.
             // Contradictory Actions are those whose PropertyChanges' Properties are the same but whose
@@ -116,20 +146,31 @@ namespace Logic.Mapek
             // PropertyChanges contain the same Properties. This filter thus constructs a set of Properties
             // referenced by the OptimalConditions in the mitigation Action collection.
             var filterStringBuilder = new StringBuilder();
-            for (var i = 0; i < mitigations.Count; i++)
+            for (var i = 0; i < mitigationActions.Count; i++)
             {
                 if (i == 0)
                 {
                     filterStringBuilder.Append("FILTER(?property NOT IN (");
                 }
 
+                string propertyName;
+
+                if (mitigationActions[i] is ActuationAction actuationAction)
+                {
+                    propertyName = actuationAction.ActedOnProperty;
+                }
+                else
+                {
+                    propertyName = ((ReconfigurationAction)mitigationActions[i]).ConfigurableParameter.Name;
+                }
+
                 // The angle brackets are required around the full Property names to be successfully used
                 // in the filter.
                 filterStringBuilder.Append('<');
-                filterStringBuilder.Append(mitigations[i].UnsatisfiedOptimalCondition.Property);
+                filterStringBuilder.Append(propertyName);
                 filterStringBuilder.Append('>');
 
-                if (i < mitigations.Count - 1)
+                if (i < mitigationActions.Count - 1)
                 {
                     filterStringBuilder.Append(", ");
                 }
@@ -145,7 +186,7 @@ namespace Logic.Mapek
 
             // Get all ActuationActions, their ActuatorStates, and their Actuators that cause PropertyChanges equal to those that the system
             // wishes to optimize for.
-            actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuatorState ?actuator WHERE {
+            actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuatorState ?actuator ?property WHERE {
                 ?actuationAction rdf:type meta:ActuationAction .
                 ?actuationAction meta:hasActuatorState ?actuatorState .
                 ?actuatorState meta:isActuatorStateOf ?actuator .
@@ -160,7 +201,7 @@ namespace Logic.Mapek
 
             foreach (var result in actuationQueryResult.Results)
             {
-                AddActuationActionToCollectionFromQueryResult(result, actions, "actuationAction", "actuatorState", "actuator");
+                AddActuationActionToCollectionFromQueryResult(result, actions);
             }
 
             var reconfigurationQuery = MapekUtilities.GetParameterizedStringQuery();
@@ -182,12 +223,7 @@ namespace Logic.Mapek
 
             foreach (var result in reconfigurationQueryResult.Results)
             {
-                AddReconfigurationActionToCollectionFromQueryResult(result,
-                    actions,
-                    "reconfigurationAction",
-                    "configurableParameter",
-                    "effect",
-                    propertyCache);
+                AddReconfigurationActionToCollectionFromQueryResult(result, actions, propertyCache);
             }
 
             return actions;
@@ -732,132 +768,104 @@ namespace Logic.Mapek
             }
         }
 
-        private List<Models.Action> EvaluateConstraintsAndGetActions(IGraph instanceModel,
-            OptimalCondition optimalCondition,
-            object propertyValue,
-            PropertyCache propertyCache)
-        {
-            var relevantActions = new List<Models.Action>();
-
-            var sensorValueHandler = _factory.GetSensorValueHandlerImplementation(optimalCondition.ConstraintValueType);
-
-            foreach (var constraint in optimalCondition.Constraints)
-            {
-                // Evaluate the constraint against the current Property value.
-                if (!sensorValueHandler.EvaluateConstraint(propertyValue, constraint))
-                {
-                    _logger.LogInformation(@"OptimalCondition {optimalCondition} with constraint {restriction} {value} is unsatisfied due
-                        to Property {property}'s value being {propertyValue}.",
-                        optimalCondition.Name,
-                        constraint.Item1.ToString(),
-                        constraint.Item2,
-                        optimalCondition.Property,
-                        propertyValue.ToString());
-
-                    // In case of the constraint not being satisfied, get the relevant Actions from the instance model.
-                    var actions = GetRelevantActionsFromUnsatisfiedConstraint(instanceModel,
-                        optimalCondition.Property,
-                        constraint.Item1,
-                        propertyCache);
-
-                    relevantActions.AddRange(actions);
-                }
-            }
-
-            return relevantActions;
-        }
-
-        private List<Models.Action> GetRelevantActionsFromUnsatisfiedConstraint(IGraph instanceModel,
-            string propertyName,
-            ConstraintOperator constraintOperator,
-            PropertyCache propertyCache)
+        private List<Models.Action> GetMitigationActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel,
+            PropertyCache propertyCache,
+            List<OptimalCondition> optimalConditions)
         {
             var actions = new List<Models.Action>();
 
-            var filter = string.Empty;
-
-            switch (constraintOperator)
+            foreach (var optimalCondition in optimalConditions)
             {
-                // In case the unsatisfied constraint is LessThan or LessThanOrEqualTo, any appropriate Action will need
-                // to result in a PropertyChange with a ValueDecrease to mitigate it.
-                case ConstraintOperator.LessThan:
-                case ConstraintOperator.LessThanOrEqualTo:
-                    filter = "?propertyChange meta:affectsPropertyWith meta:ValueDecrease .";
+                foreach (var constraint in optimalCondition.Constraints)
+                {
+                    var filter = string.Empty;
 
-                    break;
-                // In case the unsatisfied constraint is GreaterThan or GreaterThanOrEqualTo, any appropriate Action will
-                // need to result in a PropertyChange with a ValueIncrease to mitigate it.
-                case ConstraintOperator.GreaterThan:
-                case ConstraintOperator.GreaterThanOrEqualTo:
-                    filter = "?propertyChange meta:affectsPropertyWith meta:ValueIncrease .";
+                    switch (constraint.Item1)
+                    {
+                        // In case the unsatisfied constraint is LessThan or LessThanOrEqualTo, any appropriate Action will need
+                        // to result in a PropertyChange with a ValueDecrease to mitigate it.
+                        case ConstraintOperator.LessThan:
+                        case ConstraintOperator.LessThanOrEqualTo:
+                            filter = "?propertyChange meta:affectsPropertyWith meta:ValueDecrease .";
 
-                    break;
-                // Constraints like Equals and NotEquals can be mitigated through both ValueIncrease and ValueDecrease, so
-                // they fall under the default case.
-                default:
-                    break;
+                            break;
+                        // In case the unsatisfied constraint is GreaterThan or GreaterThanOrEqualTo, any appropriate Action will
+                        // need to result in a PropertyChange with a ValueIncrease to mitigate it.
+                        case ConstraintOperator.GreaterThan:
+                        case ConstraintOperator.GreaterThanOrEqualTo:
+                            filter = "?propertyChange meta:affectsPropertyWith meta:ValueIncrease .";
+
+                            break;
+                        // Constraints like Equals and NotEquals can be mitigated through both ValueIncrease and ValueDecrease, so
+                        // they fall under the default case.
+                        default:
+                            break;
+                    }
+
+                    var actuationQuery = MapekUtilities.GetParameterizedStringQuery();
+
+                    // Get all ActuationActions, ActuatorStates, and Actuators that match as relevant Actions given the appropriate
+                    // filter.
+                    actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuatorState ?actuator ?property WHERE {
+                    ?actuationAction rdf:type meta:ActuationAction.
+                    ?actuationAction meta:hasActuatorState ?actuatorState .
+                    ?actuatorState meta:enacts ?propertyChange .
+                    ?actuator meta:hasActuatorState ?actuatorState .
+                    ?actuator rdf:type sosa:Actuator .
+                    ?propertyChange ssn:forProperty ?property .
+                    ?property owl:sameAs @property .
+                    " + filter + " }";
+
+                    actuationQuery.SetUri("property", new Uri(optimalCondition.Property));
+
+                    var actuationQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(actuationQuery);
+
+                    foreach (var result in actuationQueryResult.Results)
+                    {
+                        AddActuationActionToCollectionFromQueryResult(result, actions);
+
+                        _logger.LogInformation("Found ActuationAction {actuationActionName} as a relevant Action.",
+                            result["actuationAction"].ToString());
+                    }
+
+                    var reconfigurationQuery = MapekUtilities.GetParameterizedStringQuery();
+
+                    // Get all ReconfigurationActions, ConfigurableParameters, and Effects that match as relevant Actions given the appropriate
+                    // filter.
+                    reconfigurationQuery.CommandText = @"SELECT DISTINCT ?reconfigurationAction ?configurableParameter ?effect WHERE {
+                    ?reconfigurationAction rdf:type meta:ReconfigurationAction .
+                    ?reconfigurationAction ssn:forProperty ?configurableParameter .
+                    ?reconfigurationAction meta:affectsPropertyWith ?effect .
+                    ?configurableParameter meta:enacts ?propertyChange .
+                    ?propertyChange ssn:forProperty @property .
+                    ?propertyChange meta:alteredBy ?effect .
+                    " + filter + " }";
+
+                    reconfigurationQuery.SetUri("property", new Uri(optimalCondition.Property));
+
+                    var reconfigurationQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(reconfigurationQuery);
+
+                    foreach (var result in reconfigurationQueryResult.Results)
+                    {
+                        AddReconfigurationActionToCollectionFromQueryResult(result, actions, propertyCache);
+
+                        _logger.LogInformation("Found ActuationAction {actuationActionName} as a relevant Action.",
+                            result["reconfigurationAction"].ToString());
+                    }
+                }
             }
 
-            var actuationQuery = MapekUtilities.GetParameterizedStringQuery();
-
-            // Get all ActuationActions, ActuatorStates, and Actuators that match as relevant Actions given the appropriate
-            // filter.
-            actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuatorState ?actuator WHERE {
-                ?actuationAction rdf:type meta:ActuationAction.
-                ?actuationAction meta:hasActuatorState ?actuatorState .
-                ?actuatorState meta:enacts ?propertyChange .
-                ?actuator meta:hasActuatorState ?actuatorState .
-                ?actuator rdf:type sosa:Actuator .
-                ?propertyChange ssn:forProperty @property .
-                " + filter + " }";
-
-            actuationQuery.SetUri("property", new Uri(propertyName));
-
-            var actuationQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(actuationQuery);
-
-            foreach (var result in actuationQueryResult.Results)
-            {
-                AddActuationActionToCollectionFromQueryResult(result, actions, "actuationAction", "actuatorState", "actuator");
-
-                _logger.LogInformation("Found ActuationAction {actuationActionName} as a relevant Action.", result["actuationAction"].ToString());
-            }
-
-            var reconfigurationQuery = MapekUtilities.GetParameterizedStringQuery();
-
-            // Get all ReconfigurationActions, ConfigurableParameters, and Effects that match as relevant Actions given the appropriate
-            // filter.
-            reconfigurationQuery.CommandText = @"SELECT DISTINCT ?reconfigurationAction ?configurableParameter ?effect WHERE {
-                ?reconfigurationAction rdf:type meta:ReconfigurationAction .
-                ?reconfigurationAction ssn:forProperty ?configurableParameter .
-                ?reconfigurationAction meta:affectsPropertyWith ?effect .
-                ?configurableParameter meta:enacts ?propertyChange .
-                ?propertyChange ssn:forProperty @property .
-                ?propertyChange meta:alteredBy ?effect .
-                " + filter + " }";
-
-            reconfigurationQuery.SetUri("property", new Uri(propertyName));
-
-            var reconfigurationQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(reconfigurationQuery);
-
-            foreach (var result in reconfigurationQueryResult.Results)
-            {
-                AddReconfigurationActionToCollectionFromQueryResult(result, actions, "reconfigurationAction", "configurableParameter", "effect", propertyCache);
-
-                _logger.LogInformation("Found ActuationAction {actuationActionName} as a relevant Action.", result["reconfigurationAction"].ToString());
-            }
-
-            return actions;
+            // Returns distinct Actions since they're added from every OptimalCondition's unsatisfied constraint.
+            return actions.DistinctBy(x => x.Name)
+                .ToList();
         }
 
-        private void AddActuationActionToCollectionFromQueryResult(ISparqlResult result,
-            List<Models.Action> actions,
-            string actuationActionParameter,
-            string actuatorStateParameter,
-            string actuatorParameter)
+        private void AddActuationActionToCollectionFromQueryResult(ISparqlResult result, List<Models.Action> actions)
         {
-            var actuationActionName = result[actuationActionParameter].ToString();
-            var actuatorStateName = result[actuatorStateParameter].ToString();
-            var actuatorName = result[actuatorParameter].ToString();
+            var actuationActionName = result[0].ToString();
+            var actuatorStateName = result[1].ToString();
+            var actuatorName = result[2].ToString();
+            var propertyName = result[3].ToString();
 
             var actuatorState = new ActuatorState
             {
@@ -868,7 +876,8 @@ namespace Logic.Mapek
             var action = new ActuationAction()
             {
                 Name = actuationActionName,
-                ActuatorState = actuatorState
+                ActuatorState = actuatorState,
+                ActedOnProperty = propertyName
             };
 
             actions.Add(action);
@@ -876,14 +885,11 @@ namespace Logic.Mapek
 
         private void AddReconfigurationActionToCollectionFromQueryResult(ISparqlResult result,
             List<Models.Action> actions,
-            string actionParameter,
-            string configurableParameterParameter,
-            string effectParameter,
             PropertyCache propertyCache)
         {
-            var reconfigurationActionName = result[actionParameter].ToString();
-            var configurableParameterName = result[configurableParameterParameter].ToString();
-            var effectName = result[effectParameter].ToString().Split("/")[^1];
+            var reconfigurationActionName = result[0].ToString();
+            var configurableParameterName = result[1].ToString();
+            var effectName = result[2].ToString().Split("/")[^1];
 
             if (!propertyCache.ConfigurableParameters.TryGetValue(configurableParameterName, out ConfigurableParameter configurableParameter))
             {

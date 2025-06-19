@@ -5,6 +5,6 @@ namespace Logic.Mapek
 {
     public interface IMapekExecute
     {
-        public void Execute(Plan plan, PropertyCache propertyCache);
+        public void Execute(List<Models.Action> actions, PropertyCache propertyCache);
     }
 }

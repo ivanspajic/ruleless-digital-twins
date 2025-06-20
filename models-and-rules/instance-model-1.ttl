@@ -222,6 +222,32 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds> "3600"^^xsd:int .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition7
+:OptimalCondition7 rdf:type owl:NamedIndividual ,
+                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange xsd:double
+                            ] ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange [ rdf:type rdfs:Datatype ;
+                                                owl:datatypeComplementOf [ rdf:type rdfs:Datatype ;
+                                                                           owl:onDatatype xsd:double ;
+                                                                           owl:withRestrictions ( [ xsd:minInclusive "11.8"^^xsd:double
+                                                                                                  ]
+                                                                                                  [ xsd:maxExclusive "29.5"^^xsd:double
+                                                                                                  ]
+                                                                                                )
+                                                                         ]
+                                              ]
+                            ] ;
+                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
+                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds> "3600"^^xsd:int .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomHumidity
 :RoomHumidity rdf:type owl:NamedIndividual ,
                        <http://www.w3.org/ns/sosa/ObservableProperty> ,
@@ -348,13 +374,13 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
 ] .
 
+[ xsd:maxInclusive "3"^^xsd:int
+ ] .
+
 [ xsd:minInclusive "1"^^xsd:int
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ xsd:maxInclusive "3"^^xsd:int
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger

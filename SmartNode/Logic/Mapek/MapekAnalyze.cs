@@ -232,6 +232,8 @@ namespace Logic.Mapek
         {
             var constraints = new List<Tuple<ConstraintOperator, string>>();
 
+            // TODO: clean this up after removing support for negation!
+
             // Process the constraints from specific queries that check for different kinds of restrictions in OptimalConditions.
             ProcessSingleValueEqualsConstraint(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
             ProcessFirstValueGreaterThanConstraints(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);

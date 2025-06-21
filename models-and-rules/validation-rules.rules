@@ -4,8 +4,7 @@
 @prefix sosa: <http://www.w3.org/ns/sosa/>.
 @include <OWL>.
 
-// The following rules validate that system constraints and optimizations are not conflicting or useless.
-
+// Validates that system constraints and optimizations are not conflicting.
 [rule4a:    (?thing1 meta:optimizesFor ?propertyChange1)
             (?propertyChange1 ssn:forProperty ?property)
             (?thing2 meta:optimizesFor ?propertyChange2)
@@ -13,194 +12,177 @@
             (?propertyChange1 meta:affectsPropertyWith meta:ValueIncrease)
             (?propertyChange2 meta:affectsPropertyWith meta:ValueDecrease)
             ->  print()
-                print("Contradicting optimizations detected!")
+                print("Conflicting optimizations detected!")
                 print(?thing1, "optimizes for", ?property, "with ValueIncrease through", ?propertyChange1)
                 print(?thing2, "optimizes for", ?property, "with ValueDecrease through", ?propertyChange2)
                 print()
 ]
 
 
+// The following rules validate against any conflicting or useless constraints in the same or across multiple
+// OptimalConditions for the same Property. E.g., for the same Property value, useless constraints could be >15
+// and <=15 while conflicting constraints might be =15 and >20. These rules do not check the combination of
+// minExclusive (>) and maxExclusive (<) since this reduces to everything but the excluded value.
+// E.g., >15 and <15 = !15.
 
-// The rules only validate against OptimalConditions that are allowed by Proteges reasoner. These rules do
-// not check the combination of minExclusive (>) and maxExclusive (<) since this reduces to everything but
-// the excluded value. E.g., >15 and <15 = !15.
-
+// Checks for simultaneous >= and <= with the same value.
 [rule4b:    (?restriction1 rdf:comment ?property)
             (?restriction1 xsd:minInclusive ?value)
             (?restriction2 rdf:comment ?property)
             (?restriction2 xsd:maxInclusive ?value)
             ->  print()
-                print("Useless conditions detected!")
-                print("Conditions for", ?property, "are")
-                print("greater than or equal to", ?value)
-                print("and")
-                print("less than or equal to", ?value)
-                print("at the same time, which is not a restriction.")
+                print("Conflicting conditions detected!")
+                print("Conditions for", ?property, "are >=", ?value, "and <=", ?value, "at the same time.")
                 print()
 ]
 
+// Checks for simultaneous >= and < with the same value.
 [rule4c:    (?restriction1 rdf:comment ?property)
             (?restriction1 xsd:minInclusive ?value)
             (?restriction2 rdf:comment ?property)
             (?restriction2 xsd:maxExclusive ?value)
             ->  print()
-                print("Useless conditions detected!")
-                print("Conditions for", ?property, "are")
-                print("greater than or equal to", ?value)
-                print("and")
-                print("less than", ?value)
-                print("at the same time, which is not a restriction.")
+                print("Conflicting conditions detected!")
+                print("Conditions for", ?property, "are >=", ?value, "and <", ?value, "at the same time.")
                 print()
 ]
 
+// Checks for simultaneous > and <= with the same value.
 [rule4d:    (?restriction1 rdf:comment ?property)
             (?restriction1 xsd:minExclusive ?value)
             (?restriction2 rdf:comment ?property)
             (?restriction2 xsd:maxInclusive ?value)
             ->  print()
-                print("Useless conditions detected!")
-                print("Conditions for", ?property, "are")
-                print("greater than", ?value)
-                print("and")
-                print("less than or equal to", ?value)
-                print("at the same time, which is not a restriction.")
+                print("Conflicting conditions detected!")
+                print("Conditions for", ?property, "are >", ?value, "and <=", ?value, "at the same time.")
                 print()
 ]
 
-
-
-// These rules check for any contradicting OptimalCondition ranges through the use of a simple,
-// single-valued constraint or negations. E.g., OptimalCondition1 being >15 and OptimalCondition2
-// being not(>15) for the same Property or OptimalCondition1 being 15 and OptimalCondition2
-// being >15 for the same Property.
-
+// Checks for simultanous = with at least two different values.
 [rule4e:    (?bNode1 rdf:comment ?property)
             (?bNode1 owl:hasValue ?value1)
             (?bNode2 rdf:comment ?property)
             (?bNode2 owl:hasValue ?value2)
-            notEqual(?bNode1, ?bNode2)
             notEqual(?value1, ?value2)
-            noValue(?bNode1, rdf:comment, "negation")
-            noValue(?bNode2, rdf:comment, "negation")
             ->  print()
                 print("Conflicting conditions detected!")
-                print("Conditions for", ?property, "are")
-                print(?value1)
-                print("and")
-                print(?value2)
-                print("at the same time.")
+                print("Conditions for", ?property, "are", ?value1, "and", ?value2, "at the same time.")
                 print()
 ]
 
+// Checks for simultaneous = and > with potentially different values.
 [rule4f:    (?bNode rdf:comment ?property)
-            (?bNode owl:hasValue ?value)
+            (?bNode owl:hasValue ?value1)
             (?restriction rdf:comment ?property)
-            (?restriction xsd:minExclusive ?value)
+            (?restriction xsd:minExclusive ?value2)
             ->  print()
                 print("Conflicting conditions detected!")
-                print("Conditions for", ?property, "are")
-                print(?value)
-                print("and")
-                print("greater than", ?value)
-                print("at the same time.")
+                print("Conditions for", ?property, "are", ?value1, "and >", ?value2, "at the same time.")
                 print()
 ]
 
+// Checks for simultaneous = and >= with potentially different values.
 [rule4g:    (?bNode rdf:comment ?property)
-            (?bNode owl:hasValue ?value)
+            (?bNode owl:hasValue ?value1)
             (?restriction rdf:comment ?property)
-            (?restriction xsd:maxExclusive ?value)
+            (?restriction xsd:minInclusive ?value2)
             ->  print()
                 print("Conflicting conditions detected!")
-                print("Conditions for", ?property, "are")
-                print(?value)
-                print("and")
-                print("less than", ?value)
-                print("at the same time.")
+                print("Conditions for", ?property, "are", ?value1, "and >=", ?value2, "at the same time.")
                 print()
 ]
 
-[rule4h:    (?bNode1 rdf:comment ?property)
-            (?bNode1 owl:hasValue ?value)
-            (?bNode2 rdf:comment ?property)
-            (?bNode2 owl:hasValue ?value)
-            (?bNode2 rdf:comment "negation")
-            notEqual(?bNode1, ?bNode2)
-            notEqual(?property, "negation")
+// Checks for simultaneous = and < with the same value.
+[rule4h:    (?bNode rdf:comment ?property)
+            (?bNode owl:hasValue ?value1)
+            (?restriction rdf:comment ?property)
+            (?restriction xsd:maxExclusive ?value2)
             ->  print()
                 print("Conflicting conditions detected!")
-                print("Conditions for", ?property, "are")
-                print(?value)
-                print("and")
-                print("not", ?value)
-                print("at the same time.")
+                print("Conditions for", ?property, "are", ?value1, "and <", ?value2, "at the same time.")
                 print()
 ]
 
-[rule4i:    (?restriction1 rdf:comment ?property)
-            (?restriction1 xsd:minExclusive ?value)
-            (?restriction2 rdf:comment ?property)
-            (?restriction2 xsd:minExclusive ?value)
-            (?restriction2 rdf:comment "negation")
-            notEqual(?restriction1, ?restriction2)
+// Checks for simultaneous = and <= with the same value.
+[rule4i:    (?bNode rdf:comment ?property)
+            (?bNode owl:hasValue ?value1)
+            (?restriction rdf:comment ?property)
+            (?restriction xsd:maxInclusive ?value2)
             ->  print()
                 print("Conflicting conditions detected!")
-                print("Conditions for", ?property, "are")
-                print(?value)
-                print("and")
-                print("not", ?value)
-                print("at the same time.")
+                print("Conditions for", ?property, "are", ?value1, "and <=", ?value2, "at the same time.")
                 print()
 ]
 
+// Checks for simultaneous > with at least two different values.
 [rule4j:    (?restriction1 rdf:comment ?property)
-            (?restriction1 xsd:minInclusive ?value)
+            (?restriction1 xsd:minExclusive ?value1)
             (?restriction2 rdf:comment ?property)
-            (?restriction2 xsd:minInclusive ?value)
-            (?restriction2 rdf:comment "negation")
-            notEqual(?restriction1, ?restriction2)
+            (?restriction2 xsd:minExclusive ?value2)
+            notEqual(?value1, ?value2)
             ->  print()
                 print("Conflicting conditions detected!")
-                print("Conditions for", ?property, "are")
-                print(?value)
-                print("and")
-                print("not", ?value)
-                print("at the same time.")
+                print("Conditions for", ?property, "are >", ?value1, "and >", ?value2, "at the same time.")
                 print()
 ]
 
+// Checks for simultaneous >= with at least two different values.
 [rule4k:    (?restriction1 rdf:comment ?property)
-            (?restriction1 xsd:maxExclusive ?value)
+            (?restriction1 xsd:minInclusive ?value1)
             (?restriction2 rdf:comment ?property)
-            (?restriction2 xsd:maxExclusive ?value)
-            (?restriction2 rdf:comment "negation")
-            notEqual(?restriction1, ?restriction2)
+            (?restriction2 xsd:minInclusive ?value2)
+            notEqual(?value1, ?value2)
             ->  print()
                 print("Conflicting conditions detected!")
-                print("Conditions for", ?property, "are")
-                print(?value)
-                print("and")
-                print("not", ?value)
-                print("at the same time.")
+                print("Conditions for", ?property, "are >=", ?value1, "and >=", ?value2, "at the same time.")
                 print()
 ]
 
+// Checks for simultaneous < with at least two different values.
 [rule4l:    (?restriction1 rdf:comment ?property)
-            (?restriction1 xsd:maxInclusive ?value)
+            (?restriction1 xsd:maxExclusive ?value1)
             (?restriction2 rdf:comment ?property)
-            (?restriction2 xsd:maxInclusive ?value)
-            (?restriction2 rdf:comment "negation")
-            notEqual(?restriction1, ?restriction2)
+            (?restriction2 xsd:maxExclusive ?value2)
+            notEqual(?value1, ?value2)
             ->  print()
                 print("Conflicting conditions detected!")
-                print("Conditions for", ?property, "are")
-                print(?value)
-                print("and")
-                print("not", ?value)
-                print("at the same time.")
+                print("Conditions for", ?property, "are <", ?value1, "and <", ?value2, "at the same time.")
                 print()
 ]
 
+// Checks for simultaneous <= with at least two different values.
+[rule4m:    (?restriction1 rdf:comment ?property)
+            (?restriction1 xsd:maxInclusive ?value1)
+            (?restriction2 rdf:comment ?property)
+            (?restriction2 xsd:maxInclusive ?value2)
+            notEqual(?value1, ?value2)
+            ->  print()
+                print("Conflicting conditions detected!")
+                print("Conditions for", ?property, "are <=", ?value1, "and <=", ?value2, "at the same time.")
+                print()
+]
+
+// Checks for simultaneous > and >= with potentially different values.
+[rule4n:    (?restriction1 rdf:comment ?property)
+            (?restriction1 xsd:minExclusive ?value1)
+            (?restriction2 rdf:comment ?property)
+            (?restriction2 xsd:minInclusive ?value2)
+            ->  print()
+                print("Conflicting conditions detected!")
+                print("Conditions for", ?property, "are >", ?value1, "and >=", ?value2, "at the same time.")
+                print()
+]
+
+// Checks for simultaneous < and <= with potentially different values.
+[rule4o:    (?restriction1 rdf:comment ?property)
+            (?restriction1 xsd:maxExclusive ?value1)
+            (?restriction2 rdf:comment ?property)
+            (?restriction2 xsd:maxInclusive ?value2)
+            ->  print()
+                print("Conflicting conditions detected!")
+                print("Conditions for", ?property, "are <", ?value1, "and <=", ?value2, "at the same time.")
+                print()
+]
 
 
 // NB: Additional validation rules may be added to cover more specific cases, such as for more specific

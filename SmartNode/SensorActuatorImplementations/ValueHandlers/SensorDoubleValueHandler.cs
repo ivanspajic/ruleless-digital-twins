@@ -10,7 +10,6 @@ namespace SensorActuatorImplementations.ValueHandlers
         private static readonly Dictionary<ConstraintOperator, Func<double, double, bool>> _expressionDelegateMap = new()
         {
             { ConstraintOperator.EqualTo, EvaluateEqualTo },
-            { ConstraintOperator.NotEqualTo, EvaluateNotEqualTo },
             { ConstraintOperator.GreaterThan, EvaluateGreaterThan },
             { ConstraintOperator.GreaterThanOrEqualTo, EvaluateGreaterThanOrEqualTo },
             { ConstraintOperator.LessThan, EvaluateLessThan },
@@ -72,11 +71,6 @@ namespace SensorActuatorImplementations.ValueHandlers
         private static bool EvaluateEqualTo(double sensorValue, double optimalConditionValue)
         {
             return sensorValue == optimalConditionValue;
-        }
-
-        private static bool EvaluateNotEqualTo(double sensorValue, double optimalConditionValue)
-        {
-            return sensorValue != optimalConditionValue;
         }
 
         private static bool EvaluateGreaterThan(double sensorValue, double optimalConditionValue)

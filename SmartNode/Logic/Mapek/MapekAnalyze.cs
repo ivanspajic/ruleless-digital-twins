@@ -232,8 +232,6 @@ namespace Logic.Mapek
         {
             var constraints = new List<Tuple<ConstraintOperator, string>>();
 
-            // TODO: clean this up after removing support for negation!
-
             // Process the constraints from specific queries that check for different kinds of restrictions in OptimalConditions.
             ProcessSingleValueEqualsConstraint(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
             ProcessFirstValueGreaterThanConstraints(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
@@ -244,15 +242,6 @@ namespace Logic.Mapek
             ProcessSecondValueGreaterThanOrEqualToConstraints(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
             ProcessSecondValueLessThanConstraints(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
             ProcessSecondValueLessThanOrEqualToConstraints(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessNegatedSingleValueConstraints(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessNegatedFirstValueGreaterThanConstraint(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessNegatedFirstValueGreaterThanOrEqualToConstraint(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessNegatedFirstValueLessThanConstraint(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessNegatedFirstValueLessThanOrEqualToConstraint(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessNegatedSecondValueGreaterThanConstraint(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessNegatedSecondValueGreaterThanOrEqualToConstraint(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessNegatedSecondValueLessThanConstraint(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessNegatedSecondValueLessThanOrEqualToConstraint(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
 
             // Return all the constraints that were found.
             return constraints;
@@ -278,17 +267,7 @@ namespace Logic.Mapek
             query.SetParameter("property", property);
             query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-            var singleValueQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
-
-            if (!singleValueQueryResult.IsEmpty)
-            {
-                // Reasoners (such as Protege's) should only allow one single value constraint per OptimalCondition.
-                var constraint = singleValueQueryResult.Results[0]["constraint"].ToString();
-                constraint = constraint.Split('^')[0];
-
-                var tuple = new Tuple<ConstraintOperator, string>(ConstraintOperator.EqualTo, constraint);
-                constraints.Add(tuple);
-            }
+            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.EqualTo);
         }
 
         private void ProcessFirstValueGreaterThanConstraints(IGraph instanceModel,
@@ -300,7 +279,7 @@ namespace Logic.Mapek
             var query = MapekUtilities.GetParameterizedStringQuery();
 
             // Get all first values of constraint ranges with a '>' operator. This kind of query covers both
-            // single-valued (e.g., >15) and double-valued (e.g. >15, <25) constraints.
+            // single-valued (e.g., >15) and double-valued (e.g., >15, <25) constraints.
             query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
                     @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
@@ -504,251 +483,6 @@ namespace Logic.Mapek
             ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.LessThanOrEqualTo);
         }
 
-        private void ProcessNegatedSingleValueConstraints(IGraph instanceModel,
-            INode optimalCondition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
-        {
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            // Get all negated single value constraints.
-            query.CommandText = @"SELECT ?constraint WHERE {
-                    @optimalCondition ssn:forProperty @property .
-                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                    @optimalCondition rdf:type ?bNode1 .
-                    ?bNode1 owl:complementOf ?bNode2 .
-                    ?bNode2 owl:onProperty meta:hasValueConstraint .
-                    ?bNode2 owl:hasValue ?constraint . }";
-
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.NotEqualTo);
-        }
-
-        private void ProcessNegatedFirstValueGreaterThanConstraint(IGraph instanceModel,
-            INode optimalCondition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
-        {
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            // Get all negated first values of constraint ranges with a '>' operator. This kind of query covers both
-            // single-valued (e.g., not(>15)) and double-valued (e.g. not(>15, <25)) constraints.
-            query.CommandText = @"SELECT ?constraint WHERE {
-                @optimalCondition ssn:forProperty @property .
-                @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                @optimalCondition rdf:type ?bNode1 .
-                ?bNode1 owl:complementOf ?bNode2 .
-                ?bNode2 owl:onProperty meta:hasValueConstraint .
-                ?bNode2 owl:onDataRange ?bNode3 .
-                ?bNode3 owl:withRestrictions ?bNode4 .
-                ?bNode4 rdf:first ?anonymousNode .
-                ?anonymousNode xsd:minExclusive ?constraint . }";
-
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.LessThanOrEqualTo);
-        }
-
-        private void ProcessNegatedFirstValueGreaterThanOrEqualToConstraint(IGraph instanceModel,
-            INode optimalCondition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
-        {
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            // Get all negated first values of constraint ranges with a '>=' operator.
-            query.CommandText = @"SELECT ?constraint WHERE {
-                    @optimalCondition ssn:forProperty @property .
-                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                    @optimalCondition rdf:type ?bNode1 .
-                    ?bNode1 owl:complementOf ?bNode2 .
-                    ?bNode2 owl:onProperty meta:hasValueConstraint .
-                    ?bNode2 owl:onDataRange ?bNode3 .
-                    ?bNode3 owl:withRestrictions ?bNode4 .
-                    ?bNode4 rdf:first ?anonymousNode .
-                    ?anonymousNode xsd:minInclusive ?constraint . }";
-
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.LessThan);
-        }
-
-        private void ProcessNegatedFirstValueLessThanConstraint(IGraph instanceModel,
-            INode optimalCondition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
-        {
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            // Get all negated first values of constraint ranges with a '<' operator.
-            query.CommandText = @"SELECT ?constraint WHERE {
-                    @optimalCondition ssn:forProperty @property .
-                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                    @optimalCondition rdf:type ?bNode1 .
-                    ?bNode1 owl:complementOf ?bNode2 .
-                    ?bNode2 owl:onProperty meta:hasValueConstraint .
-                    ?bNode2 owl:onDataRange ?bNode3 .
-                    ?bNode3 owl:withRestrictions ?bNode4 .
-                    ?bNode4 rdf:first ?anonymousNode .
-                    ?anonymousNode xsd:maxExclusive ?constraint . }";
-
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.GreaterThanOrEqualTo);
-        }
-
-        private void ProcessNegatedFirstValueLessThanOrEqualToConstraint(IGraph instanceModel,
-            INode optimalCondition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
-        {
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            // Get all negated first values of constraint ranges with a '<=' operator.
-            query.CommandText = @"SELECT ?constraint WHERE {
-                    @optimalCondition ssn:forProperty @property .
-                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                    @optimalCondition rdf:type ?bNode1 .
-                    ?bNode1 owl:complementOf ?bNode2 .
-                    ?bNode2 owl:onProperty meta:hasValueConstraint .
-                    ?bNode2 owl:onDataRange ?bNode3 .
-                    ?bNode3 owl:withRestrictions ?bNode4 .
-                    ?bNode4 rdf:first ?anonymousNode .
-                    ?anonymousNode xsd:maxInclusive ?constraint . }";
-
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.GreaterThan);
-        }
-
-        private void ProcessNegatedSecondValueGreaterThanConstraint(IGraph instanceModel,
-            INode optimalCondition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
-        {
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            // Get all negated second values of constraint ranges with a '>' operator.
-            query.CommandText = @"SELECT ?constraint WHERE {
-                    @optimalCondition ssn:forProperty @property .
-                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                    @optimalCondition rdf:type ?bNode1 .
-                    ?bNode1 owl:complementOf ?bNode2 .
-                    ?bNode2 owl:onProperty meta:hasValueConstraint .
-                    ?bNode2 owl:onDataRange ?bNode3 .
-                    ?bNode3 owl:withRestrictions ?bNode4 .
-                    ?bNode4 rdf:rest ?bNode5 .
-                    ?bNode5 rdf:first ?anonymousNode .
-                    ?anonymousNode xsd:minExclusive ?constraint . }";
-
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.LessThanOrEqualTo);
-        }
-
-        private void ProcessNegatedSecondValueGreaterThanOrEqualToConstraint(IGraph instanceModel,
-            INode optimalCondition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
-        {
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            // Get all negated second values of constraint ranges with a '>=' operator.
-            query.CommandText = @"SELECT ?constraint WHERE {
-                    @optimalCondition ssn:forProperty @property .
-                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                    @optimalCondition rdf:type ?bNode1 .
-                    ?bNode1 owl:complementOf ?bNode2 .
-                    ?bNode2 owl:onProperty meta:hasValueConstraint .
-                    ?bNode2 owl:onDataRange ?bNode3 .
-                    ?bNode3 owl:withRestrictions ?bNode4 .
-                    ?bNode4 rdf:rest ?bNode5 .
-                    ?bNode5 rdf:first ?anonymousNode .
-                    ?anonymousNode xsd:minInclusive ?constraint . }";
-
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.LessThan);
-        }
-
-        private void ProcessNegatedSecondValueLessThanConstraint(IGraph instanceModel,
-            INode optimalCondition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
-        {
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            // Get all negated second values of constraint ranges with a '<' operator.
-            query.CommandText = @"SELECT ?constraint WHERE {
-                    @optimalCondition ssn:forProperty @property .
-                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                    @optimalCondition rdf:type ?bNode1 .
-                    ?bNode1 owl:complementOf ?bNode2 .
-                    ?bNode2 owl:onProperty meta:hasValueConstraint .
-                    ?bNode2 owl:onDataRange ?bNode3 .
-                    ?bNode3 owl:withRestrictions ?bNode4 .
-                    ?bNode4 rdf:rest ?bNode5 .
-                    ?bNode5 rdf:first ?anonymousNode .
-                    ?anonymousNode xsd:maxExclusive ?constraint . }";
-
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.GreaterThanOrEqualTo);
-        }
-
-        private void ProcessNegatedSecondValueLessThanOrEqualToConstraint(IGraph instanceModel,
-            INode optimalCondition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
-        {
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            // Get all negated second values of constraint ranges with a '<=' operator.
-            query.CommandText = @"SELECT ?constraint WHERE {
-                    @optimalCondition ssn:forProperty @property .
-                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                    @optimalCondition rdf:type ?bNode1 .
-                    ?bNode1 owl:complementOf ?bNode2 .
-                    ?bNode2 owl:onProperty meta:hasValueConstraint .
-                    ?bNode2 owl:onDataRange ?bNode3 .
-                    ?bNode3 owl:withRestrictions ?bNode4 .
-                    ?bNode4 rdf:rest ?bNode5 .
-                    ?bNode5 rdf:first ?anonymousNode .
-                    ?anonymousNode xsd:maxInclusive ?constraint . }";
-
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.GreaterThan);
-        }
-
         private void ExecuteAndProcessOptimalConditionConstraintQueryResult(IGraph instanceModel,
             SparqlParameterizedString query,
             List<Tuple<ConstraintOperator, string>> constraints,
@@ -805,14 +539,14 @@ namespace Logic.Mapek
                     // Get all ActuationActions, ActuatorStates, and Actuators that match as relevant Actions given the appropriate
                     // filter.
                     actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuatorState ?actuator ?property WHERE {
-                    ?actuationAction rdf:type meta:ActuationAction.
-                    ?actuationAction meta:hasActuatorState ?actuatorState .
-                    ?actuatorState meta:enacts ?propertyChange .
-                    ?actuator meta:hasActuatorState ?actuatorState .
-                    ?actuator rdf:type sosa:Actuator .
-                    ?propertyChange ssn:forProperty ?property .
-                    ?property owl:sameAs @property .
-                    " + filter + " }";
+                        ?actuationAction rdf:type meta:ActuationAction.
+                        ?actuationAction meta:hasActuatorState ?actuatorState .
+                        ?actuatorState meta:enacts ?propertyChange .
+                        ?actuator meta:hasActuatorState ?actuatorState .
+                        ?actuator rdf:type sosa:Actuator .
+                        ?propertyChange ssn:forProperty ?property .
+                        ?property owl:sameAs @property .
+                        " + filter + " }";
 
                     actuationQuery.SetUri("property", new Uri(optimalCondition.Property));
 
@@ -831,13 +565,13 @@ namespace Logic.Mapek
                     // Get all ReconfigurationActions, ConfigurableParameters, and Effects that match as relevant Actions given the appropriate
                     // filter.
                     reconfigurationQuery.CommandText = @"SELECT DISTINCT ?reconfigurationAction ?configurableParameter ?effect WHERE {
-                    ?reconfigurationAction rdf:type meta:ReconfigurationAction .
-                    ?reconfigurationAction ssn:forProperty ?configurableParameter .
-                    ?reconfigurationAction meta:affectsPropertyWith ?effect .
-                    ?configurableParameter meta:enacts ?propertyChange .
-                    ?propertyChange ssn:forProperty @property .
-                    ?propertyChange meta:alteredBy ?effect .
-                    " + filter + " }";
+                        ?reconfigurationAction rdf:type meta:ReconfigurationAction .
+                        ?reconfigurationAction ssn:forProperty ?configurableParameter .
+                        ?reconfigurationAction meta:affectsPropertyWith ?effect .
+                        ?configurableParameter meta:enacts ?propertyChange .
+                        ?propertyChange ssn:forProperty @property .
+                        ?propertyChange meta:alteredBy ?effect .
+                        " + filter + " }";
 
                     reconfigurationQuery.SetUri("property", new Uri(optimalCondition.Property));
 
@@ -871,14 +605,14 @@ namespace Logic.Mapek
                 Name = actuatorStateName
             };
 
-            var action = new ActuationAction()
+            var actuationAction = new ActuationAction()
             {
                 Name = actuationActionName,
                 ActuatorState = actuatorState,
                 ActedOnProperty = propertyName
             };
 
-            actions.Add(action);
+            actions.Add(actuationAction);
         }
 
         private void AddReconfigurationActionToCollectionFromQueryResult(ISparqlResult result,

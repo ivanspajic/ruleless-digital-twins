@@ -13,7 +13,7 @@ namespace Logic.Mapek
             _logger = serviceProvider.GetRequiredService<ILogger<MapekPlan>>();
         }
 
-        public List<Models.Action> Plan(Tuple<List<OptimalCondition>, List<Models.Action>> mitigationAndOptimizationTuple)
+        public List<Models.Action> Plan(List<OptimalCondition> optimalConditions, List<Models.Action> actions)
         {
             _logger.LogInformation("Starting the Plan phase.");
 
@@ -23,8 +23,10 @@ namespace Logic.Mapek
                 // continue with those that seem to get closer. we could outsource this deciding logic via a
                 // user-defined delegate
             // 2. check the results of all remaining simulations at the end of the whole duration (e.g., 1h) and
-            // pick those whose results meet their respective optimalconditions
-            // 3. put them in a plan and return the plan for execution
+            // pick those whose results meet their respective optimalconditions (and don't break other constraints)
+
+            // this should be based on SSP rather than FMI because soft sensors can't necessarily be modeled with
+            // FMUs
 
 
 

@@ -4,6 +4,6 @@ namespace Logic.Mapek
 {
     public interface IMapekPlan
     {
-        public List<Models.Action> Plan(Tuple<List<OptimalCondition>, List<Models.Action>> optimalConditionsAndActions);
+        public List<Models.Action> Plan(List<OptimalCondition> optimalConditions, List<Models.Action> actions);
     }
 }

@@ -60,7 +60,7 @@ namespace Logic.Mapek
                 // them with all OptimalConditions.
                 var optimalConditionsAndActions = _mapekAnalyze.Analyze(instanceModel, propertyCache);
                 // Plan - Simulate all Actions and check that mitigate OptimalConditions or optimize the system.
-                var actions = _mapekPlan.Plan(optimalConditionsAndActions.Item1, optimalConditionsAndActions.Item2);
+                var actions = _mapekPlan.Plan(optimalConditionsAndActions.Item1, optimalConditionsAndActions.Item2, propertyCache);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
                 _mapekExecute.Execute(actions, propertyCache);
 

@@ -176,8 +176,7 @@ namespace Logic.Mapek
             query.CommandText = @"SELECT ?lowerLimit ?upperLimit ?valueIncrements WHERE {
                     @property rdf:type meta:ConfigurableParameter .
                     @property meta:hasLowerLimitValue ?lowerLimit .
-                    @property meta:hasUpperLimitValue ?upperLimit .
-                    @property meta:hasValueIncrements ?valueIncrements . }";
+                    @property meta:hasUpperLimitValue ?upperLimit . }";
 
             query.SetParameter("property", propertyNode);
 
@@ -200,8 +199,6 @@ namespace Logic.Mapek
             lowerLimit = lowerLimit.Split('^')[0];
             var upperLimit = configurableParameterQueryResult.Results[0]["upperLimit"].ToString();
             upperLimit = upperLimit.Split('^')[0];
-            var valueIncrements = configurableParameterQueryResult.Results[0]["valueIncrements"].ToString();
-            valueIncrements = valueIncrements.Split('^')[0];
 
             // Instantiate the new ConfigurableParameter with its lower limit as its value and add it to the cache.
             var configurableParameter = new ConfigurableParameter
@@ -209,7 +206,6 @@ namespace Logic.Mapek
                 Name = propertyName,
                 LowerLimitValue = lowerLimit,
                 UpperLimitValue = upperLimit,
-                ValueIncrements = valueIncrements,
                 Value = lowerLimit,
                 OwlType = propertyType
             };

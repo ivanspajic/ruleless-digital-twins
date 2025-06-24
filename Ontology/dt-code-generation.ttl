@@ -173,14 +173,6 @@ xsd:duration rdf:type rdfs:Datatype .
                     rdfs:label "hasValueConstraint"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueIncrements
-:hasValueIncrements rdf:type owl:DatatypeProperty ;
-                    rdfs:subPropertyOf owl:topDataProperty ;
-                    rdfs:range rdfs:Literal ;
-                    rdfs:comment "Represents a relation between a thing and the increments in which its value can be adjusted."@en ;
-                    rdfs:label "hasValueIncrements"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds
 :reachedInMaximumSeconds rdf:type owl:DatatypeProperty ;
                          rdfs:domain :OptimalCondition ;
@@ -242,10 +234,6 @@ xsd:duration rdf:type rdfs:Datatype .
                                        ] ,
                                        [ rdf:type owl:Restriction ;
                                          owl:onProperty :hasUpperLimitValue ;
-                                         owl:cardinality "1"^^xsd:nonNegativeInteger
-                                       ] ,
-                                       [ rdf:type owl:Restriction ;
-                                         owl:onProperty :hasValueIncrements ;
                                          owl:cardinality "1"^^xsd:nonNegativeInteger
                                        ] ;
                        rdfs:comment "A parameter not directly observable or actuatable but rather used for configuring an an Input to a System or Procedure."@en ;

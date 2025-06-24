@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Logic.FactoryInterface;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.MapekModels;
@@ -8,10 +9,12 @@ namespace Logic.Mapek
     public class MapekPlan : IMapekPlan
     {
         private readonly ILogger<MapekPlan> _logger;
+        private readonly IFactory _factory;
 
         public MapekPlan(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekPlan>>();
+            _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
         public List<Models.Action> Plan(List<OptimalCondition> optimalConditions, List<Models.Action> actions, PropertyCache propertyCache)
@@ -70,6 +73,8 @@ namespace Logic.Mapek
             // these simulation results should be compared such that the best optimized property values are selected
             // if there are other results that aren't related to the same properties, they should also be selected, but there should
             // only be one best result for every unique optimalcondition property
+
+            
 
             return plannedReconfigurationActions;
         }

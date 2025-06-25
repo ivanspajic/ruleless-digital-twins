@@ -67,12 +67,20 @@ namespace Logic.Mapek
             var plannedReconfigurationActions = new List<ReconfigurationAction>();
 
             // TODO
-            // for each action, run a simulation and gather the results. the results could be represented with an object containing
-            // a bool - representing whether the simulation achieved restoring its optimalcondition constraint(s) and that it didn't
-            // break others, and, in case they're related, values for properties that are being optimized
-            // these simulation results should be compared such that the best optimized property values are selected
-            // if there are other results that aren't related to the same properties, they should also be selected, but there should
-            // only be one best result for every unique optimalcondition property
+            // simulate all combinations of reconfigurationactions
+                // to ensure a finite number of simulations, a granularity factor can be used on the parameters to simulate
+                    // we can find the number of simulations for each configurableproperty by taking its min-max range and dividing
+                    // by the granularity factor
+                        // this is one type of hard-coded logic, however, we should make it possible to delegate the logic to the user
+                // for each combination, check that the combination satisfies all optimalconditions
+                    // if the combination satisfied optimalconditions, add it to the list of possible execution plans
+            // out of the passing combinations, find the optimal combination per distinct property
+                // this requires comparing the values of the optimized properties
+                    // each property will need to have some form of user-defined precedence to assist with choosing the most
+                    // optimal value outcome
+                        // pick the one containing the most properties optimized
+                        // then pick the one containing the property with the highest precedence
+                        // then pick the first in the collection
 
             
 

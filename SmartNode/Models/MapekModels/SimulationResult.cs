@@ -1,8 +1,8 @@
 ﻿namespace Models.MapekModels
 {
-    public class SimulationResult
+    public class SimulationResult<T> where T : Action
     {
-        public required string ActionName { get; init; }
+        public required List<T> Actions { get; init; }
 
         public bool OptimalConditionsSatisfied { get; init; }
 

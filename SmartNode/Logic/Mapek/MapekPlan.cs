@@ -47,26 +47,21 @@ namespace Logic.Mapek
                         // then pick the one containing the property with the highest precedence
                         // then pick the first in the collection
 
-            // there is recursion
-            // you need to make sublists of the one you're handling and call the method with that as the parameter again
-            // it has to be another method, not this one, something for getting the simulation combinations first
-
-            // TODO: actuations can certainly affect properties that are used by reconfigurations, so these should be simulated
-            // together!!!
-            // split them up only 
-
-            var actionCombinations = GetActionCombinations(actions);
+            var actionCombinationSets = GetActionCombinations(actions);
+            // Convert back to List<List<Models.Action>> for convenience.
+            var actionCombinations = actionCombinationSets.Select(x => x.ToList())
+                .ToList();
 
             return plannedActions;
         }
 
-        private List<List<Models.Action>> GetActionCombinations(List<Models.Action> actions)
+        private HashSet<HashSet<Models.Action>> GetActionCombinations(List<Models.Action> actions)
         {
-            var actionCombinations = new List<List<Models.Action>>();
+            var actionCombinationSets = new HashSet<HashSet<Models.Action>>();
 
+            // TODO: use hashsets of hashsets here to keep unique combinations regardless of duplicate creations
 
-
-            return actionCombinations;
+            return actionCombinationSets;
         }
     }
 }

@@ -197,7 +197,13 @@ namespace Logic.Mapek
 
             foreach (var result in actuationQueryResult.Results)
             {
-                AddActuationActionToCollectionFromQueryResult(result, actions);
+                // Passing in the query parameter names is required since their result order is not guaranteed.
+                AddActuationActionToCollectionFromQueryResult(result,
+                    actions,
+                    "actuationAction",
+                    "actuatorState",
+                    "actuator",
+                    "property");
             }
 
             var reconfigurationQuery = MapekUtilities.GetParameterizedStringQuery();
@@ -219,7 +225,13 @@ namespace Logic.Mapek
 
             foreach (var result in reconfigurationQueryResult.Results)
             {
-                AddReconfigurationActionToCollectionFromQueryResult(result, actions, propertyCache);
+                // Passing in the query parameter names is required since their result order is not guaranteed.
+                AddReconfigurationActionToCollectionFromQueryResult(result,
+                    actions,
+                    propertyCache,
+                    "reconfigurationAction",
+                    "configurableParameter",
+                    "effect");
             }
 
             return actions;
@@ -554,7 +566,13 @@ namespace Logic.Mapek
 
                     foreach (var result in actuationQueryResult.Results)
                     {
-                        AddActuationActionToCollectionFromQueryResult(result, actions);
+                        // Passing in the query parameter names is required since their result order is not guaranteed.
+                        AddActuationActionToCollectionFromQueryResult(result,
+                            actions,
+                            "actuationAction",
+                            "actuatorState",
+                            "actuator",
+                            "property");
 
                         _logger.LogInformation("Found ActuationAction {actuationActionName} as a relevant Action.",
                             result["actuationAction"].ToString());
@@ -579,7 +597,13 @@ namespace Logic.Mapek
 
                     foreach (var result in reconfigurationQueryResult.Results)
                     {
-                        AddReconfigurationActionToCollectionFromQueryResult(result, actions, propertyCache);
+                        // Passing in the query parameter names is required since their result order is not guaranteed.
+                        AddReconfigurationActionToCollectionFromQueryResult(result,
+                            actions,
+                            propertyCache,
+                            "reconfigurationAction",
+                            "configurableParameter",
+                            "effect");
 
                         _logger.LogInformation("Found ActuationAction {actuationActionName} as a relevant Action.",
                             result["reconfigurationAction"].ToString());
@@ -592,12 +616,17 @@ namespace Logic.Mapek
                 .ToList();
         }
 
-        private void AddActuationActionToCollectionFromQueryResult(ISparqlResult result, List<Models.Action> actions)
+        private void AddActuationActionToCollectionFromQueryResult(ISparqlResult result,
+            List<Models.Action> actions,
+            string actuationActionQueryParameter,
+            string actuatorStateQueryParameter,
+            string actuatorQueryParameter,
+            string propertyQueryParameter)
         {
-            var actuationActionName = result[0].ToString();
-            var actuatorStateName = result[1].ToString();
-            var actuatorName = result[2].ToString();
-            var propertyName = result[3].ToString();
+            var actuationActionName = result[actuationActionQueryParameter].ToString();
+            var actuatorStateName = result[actuatorStateQueryParameter].ToString();
+            var actuatorName = result[actuatorQueryParameter].ToString();
+            var propertyName = result[propertyQueryParameter].ToString();
 
             var actuatorState = new ActuatorState
             {
@@ -617,11 +646,14 @@ namespace Logic.Mapek
 
         private void AddReconfigurationActionToCollectionFromQueryResult(ISparqlResult result,
             List<Models.Action> actions,
-            PropertyCache propertyCache)
+            PropertyCache propertyCache,
+            string reconfigurationActionQueryParameter,
+            string configurableParameterQueryParameter,
+            string effectNameQueryParameter)
         {
-            var reconfigurationActionName = result[0].ToString();
-            var configurableParameterName = result[1].ToString();
-            var effectName = result[2].ToString().Split("/")[^1];
+            var reconfigurationActionName = result[reconfigurationActionQueryParameter].ToString();
+            var configurableParameterName = result[configurableParameterQueryParameter].ToString();
+            var effectName = result[effectNameQueryParameter].ToString().Split("/")[^1];
 
             if (!propertyCache.ConfigurableParameters.TryGetValue(configurableParameterName, out ConfigurableParameter configurableParameter))
             {

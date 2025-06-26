@@ -20,7 +20,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public Tuple<OptimalCondition[], Models.Action[]> Analyze(IGraph instanceModel, PropertyCache propertyCache)
+        public Tuple<List<OptimalCondition>, List<Models.Action>> Analyze(IGraph instanceModel, PropertyCache propertyCache)
         {
             _logger.LogInformation("Starting the Analyze phase.");
 
@@ -34,10 +34,10 @@ namespace Logic.Mapek
             // Combine the Action collections into one.
             mitigationActions.Concat(optimizationActions);
 
-            return new Tuple<OptimalCondition[], Models.Action[]>(optimalConditions, mitigationActions);
+            return new (optimalConditions, mitigationActions);
         }
 
-        private OptimalCondition[] GetAllOptimalConditions(IGraph instanceModel, PropertyCache propertyCache)
+        private List<OptimalCondition> GetAllOptimalConditions(IGraph instanceModel, PropertyCache propertyCache)
         {
             var optimalConditions = new List<OptimalCondition>();
 
@@ -77,10 +77,10 @@ namespace Logic.Mapek
                 optimalConditions.Add(optimalCondition);
             }
 
-            return optimalConditions.ToArray();
+            return optimalConditions;
         }
 
-        private OptimalCondition[] GetAllUnsatisfiedOptimalConditions(OptimalCondition[] optimalConditions, PropertyCache propertyCache)
+        private List<OptimalCondition> GetAllUnsatisfiedOptimalConditions(List<OptimalCondition> optimalConditions, PropertyCache propertyCache)
         {
             var unsatisfiedOptimalConditions = new List<OptimalCondition>();
 
@@ -123,12 +123,12 @@ namespace Logic.Mapek
             // Each OptimalCondition might have had multiple unsatisfied constraints, so they could've been added
             // multiple times, so we return a distinct collection.
             return unsatisfiedOptimalConditions.DistinctBy(x => x.Name)
-                .ToArray();
+                .ToList();
         }
 
-        private Models.Action[] GetOptimizationActions(IGraph instanceModel,
+        private List<Models.Action> GetOptimizationActions(IGraph instanceModel,
             PropertyCache propertyCache,
-            Models.Action[] mitigationActions)
+            List<Models.Action> mitigationActions)
         {
             var actions = new List<Models.Action>();
 
@@ -142,7 +142,7 @@ namespace Logic.Mapek
             // PropertyChanges contain the same Properties. This filter thus constructs a set of Properties
             // referenced by the OptimalConditions in the mitigation Action collection.
             var filterStringBuilder = new StringBuilder();
-            for (var i = 0; i < mitigationActions.Length; i++)
+            for (var i = 0; i < mitigationActions.Count; i++)
             {
                 if (i == 0)
                 {
@@ -166,7 +166,7 @@ namespace Logic.Mapek
                 filterStringBuilder.Append(propertyName);
                 filterStringBuilder.Append('>');
 
-                if (i < mitigationActions.Length - 1)
+                if (i < mitigationActions.Count - 1)
                 {
                     filterStringBuilder.Append(", ");
                 }
@@ -222,7 +222,7 @@ namespace Logic.Mapek
                 AddReconfigurationActionToCollectionFromQueryResult(result, actions, propertyCache);
             }
 
-            return actions.ToArray();
+            return actions;
         }
 
         private List<Tuple<ConstraintOperator, string>> ProcessConstraintQueries(IGraph instanceModel,
@@ -500,9 +500,9 @@ namespace Logic.Mapek
             }
         }
 
-        private Models.Action[] GetMitigationActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel,
+        private List<Models.Action> GetMitigationActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel,
             PropertyCache propertyCache,
-            OptimalCondition[] optimalConditions)
+            List<OptimalCondition> optimalConditions)
         {
             var actions = new List<Models.Action>();
 
@@ -589,7 +589,7 @@ namespace Logic.Mapek
 
             // Returns distinct Actions since they're added from every OptimalCondition's unsatisfied constraint.
             return actions.DistinctBy(x => x.Name)
-                .ToArray();
+                .ToList();
         }
 
         private void AddActuationActionToCollectionFromQueryResult(ISparqlResult result, List<Models.Action> actions)

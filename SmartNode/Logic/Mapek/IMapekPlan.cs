@@ -5,8 +5,8 @@ namespace Logic.Mapek
 {
     public interface IMapekPlan
     {
-        public Models.Action[] Plan(OptimalCondition[] optimalConditions,
-            Models.Action[] actions,
+        public List<Models.Action> Plan(List<OptimalCondition> optimalConditions,
+            List<Models.Action> actions,
             PropertyCache propertyCache);
     }
 }

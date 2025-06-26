@@ -17,43 +17,11 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public Models.Action[] Plan(OptimalCondition[] optimalConditions, Models.Action[] actions, PropertyCache propertyCache)
+        public List<Models.Action> Plan(List<OptimalCondition> optimalConditions, List<Models.Action> actions, PropertyCache propertyCache)
         {
             _logger.LogInformation("Starting the Plan phase.");
 
             var plannedActions = new List<Models.Action>();
-
-            var actuationActions = new List<ActuationAction>();
-            var reconfigurationActions = new List<ReconfigurationAction>();
-
-            // TODO: actuations can certainly affect properties that are used by reconfigurations, so these should be simulated
-            // together!!!
-            // split them up only 
-
-            foreach (var action in actions)
-            {
-                if (action is ActuationAction actuationAction)
-                {
-                    actuationActions.Add(actuationAction);
-                }
-                else
-                {
-                    reconfigurationActions.Add((ReconfigurationAction)action);
-                }
-            }
-
-            var plannedActuationActions = SimulateAndPickBestActuationActions(actuationActions.ToArray());
-            var plannedReconfigurationActions = SimulateAndPickBestReconfigurationActions(reconfigurationActions.ToArray());
-
-            plannedActions.AddRange(plannedActuationActions);
-            plannedActions.AddRange(plannedReconfigurationActions);
-
-            return plannedActions.ToArray();
-        }
-
-        private ActuationAction[] SimulateAndPickBestActuationActions(ActuationAction[] actuationActions)
-        {
-            var plannedActuationActions = new List<ActuationAction>();
 
             // 1. run simulations for all actions present
             // this should be done with some heuristics. spawn them all but don't run them all for the entire
@@ -62,13 +30,6 @@ namespace Logic.Mapek
             // user-defined delegate
             // 2. check the results of all remaining simulations at the end of the whole duration (e.g., 1h) and
             // pick those whose results meet their respective optimalconditions (and don't break other constraints)
-
-            return plannedActuationActions.ToArray();
-        }
-
-        private List<ReconfigurationAction> SimulateAndPickBestReconfigurationActions(ReconfigurationAction[] reconfigurationActions)
-        {
-            var plannedReconfigurationActions = new List<ReconfigurationAction>();
 
             // TODO
             // simulate all combinations of reconfigurationactions
@@ -86,31 +47,26 @@ namespace Logic.Mapek
                         // then pick the one containing the property with the highest precedence
                         // then pick the first in the collection
 
-            var actionsSatisfyingOptimalConditions = SimulateAndGetPassingReconfigurationActionCombinations(reconfigurationActions);
-
-            return plannedReconfigurationActions;
-        }
-
-        private List<List<ReconfigurationAction>> SimulateAndGetPassingReconfigurationActionCombinations(ReconfigurationAction[] reconfigurationActions)
-        {
-            var passingCombinations = new List<List<ReconfigurationAction>>();
-
             // there is recursion
             // you need to make sublists of the one you're handling and call the method with that as the parameter again
             // it has to be another method, not this one, something for getting the simulation combinations first
-            var actionCombinations = GetReconfigurationActionCombinations(reconfigurationActions);
 
-            return passingCombinations;
+            // TODO: actuations can certainly affect properties that are used by reconfigurations, so these should be simulated
+            // together!!!
+            // split them up only 
+
+            var actionCombinations = GetActionCombinations(actions);
+
+            return plannedActions;
         }
 
-        private ReconfigurationAction[][] GetReconfigurationActionCombinations(ReconfigurationAction[] reconfigurationActions)
+        private List<List<Models.Action>> GetActionCombinations(List<Models.Action> actions)
         {
-            var combinations = new List<List<ReconfigurationAction>>();
+            var actionCombinations = new List<List<Models.Action>>();
 
-            for (var i = 0; i < reconfigurationActions.Count; i++)
-            {
-                var subsequentActions = reconfigurationActions.
-            }
+
+
+            return actionCombinations;
         }
     }
 }

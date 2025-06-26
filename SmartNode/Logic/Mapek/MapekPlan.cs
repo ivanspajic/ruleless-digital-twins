@@ -17,7 +17,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public List<Models.Action> Plan(List<OptimalCondition> optimalConditions, List<Models.Action> actions, PropertyCache propertyCache)
+        public Models.Action[] Plan(OptimalCondition[] optimalConditions, Models.Action[] actions, PropertyCache propertyCache)
         {
             _logger.LogInformation("Starting the Plan phase.");
 
@@ -25,6 +25,10 @@ namespace Logic.Mapek
 
             var actuationActions = new List<ActuationAction>();
             var reconfigurationActions = new List<ReconfigurationAction>();
+
+            // TODO: actuations can certainly affect properties that are used by reconfigurations, so these should be simulated
+            // together!!!
+            // split them up only 
 
             foreach (var action in actions)
             {
@@ -38,16 +42,16 @@ namespace Logic.Mapek
                 }
             }
 
-            var plannedActuationActions = SimulateAndPickBestActuationActions(actuationActions);
-            var plannedReconfigurationActions = SimulateAndPickBestReconfigurationActions(reconfigurationActions);
+            var plannedActuationActions = SimulateAndPickBestActuationActions(actuationActions.ToArray());
+            var plannedReconfigurationActions = SimulateAndPickBestReconfigurationActions(reconfigurationActions.ToArray());
 
             plannedActions.AddRange(plannedActuationActions);
             plannedActions.AddRange(plannedReconfigurationActions);
 
-            return plannedActions;
+            return plannedActions.ToArray();
         }
 
-        private List<ActuationAction> SimulateAndPickBestActuationActions(List<ActuationAction> actuationActions)
+        private ActuationAction[] SimulateAndPickBestActuationActions(ActuationAction[] actuationActions)
         {
             var plannedActuationActions = new List<ActuationAction>();
 
@@ -59,10 +63,10 @@ namespace Logic.Mapek
             // 2. check the results of all remaining simulations at the end of the whole duration (e.g., 1h) and
             // pick those whose results meet their respective optimalconditions (and don't break other constraints)
 
-            return plannedActuationActions;
+            return plannedActuationActions.ToArray();
         }
 
-        private List<ReconfigurationAction> SimulateAndPickBestReconfigurationActions(List<ReconfigurationAction> reconfigurationActions)
+        private List<ReconfigurationAction> SimulateAndPickBestReconfigurationActions(ReconfigurationAction[] reconfigurationActions)
         {
             var plannedReconfigurationActions = new List<ReconfigurationAction>();
 
@@ -71,7 +75,7 @@ namespace Logic.Mapek
                 // to ensure a finite number of simulations, a granularity factor can be used on the parameters to simulate
                     // we can find the number of simulations for each configurableproperty by taking its min-max range and dividing
                     // by the granularity factor
-                        // this is one type of hard-coded logic, however, we should make it possible to delegate the logic to the user
+                        // this is one type of hard-coded logic, however, we should make it possible to delegate this logic to the user
                 // for each combination, check that the combination satisfies all optimalconditions
                     // if the combination satisfied optimalconditions, add it to the list of possible execution plans
             // out of the passing combinations, find the optimal combination per distinct property
@@ -82,9 +86,31 @@ namespace Logic.Mapek
                         // then pick the one containing the property with the highest precedence
                         // then pick the first in the collection
 
-            
+            var actionsSatisfyingOptimalConditions = SimulateAndGetPassingReconfigurationActionCombinations(reconfigurationActions);
 
             return plannedReconfigurationActions;
+        }
+
+        private List<List<ReconfigurationAction>> SimulateAndGetPassingReconfigurationActionCombinations(ReconfigurationAction[] reconfigurationActions)
+        {
+            var passingCombinations = new List<List<ReconfigurationAction>>();
+
+            // there is recursion
+            // you need to make sublists of the one you're handling and call the method with that as the parameter again
+            // it has to be another method, not this one, something for getting the simulation combinations first
+            var actionCombinations = GetReconfigurationActionCombinations(reconfigurationActions);
+
+            return passingCombinations;
+        }
+
+        private ReconfigurationAction[][] GetReconfigurationActionCombinations(ReconfigurationAction[] reconfigurationActions)
+        {
+            var combinations = new List<List<ReconfigurationAction>>();
+
+            for (var i = 0; i < reconfigurationActions.Count; i++)
+            {
+                var subsequentActions = reconfigurationActions.
+            }
         }
     }
 }

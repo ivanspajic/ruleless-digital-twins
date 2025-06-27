@@ -10,11 +10,13 @@ namespace Logic.Mapek
     {
         private readonly ILogger<MapekPlan> _logger;
         private readonly IFactory _factory;
+        private readonly IEqualityComparer<HashSet<Models.Action>> _actionSetEqualityComparer;
 
         public MapekPlan(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekPlan>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
+            _actionSetEqualityComparer = serviceProvider.GetRequiredService<IEqualityComparer<HashSet<Models.Action>>>();
         }
 
         public List<Models.Action> Plan(List<OptimalCondition> optimalConditions, List<Models.Action> actions, PropertyCache propertyCache)
@@ -48,6 +50,8 @@ namespace Logic.Mapek
                         // then pick the first in the collection
 
             var actionCombinationSets = GetActionCombinations(actions);
+
+
             // Convert back to List<List<Models.Action>> for convenience.
             var actionCombinations = actionCombinationSets.Select(x => x.ToList())
                 .ToList();
@@ -57,9 +61,46 @@ namespace Logic.Mapek
 
         private HashSet<HashSet<Models.Action>> GetActionCombinations(List<Models.Action> actions)
         {
-            var actionCombinationSets = new HashSet<HashSet<Models.Action>>();
+            // Ensure that the set of sets has unique elements with the equality comparer.
+            var actionCombinationSets = new HashSet<HashSet<Models.Action>>(_actionSetEqualityComparer);
 
-            // TODO: use hashsets of hashsets here to keep unique combinations regardless of duplicate creations
+            foreach (var action in actions)
+            {
+                // Pick the current Action out of the collection.
+                var remainingActions = actions.Where(innerAction => innerAction != action)
+                    .ToList();
+
+                if (remainingActions.Count == 0)
+                {
+                    // If there are no remaining Actions in the collection, we have to create the set of
+                    // Actions with the current Action and add it to the set of combinations.
+                    var singleActionSet = new HashSet<Models.Action>
+                    {
+                        action
+                    };
+
+                    actionCombinationSets.Add(singleActionSet);
+                }
+                else
+                {
+                    // In case of more remaining Actions, we call this method again with the remaining Action
+                    // collection and add the results to the set of combinations.
+                    var remainingActionCombinations = GetActionCombinations(remainingActions);
+                    actionCombinationSets.UnionWith(remainingActionCombinations);
+
+                    foreach (var remainingActionCombination in remainingActionCombinations)
+                    {
+                        // For each Action combination from the collection of remaining Actions, create a new
+                        // set and add the current Action to it before adding it to the set of combinations.
+                        var multipleActionSet = new HashSet<Models.Action>();
+
+                        multipleActionSet.UnionWith(remainingActionCombination);
+                        multipleActionSet.Add(action);
+
+                        actionCombinationSets.Add(multipleActionSet);
+                    }
+                }
+            }
 
             return actionCombinationSets;
         }

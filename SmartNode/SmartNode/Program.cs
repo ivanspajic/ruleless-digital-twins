@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Logic.FactoryInterface;
 using System.Reflection;
+using Logic.Mapek.EqualityComparers;
 
 namespace SmartNode
 {
@@ -28,6 +29,7 @@ namespace SmartNode
             builder.Services.AddSingleton<IMapekAnalyze, MapekAnalyze>();
             builder.Services.AddSingleton<IMapekPlan, MapekPlan>();
             builder.Services.AddSingleton<IMapekExecute, MapekExecute>();
+            builder.Services.AddSingleton<IEqualityComparer<HashSet<Models.Action>>, ActionSetEqualityComparer>();
 
             using var host = builder.Build();
 

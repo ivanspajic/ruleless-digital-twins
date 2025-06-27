@@ -20,7 +20,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public Tuple<List<OptimalCondition>, List<Models.Action>> Analyze(IGraph instanceModel, PropertyCache propertyCache)
+        public Tuple<IEnumerable<OptimalCondition>, IEnumerable<Models.Action>> Analyze(IGraph instanceModel, PropertyCache propertyCache)
         {
             _logger.LogInformation("Starting the Analyze phase.");
 
@@ -37,7 +37,7 @@ namespace Logic.Mapek
             return new (optimalConditions, mitigationActions);
         }
 
-        private List<OptimalCondition> GetAllOptimalConditions(IGraph instanceModel, PropertyCache propertyCache)
+        private IEnumerable<OptimalCondition> GetAllOptimalConditions(IGraph instanceModel, PropertyCache propertyCache)
         {
             var optimalConditions = new List<OptimalCondition>();
 
@@ -80,7 +80,7 @@ namespace Logic.Mapek
             return optimalConditions;
         }
 
-        private List<OptimalCondition> GetAllUnsatisfiedOptimalConditions(List<OptimalCondition> optimalConditions, PropertyCache propertyCache)
+        private IEnumerable<OptimalCondition> GetAllUnsatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
         {
             var unsatisfiedOptimalConditions = new List<OptimalCondition>();
 
@@ -122,13 +122,12 @@ namespace Logic.Mapek
 
             // Each OptimalCondition might have had multiple unsatisfied constraints, so they could've been added
             // multiple times, so we return a distinct collection.
-            return unsatisfiedOptimalConditions.DistinctBy(x => x.Name)
-                .ToList();
+            return unsatisfiedOptimalConditions.DistinctBy(x => x.Name);
         }
 
-        private List<Models.Action> GetOptimizationActions(IGraph instanceModel,
+        private IEnumerable<Models.Action> GetOptimizationActions(IGraph instanceModel,
             PropertyCache propertyCache,
-            List<Models.Action> mitigationActions)
+            IEnumerable<Models.Action> mitigationActions)
         {
             var actions = new List<Models.Action>();
 
@@ -142,22 +141,26 @@ namespace Logic.Mapek
             // PropertyChanges contain the same Properties. This filter thus constructs a set of Properties
             // referenced by the OptimalConditions in the mitigation Action collection.
             var filterStringBuilder = new StringBuilder();
-            for (var i = 0; i < mitigationActions.Count; i++)
+
+            var firstMitigationAction = mitigationActions.First();
+            var lastMitigationAction = mitigationActions.Last();
+
+            foreach (var mitigationAction in mitigationActions)
             {
-                if (i == 0)
+                if (mitigationAction == firstMitigationAction)
                 {
                     filterStringBuilder.Append("FILTER(?property NOT IN (");
                 }
 
                 string propertyName;
 
-                if (mitigationActions[i] is ActuationAction actuationAction)
+                if (mitigationAction is ActuationAction actuationAction)
                 {
                     propertyName = actuationAction.ActedOnProperty;
                 }
                 else
                 {
-                    propertyName = ((ReconfigurationAction)mitigationActions[i]).ConfigurableParameter.Name;
+                    propertyName = ((ReconfigurationAction)mitigationAction).ConfigurableParameter.Name;
                 }
 
                 // The angle brackets are required around the full Property names to be successfully used
@@ -166,7 +169,7 @@ namespace Logic.Mapek
                 filterStringBuilder.Append(propertyName);
                 filterStringBuilder.Append('>');
 
-                if (i < mitigationActions.Count - 1)
+                if (mitigationAction != lastMitigationAction)
                 {
                     filterStringBuilder.Append(", ");
                 }
@@ -237,7 +240,7 @@ namespace Logic.Mapek
             return actions;
         }
 
-        private List<Tuple<ConstraintOperator, string>> ProcessConstraintQueries(IGraph instanceModel,
+        private IEnumerable<Tuple<ConstraintOperator, string>> ProcessConstraintQueries(IGraph instanceModel,
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds)
@@ -263,7 +266,7 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
+            IList<Tuple<ConstraintOperator, string>> constraints)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -286,7 +289,7 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
+            IList<Tuple<ConstraintOperator, string>> constraints)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -313,7 +316,7 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
+            IList<Tuple<ConstraintOperator, string>> constraints)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -339,7 +342,7 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds, 
-            List<Tuple<ConstraintOperator, string>> constraints)
+            IList<Tuple<ConstraintOperator, string>> constraints)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -365,7 +368,7 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
+            IList<Tuple<ConstraintOperator, string>> constraints)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -391,7 +394,7 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
+            IList<Tuple<ConstraintOperator, string>> constraints)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -418,7 +421,7 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
+            IList<Tuple<ConstraintOperator, string>> constraints)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -445,7 +448,7 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
+            IList<Tuple<ConstraintOperator, string>> constraints)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -472,7 +475,7 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            List<Tuple<ConstraintOperator, string>> constraints)
+            IList<Tuple<ConstraintOperator, string>> constraints)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -497,7 +500,7 @@ namespace Logic.Mapek
 
         private void ExecuteAndProcessOptimalConditionConstraintQueryResult(IGraph instanceModel,
             SparqlParameterizedString query,
-            List<Tuple<ConstraintOperator, string>> constraints,
+            IList<Tuple<ConstraintOperator, string>> constraints,
             ConstraintOperator constraintOperator)
         {
             var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
@@ -512,9 +515,9 @@ namespace Logic.Mapek
             }
         }
 
-        private List<Models.Action> GetMitigationActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel,
+        private IEnumerable<Models.Action> GetMitigationActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel,
             PropertyCache propertyCache,
-            List<OptimalCondition> optimalConditions)
+            IEnumerable<OptimalCondition> optimalConditions)
         {
             var actions = new List<Models.Action>();
 
@@ -612,12 +615,11 @@ namespace Logic.Mapek
             }
 
             // Returns distinct Actions since they're added from every OptimalCondition's unsatisfied constraint.
-            return actions.DistinctBy(x => x.Name)
-                .ToList();
+            return actions.DistinctBy(x => x.Name);
         }
 
         private void AddActuationActionToCollectionFromQueryResult(ISparqlResult result,
-            List<Models.Action> actions,
+            IList<Models.Action> actions,
             string actuationActionQueryParameter,
             string actuatorStateQueryParameter,
             string actuatorQueryParameter,
@@ -645,7 +647,7 @@ namespace Logic.Mapek
         }
 
         private void AddReconfigurationActionToCollectionFromQueryResult(ISparqlResult result,
-            List<Models.Action> actions,
+            IList<Models.Action> actions,
             PropertyCache propertyCache,
             string reconfigurationActionQueryParameter,
             string configurableParameterQueryParameter,

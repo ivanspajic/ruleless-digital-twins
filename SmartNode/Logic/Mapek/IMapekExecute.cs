@@ -1,10 +1,9 @@
-﻿using Models;
-using Models.MapekModels;
+﻿using Models.MapekModels;
 
 namespace Logic.Mapek
 {
     public interface IMapekExecute
     {
-        public void Execute(List<Models.Action> actions, PropertyCache propertyCache);
+        public void Execute(IEnumerable<Models.Action> actions, PropertyCache propertyCache);
     }
 }

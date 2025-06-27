@@ -6,6 +6,6 @@ namespace Logic.Mapek
 {
     public interface IMapekAnalyze
     {
-        public Tuple<List<OptimalCondition>, List<Models.Action>> Analyze(IGraph instanceModel, PropertyCache propertyCache);
+        public Tuple<IEnumerable<OptimalCondition>, IEnumerable<Models.Action>> Analyze(IGraph instanceModel, PropertyCache propertyCache);
     }
 }

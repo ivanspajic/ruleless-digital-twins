@@ -17,7 +17,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public void Execute(List<Models.Action> actions, PropertyCache propertyCache)
+        public void Execute(IEnumerable<Models.Action> actions, PropertyCache propertyCache)
         {
             _logger.LogInformation("Starting the Execute phase.");
 

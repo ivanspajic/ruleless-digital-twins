@@ -8,6 +8,8 @@ namespace Logic.Mapek
 {
     public class MapekPlan : IMapekPlan
     {
+        private const int ReconfigurationValueSimulationGranularity = 5;
+
         private readonly ILogger<MapekPlan> _logger;
         private readonly IFactory _factory;
         private readonly IEqualityComparer<HashSet<Models.Action>> _actionSetEqualityComparer;
@@ -19,7 +21,7 @@ namespace Logic.Mapek
             _actionSetEqualityComparer = serviceProvider.GetRequiredService<IEqualityComparer<HashSet<Models.Action>>>();
         }
 
-        public List<Models.Action> Plan(List<OptimalCondition> optimalConditions, List<Models.Action> actions, PropertyCache propertyCache)
+        public IEnumerable<Models.Action> Plan(IEnumerable<OptimalCondition> optimalConditions, IEnumerable<Models.Action> actions, PropertyCache propertyCache)
         {
             _logger.LogInformation("Starting the Plan phase.");
 
@@ -50,16 +52,18 @@ namespace Logic.Mapek
                         // then pick the first in the collection
 
             var actionCombinationSets = GetActionCombinations(actions);
-
+            //var simulationResults = SimulateActionCombinations(actionCombinationSets);
 
             // Convert back to List<List<Models.Action>> for convenience.
             var actionCombinations = actionCombinationSets.Select(x => x.ToList())
                 .ToList();
 
+
+
             return plannedActions;
         }
 
-        private HashSet<HashSet<Models.Action>> GetActionCombinations(List<Models.Action> actions)
+        private HashSet<HashSet<Models.Action>> GetActionCombinations(IEnumerable<Models.Action> actions)
         {
             // Ensure that the set of sets has unique elements with the equality comparer.
             var actionCombinationSets = new HashSet<HashSet<Models.Action>>(_actionSetEqualityComparer);
@@ -67,10 +71,9 @@ namespace Logic.Mapek
             foreach (var action in actions)
             {
                 // Pick the current Action out of the collection.
-                var remainingActions = actions.Where(innerAction => innerAction != action)
-                    .ToList();
+                var remainingActions = actions.Where(innerAction => innerAction != action);
 
-                if (remainingActions.Count == 0)
+                if (!remainingActions.Any())
                 {
                     // If there are no remaining Actions in the collection, we have to create the set of
                     // Actions with the current Action and add it to the set of combinations.

@@ -2,10 +2,10 @@
 {
     public class SimulationResult
     {
-        public required List<Models.Action> Actions { get; init; }
+        public required IEnumerable<Action> Actions { get; init; }
 
         public bool OptimalConditionsSatisfied { get; init; }
 
-        public required IReadOnlyCollection<Property> OptimizedProperties { get; init; }
+        public required IEnumerable<Property> OptimizedProperties { get; init; }
     }
 }

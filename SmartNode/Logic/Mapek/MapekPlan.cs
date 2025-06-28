@@ -39,7 +39,7 @@ namespace Logic.Mapek
                         // then pick the first in the collection
 
             var actionCombinations = GetActionCombinations(actions);
-            var simulationResults = SimulateActionCombinations(actionCombinations);
+            var simulationResults = SimulateActionCombinations(actionCombinations, optimalConditions, propertyCache);
 
             return plannedActions;
         }
@@ -89,7 +89,9 @@ namespace Logic.Mapek
             return actionCombinations;
         }
 
-        private IEnumerable<SimulationResult> SimulateActionCombinations(IEnumerable<IEnumerable<Models.Action>> actionCombinations)
+        private IEnumerable<SimulationResult> SimulateActionCombinations(IEnumerable<IEnumerable<Models.Action>> actionCombinations,
+            IEnumerable<OptimalCondition> optimalConditions,
+            PropertyCache propertyCache)
         {
             // TODO:
             // simulate all combinations of reconfigurationactions
@@ -97,6 +99,74 @@ namespace Logic.Mapek
                     // we can find the number of simulations for each configurableproperty by taking its min-max range and dividing
                     // by the granularity factor
                         // this is one type of hard-coded logic, however, we should make it possible to delegate this logic to the user
+
+            // simulate the actuations first since reconfigurations use measured properties as inputs
+            // use granularity for simulating 
+
+            var simulationResults = new List<SimulationResult>();
+
+            foreach (var actionCombination in actionCombinations)
+            {
+                var actuationActions = actionCombination.Where(action => action is ActuationAction)
+                    .Select(action => (ActuationAction)action);
+                var reconfigurationActions = actionCombination.Where(action => action is ReconfigurationAction)
+                    .Select(action => (ReconfigurationAction)action);
+
+                // Make a deep copy of the property cache for simulations.
+                var propertyCacheCopy = new PropertyCache
+                {
+                    Properties = new Dictionary<string, Property>(),
+                    ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
+                };
+
+                foreach (var keyValuePair in propertyCache.Properties)
+                {
+                    propertyCacheCopy.Properties.Add(keyValuePair.Key, new Property
+                    {
+                        Name = keyValuePair.Value.Name,
+                        OwlType = keyValuePair.Value.OwlType,
+                        Value = keyValuePair.Value.Value
+                    });
+                }
+
+                foreach (var keyValuePair in propertyCache.ConfigurableParameters)
+                {
+                    propertyCacheCopy.Properties.Add(keyValuePair.Key, new ConfigurableParameter
+                    {
+                        Name = keyValuePair.Value.Name,
+                        OwlType = keyValuePair.Value.OwlType,
+                        Value = keyValuePair.Value.Value,
+                        LowerLimitValue = keyValuePair.Value.LowerLimitValue,
+                        UpperLimitValue = keyValuePair.Value.UpperLimitValue
+                    });
+                }
+
+                // Simulate each ActuationAction and update the property cache copy.
+                foreach (var actuationAction in actuationActions)
+                {
+                    var inputs = new Dictionary<string, object>
+                    {
+                        { "actuator", actuationAction.ActuatorState.Actuator },
+                        { "actuatorState", actuationAction.ActuatorState.Name }
+                    };
+
+                    var outputs = GetOutputsFromSimulation(inputs);
+                }
+
+                // Simulate each ReconfigurationAction and update the property cache copy.
+                foreach (var reconfigurationAction in reconfigurationActions)
+                {
+
+                }
+
+                // Check that every OptimalCondition passes with respect to the values in the property cache copy.
+                foreach (var optimalCondition in optimalConditions)
+                {
+
+                }
+
+                // based on the optimalcondition check, make a simulationresult and add it to the collection
+            }
 
             // 1. run simulations for all actions present
             // this should be done with some heuristics. spawn them all but don't run them all for the entire
@@ -107,6 +177,11 @@ namespace Logic.Mapek
             // pick those whose results meet their respective optimalconditions (and don't break other constraints)
 
             return new List<SimulationResult>();
+        }
+
+        private IDictionary<string, object> GetOutputsFromSimulation(IDictionary<string, object> inputs)
+        {
+
         }
     }
 }

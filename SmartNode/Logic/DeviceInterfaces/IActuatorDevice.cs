@@ -1,6 +1,6 @@
 ﻿namespace Logic.DeviceInterfaces
 {
-    public interface IActuator
+    public interface IActuatorDevice
     {
         public string ActuatorName { get; init; }
 

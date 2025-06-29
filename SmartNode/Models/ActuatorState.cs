@@ -2,6 +2,6 @@
 {
     public class ActuatorState : NamedIndividual
     {
-        public required string Actuator { get; init; }
+        public required Actuator Actuator { get; init; }
     }
 }

@@ -150,7 +150,7 @@ namespace Logic.Mapek
                         { "actuatorState", actuationAction.ActuatorState.Name }
                     };
 
-                    var outputs = GetOutputsFromSimulation(inputs);
+                    //var outputs = GetOutputsFromSimulation(inputs);
                 }
 
                 // Simulate each ReconfigurationAction and update the property cache copy.
@@ -179,9 +179,9 @@ namespace Logic.Mapek
             return new List<SimulationResult>();
         }
 
-        private IDictionary<string, object> GetOutputsFromSimulation(IDictionary<string, object> inputs)
-        {
+        //private IDictionary<string, object> GetOutputsFromSimulation(string fmuFilePath, IDictionary<string, object> inputs)
+        //{
 
-        }
+        //}
     }
 }

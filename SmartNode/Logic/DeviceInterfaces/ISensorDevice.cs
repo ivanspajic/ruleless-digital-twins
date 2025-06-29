@@ -1,6 +1,6 @@
 ﻿namespace Logic.DeviceInterfaces
 {
-    public interface ISensor
+    public interface ISensorDevice
     {
         public string SensorName { get; init; }
 

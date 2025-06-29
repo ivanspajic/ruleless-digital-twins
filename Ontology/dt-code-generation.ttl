@@ -138,9 +138,8 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel
 :hasModel rdf:type owl:DatatypeProperty ;
-          rdfs:domain <http://www.w3.org/ns/sosa/Procedure> ;
           rdfs:range xsd:anyURI ;
-          rdfs:comment "Refers to a model, such as a functional mock-up unit (FMU), used by a given Procedure."@en ;
+          rdfs:comment "Refers to a model, such as a functional mock-up unit (FMU), used by a thing."@en ;
           rdfs:label "hasModel"@en .
 
 
@@ -339,6 +338,11 @@ xsd:duration rdf:type rdfs:Datatype .
                                                        owl:onProperty :hasActuatorState ;
                                                        owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                        owl:onClass :ActuatorState
+                                                     ] ,
+                                                     [ rdf:type owl:Restriction ;
+                                                       owl:onProperty :hasModel ;
+                                                       owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                       owl:onDataRange xsd:anyURI
                                                      ] .
 
 

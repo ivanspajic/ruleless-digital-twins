@@ -40,7 +40,7 @@ namespace Logic.Mapek
                 actuationAction.ActuatorState.Actuator,
                 actuationAction.ActuatorState);
 
-            var actuator = _factory.GetActuatorImplementation(actuationAction.ActuatorState.Actuator);
+            var actuator = _factory.GetActuatorDeviceImplementation(actuationAction.ActuatorState.Actuator.Name);
 
             // TODO: expand the logic here when we add more actuation methods.
             actuator.Actuate(actuationAction.ActuatorState.Name);

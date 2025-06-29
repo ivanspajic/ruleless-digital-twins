@@ -2,7 +2,7 @@
 
 namespace SensorActuatorImplementations.Sensors
 {
-    public class ExampleSensor : ISensor
+    public class ExampleSensor : ISensorDevice
     {
         public required string SensorName { get; init; }
 

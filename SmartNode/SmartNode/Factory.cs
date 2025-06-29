@@ -10,7 +10,7 @@ namespace SmartNode
     internal class Factory : IFactory
     {
         // New implementations can simply be added to the factory collections.
-        private readonly Dictionary<(string, string), ISensor> _sensors = new()
+        private readonly Dictionary<(string, string), ISensorDevice> _sensors = new()
         {
             {
                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1",
@@ -61,7 +61,7 @@ namespace SmartNode
                 }
             }
         };
-        private readonly Dictionary<string, IActuator> _actuators = new()
+        private readonly Dictionary<string, IActuatorDevice> _actuators = new()
         {
             {
                 "Heater", new ExampleActuator()
@@ -78,9 +78,9 @@ namespace SmartNode
             { "int", new SensorIntValueHandler() }
         };
 
-        public ISensor GetSensorImplementation(string sensorName, string procedureName)
+        public ISensorDevice GetSensorDeviceImplementation(string sensorName, string procedureName)
         {
-            if (_sensors.TryGetValue((sensorName, procedureName), out ISensor sensor))
+            if (_sensors.TryGetValue((sensorName, procedureName), out ISensorDevice sensor))
             {
                 return sensor;
             }
@@ -88,9 +88,9 @@ namespace SmartNode
             throw new Exception($"No implementation was found for Sensor {sensorName} with Procedure {procedureName}.");
         }
 
-        public IActuator GetActuatorImplementation(string actuatorName)
+        public IActuatorDevice GetActuatorDeviceImplementation(string actuatorName)
         {
-            if (_actuators.TryGetValue(actuatorName, out IActuator actuator))
+            if (_actuators.TryGetValue(actuatorName, out IActuatorDevice actuator))
             {
                 return actuator;
             }

@@ -93,16 +93,6 @@ namespace Logic.Mapek
             IEnumerable<OptimalCondition> optimalConditions,
             PropertyCache propertyCache)
         {
-            // TODO:
-            // simulate all combinations of reconfigurationactions
-                // to ensure a finite number of simulations, a granularity factor can be used on the parameters to simulate
-                    // we can find the number of simulations for each configurableproperty by taking its min-max range and dividing
-                    // by the granularity factor
-                        // this is one type of hard-coded logic, however, we should make it possible to delegate this logic to the user
-
-            // simulate the actuations first since reconfigurations use measured properties as inputs
-            // use granularity for simulating 
-
             var simulationResults = new List<SimulationResult>();
 
             foreach (var actionCombination in actionCombinations)
@@ -150,13 +140,13 @@ namespace Logic.Mapek
                         { "actuatorState", actuationAction.ActuatorState.Name }
                     };
 
-                    //var outputs = GetOutputsFromSimulation(inputs);
+                    var outputs = GetOutputsFromSimulation(actuationAction.ActuatorState.Actuator.Model, inputs);
                 }
 
                 // Simulate each ReconfigurationAction and update the property cache copy.
                 foreach (var reconfigurationAction in reconfigurationActions)
                 {
-
+                    
                 }
 
                 // Check that every OptimalCondition passes with respect to the values in the property cache copy.
@@ -179,9 +169,17 @@ namespace Logic.Mapek
             return new List<SimulationResult>();
         }
 
-        //private IDictionary<string, object> GetOutputsFromSimulation(string fmuFilePath, IDictionary<string, object> inputs)
-        //{
+        private IDictionary<string, object> GetOutputsFromSimulation(string fmuFilePath, IDictionary<string, object> inputs)
+        {
+            //TODO:
+            //    simulate all combinations of reconfigurationactions
+            //    to ensure a finite number of simulations, a granularity factor can be used on the parameters to simulate
+            //     we can find the number of simulations for each configurableproperty by taking its min - max range and dividing
+            //     by the granularity factor
+            //     this is one type of hard - coded logic, however, we should make it possible to delegate this logic to the user
 
-        //}
+            //     simulate the actuations first since reconfigurations use measured properties as inputs
+            //     use granularity for simulating
+        }
     }
 }

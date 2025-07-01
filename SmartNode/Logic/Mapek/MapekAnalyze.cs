@@ -1,8 +1,8 @@
 ﻿using Logic.FactoryInterface;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Models;
 using Models.MapekModels;
+using Models.OntologicalModels;
 using System.Text;
 using VDS.RDF;
 using VDS.RDF.Query;
@@ -20,7 +20,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public Tuple<IEnumerable<OptimalCondition>, IEnumerable<Models.Action>> Analyze(IGraph instanceModel, PropertyCache propertyCache)
+        public Tuple<IEnumerable<OptimalCondition>, IEnumerable<Models.OntologicalModels.Action>> Analyze(IGraph instanceModel, PropertyCache propertyCache)
         {
             _logger.LogInformation("Starting the Analyze phase.");
 
@@ -125,11 +125,11 @@ namespace Logic.Mapek
             return unsatisfiedOptimalConditions.DistinctBy(x => x.Name);
         }
 
-        private IEnumerable<Models.Action> GetOptimizationActions(IGraph instanceModel,
+        private IEnumerable<Models.OntologicalModels.Action> GetOptimizationActions(IGraph instanceModel,
             PropertyCache propertyCache,
-            IEnumerable<Models.Action> mitigationActions)
+            IEnumerable<Models.OntologicalModels.Action> mitigationActions)
         {
-            var actions = new List<Models.Action>();
+            var actions = new List<Models.OntologicalModels.Action>();
 
             // Construct a filter for eliminating Actions that are duplicate or contradicting to those
             // already in the mitigation Action collection.
@@ -517,11 +517,11 @@ namespace Logic.Mapek
             }
         }
 
-        private IEnumerable<Models.Action> GetMitigationActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel,
+        private IEnumerable<Models.OntologicalModels.Action> GetMitigationActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel,
             PropertyCache propertyCache,
             IEnumerable<OptimalCondition> optimalConditions)
         {
-            var actions = new List<Models.Action>();
+            var actions = new List<Models.OntologicalModels.Action>();
 
             foreach (var optimalCondition in optimalConditions)
             {
@@ -623,7 +623,7 @@ namespace Logic.Mapek
         }
 
         private void AddActuationActionToCollectionFromQueryResult(ISparqlResult result,
-            IList<Models.Action> actions,
+            IList<Models.OntologicalModels.Action> actions,
             string actuationActionQueryParameter,
             string actuatorStateQueryParameter,
             string actuatorQueryParameter,
@@ -659,7 +659,7 @@ namespace Logic.Mapek
         }
 
         private void AddReconfigurationActionToCollectionFromQueryResult(ISparqlResult result,
-            IList<Models.Action> actions,
+            IList<Models.OntologicalModels.Action> actions,
             PropertyCache propertyCache,
             string reconfigurationActionQueryParameter,
             string configurableParameterQueryParameter,

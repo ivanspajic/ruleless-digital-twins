@@ -4,6 +4,6 @@ namespace Logic.Mapek
 {
     public interface IMapekExecute
     {
-        public void Execute(IEnumerable<Models.Action> actions, PropertyCache propertyCache);
+        public void Execute(IEnumerable<Models.OntologicalModels.Action> actions, PropertyCache propertyCache);
     }
 }

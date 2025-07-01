@@ -2,14 +2,14 @@
 
 namespace Logic.Mapek.EqualityComparers
 {
-    public class ActionSetEqualityComparer : IEqualityComparer<HashSet<Models.Action>>
+    public class ActionSetEqualityComparer : IEqualityComparer<HashSet<Models.OntologicalModels.Action>>
     {
-        public bool Equals(HashSet<Models.Action>? x, HashSet<Models.Action>? y)
+        public bool Equals(HashSet<Models.OntologicalModels.Action>? x, HashSet<Models.OntologicalModels.Action>? y)
         {
             return x!.SetEquals(y!);
         }
 
-        public int GetHashCode([DisallowNull] HashSet<Models.Action> obj)
+        public int GetHashCode([DisallowNull] HashSet<Models.OntologicalModels.Action> obj)
         {
             var hashCode = 0;
 

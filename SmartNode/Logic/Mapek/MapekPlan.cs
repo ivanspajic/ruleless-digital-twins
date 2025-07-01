@@ -1,8 +1,8 @@
 ﻿using Logic.FactoryInterface;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Models;
 using Models.MapekModels;
+using Models.OntologicalModels;
 
 namespace Logic.Mapek
 {
@@ -12,20 +12,20 @@ namespace Logic.Mapek
 
         private readonly ILogger<MapekPlan> _logger;
         private readonly IFactory _factory;
-        private readonly IEqualityComparer<HashSet<Models.Action>> _actionSetEqualityComparer;
+        private readonly IEqualityComparer<HashSet<Models.OntologicalModels.Action>> _actionSetEqualityComparer;
 
         public MapekPlan(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekPlan>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
-            _actionSetEqualityComparer = serviceProvider.GetRequiredService<IEqualityComparer<HashSet<Models.Action>>>();
+            _actionSetEqualityComparer = serviceProvider.GetRequiredService<IEqualityComparer<HashSet<Models.OntologicalModels.Action>>>();
         }
 
-        public IEnumerable<Models.Action> Plan(IEnumerable<OptimalCondition> optimalConditions, IEnumerable<Models.Action> actions, PropertyCache propertyCache)
+        public IEnumerable<Models.OntologicalModels.Action> Plan(IEnumerable<OptimalCondition> optimalConditions, IEnumerable<Models.OntologicalModels.Action> actions, PropertyCache propertyCache)
         {
             _logger.LogInformation("Starting the Plan phase.");
 
-            var plannedActions = new List<Models.Action>();
+            var plannedActions = new List<Models.OntologicalModels.Action>();
 
             // TODO:
             // for each combination, check that the combination satisfies all optimalconditions
@@ -44,10 +44,10 @@ namespace Logic.Mapek
             return plannedActions;
         }
 
-        private HashSet<HashSet<Models.Action>> GetActionCombinations(IEnumerable<Models.Action> actions)
+        private HashSet<HashSet<Models.OntologicalModels.Action>> GetActionCombinations(IEnumerable<Models.OntologicalModels.Action> actions)
         {
             // Ensure that the set of sets has unique elements with the equality comparer.
-            var actionCombinations = new HashSet<HashSet<Models.Action>>(_actionSetEqualityComparer);
+            var actionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(_actionSetEqualityComparer);
 
             foreach (var action in actions)
             {
@@ -58,7 +58,7 @@ namespace Logic.Mapek
                 {
                     // If there are no remaining Actions in the collection, we have to create the set of
                     // Actions with the current Action and add it to the set of combinations.
-                    var singleActionSet = new HashSet<Models.Action>
+                    var singleActionSet = new HashSet<Models.OntologicalModels.Action>
                     {
                         action
                     };
@@ -76,7 +76,7 @@ namespace Logic.Mapek
                     {
                         // For each Action combination from the collection of remaining Actions, create a new
                         // set and add the current Action to it before adding it to the set of combinations.
-                        var multipleActionSet = new HashSet<Models.Action>();
+                        var multipleActionSet = new HashSet<Models.OntologicalModels.Action>();
 
                         multipleActionSet.UnionWith(remainingActionCombination);
                         multipleActionSet.Add(action);
@@ -89,7 +89,7 @@ namespace Logic.Mapek
             return actionCombinations;
         }
 
-        private IEnumerable<SimulationResult> SimulateActionCombinations(IEnumerable<IEnumerable<Models.Action>> actionCombinations,
+        private IEnumerable<SimulationResult> SimulateActionCombinations(IEnumerable<IEnumerable<Models.OntologicalModels.Action>> actionCombinations,
             IEnumerable<OptimalCondition> optimalConditions,
             PropertyCache propertyCache)
         {

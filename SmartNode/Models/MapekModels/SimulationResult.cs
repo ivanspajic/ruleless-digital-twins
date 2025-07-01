@@ -1,4 +1,6 @@
-﻿namespace Models.MapekModels
+﻿using Models.OntologicalModels;
+
+namespace Models.MapekModels
 {
     public class SimulationResult
     {

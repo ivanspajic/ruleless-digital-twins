@@ -1,8 +1,8 @@
 ﻿using Logic.FactoryInterface;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Models;
 using Models.MapekModels;
+using Models.OntologicalModels;
 
 namespace Logic.Mapek
 {
@@ -17,7 +17,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public void Execute(IEnumerable<Models.Action> actions, PropertyCache propertyCache)
+        public void Execute(IEnumerable<Models.OntologicalModels.Action> actions, PropertyCache propertyCache)
         {
             _logger.LogInformation("Starting the Execute phase.");
 

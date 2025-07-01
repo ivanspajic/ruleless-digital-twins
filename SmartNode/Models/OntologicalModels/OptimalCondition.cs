@@ -1,4 +1,4 @@
-﻿namespace Models
+﻿namespace Models.OntologicalModels
 {
     public class OptimalCondition : NamedIndividual
     {

@@ -1,5 +1,5 @@
 ﻿using Logic.SensorValueHandlers;
-using Models;
+using Models.OntologicalModels;
 
 namespace SensorActuatorImplementations.ValueHandlers
 {

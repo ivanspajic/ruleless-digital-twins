@@ -4,6 +4,7 @@ using System.Globalization;
 
 namespace SensorActuatorImplementations.ValueHandlers
 {
+    // Compares doubles in a simplistic way, but it should do for most intents and purposes.
     public class SensorDoubleValueHandler : ISensorValueHandler
     {
         // In case of new ConstraintOperators being supported, this could be used to register new delegates.

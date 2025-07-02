@@ -41,6 +41,8 @@ namespace Logic.Mapek
             var actionCombinations = GetActionCombinations(actions);
             var simulationResults = SimulateActionCombinations(actionCombinations, optimalConditions, propertyCache);
 
+            // TODO: get the minimal number of time from all optimal conditions to use as the maximum for the simulations
+
             return plannedActions;
         }
 
@@ -171,15 +173,17 @@ namespace Logic.Mapek
 
         private IDictionary<string, object> GetOutputsFromSimulation(string fmuFilePath, IDictionary<string, object> inputs)
         {
-            //TODO:
-            //    simulate all combinations of reconfigurationactions
-            //    to ensure a finite number of simulations, a granularity factor can be used on the parameters to simulate
-            //     we can find the number of simulations for each configurableproperty by taking its min - max range and dividing
-            //     by the granularity factor
-            //     this is one type of hard - coded logic, however, we should make it possible to delegate this logic to the user
+            // TODO:
+            // simulate all combinations of reconfigurationactions
+            // to ensure a finite number of simulations, a granularity factor can be used on the parameters to simulate
+            // we can find the number of simulations for each configurableproperty by taking its min - max range and dividing
+            // by the granularity factor
+            // this is one type of hard - coded logic, however, we should make it possible to delegate this logic to the user
 
-            //     simulate the actuations first since reconfigurations use measured properties as inputs
-            //     use granularity for simulating
+            // simulate the actuations first since reconfigurations use measured properties as inputs
+            // use granularity for simulating
+
+
         }
     }
 }

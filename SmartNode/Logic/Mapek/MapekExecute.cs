@@ -52,7 +52,7 @@ namespace Logic.Mapek
                 reconfigurationAction.ConfigurableParameter.Name,
                 reconfigurationAction.Effect);
 
-            var valueHandler = _factory.GetSensorValueHandlerImplementation(reconfigurationAction.ConfigurableParameter.OwlType);
+            var valueHandler = _factory.GetValueHandlerImplementation(reconfigurationAction.ConfigurableParameter.OwlType);
 
             propertyCache.ConfigurableParameters[reconfigurationAction.ConfigurableParameter.Name].Value =
                 valueHandler.ChangeValueByAmount(reconfigurationAction.ConfigurableParameter.Value,

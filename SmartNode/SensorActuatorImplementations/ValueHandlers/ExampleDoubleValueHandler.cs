@@ -1,20 +1,29 @@
-﻿using Logic.SensorValueHandlers;
-using Logic.Models.OntologicalModels;
+﻿using Logic.Models.OntologicalModels;
+using Logic.ValueHandlerInterfaces;
 using System.Globalization;
+using System.Linq.Expressions;
 
 namespace SensorActuatorImplementations.ValueHandlers
 {
     // Compares doubles in a simplistic way, but it should do for most intents and purposes.
-    public class SensorDoubleValueHandler : ISensorValueHandler
+    public class ExampleDoubleValueHandler : IValueHandler
     {
-        // In case of new ConstraintOperators being supported, this could be used to register new delegates.
-        private static readonly Dictionary<ConstraintOperator, Func<double, double, bool>> _expressionDelegateMap = new()
+        // In case of new ExpressionTypes being supported, this could be used to register new delegates.
+        private static readonly Dictionary<ExpressionType, Func<double, double, bool>> _expressionDelegateMap = new()
         {
-            { ConstraintOperator.EqualTo, EvaluateEqualTo },
-            { ConstraintOperator.GreaterThan, EvaluateGreaterThan },
-            { ConstraintOperator.GreaterThanOrEqualTo, EvaluateGreaterThanOrEqualTo },
-            { ConstraintOperator.LessThan, EvaluateLessThan },
-            { ConstraintOperator.LessThanOrEqualTo, EvaluateLessThanOrEqualTo }
+            { ExpressionType.Equal, EvaluateEqualTo },
+            { ExpressionType.GreaterThan, EvaluateGreaterThan },
+            { ExpressionType.GreaterThanOrEqual, EvaluateGreaterThanOrEqualTo },
+            { ExpressionType.LessThan, EvaluateLessThan },
+            { ExpressionType.LessThanOrEqual, EvaluateLessThanOrEqualTo },
+        };
+
+        // In case of more ways of combining constraint propositions of OptimalConditions, this could be used to register new
+        // delegates.
+        private static readonly Dictionary<ExpressionType, Func<bool, bool, bool>> _expressionCombinationDelegateMap = new()
+        {
+            { ExpressionType.And, EvaluateAnd },
+            { ExpressionType.Or, EvaluateOr }
         };
 
         // In case of new Effects being added, this could be used to register new delegates.
@@ -24,15 +33,40 @@ namespace SensorActuatorImplementations.ValueHandlers
             { Effect.ValueDecrease, DecreaseValueByAmount }
         };
 
-        public bool EvaluateConstraint(object sensorValue, Tuple<ConstraintOperator, string> constraint)
+        public bool EvaluateConstraints(BinaryExpression constraintExpression)
         {
-            if (_expressionDelegateMap.TryGetValue(constraint.Item1, out Func<double, double, bool>? evaluator))
+            if (_expressionDelegateMap.TryGetValue(constraintExpression.NodeType, out Func<double, double, bool> valueComparisonEvaluator))
             {
-                // The constraint value comes directly from the graph as a string.
-                return evaluator((double)sensorValue, double.Parse(constraint.Item2, CultureInfo.InvariantCulture));
-            }
+                // In case of finding the node type in the expression delegate map, we know it must be a binary expression with constant values
+                // to be compared.
+                var left = ((ConstantExpression)constraintExpression.Left).Value!;
+                var right = ((ConstantExpression)constraintExpression.Right).Value!;
 
-            throw new Exception($"Unsupported constraint operator {constraint.Item1}.");
+                if (left is not double)
+                {
+                    left = double.Parse(left.ToString()!, CultureInfo.InvariantCulture);
+                }
+
+                if (right is not double)
+                {
+                    right = double.Parse(right.ToString()!, CultureInfo.InvariantCulture);
+                }
+
+                return valueComparisonEvaluator((double)left, (double)right);
+            }
+            else if (_expressionCombinationDelegateMap.TryGetValue(constraintExpression.NodeType, out Func<bool, bool, bool> constraintCombinationEvaluator))
+            {
+                // In case of finding the node type in the expression combination delegate map, we know it must be a binary expression with more
+                // sub-expression either containing more combinations or value comparisons.
+                var left = EvaluateConstraints((BinaryExpression)constraintExpression.Left);
+                var right = EvaluateConstraints((BinaryExpression)constraintExpression.Right);
+
+                return constraintCombinationEvaluator(left, right);
+            }
+            else
+            {
+                throw new Exception($"Unsupported expression node type: {constraintExpression.NodeType}");
+            }
         }
 
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues)
@@ -57,12 +91,12 @@ namespace SensorActuatorImplementations.ValueHandlers
             {
                 // Check if the value is not already a double to parse it before proceeding. This ensures that we parse
                 // during the initial run when the value is given as a string directly from the instance model graph.
-                // In all other cases, since the ConfigurableParameter's value is cached, it will be a double.
+                // In all other cases, since the ConfigurableParameter's value is cached, it will be a double (object).
                 if (value is not double)
                 {
                     value = double.Parse(value.ToString()!, CultureInfo.InvariantCulture);
                 }
-
+                
                 return valueUpdater((double)value, (double)amountToChangeBy);
             }
 
@@ -92,6 +126,16 @@ namespace SensorActuatorImplementations.ValueHandlers
         private static bool EvaluateLessThanOrEqualTo(double sensorValue, double optimalConditionValue)
         {
             return sensorValue <= optimalConditionValue;
+        }
+
+        private static bool EvaluateAnd(bool left, bool right)
+        {
+            return left && right;
+        }
+
+        private static bool EvaluateOr(bool left, bool right)
+        {
+            return left || right;
         }
 
         private static double IncreaseValueByAmount(double value, double amountToIncreaseBy)

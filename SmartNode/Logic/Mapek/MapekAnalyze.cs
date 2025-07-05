@@ -6,6 +6,7 @@ using Logic.Models.OntologicalModels;
 using System.Text;
 using VDS.RDF;
 using VDS.RDF.Query;
+using System.Linq.Expressions;
 
 namespace Logic.Mapek
 {
@@ -58,19 +59,39 @@ namespace Logic.Mapek
                 var optimalConditionNode = result["optimalCondition"];
                 var propertyNode = result["property"];
                 var propertyName = propertyNode.ToString();
+
+                Property property = null!;
+
+                if (propertyCache.Properties.ContainsKey(propertyName))
+                {
+                    property = propertyCache.Properties[propertyName];
+                }
+                else if (propertyCache.ConfigurableParameters.ContainsKey(propertyName))
+                {
+                    property = propertyCache.ConfigurableParameters[propertyName];
+                }
+                else
+                {
+                    throw new Exception($"Property {propertyName} not found in the property cache.");
+                }
+
                 var reachedInMaximumSeconds = result["reachedInMaximumSeconds"];
                 var reachedInMaximumSecondsValue = reachedInMaximumSeconds.ToString().Split('^')[0];
-                var propertyType = MapekUtilities.GetPropertyType(instanceModel, propertyNode);
 
-                // Process all the constraints this OptimalCondition might have.
-                var constraints = ProcessConstraintQueries(instanceModel, optimalConditionNode, propertyNode, reachedInMaximumSeconds);
+                // Build this OptimalCondition's full expression tree.
+                var constraintExpression = ProcessConstraintQueries(instanceModel, optimalConditionNode, propertyNode, reachedInMaximumSeconds, property.Value);
+
+                if (constraintExpression == null)
+                {
+                    throw new Exception($"OptimalCondition {optimalConditionNode.ToString()} has no constraints.");
+                }
 
                 var optimalCondition = new OptimalCondition()
                 {
-                    Constraints = constraints,
-                    ConstraintValueType = propertyType,
+                    ConstraintExpression = constraintExpression,
+                    ConstraintValueType = property.OwlType,
                     Name = optimalConditionNode.ToString(),
-                    Property = propertyNode.ToString(),
+                    Property = propertyName,
                     ReachedInMaximumSeconds = int.Parse(reachedInMaximumSecondsValue)
                 };
 
@@ -86,7 +107,7 @@ namespace Logic.Mapek
 
             foreach (var optimalCondition in optimalConditions)
             {
-                var sensorValueHandler = _factory.GetSensorValueHandlerImplementation(optimalCondition.ConstraintValueType);
+                var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.ConstraintValueType);
                 object propertyValue;
 
                 if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property, out ConfigurableParameter configurableParameter))
@@ -102,21 +123,12 @@ namespace Logic.Mapek
                     throw new Exception($"Property {optimalCondition.Property} was not found in the system.");
                 }
 
-                // If a constraint isn't satisfied, add the OptimalCondition to the collection.
-                foreach (var constraint in optimalCondition.Constraints)
+                // If the OptimalCondition is unsatisfied, add it to the collection.
+                if (!valueHandler.EvaluateConstraints(optimalCondition.ConstraintExpression))
                 {
-                    if (!sensorValueHandler.EvaluateConstraint(propertyValue, constraint))
-                    {
-                        _logger.LogInformation(@"OptimalCondition {optimalCondition} with constraint {restriction} {value} is unsatisfied due
-                            to Property {property}'s value being {propertyValue}.",
-                            optimalCondition.Name,
-                            constraint.Item1.ToString(),
-                            constraint.Item2,
-                            optimalCondition.Property,
-                            propertyValue.ToString());
+                    _logger.LogInformation(@"OptimalCondition {optimalCondition} is unsatisfied.", optimalCondition.Name);
 
-                        unsatisfiedOptimalConditions.Add(optimalCondition);
-                    }
+                    unsatisfiedOptimalConditions.Add(optimalCondition);
                 }
             }
 
@@ -242,37 +254,192 @@ namespace Logic.Mapek
             return actions;
         }
 
-        private IEnumerable<Tuple<ConstraintOperator, string>> ProcessConstraintQueries(IGraph instanceModel,
-            INode optimalCondition,
-            INode property,
-            INode reachedInMaximumSeconds)
-        {
-            var constraints = new List<Tuple<ConstraintOperator, string>>();
-
-            // Process the constraints from specific queries that check for different kinds of restrictions in OptimalConditions.
-            ProcessSingleValueEqualsConstraint(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessFirstValueGreaterThanConstraints(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessFirstValueGreaterThanOrEqualToConstraints(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessFirstValueLessThanConstraints(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessFirstValueLessThanOrEqualToConstraints(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessSecondValueGreaterThanConstraints(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessSecondValueGreaterThanOrEqualToConstraints(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessSecondValueLessThanConstraints(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-            ProcessSecondValueLessThanOrEqualToConstraints(instanceModel, optimalCondition, property, reachedInMaximumSeconds, constraints);
-
-            // Return all the constraints that were found.
-            return constraints;
-        }
-
-        private void ProcessSingleValueEqualsConstraint(IGraph instanceModel,
+        private BinaryExpression ProcessConstraintQueries(IGraph instanceModel,
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            IList<Tuple<ConstraintOperator, string>> constraints)
+            object propertyValue)
+        {
+            BinaryExpression constraintExpression = null!;
+
+            // Process the constraints from specific queries that check for different kinds of restrictions in OptimalConditions.
+            var singleValueEqualsBinaryExpression = ProcessSingleValueEqualsConstraint(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            if (singleValueEqualsBinaryExpression != null)
+            {
+                // If there is an equals constraint for this Property in this OptimalCondition, then there can't be any other kinds of
+                // constraints.
+                return singleValueEqualsBinaryExpression;
+            }
+
+            BinaryExpression conjunctiveExpression = null!;
+
+
+
+            var firstValueGreaterBinaryExpressions = ProcessFirstValueGreaterThanConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var firstValueGreaterEqualBinaryExpressions = ProcessFirstValueGreaterThanOrEqualToConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var firstValueLessBinaryExpressions = ProcessFirstValueLessThanConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var firstValueLessEqualBinaryExpressions = ProcessFirstValueLessThanOrEqualToConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var secondValueGreaterBinaryExpressions = ProcessSecondValueGreaterThanConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var secondValueGreaterEqualBinaryExpressions = ProcessSecondValueGreaterThanOrEqualToConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var secondValueLessBinaryExpressions = ProcessSecondValueLessThanConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var secondValueLessEqualBinaryExpressions = ProcessSecondValueLessThanOrEqualToConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            // TODO: handle the disjunct querying such that it preserves the structure of the disjunction
+            // important: find the difference in structure between single-valued disjunctions and double-valued disjunctions
+
+
+            var firstValueFirstUnionGreaterBinaryExpressions = ProcessFirstValueFirstUnionGreaterThanConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var firstValueFirstUnionGreaterEqualBinaryExpressions = ProcessFirstValueFirstUnionGreaterThanOrEqualToConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var firstValueFirstUnionLessBinaryExpressions = ProcessFirstValueFirstUnionLessThanConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var firstValueFirstUnionLessEqualBinaryExpressions = ProcessFirstValueFirstUnionLessThanOrEqualToConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var secondValueFirstUnionGreaterBinaryExpressions = ProcessSecondValueFirstUnionGreaterThanConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var secondValueFirstUnionGreaterEqualBinaryExpressions = ProcessSecondValueFirstUnionGreaterThanOrEqualToConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var secondValueFirstUnionLessBinaryExpressions = ProcessSecondValueFirstUnionLessThanConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var secondValueFirstUnionLessEqualBinaryExpressions = ProcessSecondValueFirstUnionLessThanOrEqualToConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var firstValueSecondUnionGreaterBinaryExpressions = ProcessFirstValueSecondUnionGreaterThanConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var firstValueSecondUnionGreaterEqualBinaryExpressions = ProcessFirstValueSecondUnionGreaterThanOrEqualToConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var firstValueSecondUnionLessBinaryExpressions = ProcessFirstValueSecondUnionLessThanConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var firstValueSecondUnionLessEqualBinaryExpressions = ProcessFirstValueSecondUnionLessThanOrEqualToConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var secondValueSecondUnionGreaterBinaryExpressions = ProcessSecondValueSecondUnionGreaterThanConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var secondValueSecondUnionGreaterEqualBinaryExpressions = ProcessSecondValueSecondUnionGreaterThanOrEqualToConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var secondValueSecondUnionLessBinaryExpressions = ProcessSecondValueSecondUnionLessThanConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            var secondValueSecondUnionLessEqualBinaryExpressions = ProcessSecondValueSecondUnionLessThanOrEqualToConstraints(instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue);
+
+            return constraintExpression;
+        }
+
+        private BinaryExpression ProcessSingleValueEqualsConstraint(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
-            // Check if the OptimalCondition has a single-valued constraint.
+            // Check if the OptimalCondition has a single-valued equals constraint (e.g., =15).
             query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
                     @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
@@ -284,14 +451,15 @@ namespace Logic.Mapek
             query.SetParameter("property", property);
             query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.EqualTo);
+            // There should only be a single instance of this after validation.
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.Equal, propertyValue).First();
         }
 
-        private void ProcessFirstValueGreaterThanConstraints(IGraph instanceModel,
+        private IEnumerable<BinaryExpression> ProcessFirstValueGreaterThanConstraints(IGraph instanceModel,
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            IList<Tuple<ConstraintOperator, string>> constraints)
+            object propertyValue)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -311,14 +479,14 @@ namespace Logic.Mapek
             query.SetParameter("property", property);
             query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.GreaterThan);
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.GreaterThan, propertyValue);
         }
 
-        private void ProcessFirstValueGreaterThanOrEqualToConstraints(IGraph instanceModel,
+        private IEnumerable<BinaryExpression> ProcessFirstValueGreaterThanOrEqualToConstraints(IGraph instanceModel,
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            IList<Tuple<ConstraintOperator, string>> constraints)
+            object propertyValue)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -337,14 +505,14 @@ namespace Logic.Mapek
             query.SetParameter("property", property);
             query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.GreaterThanOrEqualTo);
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.GreaterThanOrEqual, propertyValue);
         }
 
-        private void ProcessFirstValueLessThanConstraints(IGraph instanceModel,
+        private IEnumerable<BinaryExpression> ProcessFirstValueLessThanConstraints(IGraph instanceModel,
             INode optimalCondition,
             INode property,
-            INode reachedInMaximumSeconds, 
-            IList<Tuple<ConstraintOperator, string>> constraints)
+            INode reachedInMaximumSeconds,
+            object propertyValue)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -363,14 +531,14 @@ namespace Logic.Mapek
             query.SetParameter("property", property);
             query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.LessThan);
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.LessThan, propertyValue);
         }
 
-        private void ProcessFirstValueLessThanOrEqualToConstraints(IGraph instanceModel,
+        private IEnumerable<BinaryExpression> ProcessFirstValueLessThanOrEqualToConstraints(IGraph instanceModel,
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            IList<Tuple<ConstraintOperator, string>> constraints)
+            object propertyValue)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -389,14 +557,14 @@ namespace Logic.Mapek
             query.SetParameter("property", property);
             query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.LessThanOrEqualTo);
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.LessThanOrEqual, propertyValue);
         }
 
-        private void ProcessSecondValueGreaterThanConstraints(IGraph instanceModel,
+        private IEnumerable<BinaryExpression> ProcessSecondValueGreaterThanConstraints(IGraph instanceModel,
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            IList<Tuple<ConstraintOperator, string>> constraints)
+            object propertyValue)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -416,14 +584,14 @@ namespace Logic.Mapek
             query.SetParameter("property", property);
             query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.GreaterThan);
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.GreaterThan, propertyValue);
         }
 
-        private void ProcessSecondValueGreaterThanOrEqualToConstraints(IGraph instanceModel,
+        private IEnumerable<BinaryExpression> ProcessSecondValueGreaterThanOrEqualToConstraints(IGraph instanceModel,
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            IList<Tuple<ConstraintOperator, string>> constraints)
+            object propertyValue)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -443,14 +611,14 @@ namespace Logic.Mapek
             query.SetParameter("property", property);
             query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.GreaterThanOrEqualTo);
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.GreaterThanOrEqual, propertyValue);
         }
 
-        private void ProcessSecondValueLessThanConstraints(IGraph instanceModel,
+        private IEnumerable<BinaryExpression> ProcessSecondValueLessThanConstraints(IGraph instanceModel,
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            IList<Tuple<ConstraintOperator, string>> constraints)
+            object propertyValue)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -470,14 +638,14 @@ namespace Logic.Mapek
             query.SetParameter("property", property);
             query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.LessThan);
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.LessThan, propertyValue);
         }
 
-        private void ProcessSecondValueLessThanOrEqualToConstraints(IGraph instanceModel,
+        private IEnumerable<BinaryExpression> ProcessSecondValueLessThanOrEqualToConstraints(IGraph instanceModel,
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            IList<Tuple<ConstraintOperator, string>> constraints)
+            object propertyValue)
         {
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -497,14 +665,467 @@ namespace Logic.Mapek
             query.SetParameter("property", property);
             query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-            ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, constraints, ConstraintOperator.LessThanOrEqualTo);
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.LessThanOrEqual, propertyValue);
         }
 
-        private void ExecuteAndProcessOptimalConditionConstraintQueryResult(IGraph instanceModel,
-            SparqlParameterizedString query,
-            IList<Tuple<ConstraintOperator, string>> constraints,
-            ConstraintOperator constraintOperator)
+        private IEnumerable<BinaryExpression> ProcessFirstValueFirstUnionGreaterThanConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
         {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all first values of first parts of disjunctive constraints with a '>' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:first ?bNode4 .
+                    ?bNode4 owl:withRestrictions ?bNode5 .
+                    ?bNode5 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minExclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.GreaterThan, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ProcessFirstValueFirstUnionGreaterThanOrEqualToConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all first values of first parts of disjunctive constraints with a '>=' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:first ?bNode4 .
+                    ?bNode4 owl:withRestrictions ?bNode5 .
+                    ?bNode5 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minInclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.GreaterThanOrEqual, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ProcessFirstValueFirstUnionLessThanConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all first values of first parts of disjunctive constraints with a '<' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:first ?bNode4 .
+                    ?bNode4 owl:withRestrictions ?bNode5 .
+                    ?bNode5 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxExclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.LessThan, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ProcessFirstValueFirstUnionLessThanOrEqualToConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all first values of first parts of disjunctive constraints with a '<=' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:first ?bNode4 .
+                    ?bNode4 owl:withRestrictions ?bNode5 .
+                    ?bNode5 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxInclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.LessThanOrEqual, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ProcessSecondValueFirstUnionGreaterThanConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all second values of first parts of disjunctive constraints with a '>' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:first ?bNode4 .
+                    ?bNode4 owl:withRestrictions ?bNode5 .
+                    ?bNode5 rdf:rest ?bNode6 .
+                    ?bNode6 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minExclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.GreaterThan, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ProcessSecondValueFirstUnionGreaterThanOrEqualToConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all second values of first parts of disjunctive constraints with a '>=' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:first ?bNode4 .
+                    ?bNode4 owl:withRestrictions ?bNode5 .
+                    ?bNode5 rdf:rest ?bNode6 .
+                    ?bNode6 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minInclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.GreaterThanOrEqual, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ProcessSecondValueFirstUnionLessThanConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all second values of first parts of disjunctive constraints with a '<' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:first ?bNode4 .
+                    ?bNode4 owl:withRestrictions ?bNode5 .
+                    ?bNode5 rdf:rest ?bNode6 .
+                    ?bNode6 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxExclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.LessThan, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ProcessSecondValueFirstUnionLessThanOrEqualToConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all second values of first parts of disjunctive constraints with a '<=' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:first ?bNode4 .
+                    ?bNode4 owl:withRestrictions ?bNode5 .
+                    ?bNode5 rdf:rest ?bNode6 .
+                    ?bNode6 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxInclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.LessThanOrEqual, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ProcessFirstValueSecondUnionGreaterThanConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all first values of second parts of disjunctive constraints with a '>' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:rest ?bNode4 .
+                    ?bNode4 rdf:first ?bNode5 .
+                    ?bNode5 owl:withRestrictions ?bNode6 .
+                    ?bNode6 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minExclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.GreaterThan, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ProcessFirstValueSecondUnionGreaterThanOrEqualToConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all first values of second parts of disjunctive constraints with a '>=' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:rest ?bNode4 .
+                    ?bNode4 rdf:first ?bNode5 .
+                    ?bNode5 owl:withRestrictions ?bNode6 .
+                    ?bNode6 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minInclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.GreaterThanOrEqual, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ProcessFirstValueSecondUnionLessThanConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all first values of second parts of disjunctive constraints with a '<' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:rest ?bNode4 .
+                    ?bNode4 rdf:first ?bNode5 .
+                    ?bNode5 owl:withRestrictions ?bNode6 .
+                    ?bNode6 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxExclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.LessThan, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ProcessFirstValueSecondUnionLessThanOrEqualToConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all first values of second parts of disjunctive constraints with a '<=' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:rest ?bNode4 .
+                    ?bNode4 rdf:first ?bNode5 .
+                    ?bNode5 owl:withRestrictions ?bNode6 .
+                    ?bNode6 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxInclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.LessThanOrEqual, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ProcessSecondValueSecondUnionGreaterThanConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all second values of second parts of disjunctive constraints with a '>' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:rest ?bNode4 .
+                    ?bNode4 rdf:first ?bNode5 .
+                    ?bNode5 owl:withRestrictions ?bNode6 .
+                    ?bNode6 rdf:rest ?bNode7 .
+                    ?bNode7 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minExclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.GreaterThan, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ProcessSecondValueSecondUnionGreaterThanOrEqualToConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all second values of second parts of disjunctive constraints with a '>=' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:rest ?bNode4 .
+                    ?bNode4 rdf:first ?bNode5 .
+                    ?bNode5 owl:withRestrictions ?bNode6 .
+                    ?bNode6 rdf:rest ?bNode7 .
+                    ?bNode7 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:minInclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.GreaterThanOrEqual, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ProcessSecondValueSecondUnionLessThanConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all second values of second parts of disjunctive constraints with a '<' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:rest ?bNode4 .
+                    ?bNode4 rdf:first ?bNode5 .
+                    ?bNode5 owl:withRestrictions ?bNode6 .
+                    ?bNode6 rdf:rest ?bNode7 .
+                    ?bNode7 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxExclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.LessThan, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ProcessSecondValueSecondUnionLessThanOrEqualToConstraints(IGraph instanceModel,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            object propertyValue)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            // Get all second values of second parts of disjunctive constraints with a '<=' operator.
+            query.CommandText = @"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:unionOf ?bNode3 .
+                    ?bNode3 rdf:rest ?bNode4 .
+                    ?bNode4 rdf:first ?bNode5 .
+                    ?bNode5 owl:withRestrictions ?bNode6 .
+                    ?bNode6 rdf:rest ?bNode7 .
+                    ?bNode7 rdf:first ?anonymousNode .
+                    ?anonymousNode xsd:maxInclusive ?constraint . }";
+
+            query.SetParameter("optimalCondition", optimalCondition);
+            query.SetParameter("property", property);
+            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+            return ExecuteAndProcessOptimalConditionConstraintQueryResult(instanceModel, query, ExpressionType.LessThanOrEqual, propertyValue);
+        }
+
+        private IEnumerable<BinaryExpression> ExecuteAndProcessOptimalConditionConstraintQueryResult(IGraph instanceModel,
+            SparqlParameterizedString query,
+            ExpressionType expressionType,
+            object propertyValue)
+        {
+            // Construct a list for returning BinaryExpressions instead of building them here. This is because the results of the queries
+            // could return constraints that aren't necessarily immediately related. E.g., the same OptimalCondition having two disjunctive
+            // constraints.
+            var binaryExpressions = new List<BinaryExpression>();
+
             var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
 
             foreach (var innerResult in queryResult)
@@ -512,9 +1133,24 @@ namespace Logic.Mapek
                 var constraint = innerResult["constraint"].ToString();
                 constraint = constraint.Split('^')[0];
 
-                var tuple = new Tuple<ConstraintOperator, string>(constraintOperator, constraint);
-                constraints.Add(tuple);
+                var left = BinaryExpression.Constant(propertyValue);
+                var right = BinaryExpression.Constant(constraint);
+
+                BinaryExpression binaryExpression = null!;
+
+                binaryExpression = expressionType switch
+                {
+                    ExpressionType.Equal => BinaryExpression.Equal(left, right),
+                    ExpressionType.GreaterThan => BinaryExpression.GreaterThan(left, right),
+                    ExpressionType.GreaterThanOrEqual => BinaryExpression.GreaterThanOrEqual(left, right),
+                    ExpressionType.LessThan => BinaryExpression.LessThan(left, right),
+                    ExpressionType.LessThanOrEqual => BinaryExpression.LessThanOrEqual(left, right),
+                    _ => throw new Exception($"Unsupported expression type {expressionType}.")
+                };
+                binaryExpressions.Add(binaryExpression);
             }
+
+            return binaryExpressions;
         }
 
         private IEnumerable<Models.OntologicalModels.Action> GetMitigationActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel,

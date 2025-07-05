@@ -1,5 +1,5 @@
 ﻿using Logic.DeviceInterfaces;
-using Logic.SensorValueHandlers;
+using Logic.ValueHandlerInterfaces;
 
 namespace Logic.FactoryInterface
 {
@@ -9,6 +9,6 @@ namespace Logic.FactoryInterface
 
         public IActuatorDevice GetActuatorDeviceImplementation(string actuatorName);
 
-        public ISensorValueHandler GetSensorValueHandlerImplementation(string owlType);
+        public IValueHandler GetValueHandlerImplementation(string owlType);
     }
 }

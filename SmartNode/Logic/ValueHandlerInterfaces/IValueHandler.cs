@@ -1,10 +1,11 @@
 ﻿using Logic.Models.OntologicalModels;
+using System.Linq.Expressions;
 
-namespace Logic.SensorValueHandlers
+namespace Logic.ValueHandlerInterfaces
 {
-    public interface ISensorValueHandler
+    public interface IValueHandler
     {
-        public bool EvaluateConstraint(object sensorValue, Tuple<ConstraintOperator, string> constraint);
+        public bool EvaluateConstraints(BinaryExpression constraintExpression);
 
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues);
 

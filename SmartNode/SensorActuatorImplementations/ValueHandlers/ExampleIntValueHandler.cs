@@ -3,7 +3,8 @@ using Logic.Models.OntologicalModels;
 
 namespace SensorActuatorImplementations.ValueHandlers
 {
-    public class SensorTimespanValueHandler : ISensorValueHandler
+    // Example int Sensor value handler implementation.
+    public class ExampleIntValueHandler : IValueHandler
     {
         public object ChangeValueByAmount(object value, object amountToChangeBy, Effect typeOfChange)
         {

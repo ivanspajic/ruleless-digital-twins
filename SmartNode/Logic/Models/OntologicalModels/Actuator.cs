@@ -1,4 +1,4 @@
-﻿namespace Models.OntologicalModels
+﻿namespace Logic.Models.OntologicalModels
 {
     public class Actuator : NamedIndividual
     {

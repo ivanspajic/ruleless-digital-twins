@@ -1,10 +1,10 @@
-﻿using Models.OntologicalModels;
+﻿using Logic.Models.OntologicalModels;
 
-namespace Models.MapekModels
+namespace Logic.Models.MapekModels
 {
     public class SimulationResult
     {
-        public required IEnumerable<Action> Actions { get; init; }
+        public required IEnumerable<OntologicalModels.Action> Actions { get; init; }
 
         public bool OptimalConditionsSatisfied { get; init; }
 

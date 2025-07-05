@@ -1,6 +1,6 @@
-﻿using Models.OntologicalModels;
+﻿using Logic.Models.OntologicalModels;
 
-namespace Models.MapekModels
+namespace Logic.Models.MapekModels
 {
     public class PropertyCache
     {

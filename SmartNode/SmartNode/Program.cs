@@ -29,7 +29,7 @@ namespace SmartNode
             builder.Services.AddSingleton<IMapekAnalyze, MapekAnalyze>();
             builder.Services.AddSingleton<IMapekPlan, MapekPlan>();
             builder.Services.AddSingleton<IMapekExecute, MapekExecute>();
-            builder.Services.AddSingleton<IEqualityComparer<HashSet<Models.OntologicalModels.Action>>, ActionSetEqualityComparer>();
+            builder.Services.AddSingleton<IEqualityComparer<HashSet<Logic.Models.OntologicalModels.Action>>, ActionSetEqualityComparer>();
 
             using var host = builder.Build();
 

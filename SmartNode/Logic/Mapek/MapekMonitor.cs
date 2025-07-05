@@ -1,8 +1,8 @@
 ﻿using Logic.FactoryInterface;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Models.MapekModels;
-using Models.OntologicalModels;
+using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
 using VDS.RDF;
 using VDS.RDF.Query;
 

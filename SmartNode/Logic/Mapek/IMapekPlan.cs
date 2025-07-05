@@ -1,5 +1,5 @@
-﻿using Models.MapekModels;
-using Models.OntologicalModels;
+﻿using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
 
 namespace Logic.Mapek
 {

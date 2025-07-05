@@ -1,4 +1,4 @@
-﻿using Models.MapekModels;
+﻿using Logic.Models.MapekModels;
 
 namespace Logic.Mapek
 {

@@ -1,4 +1,4 @@
-﻿using Models.OntologicalModels;
+﻿using Logic.Models.OntologicalModels;
 
 namespace Logic.SensorValueHandlers
 {

@@ -10,8 +10,7 @@
 // The following rules cover individuals with one or two value constraints. Once an OptimalCondition constraint
 // has been located, a mark will be placed to allow subsequent rules to match and fire.
 
-[rule1a:    (?individual rdf:type owl:NamedIndividual)
-            (?individual rdf:type meta:OptimalCondition)
+[rule1a:    (?individual rdf:type meta:OptimalCondition)
             (?individual ssn:forProperty ?property)
             (?individual rdf:type ?bNode1)
             (?bNode1 owl:hasValue ?restriction)
@@ -21,8 +20,7 @@
                 print()
 ]
 
-[rule1b:    (?individual rdf:type owl:NamedIndividual)
-            (?individual rdf:type meta:OptimalCondition)
+[rule1b:    (?individual rdf:type meta:OptimalCondition)
             (?individual ssn:forProperty ?property)
             (?individual rdf:type ?bNode1)
             (?bNode1 owl:onDataRange ?bNode2)
@@ -34,14 +32,77 @@
                 print()
 ]
 
-[rule1c:    (?individual rdf:type owl:NamedIndividual)
-            (?individual rdf:type meta:OptimalCondition)
+[rule1c:    (?individual rdf:type meta:OptimalCondition)
             (?individual ssn:forProperty ?property)
             (?individual rdf:type ?bNode1)
             (?bNode1 owl:onDataRange ?bNode2)
             (?bNode2 owl:withRestrictions ?bNode3)
             (?bNode3 rdf:rest ?bNode4)
             (?bNode4 rdf:first ?restriction)
+            ->  (?restriction rdf:comment ?property)
+                print()
+                print("Marked a value restriction with Property", ?property)
+                print()
+]
+
+// These rules support disjunctive constraint definitions in OptimalConditions. E.g., (>15, <=20) or (>=24, <35).
+// Such definitions cover cases whose Property values might fit in disjoint ranges. Currently, only 2 constraints
+// are supported, but it is naturally possible to support more.
+
+[rule1d:    (?individual rdf:type meta:OptimalCondition)
+            (?individual ssn:forProperty ?property)
+            (?individual rdf:type ?bNode1)
+            (?bNode1 owl:onDataRange ?bNode2)
+            (?bNode2 owl:unionOf ?bNode3)
+            (?bNode3 rdf:first ?bNode4)
+            (?bNode4 owl:withRestrictions ?bNode5)
+            (?bNode5 rdf:first ?restriction)
+            ->  (?restriction rdf:comment ?property)
+                print()
+                print("Marked a value restriction with Property", ?property)
+                print()
+]
+
+[rule1e:    (?individual rdf:type meta:OptimalCondition)
+            (?individual ssn:forProperty ?property)
+            (?individual rdf:type ?bNode1)
+            (?bNode1 owl:onDataRange ?bNode2)
+            (?bNode2 owl:unionOf ?bNode3)
+            (?bNode3 rdf:first ?bNode4)
+            (?bNode4 owl:withRestrictions ?bNode5)
+            (?bNode5 rdf:rest ?bNode6)
+            (?bNode6 rdf:first ?restriction)
+            ->  (?restriction rdf:comment ?property)
+                print()
+                print("Marked a value restriction with Property", ?property)
+                print()
+]
+
+[rule1f:    (?individual rdf:type meta:OptimalCondition)
+            (?individual ssn:forProperty ?property)
+            (?individual rdf:type ?bNode1)
+            (?bNode1 owl:onDataRange ?bNode2)
+            (?bNode2 owl:unionOf ?bNode3)
+            (?bNode3 rdf:rest ?bNode4)
+            (?bNode4 rdf:first ?bNode5)
+            (?bNode5 owl:withRestrictions ?bNode6)
+            (?bNode6 rdf:rest ?bNode7)
+            (?bNode7 rdf:first ?restriction)
+            ->  (?restriction rdf:comment ?property)
+                print()
+                print("Marked a value restriction with Property", ?property)
+                print()
+]
+
+[rule1g:    (?individual rdf:type meta:OptimalCondition)
+            (?individual ssn:forProperty ?property)
+            (?individual rdf:type ?bNode1)
+            (?bNode1 owl:onDataRange ?bNode2)
+            (?bNode2 owl:unionOf ?bNode3)
+            (?bNode3 rdf:rest ?bNode4)
+            (?bNode4 rdf:first ?bNode5)
+            (?bNode5 owl:withRestrictions ?bNode6)
+            (?bNode6 rdf:first ?restriction)
             ->  (?restriction rdf:comment ?property)
                 print()
                 print("Marked a value restriction with Property", ?property)

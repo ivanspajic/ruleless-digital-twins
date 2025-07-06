@@ -1,6 +1,6 @@
 ﻿using Logic.DeviceInterfaces;
 using Logic.FactoryInterface;
-using Logic.SensorValueHandlers;
+using Logic.ValueHandlerInterfaces;
 using SensorActuatorImplementations.Actuators;
 using SensorActuatorImplementations.Sensors;
 using SensorActuatorImplementations.ValueHandlers;
@@ -98,7 +98,7 @@ namespace SmartNode
             throw new Exception($"No implementation was found for Actuator {actuator}.");
         }
 
-        public IValueHandler GetSensorValueHandlerImplementation(string owlType)
+        public IValueHandler GetValueHandlerImplementation(string owlType)
         {
             if (_sensorValueHandlers.TryGetValue(owlType, out IValueHandler sensorValueHandler))
             {

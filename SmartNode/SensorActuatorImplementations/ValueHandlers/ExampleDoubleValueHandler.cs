@@ -2,6 +2,7 @@
 using Logic.ValueHandlerInterfaces;
 using System.Globalization;
 using System.Linq.Expressions;
+using VDS.RDF.Writing.Formatting;
 
 namespace SensorActuatorImplementations.ValueHandlers
 {
@@ -33,8 +34,10 @@ namespace SensorActuatorImplementations.ValueHandlers
             { Effect.ValueDecrease, DecreaseValueByAmount }
         };
 
-        public bool EvaluateConstraints(BinaryExpression constraintExpression)
+        public IEnumerable<BinaryExpression> GetUnsatisfiedConstraintsFromEvaluation(BinaryExpression constraintExpression)
         {
+            var unsatisfiedConstraints = new List<BinaryExpression>();
+
             if (_expressionDelegateMap.TryGetValue(constraintExpression.NodeType, out Func<double, double, bool> valueComparisonEvaluator))
             {
                 // In case of finding the node type in the expression delegate map, we know it must be a binary expression with constant values
@@ -52,21 +55,35 @@ namespace SensorActuatorImplementations.ValueHandlers
                     right = double.Parse(right.ToString()!, CultureInfo.InvariantCulture);
                 }
 
-                return valueComparisonEvaluator((double)left, (double)right);
+                // Evaluate the comparison and add the atomic 
+                var evaluation = valueComparisonEvaluator((double)left, (double)right);
+
+                if (!evaluation)
+                {
+                    unsatisfiedConstraints.Add(constraintExpression);
+                }
             }
             else if (_expressionCombinationDelegateMap.TryGetValue(constraintExpression.NodeType, out Func<bool, bool, bool> constraintCombinationEvaluator))
             {
                 // In case of finding the node type in the expression combination delegate map, we know it must be a binary expression with more
                 // sub-expression either containing more combinations or value comparisons.
-                var left = EvaluateConstraints((BinaryExpression)constraintExpression.Left);
-                var right = EvaluateConstraints((BinaryExpression)constraintExpression.Right);
+                var leftUnsatisfiedConstraints = GetUnsatisfiedConstraintsFromEvaluation((BinaryExpression)constraintExpression.Left);
+                var rightUnsatisfiedConstraints = GetUnsatisfiedConstraintsFromEvaluation((BinaryExpression)constraintExpression.Right);
 
-                return constraintCombinationEvaluator(left, right);
+                var evaluation = constraintCombinationEvaluator(leftUnsatisfiedConstraints.Any(), rightUnsatisfiedConstraints.Any());
+
+                if (!evaluation)
+                {
+                    unsatisfiedConstraints.AddRange(leftUnsatisfiedConstraints);
+                    unsatisfiedConstraints.AddRange(rightUnsatisfiedConstraints);
+                }
             }
             else
             {
                 throw new Exception($"Unsupported expression node type: {constraintExpression.NodeType}");
             }
+
+            return unsatisfiedConstraints;
         }
 
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues)

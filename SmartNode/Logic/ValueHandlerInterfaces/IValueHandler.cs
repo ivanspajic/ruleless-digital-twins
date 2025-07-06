@@ -5,7 +5,7 @@ namespace Logic.ValueHandlerInterfaces
 {
     public interface IValueHandler
     {
-        public bool EvaluateConstraints(BinaryExpression constraintExpression);
+        public IEnumerable<BinaryExpression> GetUnsatisfiedConstraintsFromEvaluation(BinaryExpression constraintExpression);
 
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues);
 

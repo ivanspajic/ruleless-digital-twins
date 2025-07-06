@@ -27,6 +27,9 @@ owl:FunctionalProperty
         owl:equivalentClass  owl:FunctionalProperty;
         owl:sameAs           owl:FunctionalProperty .
 
+_:b2    rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+        owl:sameAs  _:b2 , _:b3 .
+
 rdfs:domain  rdf:type           rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:domain             rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:range              rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
@@ -36,7 +39,7 @@ rdfs:domain  rdf:type           rdf:Property , rdfs:Resource , owl:Thing;
 
 <http://www.w3.org/ns/sosa/Actuator>
         rdf:type             rdfs:Class , rdfs:Resource , owl:Class , owl:Thing;
-        rdfs:subClassOf      owl:Thing , <http://www.w3.org/ns/sosa/Actuator> , rdfs:Resource , _:b2 , _:b3;
+        rdfs:subClassOf      owl:Thing , <http://www.w3.org/ns/sosa/Actuator> , rdfs:Resource , _:b4 , _:b5;
         owl:equivalentClass  <http://www.w3.org/ns/sosa/Actuator>;
         owl:sameAs           <http://www.w3.org/ns/sosa/Actuator> .
 
@@ -46,11 +49,17 @@ rdfs:domain  rdf:type           rdf:Property , rdfs:Resource , owl:Thing;
         owl:equivalentClass  <http://www.w3.org/ns/ssn/Property>;
         owl:sameAs           <http://www.w3.org/ns/ssn/Property> .
 
+_:b6    rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+        owl:sameAs  _:b6 , _:b7 .
+
 <http://www.w3.org/ns/sosa/Sensor>
         rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
         rdfs:subClassOf      <http://www.w3.org/ns/sosa/Sensor> , rdfs:Resource;
         owl:equivalentClass  <http://www.w3.org/ns/sosa/Sensor>;
         owl:sameAs           <http://www.w3.org/ns/sosa/Sensor> .
+
+_:b8    rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+        owl:sameAs  _:b8 , _:b9 .
 
 rdfs:Resource  rdf:type      rdfs:Class , rdfs:Resource , owl:Class , owl:Thing;
         rdfs:subClassOf      owl:Thing , rdfs:Resource;
@@ -128,7 +137,7 @@ xsd:minExclusive  rdf:type      rdf:Property , rdfs:Resource , owl:Thing;
         owl:sameAs              xsd:minExclusive .
 
 owl:equivalentProperty
-        rdf:type            rdf:Property , rdfs:Resource , owl:Thing;
+        rdf:type            rdf:Property , owl:Thing , rdfs:Resource;
         rdfs:subPropertyOf  owl:equivalentProperty;
         owl:sameAs          owl:equivalentProperty .
 
@@ -141,9 +150,9 @@ xsd:long  rdf:type           rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Cl
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuator>
         rdf:type                owl:ObjectProperty , rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "The relation between an ActuationExecution and an Actuator it uses."@en;
-        rdfs:domain             owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> , rdfs:Resource , _:b4 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action>;
+        rdfs:domain             owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> , rdfs:Resource , _:b10 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action>;
         rdfs:label              "hasActuator"@en;
-        rdfs:range              owl:Thing , <http://www.w3.org/ns/sosa/Actuator> , rdfs:Resource , _:b2 , _:b3;
+        rdfs:range              owl:Thing , <http://www.w3.org/ns/sosa/Actuator> , rdfs:Resource , _:b4 , _:b5;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuator>;
         owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuator>;
         owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuator> .
@@ -163,14 +172,14 @@ xsd:unsignedByte  rdf:type   rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Cl
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds>
         rdf:type                rdf:Property , owl:DatatypeProperty , owl:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "Represents the maximum amount of time in seconds to reach an OptimalCondition."@en;
-        rdfs:domain             <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> , rdfs:Resource , owl:Thing , _:b5 , _:b6 , _:b7 , <http://www.w3.org/ns/ssn/systems/Condition>;
+        rdfs:domain             <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> , rdfs:Resource , owl:Thing , _:b11 , _:b12 , _:b13 , <http://www.w3.org/ns/ssn/systems/Condition>;
         rdfs:label              "reachedInMaximumSeconds"@en;
         rdfs:range              xsd:int , rdfs:Resource , xsd:integer , xsd:long , xsd:decimal , owl:Thing;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds>;
         owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds>;
         owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds> .
 
-xsd:negativeInteger  rdf:type  rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
+xsd:negativeInteger  rdf:type  rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
         rdfs:subClassOf      xsd:negativeInteger , rdfs:Resource;
         owl:equivalentClass  xsd:negativeInteger;
         owl:sameAs           xsd:negativeInteger .
@@ -189,17 +198,6 @@ owl:onDatatype  rdf:type        rdf:Property , rdfs:Resource , owl:Thing;
         owl:equivalentProperty  owl:onDatatype;
         owl:sameAs              owl:onDatatype .
 
-<http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts>
-        rdf:type                rdf:Property , owl:ObjectProperty , owl:Property , rdfs:Resource , owl:Thing;
-        rdfs:comment            "Represents a relation between a thing, such as a System or Actuator, and a PropertyChange."@en;
-        rdfs:domain             owl:Thing , rdfs:Resource;
-        rdfs:label              "enacts"@en;
-        rdfs:range              owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , rdfs:Resource , _:b8 , _:b9;
-        rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts>;
-        owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts>;
-        owl:inverseOf           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy>;
-        owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> .
-
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasUpperLimitValue>
         rdf:type                owl:DatatypeProperty , owl:Property , rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "Describes a relation to a specific value's upper limit (of a specific type) contained by a property or an Input/Output parameter."@en;
@@ -209,12 +207,16 @@ owl:onDatatype  rdf:type        rdf:Property , rdfs:Resource , owl:Thing;
         owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasUpperLimitValue>;
         owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasUpperLimitValue> .
 
-_:b10   rdf:type              rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf       _:b10 , rdfs:Resource;
-        owl:equivalentClass   _:b10;
-        owl:onDatatype        xsd:double;
-        owl:sameAs            _:b10;
-        owl:withRestrictions  _:b11 .
+<http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts>
+        rdf:type                rdf:Property , owl:ObjectProperty , owl:Property , rdfs:Resource , owl:Thing;
+        rdfs:comment            "Represents a relation between a thing, such as a System or Actuator, and a PropertyChange."@en;
+        rdfs:domain             owl:Thing , rdfs:Resource;
+        rdfs:label              "enacts"@en;
+        rdfs:range              owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , rdfs:Resource , _:b14 , _:b15;
+        rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts>;
+        owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts>;
+        owl:inverseOf           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy>;
+        owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/propertyFor>
         rdf:type                owl:ObjectProperty , rdf:Property , rdfs:Resource , owl:Thing;
@@ -231,6 +233,12 @@ xsd:gDay  rdf:type           rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Th
         rdfs:subClassOf      xsd:gDay , rdfs:Resource;
         owl:equivalentClass  xsd:gDay;
         owl:sameAs           xsd:gDay .
+
+_:b16   rdf:type             rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
+        rdfs:subClassOf      _:b16 , rdfs:Resource;
+        owl:equivalentClass  _:b16;
+        owl:sameAs           _:b16;
+        owl:unionOf          _:b17 .
 
 xsd:unsignedShort  rdf:type  rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Class , owl:Thing;
         rdfs:subClassOf      rdfs:Resource , owl:Thing , xsd:unsignedLong , xsd:short , xsd:integer , xsd:long , xsd:nonNegativeInteger , xsd:unsignedInt , xsd:unsignedShort , xsd:int , xsd:decimal;
@@ -294,7 +302,7 @@ owl:Class  rdf:type          rdfs:Class , rdfs:Resource , owl:Class , owl:Thing;
         owl:sameAs              <http://www.w3.org/ns/ssn/hasOutput> .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FanOnhttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction>
-        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action> , _:b4;
+        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action> , _:b10;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState>
                 :FanOn;
         owl:sameAs  <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FanOnhttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> .
@@ -343,6 +351,14 @@ owl:intersectionOf  rdf:type    rdf:Property , rdfs:Resource , owl:Thing;
         owl:equivalentProperty  owl:intersectionOf;
         owl:sameAs              owl:intersectionOf .
 
+_:b18   rdf:type             rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdf:comment          :RoomTemperature;
+        rdfs:subClassOf      _:b18 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass  _:b18;
+        owl:hasValue         "19.2"^^xsd:double;
+        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint>;
+        owl:sameAs           _:b18 .
+
 owl:incompatibleWith  rdf:type  rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:domain             owl:Ontology , rdfs:Resource , owl:Thing;
         rdfs:range              owl:Ontology , rdfs:Resource , owl:Thing;
@@ -371,7 +387,7 @@ xsd:nonNegativeInteger
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/alteredBy>
         rdf:type                owl:ObjectProperty , owl:Property , rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "Represents a relation between a ConfigurableProperty and an Effect on it that causes a related property to change."@en;
-        rdfs:domain             owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration> , rdfs:Resource , _:b12 , _:b13 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , _:b9 , _:b8;
+        rdfs:domain             owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration> , rdfs:Resource , _:b19 , _:b20 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , _:b15 , _:b14;
         rdfs:label              "alteredBy"@en;
         rdfs:range              owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Effect> , rdfs:Resource;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/alteredBy>;
@@ -384,7 +400,7 @@ owl:versionInfo  rdf:type  owl:AnnotationProperty , rdfs:Resource , owl:Thing;
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/altersBy>
         rdf:type                owl:DatatypeProperty , owl:Property , rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "Represents the relation between a ReconfiguationAction and the literal (value) it alters a ConfigurableParameter with."@en;
-        rdfs:domain             <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationAction> , rdfs:Resource , owl:Thing , _:b14 , _:b15 , _:b16 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action>;
+        rdfs:domain             <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationAction> , rdfs:Resource , owl:Thing , _:b21 , _:b22 , _:b23 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action>;
         rdfs:label              "altersBy"@en;
         rdfs:range              rdfs:Literal , rdfs:Resource , owl:Thing;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/altersBy>;
@@ -398,7 +414,7 @@ owl:versionInfo  rdf:type  owl:AnnotationProperty , rdfs:Resource , owl:Thing;
         owl:sameAs              <http://www.w3.org/ns/sosa/observes> .
 
 owl:TransitiveProperty
-        rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
+        rdf:type             rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
         rdfs:subClassOf      owl:TransitiveProperty , rdfs:Resource , owl:ObjectProperty;
         owl:equivalentClass  owl:TransitiveProperty;
         owl:sameAs           owl:TransitiveProperty .
@@ -422,7 +438,7 @@ xsd:double  rdf:type         rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Th
         owl:sameAs           xsd:double .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStronghttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction>
-        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action> , _:b4;
+        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action> , _:b10;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState>
                 :HeaterStrong;
         owl:sameAs  <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStronghttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> .
@@ -442,9 +458,9 @@ xsd:integer  rdf:type        rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Cl
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizedBy>
         rdf:type                owl:ObjectProperty , rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "A relation between a Property and a Platform optimizing for it."@en;
-        rdfs:domain             owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , rdfs:Resource , _:b8 , _:b9;
+        rdfs:domain             owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , rdfs:Resource , _:b14 , _:b15;
         rdfs:label              "optimizedBy"@en;
-        rdfs:range              owl:Thing , <http://www.w3.org/ns/sosa/Platform> , rdfs:Resource , _:b17 , _:b18;
+        rdfs:range              owl:Thing , <http://www.w3.org/ns/sosa/Platform> , rdfs:Resource , _:b24 , _:b25;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizedBy>;
         owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizedBy>;
         owl:inverseOf           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor>;
@@ -454,6 +470,13 @@ owl:cardinality  rdf:type       rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:subPropertyOf      owl:cardinality;
         owl:equivalentProperty  owl:cardinality;
         owl:sameAs              owl:cardinality .
+
+_:b26   rdf:type              rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
+        rdfs:subClassOf       _:b26 , rdfs:Resource;
+        owl:equivalentClass   _:b26;
+        owl:onDatatype        xsd:double;
+        owl:sameAs            _:b26;
+        owl:withRestrictions  _:b27 .
 
 xsd:positiveInteger  rdf:type  rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
         rdfs:subClassOf      xsd:positiveInteger , rdfs:Resource;
@@ -471,8 +494,11 @@ rdf:type  rdf:type              rdf:Property , rdfs:Resource , owl:Thing;
         owl:equivalentProperty  rdf:type;
         owl:sameAs              rdf:type .
 
+_:b7    rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+        owl:sameAs  _:b7 , _:b6 .
+
 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterWeakhttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction>
-        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action> , _:b4;
+        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action> , _:b10;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState>
                 :HeaterWeak;
         owl:sameAs  <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterWeakhttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> .
@@ -492,13 +518,6 @@ rdfs:ContainerMembershipProperty
         owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
         owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> .
 
-_:b19   rdf:type              rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf       _:b20 , _:b19 , rdfs:Resource;
-        owl:equivalentClass   _:b19;
-        owl:onDatatype        xsd:double;
-        owl:sameAs            _:b19;
-        owl:withRestrictions  _:b21 .
-
 <http://www.w3.org/ns/ssn/implements>
         rdf:type                rdf:Property , owl:Property , rdfs:Resource , owl:Thing;
         rdfs:subPropertyOf      <http://www.w3.org/ns/ssn/implements>;
@@ -517,11 +536,21 @@ xsd:dateTime  rdf:type       rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Cl
         owl:equivalentClass  xsd:dateTime;
         owl:sameAs           xsd:dateTime .
 
+_:b28   rdf:type              rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
+        rdfs:subClassOf       _:b28 , rdfs:Resource;
+        owl:equivalentClass   _:b28;
+        owl:onDatatype        xsd:double;
+        owl:sameAs            _:b28;
+        owl:withRestrictions  _:b29 .
+
 xsd:int  rdf:type            rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class , owl:Thing;
         rdfs:subClassOf      owl:Thing , xsd:int , rdfs:Resource , xsd:integer , xsd:long , xsd:decimal;
         owl:disjointWith     xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration;
         owl:equivalentClass  xsd:int;
         owl:sameAs           xsd:int .
+
+_:b3    rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+        owl:sameAs  _:b3 , _:b2 .
 
 rdf:Statement  rdf:type      rdfs:Class , rdfs:Resource , owl:Class , owl:Thing;
         rdfs:subClassOf      owl:Thing , rdfs:Resource , rdf:Statement;
@@ -537,14 +566,6 @@ rdf:Statement  rdf:type      rdfs:Class , rdfs:Resource , owl:Class , owl:Thing;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith>;
         owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith>;
         owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> .
-
-_:b22   rdf:type             rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdf:comment          :RoomTemperature;
-        rdfs:subClassOf      _:b22 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass  _:b22;
-        owl:hasValue         "19.2"^^xsd:double;
-        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint>;
-        owl:sameAs           _:b22 .
 
 owl:backwardCompatibleWith
         rdf:type                rdf:Property , rdfs:Resource , owl:Thing;
@@ -562,12 +583,15 @@ owl:backwardCompatibleWith
 
 [ rdf:comment  :RoomTemperatureIncrease , :RoomTemperatureDecrease , :EnergyConsumptionDecrease , :RoomHumidityDecrease ] .
 
-xsd:gMonthDay  rdf:type      rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
+_:b9    rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+        owl:sameAs  _:b9 , _:b8 .
+
+xsd:gMonthDay  rdf:type      rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
         rdfs:subClassOf      xsd:gMonthDay , rdfs:Resource;
         owl:equivalentClass  xsd:gMonthDay;
         owl:sameAs           xsd:gMonthDay .
 
-rdf:Alt  rdf:type            rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
+rdf:Alt  rdf:type            rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
         rdfs:subClassOf      rdf:Alt , rdfs:Resource , rdfs:Container;
         owl:equivalentClass  rdf:Alt;
         owl:sameAs           rdf:Alt .
@@ -585,6 +609,13 @@ owl:onDataRange  rdf:type       rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel>;
         owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel>;
         owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> .
+
+_:b30   rdf:type              rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
+        rdfs:subClassOf       _:b16 , _:b30 , rdfs:Resource;
+        owl:equivalentClass   _:b30;
+        owl:onDatatype        xsd:double;
+        owl:sameAs            _:b30;
+        owl:withRestrictions  _:b31 .
 
 xsd:nonPositiveInteger
         rdf:type             rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Class , owl:Thing;
@@ -631,12 +662,12 @@ xsd:time  rdf:type           rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Cl
         owl:equivalentClass  xsd:time;
         owl:sameAs           xsd:time .
 
-rdf:Bag  rdf:type            rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
+rdf:Bag  rdf:type            rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
         rdfs:subClassOf      rdf:Bag , rdfs:Resource , rdfs:Container;
         owl:equivalentClass  rdf:Bag;
         owl:sameAs           rdf:Bag .
 
-xsd:gYearMonth  rdf:type     rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
+xsd:gYearMonth  rdf:type     rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
         rdfs:subClassOf      xsd:gYearMonth , rdfs:Resource;
         owl:equivalentClass  xsd:gYearMonth;
         owl:sameAs           xsd:gYearMonth .
@@ -680,15 +711,15 @@ rdfs:comment  rdf:type          rdf:Property , rdfs:Resource , owl:Thing;
         owl:equivalentProperty  rdfs:comment;
         owl:sameAs              rdfs:comment .
 
-xsd:maxInclusive  rdf:type      rdf:Property , owl:AnnotationProperty , rdfs:Resource , owl:Thing;
-        rdfs:subPropertyOf      xsd:maxInclusive;
-        owl:equivalentProperty  xsd:maxInclusive;
-        owl:sameAs              xsd:maxInclusive .
-
 <urn:x-hp-jena:rubrik/validation>
         rdf:type            rdf:Property , owl:Thing , rdfs:Resource;
         rdfs:subPropertyOf  <urn:x-hp-jena:rubrik/validation>;
         owl:sameAs          <urn:x-hp-jena:rubrik/validation> .
+
+xsd:maxInclusive  rdf:type      rdf:Property , owl:AnnotationProperty , rdfs:Resource , owl:Thing;
+        rdfs:subPropertyOf      xsd:maxInclusive;
+        owl:equivalentProperty  xsd:maxInclusive;
+        owl:sameAs              xsd:maxInclusive .
 
 owl:sameAs  rdf:type            owl:SymmetricProperty , owl:ObjectProperty , rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:domain             owl:Thing , rdfs:Resource;
@@ -716,7 +747,7 @@ rdfs:Datatype  rdf:type      rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
 
 <http://www.w3.org/ns/ssn/Input>
         rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      _:b23 , _:b24 , rdfs:Resource , <http://www.w3.org/ns/ssn/Input> , _:b25 , <http://www.w3.org/ns/ssn/Property>;
+        rdfs:subClassOf      _:b32 , _:b33 , rdfs:Resource , <http://www.w3.org/ns/ssn/Input> , _:b34 , <http://www.w3.org/ns/ssn/Property>;
         owl:equivalentClass  <http://www.w3.org/ns/ssn/Input>;
         owl:sameAs           <http://www.w3.org/ns/ssn/Input> .
 
@@ -756,6 +787,9 @@ owl:oneOf  rdf:type             rdf:Property , rdfs:Resource , owl:Thing;
         owl:equivalentProperty  owl:oneOf;
         owl:sameAs              owl:oneOf .
 
+_:b35   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+        owl:sameAs  _:b35 , _:b36 .
+
 xsd:hexBinary  rdf:type      rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
         rdfs:subClassOf      xsd:hexBinary , rdfs:Resource;
         owl:equivalentClass  xsd:hexBinary;
@@ -778,16 +812,16 @@ owl:unionOf  rdf:type           rdf:Property , rdfs:Resource , owl:Thing;
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor>
         rdf:type                rdf:Property , owl:ObjectProperty , owl:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "Represents a relation between a platform and a PropertyChange that indicates that platform's optimization of those properties."@en;
-        rdfs:domain             owl:Thing , <http://www.w3.org/ns/sosa/Platform> , rdfs:Resource , _:b17 , _:b18;
+        rdfs:domain             owl:Thing , <http://www.w3.org/ns/sosa/Platform> , rdfs:Resource , _:b24 , _:b25;
         rdfs:label              "optimizesFor"@en;
-        rdfs:range              owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , rdfs:Resource , _:b8 , _:b9;
+        rdfs:range              owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , rdfs:Resource , _:b14 , _:b15;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor>;
         owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor>;
         owl:inverseOf           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizedBy>;
         owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor> .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterMediumhttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction>
-        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action> , _:b4;
+        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action> , _:b10;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState>
                 :HeaterMedium;
         owl:sameAs  <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterMediumhttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> .
@@ -804,14 +838,14 @@ owl:withRestrictions  rdf:type  rdf:Property , rdfs:Resource , owl:Thing;
 
 <http://www.w3.org/ns/sosa/ObservableProperty>
         rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      <http://www.w3.org/ns/sosa/ObservableProperty> , _:b23 , _:b25 , rdfs:Resource , _:b24;
+        rdfs:subClassOf      _:b32 , <http://www.w3.org/ns/sosa/ObservableProperty> , _:b34 , rdfs:Resource , _:b33;
         owl:equivalentClass  <http://www.w3.org/ns/sosa/ObservableProperty>;
         owl:sameAs           <http://www.w3.org/ns/sosa/ObservableProperty> .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy>
         rdf:type                owl:ObjectProperty , owl:Property , rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "Represents a relation between a PropertyChange and a thing, such as a System or Actuator."@en;
-        rdfs:domain             owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , rdfs:Resource , _:b8 , _:b9;
+        rdfs:domain             owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , rdfs:Resource , _:b14 , _:b15;
         rdfs:label              "enactedBy"@en;
         rdfs:range              owl:Thing , rdfs:Resource;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy>;
@@ -824,6 +858,9 @@ rdf:predicate  rdf:type         rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:subPropertyOf      rdf:predicate;
         owl:equivalentProperty  rdf:predicate;
         owl:sameAs              rdf:predicate .
+
+_:b36   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+        owl:sameAs  _:b36 , _:b35 .
 
 xsd:base64Binary  rdf:type   rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
         rdfs:subClassOf      xsd:base64Binary , rdfs:Resource;
@@ -842,13 +879,6 @@ owl:qualifiedCardinality
         rdfs:subPropertyOf      owl:qualifiedCardinality;
         owl:equivalentProperty  owl:qualifiedCardinality;
         owl:sameAs              owl:qualifiedCardinality .
-
-_:b26   rdf:type              rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf       _:b26 , rdfs:Resource;
-        owl:equivalentClass   _:b26;
-        owl:onDatatype        xsd:double;
-        owl:sameAs            _:b26;
-        owl:withRestrictions  _:b27 .
 
 owl:priorVersion  rdf:type      rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:domain             owl:Ontology , rdfs:Resource , owl:Thing;
@@ -876,13 +906,6 @@ rdfs:subClassOf  rdf:type       rdf:Property , rdfs:Resource , owl:Thing;
         owl:equivalentProperty  rdfs:subClassOf;
         owl:sameAs              rdfs:subClassOf .
 
-_:b28   rdf:type              rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf       _:b20 , _:b28 , rdfs:Resource;
-        owl:equivalentClass   _:b28;
-        owl:onDatatype        xsd:double;
-        owl:sameAs            _:b28;
-        owl:withRestrictions  _:b29 .
-
 xsd:unsignedLong  rdf:type   rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Class , owl:Thing;
         rdfs:subClassOf      rdfs:Resource , owl:Thing , xsd:unsignedLong , xsd:integer , xsd:long , xsd:nonNegativeInteger , xsd:decimal;
         owl:disjointWith     xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration;
@@ -902,7 +925,7 @@ owl:Restriction  rdf:type    rdfs:Class , rdfs:Resource , owl:Class , owl:Thing;
 
 <http://www.w3.org/ns/ssn/Output>
         rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      _:b24 , _:b25 , <http://www.w3.org/ns/ssn/Output> , rdfs:Resource , _:b23 , <http://www.w3.org/ns/ssn/Property>;
+        rdfs:subClassOf      _:b33 , _:b34 , <http://www.w3.org/ns/ssn/Output> , rdfs:Resource , _:b32 , <http://www.w3.org/ns/ssn/Property>;
         owl:equivalentClass  <http://www.w3.org/ns/ssn/Output>;
         owl:sameAs           <http://www.w3.org/ns/ssn/Output> .
 
@@ -913,7 +936,7 @@ owl:topDataProperty  rdf:type   rdfs:Resource , rdf:Property , owl:Thing;
 
 <http://www.w3.org/ns/sosa/Platform>
         rdf:type             rdfs:Class , rdfs:Resource , owl:Class , owl:Thing;
-        rdfs:subClassOf      owl:Thing , <http://www.w3.org/ns/sosa/Platform> , rdfs:Resource , _:b17 , _:b18;
+        rdfs:subClassOf      owl:Thing , <http://www.w3.org/ns/sosa/Platform> , rdfs:Resource , _:b24 , _:b25;
         owl:equivalentClass  <http://www.w3.org/ns/sosa/Platform>;
         owl:sameAs           <http://www.w3.org/ns/sosa/Platform> .
 
@@ -929,6 +952,13 @@ rdfs:subPropertyOf  rdf:type    rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:subPropertyOf      rdfs:subPropertyOf;
         owl:equivalentProperty  rdfs:subPropertyOf;
         owl:sameAs              rdfs:subPropertyOf .
+
+_:b37   rdf:type              rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
+        rdfs:subClassOf       _:b16 , _:b37 , rdfs:Resource;
+        owl:equivalentClass   _:b37;
+        owl:onDatatype        xsd:double;
+        owl:sameAs            _:b37;
+        owl:withRestrictions  _:b38 .
 
 owl:AnnotationProperty
         rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
@@ -959,112 +989,169 @@ owl:maxQualifiedCardinality
         owl:equivalentProperty  owl:maxQualifiedCardinality;
         owl:sameAs              owl:maxQualifiedCardinality .
 
-_:b20   rdf:type             rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      _:b20 , rdfs:Resource;
-        owl:equivalentClass  _:b20;
-        owl:sameAs           _:b20;
-        owl:unionOf          _:b30 .
-
 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DehumidifierOnhttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction>
-        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action> , _:b4;
+        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action> , _:b10;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState>
                 :DehumidifierOn;
         owl:sameAs  <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DehumidifierOnhttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> .
-
-_:b31   rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf      _:b31 , rdfs:Resource , owl:Thing;
-        owl:cardinality      "1"^^xsd:nonNegativeInteger;
-        owl:equivalentClass  _:b31;
-        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasLowerLimitValue>;
-        owl:sameAs           _:b31 .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation>
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
         rdfs:comment         "Represents a specific PropertyChange as a result of actuating on the respective Property."@en;
         rdfs:label           "PropertyChangeByActuation"@en;
-        rdfs:subClassOf      owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> , rdfs:Resource , _:b32 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , _:b8 , _:b9;
+        rdfs:subClassOf      owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> , rdfs:Resource , _:b39 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , _:b14 , _:b15;
         owl:disjointWith     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration>;
         owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation>;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> .
 
-_:b23   rdf:type             rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf      owl:Thing , _:b23 , rdfs:Resource , _:b25 , _:b24;
-        owl:cardinality      "1"^^xsd:nonNegativeInteger;
-        owl:equivalentClass  _:b23 , _:b25 , _:b24;
-        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
-        owl:sameAs           _:b23 .
+_:b40   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           _:b40 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass       _:b40;
+        owl:onDataRange           xsd:double;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasLowerLimitValue>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b40 .
 
-_:b15   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , _:b15 , rdfs:Resource;
-        owl:equivalentClass       _:b15;
+_:b41   rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf      rdfs:Resource , owl:Thing , _:b41;
+        owl:cardinality      "1"^^xsd:nonNegativeInteger;
+        owl:equivalentClass  _:b41;
+        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasUpperLimitValue>;
+        owl:sameAs           _:b41 .
+
+_:b22   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , _:b22 , rdfs:Resource;
+        owl:equivalentClass       _:b22;
         owl:onClass               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurableParameter>;
         owl:onProperty            <http://www.w3.org/ns/ssn/forProperty>;
         owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b15 .
+        owl:sameAs                _:b22 .
+
+_:b33   rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf      owl:Thing , _:b33 , rdfs:Resource , _:b34 , _:b32;
+        owl:cardinality      "1"^^xsd:nonNegativeInteger;
+        owl:equivalentClass  _:b33 , _:b34 , _:b32;
+        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
+        owl:sameAs           _:b33 .
+
+_:b1    rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf              owl:Thing , _:b1 , rdfs:Resource;
+        owl:equivalentClass          _:b1;
+        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation>;
+        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts>;
+        owl:sameAs                   _:b1 .
+
+_:b42   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           _:b42 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass       _:b42;
+        owl:onDataRange           _:b28;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b42 .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurableParameter>
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
         rdfs:comment         "A parameter not directly observable or actuatable but rather used for configuring an an Input to a System or Procedure."@en;
         rdfs:label           "ConfigurableParameter"@en;
-        rdfs:subClassOf      owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurableParameter> , rdfs:Resource , _:b33 , _:b31 , _:b34 , <http://www.w3.org/ns/ssn/Input> , _:b23 , _:b25 , _:b24 , <http://www.w3.org/ns/ssn/Property>;
+        rdfs:subClassOf      owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurableParameter> , rdfs:Resource , _:b41 , _:b43 , _:b44 , <http://www.w3.org/ns/ssn/Input> , <http://www.w3.org/ns/ssn/Property> , _:b34 , _:b33 , _:b32;
         owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurableParameter>;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurableParameter> .
 
-_:b35   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           _:b35 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b35;
-        owl:onDataRange           xsd:double;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b35 .
+_:b43   rdf:type             rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf      rdfs:Resource , _:b43 , owl:Thing;
+        owl:cardinality      "1"^^xsd:nonNegativeInteger;
+        owl:equivalentClass  _:b43;
+        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasLowerLimitValue>;
+        owl:sameAs           _:b43 .
+
+_:b20   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf              owl:Thing , _:b20 , rdfs:Resource;
+        owl:equivalentClass          _:b20;
+        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurableParameter>;
+        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy>;
+        owl:sameAs                   _:b20 .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction>
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
         rdfs:comment         "Represents a single system Action with an actuation, either for optimization or regaining optimal conditions."@en;
         rdfs:label           "ActuationAction"@en;
-        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> , rdfs:Resource , owl:Thing , _:b4 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action>;
+        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> , rdfs:Resource , owl:Thing , _:b10 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action>;
         owl:disjointWith     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationAction>;
         owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction>;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction> .
 
-_:b9    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , _:b9 , rdfs:Resource;
-        owl:equivalentClass       _:b9;
+_:b19   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , _:b19 , rdfs:Resource;
+        owl:equivalentClass       _:b19;
         owl:onClass               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Effect>;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith>;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/alteredBy>;
         owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b9 .
+        owl:sameAs                _:b19 .
 
-_:b13   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf              owl:Thing , _:b13 , rdfs:Resource;
-        owl:equivalentClass          _:b13;
-        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurableParameter>;
-        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy>;
-        owl:sameAs                   _:b13 .
-
-_:b36   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           _:b36 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b36;
-        owl:onDataRange           _:b20;
+_:b45   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           _:b45 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass       _:b45;
+        owl:onDataRange           _:b16;
         owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint>;
         owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b36 .
+        owl:sameAs                _:b45 .
 
-_:b8    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , _:b8 , rdfs:Resource;
-        owl:equivalentClass       _:b8;
+_:b12   rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf      owl:Thing , rdfs:Resource , _:b12;
+        owl:cardinality      "1"^^xsd:nonNegativeInteger;
+        owl:equivalentClass  _:b12;
+        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint>;
+        owl:sameAs           _:b12 .
+
+_:b24   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf              owl:Thing , _:b24 , rdfs:Resource;
+        owl:equivalentClass          _:b24;
+        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition>;
+        owl:onProperty               <http://www.w3.org/ns/ssn/implements>;
+        owl:sameAs                   _:b24 .
+
+_:b13   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , _:b13 , rdfs:Resource;
+        owl:equivalentClass       _:b13;
         owl:onClass               <http://www.w3.org/ns/ssn/Property>;
         owl:onProperty            <http://www.w3.org/ns/ssn/forProperty>;
         owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b8 .
+        owl:sameAs                _:b13 .
 
-_:b33   rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf      _:b33 , owl:Thing , rdfs:Resource;
-        owl:cardinality      "1"^^xsd:nonNegativeInteger;
-        owl:equivalentClass  _:b33;
-        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasUpperLimitValue>;
-        owl:sameAs           _:b33 .
+_:b46   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           _:b46 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass       _:b46;
+        owl:onDataRange           xsd:double;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b46 .
+
+_:b47   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           _:b47 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass       _:b47;
+        owl:onDataRange           xsd:double;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b47 .
+
+_:b14   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , _:b14 , rdfs:Resource;
+        owl:equivalentClass       _:b14;
+        owl:onClass               <http://www.w3.org/ns/ssn/Property>;
+        owl:onProperty            <http://www.w3.org/ns/ssn/forProperty>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b14 .
+
+_:b48   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           _:b48 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass       _:b48;
+        owl:onDataRange           xsd:double;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b48 .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action>
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
@@ -1074,67 +1161,52 @@ _:b33   rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Res
         owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action>;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action> .
 
-_:b32   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf              owl:Thing , _:b32 , rdfs:Resource;
-        owl:equivalentClass          _:b32;
-        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState>;
-        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy>;
-        owl:sameAs                   _:b32 .
-
-_:b37   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           _:b37 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b37;
+_:b49   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           _:b49 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass       _:b49;
         owl:onDataRange           xsd:double;
         owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
         owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b37 .
+        owl:sameAs                _:b49 .
 
-_:b18   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf              owl:Thing , _:b18 , rdfs:Resource;
-        owl:equivalentClass          _:b18;
+_:b34   rdf:type             rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf      rdfs:Resource , _:b34 , owl:Thing , _:b33 , _:b32;
+        owl:cardinality      "1"^^xsd:nonNegativeInteger;
+        owl:equivalentClass  _:b34 , _:b33 , _:b32;
+        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
+        owl:sameAs           _:b34 .
+
+_:b25   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf              owl:Thing , _:b25 , rdfs:Resource;
+        owl:equivalentClass          _:b25;
         owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
         owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange>;
         owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor>;
-        owl:sameAs                   _:b18 .
+        owl:sameAs                   _:b25 .
 
-_:b0    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , _:b0 , rdfs:Resource;
-        owl:equivalentClass       _:b0;
-        owl:onClass               <http://www.w3.org/ns/sosa/Actuator>;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/isActuatorStateOf>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b0 .
+_:b5    rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf              owl:Thing , _:b5 , rdfs:Resource;
+        owl:equivalentClass          _:b5;
+        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState>;
+        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState>;
+        owl:sameAs                   _:b5 .
 
-_:b38   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           _:b38 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b38;
+_:b50   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           _:b50 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass       _:b50;
         owl:onDataRange           xsd:double;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasLowerLimitValue>;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasUpperLimitValue>;
         owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b38 .
+        owl:sameAs                _:b50 .
 
-_:b4    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , _:b4 , rdfs:Resource;
-        owl:equivalentClass       _:b4;
-        owl:onClass               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState>;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState>;
+_:b15   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , _:b15 , rdfs:Resource;
+        owl:equivalentClass       _:b15;
+        owl:onClass               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Effect>;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith>;
         owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b4 .
-
-_:b25   rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf      rdfs:Resource , owl:Thing , _:b25 , _:b23 , _:b24;
-        owl:cardinality      "1"^^xsd:nonNegativeInteger;
-        owl:equivalentClass  _:b25 , _:b23 , _:b24;
-        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
-        owl:sameAs           _:b25 .
-
-_:b24   rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf      rdfs:Resource , owl:Thing , _:b24 , _:b23 , _:b25;
-        owl:cardinality      "1"^^xsd:nonNegativeInteger;
-        owl:equivalentClass  _:b24 , _:b23 , _:b25;
-        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
-        owl:sameAs           _:b24 .
+        owl:sameAs                _:b15 .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Effect>
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
@@ -1148,119 +1220,87 @@ _:b24   rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Res
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
         rdfs:comment         "Represents a specific property change in a given system, either via a changed configuration property or an actuation on an observable one."@en;
         rdfs:label           "PropertyChange"@en;
-        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , rdfs:Resource , owl:Thing , _:b8 , _:b9;
+        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , rdfs:Resource , owl:Thing , _:b14 , _:b15;
         owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange>;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> .
-
-_:b39   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           _:b39 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b39;
-        owl:onDataRange           xsd:double;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b39 .
-
-_:b7    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , _:b7 , rdfs:Resource;
-        owl:equivalentClass       _:b7;
-        owl:onClass               <http://www.w3.org/ns/ssn/Property>;
-        owl:onProperty            <http://www.w3.org/ns/ssn/forProperty>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b7 .
-
-_:b40   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           _:b40 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b40;
-        owl:onDataRange           xsd:double;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasUpperLimitValue>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b40 .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration>
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
         rdfs:comment         "Represents a specific PropertyChange as a result of reconfiguring a related ConfigurableProperty."@en;
         rdfs:label           "PropertyChangeByReconfiguration"@en;
-        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration> , rdfs:Resource , owl:Thing , _:b12 , _:b13 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , _:b9 , _:b8;
+        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration> , rdfs:Resource , owl:Thing , _:b19 , _:b20 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , _:b15 , _:b14;
         owl:disjointWith     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation>;
         owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration>;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration> .
 
-_:b41   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           _:b41 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b41;
-        owl:onDataRange           _:b10;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint>;
+_:b51   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           _:b51 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass       _:b51;
+        owl:onDataRange           xsd:double;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
         owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b41 .
+        owl:sameAs                _:b51 .
+
+_:b4    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , _:b4 , rdfs:Resource;
+        owl:equivalentClass       _:b4;
+        owl:onDataRange           xsd:anyURI;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b4 .
+
+_:b44   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf              owl:Thing , _:b44 , rdfs:Resource;
+        owl:equivalentClass          _:b44;
+        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration>;
+        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts>;
+        owl:sameAs                   _:b44 .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationAction>
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
         rdfs:comment         "Represents a single system Action with a parameter reconfiguration, either for optimization or regaining optimal conditions."@en;
         rdfs:label           "ReconfigurationAction"@en;
-        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationAction> , rdfs:Resource , owl:Thing , _:b14 , _:b15 , _:b16 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action>;
+        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationAction> , rdfs:Resource , owl:Thing , _:b21 , _:b22 , _:b23 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action>;
         owl:disjointWith     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction>;
-        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationAction> , _:b14;
+        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationAction> , _:b21;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationAction> .
 
-_:b17   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf              owl:Thing , _:b17 , rdfs:Resource;
-        owl:equivalentClass          _:b17;
-        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition>;
-        owl:onProperty               <http://www.w3.org/ns/ssn/implements>;
-        owl:sameAs                   _:b17 .
-
-_:b14   rdf:type             rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf      _:b14 , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action> , _:b16 , _:b15 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationAction>;
+_:b21   rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf      _:b21 , rdfs:Resource , owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationAction> , _:b22 , _:b23 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action>;
         owl:cardinality      "1"^^xsd:nonNegativeInteger;
-        owl:equivalentClass  _:b14 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationAction>;
+        owl:equivalentClass  _:b21 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationAction>;
         owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/altersBy>;
-        owl:sameAs           _:b14 .
+        owl:sameAs           _:b21 .
 
-_:b16   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , _:b16 , rdfs:Resource;
-        owl:equivalentClass       _:b16;
+_:b0    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , _:b0 , rdfs:Resource;
+        owl:equivalentClass       _:b0;
+        owl:onClass               <http://www.w3.org/ns/sosa/Actuator>;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/isActuatorStateOf>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b0 .
+
+_:b23   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , _:b23 , rdfs:Resource;
+        owl:equivalentClass       _:b23;
         owl:onClass               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Effect>;
         owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith>;
         owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b16 .
+        owl:sameAs                _:b23 .
 
-_:b6    rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf      owl:Thing , _:b6 , rdfs:Resource;
+_:b32   rdf:type             rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf      rdfs:Resource , owl:Thing , _:b32 , _:b33 , _:b34;
         owl:cardinality      "1"^^xsd:nonNegativeInteger;
-        owl:equivalentClass  _:b6;
-        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint>;
-        owl:sameAs           _:b6 .
-
-_:b1    rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf              owl:Thing , _:b1 , rdfs:Resource;
-        owl:equivalentClass          _:b1;
-        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation>;
-        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts>;
-        owl:sameAs                   _:b1 .
-
-_:b3    rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf              owl:Thing , _:b3 , rdfs:Resource;
-        owl:equivalentClass          _:b3;
-        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState>;
-        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState>;
-        owl:sameAs                   _:b3 .
-
-_:b34   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf              owl:Thing , _:b34 , rdfs:Resource;
-        owl:equivalentClass          _:b34;
-        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration>;
-        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts>;
-        owl:sameAs                   _:b34 .
+        owl:equivalentClass  _:b32 , _:b33 , _:b34;
+        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
+        owl:sameAs           _:b32 .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition>
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
         rdfs:comment         "An optimal property condition, such as a desired value range definition. For example, an optimal temperature condition of a room could be defined as values greater than 18 and lower than 22 degrees Celsius."@en;
         rdfs:label           "OptimalCondition"@en;
-        rdfs:subClassOf      rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> , owl:Thing , _:b5 , _:b6 , _:b7 , <http://www.w3.org/ns/ssn/systems/Condition>;
+        rdfs:subClassOf      rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> , owl:Thing , _:b11 , _:b12 , _:b13 , <http://www.w3.org/ns/ssn/systems/Condition>;
         owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition>;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> .
 
@@ -1272,56 +1312,40 @@ _:b34   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , 
         owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState>;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState> .
 
-_:b42   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           _:b42 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b42;
-        owl:onDataRange           _:b26;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint>;
+_:b10   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , _:b10 , rdfs:Resource;
+        owl:equivalentClass       _:b10;
+        owl:onClass               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState>;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState>;
         owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b42 .
+        owl:sameAs                _:b10 .
 
-_:b43   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           _:b43 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b43;
-        owl:onDataRange           xsd:double;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b43 .
-
-_:b12   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , _:b12 , rdfs:Resource;
-        owl:equivalentClass       _:b12;
-        owl:onClass               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Effect>;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/alteredBy>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b12 .
-
-_:b44   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           _:b44 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b44;
-        owl:onDataRange           xsd:double;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b44 .
-
-_:b5    rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf              owl:Thing , _:b5 , rdfs:Resource;
-        owl:equivalentClass          _:b5;
+_:b11   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf              owl:Thing , _:b11 , rdfs:Resource;
+        owl:equivalentClass          _:b11;
         owl:maxQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
         owl:onDataRange              xsd:int;
         owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds>;
-        owl:sameAs                   _:b5 .
+        owl:sameAs                   _:b11 .
 
-_:b2    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , _:b2 , rdfs:Resource;
-        owl:equivalentClass       _:b2;
-        owl:onDataRange           xsd:anyURI;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel>;
+_:b52   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           _:b52 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass       _:b52;
+        owl:onDataRange           _:b26;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint>;
         owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b2 .
+        owl:sameAs                _:b52 .
+
+_:b39   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf              owl:Thing , _:b39 , rdfs:Resource;
+        owl:equivalentClass          _:b39;
+        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState>;
+        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy>;
+        owl:sameAs                   _:b39 .
 
 :RoomTemperatureIncrease
-        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> , owl:NamedIndividual , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , _:b9 , _:b8 , _:b32;
+        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> , owl:NamedIndividual , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , _:b15 , _:b14 , _:b39;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith>
                 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease>;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy>
@@ -1330,65 +1354,53 @@ _:b2    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdf
         <http://www.w3.org/ns/ssn/forProperty>
                 :RoomTemperature .
 
-:RoomTemperature  rdf:type  _:b39 , <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b23 , _:b25 , _:b24;
+_:b53   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
+        rdf:first   _:b37;
+        rdf:rest    ();
+        owl:sameAs  _:b53 .
+
+:RoomTemperature  rdf:type  _:b48 , <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b33 , _:b34 , _:b32;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>
-                _:b45;
+                _:b54;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/propertyFor>
                 :RoomTemperatureIncrease , :RoomTemperatureDecrease , :OptimalCondition4 , :OptimalCondition3 , :OptimalCondition2 , :OptimalCondition1;
         owl:sameAs  :RoomTemperature .
 
-_:b46   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
+_:b27   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
         rdf:first   [ rdf:comment       :RoomTemperature;
-                      xsd:maxExclusive  "20.4"^^xsd:double
+                      xsd:minExclusive  "19.3"^^xsd:double
                     ];
         rdf:rest    ();
-        owl:sameAs  _:b46 .
+        owl:sameAs  _:b27 .
 
-_:b47   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
-        rdf:first   _:b19;
-        rdf:rest    ();
-        owl:sameAs  _:b47 .
-
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+_:b31   rdf:type    rdfs:Resource , rdf:List , owl:Thing;
+        rdf:first   [ rdf:comment       :RoomTemperature;
+                      xsd:minInclusive  "13.8"^^xsd:double
+                    ];
+        rdf:rest    _:b55;
+        owl:sameAs  _:b31 .
 
 :TemperatureSensor1MeasuredTemperature
-        rdf:type    _:b37 , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Input> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b23 , _:b25 , _:b24 , <http://www.w3.org/ns/ssn/Property>;
+        rdf:type    _:b47 , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Input> , owl:NamedIndividual , owl:Thing , rdfs:Resource , <http://www.w3.org/ns/ssn/Property> , _:b34 , _:b33 , _:b32;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>
-                _:b48;
+                _:b56;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/isInputOf>
                 :SoftSensor1Algorithm;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/isOutputOf>
                 :TemperatureSensor1Procedure;
         owl:sameAs  :TemperatureSensor1MeasuredTemperature .
 
-_:b30   rdf:type    rdfs:Resource , rdf:List , owl:Thing;
-        rdf:first   _:b28;
-        rdf:rest    _:b47;
-        owl:sameAs  _:b30 .
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
-:EnergyConsumption  rdf:type  _:b40 , _:b38 , <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b23 , _:b25 , _:b24;
+:EnergyConsumption  rdf:type  _:b50 , _:b40 , <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b33 , _:b34 , _:b32;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>
-                _:b49;
+                _:b57;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/propertyFor>
                 :EnergyConsumptionIncrease , :EnergyConsumptionDecrease;
         owl:sameAs  :EnergyConsumption .
 
-_:b11   rdf:type    rdfs:Resource , rdf:List , owl:Thing;
-        rdf:first   [ rdf:comment       :RoomTemperature;
-                      xsd:minInclusive  "13.8"^^xsd:double
-                    ];
-        rdf:rest    _:b50;
-        owl:sameAs  _:b11 .
-
-_:b29   rdf:type    rdfs:Resource , rdf:List , owl:Thing;
-        rdf:first   [ rdf:comment       :RoomTemperature;
-                      xsd:minInclusive  "13.8"^^xsd:double
-                    ];
-        rdf:rest    _:b46;
-        owl:sameAs  _:b29 .
-
 :EnergyConsumptionDecrease
-        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b9 , _:b8;
+        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b15 , _:b14;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith>
                 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease>;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizedBy>
@@ -1397,19 +1409,12 @@ _:b29   rdf:type    rdfs:Resource , rdf:List , owl:Thing;
         <http://www.w3.org/ns/ssn/forProperty>
                 :EnergyConsumption .
 
-:Heater  rdf:type   <http://www.w3.org/ns/sosa/Actuator> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b3 , _:b2;
+:Heater  rdf:type   <http://www.w3.org/ns/sosa/Actuator> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b5 , _:b4;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState>
                 :HeaterWeak , :HeaterStrong , :HeaterMedium;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel>
                 "../../../../SensorActuatorImplementations/FMUs/heater.fmu"^^xsd:anyURI;
         owl:sameAs  :Heater .
-
-_:b51   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
-        rdf:first   [ rdf:comment       :RoomTemperature;
-                      xsd:maxInclusive  "36.9"^^xsd:double
-                    ];
-        rdf:rest    ();
-        owl:sameAs  _:b51 .
 
 :TemperatureSensor1  rdf:type  <http://www.w3.org/ns/sosa/Sensor> , owl:NamedIndividual , rdfs:Resource , owl:Thing;
         owl:sameAs  :TemperatureSensor1;
@@ -1419,7 +1424,7 @@ _:b51   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
                 :TemperatureSensor1Procedure .
 
 :RoomTemperatureDecrease
-        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> , owl:NamedIndividual , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , _:b9 , _:b8 , _:b32;
+        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> , owl:NamedIndividual , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , _:b15 , _:b14 , _:b39;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith>
                 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease>;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy>
@@ -1429,25 +1434,23 @@ _:b51   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
                 :RoomTemperature .
 
 :TemperatureSensor2MeasuredTemperature
-        rdf:type    _:b44 , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Input> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b23 , _:b25 , _:b24 , <http://www.w3.org/ns/ssn/Property>;
+        rdf:type    _:b46 , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Input> , owl:NamedIndividual , owl:Thing , rdfs:Resource , <http://www.w3.org/ns/ssn/Property> , _:b34 , _:b33 , _:b32;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>
-                _:b52;
+                _:b58;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/isInputOf>
                 :SoftSensor1Algorithm;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/isOutputOf>
                 :TemperatureSensor2Procedure;
         owl:sameAs  :TemperatureSensor2MeasuredTemperature .
 
-:OptimalCondition2  rdf:type  _:b41 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b6 , <http://www.w3.org/ns/ssn/systems/Condition> , _:b7 , _:b5;
+:OptimalCondition2  rdf:type  _:b42 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b12 , <http://www.w3.org/ns/ssn/systems/Condition> , _:b13 , _:b11;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint>
-                _:b53;
+                _:b8 , _:b9;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds>
                 "3600"^^xsd:int;
         owl:sameAs  :OptimalCondition2;
         <http://www.w3.org/ns/ssn/forProperty>
                 :RoomTemperature .
-
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
 :TemperatureSensor1Procedure
         rdf:type    <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual , owl:Thing , rdfs:Resource;
@@ -1455,17 +1458,26 @@ _:b51   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
         <http://www.w3.org/ns/ssn/hasOutput>
                 :TemperatureSensor1MeasuredTemperature .
 
-_:b50   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
-        rdf:first   [ rdf:comment       :RoomTemperature;
-                      xsd:maxExclusive  "19.4"^^xsd:double
-                    ];
-        rdf:rest    ();
-        owl:sameAs  _:b50 .
-
 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1>
         rdf:type     owl:Ontology , rdfs:Resource , owl:Thing;
         owl:imports  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation>;
         owl:sameAs   <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1> .
+
+_:b59   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
+        rdf:first   [ rdf:comment       :RoomTemperature;
+                      xsd:maxInclusive  "48.8"^^xsd:double
+                    ];
+        rdf:rest    ();
+        owl:sameAs  _:b59 .
+
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+_:b38   rdf:type    rdfs:Resource , rdf:List , owl:Thing;
+        rdf:first   [ rdf:comment       :RoomTemperature;
+                      xsd:minExclusive  "15.5"^^xsd:double
+                    ];
+        rdf:rest    _:b59;
+        owl:sameAs  _:b38 .
 
 :FanOn  rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b1 , _:b0;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts>
@@ -1475,33 +1487,31 @@ _:b50   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
         owl:sameAs  :FanOn .
 
 :AverageRoomTemperature
-        rdf:type    _:b35 , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b23 , _:b25 , _:b24 , <http://www.w3.org/ns/ssn/Property>;
+        rdf:type    _:b51 , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b33 , _:b34 , _:b32 , <http://www.w3.org/ns/ssn/Property>;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>
-                _:b54;
+                _:b60;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/isOutputOf>
                 :SoftSensor1Algorithm;
         owl:sameAs  :AverageRoomTemperature .
 
-[ xsd:maxInclusive  "3"^^xsd:int ] .
-
-:OptimalCondition4  rdf:type  _:b36 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b6 , <http://www.w3.org/ns/ssn/systems/Condition> , _:b7 , _:b5;
+:OptimalCondition4  rdf:type  _:b45 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b12 , <http://www.w3.org/ns/ssn/systems/Condition> , _:b13 , _:b11;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint>
-                _:b55;
+                _:b2 , _:b3;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds>
                 "3600"^^xsd:int;
         owl:sameAs  :OptimalCondition4;
         <http://www.w3.org/ns/ssn/forProperty>
                 :RoomTemperature .
 
-:RoomHumidity  rdf:type  _:b43 , <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b23 , _:b25 , _:b24;
+:RoomHumidity  rdf:type  _:b49 , <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b33 , _:b34 , _:b32;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue>
-                _:b56;
+                _:b61;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/propertyFor>
                 :RoomHumidityDecrease;
         owl:sameAs  :RoomHumidity .
 
 :RoomHumidityDecrease
-        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> , owl:NamedIndividual , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , _:b9 , _:b8 , _:b32;
+        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> , owl:NamedIndividual , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , _:b15 , _:b14 , _:b39;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith>
                 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease>;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy>
@@ -1514,11 +1524,15 @@ _:b50   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
 :TemperatureSensor2Procedure
         rdf:type    <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual , owl:Thing , rdfs:Resource;
         owl:sameAs  :TemperatureSensor2Procedure;
         <http://www.w3.org/ns/ssn/hasOutput>
                 :TemperatureSensor2MeasuredTemperature .
+
+[ xsd:maxInclusive  "3"^^xsd:int ] .
 
 :HeaterStrong  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b1 , _:b0;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts>
@@ -1527,23 +1541,24 @@ _:b50   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
                 :Heater , <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStronghttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction>;
         owl:sameAs  :HeaterStrong .
 
-_:b21   rdf:type    rdfs:Resource , rdf:List , owl:Thing;
-        rdf:first   [ rdf:comment       :RoomTemperature;
-                      xsd:minExclusive  "15.5"^^xsd:double
-                    ];
-        rdf:rest    _:b51;
-        owl:sameAs  _:b21 .
-
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+_:b17   rdf:type    rdfs:Resource , rdf:List , owl:Thing;
+        rdf:first   _:b30;
+        rdf:rest    _:b53;
+        owl:sameAs  _:b17 .
 
 :SoftSensor1  rdf:type  <http://www.w3.org/ns/sosa/Sensor> , owl:NamedIndividual , rdfs:Resource , owl:Thing;
         owl:sameAs  :SoftSensor1;
         <http://www.w3.org/ns/ssn/implements>
                 :SoftSensor1Algorithm .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+_:b29   rdf:type    rdfs:Resource , rdf:List , owl:Thing;
+        rdf:first   [ rdf:comment       :RoomTemperature;
+                      xsd:minInclusive  "13.8"^^xsd:double
+                    ];
+        rdf:rest    _:b62;
+        owl:sameAs  _:b29 .
 
 :HeaterMedium  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b1 , _:b0;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts>
@@ -1559,7 +1574,7 @@ _:b21   rdf:type    rdfs:Resource , rdf:List , owl:Thing;
                 :Heater , <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterWeakhttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction>;
         owl:sameAs  :HeaterWeak .
 
-:RoomM370  rdf:type  <http://www.w3.org/ns/sosa/Platform> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b18 , _:b17;
+:RoomM370  rdf:type  <http://www.w3.org/ns/sosa/Platform> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b25 , _:b24;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor>
                 :EnergyConsumptionDecrease , :RoomHumidityDecrease;
         owl:sameAs  :RoomM370;
@@ -1568,28 +1583,28 @@ _:b21   rdf:type    rdfs:Resource , rdf:List , owl:Thing;
         <http://www.w3.org/ns/ssn/implements>
                 :OptimalCondition3 , :OptimalCondition1 , :OptimalCondition2 .
 
-:OptimalCondition1  rdf:type  _:b42 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b6 , <http://www.w3.org/ns/ssn/systems/Condition> , _:b7 , _:b5;
+:OptimalCondition1  rdf:type  _:b52 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b12 , <http://www.w3.org/ns/ssn/systems/Condition> , _:b13 , _:b11;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint>
-                _:b57;
+                _:b7 , _:b6;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds>
                 "3600"^^xsd:int;
         owl:sameAs  :OptimalCondition1;
         <http://www.w3.org/ns/ssn/forProperty>
                 :RoomTemperature .
 
-:Dehumidifier  rdf:type  <http://www.w3.org/ns/sosa/Actuator> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b3 , _:b2;
+:Dehumidifier  rdf:type  <http://www.w3.org/ns/sosa/Actuator> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b5 , _:b4;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState>
                 :DehumidifierOn;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel>
                 "../../../../SensorActuatorImplementations/FMUs/dehumidifier.fmu"^^xsd:anyURI;
         owl:sameAs  :Dehumidifier .
 
-_:b27   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
+_:b62   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
         rdf:first   [ rdf:comment       :RoomTemperature;
-                      xsd:minExclusive  "19.3"^^xsd:double
+                      xsd:maxExclusive  "19.4"^^xsd:double
                     ];
         rdf:rest    ();
-        owl:sameAs  _:b27 .
+        owl:sameAs  _:b62 .
 
 :SoftSensor1Algorithm
         rdf:type    <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual , owl:Thing , rdfs:Resource;
@@ -1603,12 +1618,21 @@ _:b27   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
+[ xsd:minInclusive  "1"^^xsd:int ] .
+
 :TemperatureSensor2  rdf:type  <http://www.w3.org/ns/sosa/Sensor> , owl:NamedIndividual , rdfs:Resource , owl:Thing;
         owl:sameAs  :TemperatureSensor2;
         <http://www.w3.org/ns/sosa/observes>
                 :RoomTemperature;
         <http://www.w3.org/ns/ssn/implements>
                 :TemperatureSensor2Procedure .
+
+_:b55   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
+        rdf:first   [ rdf:comment       :RoomTemperature;
+                      xsd:maxExclusive  "20.4"^^xsd:double
+                    ];
+        rdf:rest    ();
+        owl:sameAs  _:b55 .
 
 :DehumidifierOn  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b1 , _:b0;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts>
@@ -1617,11 +1641,11 @@ _:b27   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
                 :Dehumidifier , <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DehumidifierOnhttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction>;
         owl:sameAs  :DehumidifierOn .
 
-:OptimalCondition3  rdf:type  _:b22 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b6 , <http://www.w3.org/ns/ssn/systems/Condition> , _:b7 , _:b5;
+:OptimalCondition3  rdf:type  _:b18 , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b12 , <http://www.w3.org/ns/ssn/systems/Condition> , _:b13 , _:b11;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint>
                 "19.2"^^xsd:double;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint>
-                _:b58;
+                _:b35 , _:b36;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds>
                 "3600"^^xsd:int;
         owl:sameAs  :OptimalCondition3;
@@ -1629,7 +1653,7 @@ _:b27   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
                 :RoomTemperature .
 
 :EnergyConsumptionIncrease
-        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> , owl:NamedIndividual , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , _:b9 , _:b8 , _:b32;
+        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> , owl:NamedIndividual , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> , _:b15 , _:b14 , _:b39;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith>
                 <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease>;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy>
@@ -1638,9 +1662,9 @@ _:b27   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
         <http://www.w3.org/ns/ssn/forProperty>
                 :EnergyConsumption .
 
-[ xsd:minInclusive  "1"^^xsd:int ] .
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
-:Fan    rdf:type    <http://www.w3.org/ns/sosa/Actuator> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b3 , _:b2;
+:Fan    rdf:type    <http://www.w3.org/ns/sosa/Actuator> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b5 , _:b4;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState>
                 :FanOn;
         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel>
@@ -1664,52 +1688,28 @@ _:b27   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
         rdf:type    owl:Ontology , rdfs:Resource , owl:Thing;
         owl:sameAs  <http://www.w3.org/ns/ssn/systems/> .
 
-_:b52   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
-        owl:sameAs  _:b52 .
-
-_:b48   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
-        owl:sameAs  _:b48 .
-
-_:b54   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
-        owl:sameAs  _:b54 .
-
-_:b55   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
-        owl:sameAs  _:b55 .
-
 _:b58   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b58 .
-
-_:b53   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
-        owl:sameAs  _:b53 .
-
-_:b57   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
-        owl:sameAs  _:b57 .
-
-_:b45   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
-        owl:sameAs  _:b45 .
 
 _:b56   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b56 .
 
-_:b49   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
-        owl:sameAs  _:b49 .
-
-_:b59   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
-        owl:sameAs  _:b59 .
-
 _:b60   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b60 .
 
-_:b61   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b54   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+        owl:sameAs  _:b54 .
+
+_:b61   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b61 .
 
-_:b62   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
-        owl:sameAs  _:b62 .
+_:b57   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+        owl:sameAs  _:b57 .
 
-_:b63   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b63   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b63 .
 
-_:b64   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b64   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b64 .
 
 _:b65   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
@@ -1718,25 +1718,25 @@ _:b65   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
 _:b66   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b66 .
 
-_:b67   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b67   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b67 .
 
-_:b68   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b68   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b68 .
 
 _:b69   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b69 .
 
-_:b70   rdf:type    owl:Thing , rdfs:Resource;
+_:b70   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b70 .
 
-_:b71   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b71   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b71 .
 
 _:b72   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b72 .
 
-_:b73   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b73   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b73 .
 
 _:b74   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
@@ -1748,37 +1748,37 @@ _:b75   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
 _:b76   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b76 .
 
-_:b77   rdf:type    owl:Thing , rdfs:Resource;
+_:b77   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b77 .
 
-_:b78   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b78   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b78 .
 
 _:b79   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b79 .
 
-_:b80   rdf:type    owl:Thing , rdfs:Resource;
+_:b80   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b80 .
 
-_:b81   rdf:type    owl:Thing , rdfs:Resource;
+_:b81   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b81 .
 
-_:b82   rdf:type    owl:Thing , rdfs:Resource;
+_:b82   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b82 .
 
 _:b83   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b83 .
 
-_:b84   rdf:type    owl:Thing , rdfs:Resource;
+_:b84   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b84 .
 
 _:b85   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b85 .
 
-_:b86   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b86   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b86 .
 
-_:b87   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b87   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b87 .
 
 _:b88   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
@@ -1787,22 +1787,22 @@ _:b88   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
 _:b89   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b89 .
 
-_:b90   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b90   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b90 .
 
-_:b91   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b91   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b91 .
 
-_:b92   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b92   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b92 .
 
 _:b93   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b93 .
 
-_:b94   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b94   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b94 .
 
-_:b95   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b95   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b95 .
 
 _:b96   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
@@ -1814,40 +1814,40 @@ _:b97   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
 _:b98   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b98 .
 
-_:b99   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b99   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b99 .
 
-_:b100  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b100  rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b100 .
 
 _:b101  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b101 .
 
-_:b102  rdf:type    owl:Thing , rdfs:Resource;
+_:b102  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b102 .
 
-_:b103  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b103  rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b103 .
 
-_:b104  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b104  rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b104 .
 
-_:b105  rdf:type    owl:Thing , rdfs:Resource;
+_:b105  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b105 .
 
-_:b106  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b106  rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b106 .
 
-_:b107  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b107  rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b107 .
 
 _:b108  rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b108 .
 
-_:b109  rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b109  rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b109 .
 
-_:b110  rdf:type    owl:Thing , rdfs:Resource;
+_:b110  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b110 .
 
 _:b111  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
@@ -1859,10 +1859,10 @@ _:b112  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
 _:b113  rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b113 .
 
-_:b114  rdf:type    owl:Thing , rdfs:Resource;
+_:b114  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b114 .
 
-_:b115  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b115  rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b115 .
 
 _:b116  rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
@@ -1871,14 +1871,32 @@ _:b116  rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
 _:b117  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b117 .
 
-_:b118  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b118  rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b118 .
 
-_:b119  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b119  rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b119 .
 
-_:b120  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b120  rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b120 .
 
-_:b121  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b121  rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b121 .
+
+_:b122  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+        owl:sameAs  _:b122 .
+
+_:b123  rdf:type    owl:Thing , rdfs:Resource;
+        owl:sameAs  _:b123 .
+
+_:b124  rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+        owl:sameAs  _:b124 .
+
+_:b125  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+        owl:sameAs  _:b125 .
+
+_:b126  rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+        owl:sameAs  _:b126 .
+
+_:b127  rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+        owl:sameAs  _:b127 .

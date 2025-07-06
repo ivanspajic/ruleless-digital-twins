@@ -1,5 +1,6 @@
-﻿using Logic.SensorValueHandlers;
-using Logic.Models.OntologicalModels;
+﻿using Logic.Models.OntologicalModels;
+using Logic.ValueHandlerInterfaces;
+using System.Linq.Expressions;
 
 namespace SensorActuatorImplementations.ValueHandlers
 {
@@ -10,12 +11,12 @@ namespace SensorActuatorImplementations.ValueHandlers
             throw new NotImplementedException();
         }
 
-        public bool EvaluateConstraint(object sensorValue, Tuple<ConstraintOperator, string> constraint)
+        public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues)
         {
             throw new NotImplementedException();
         }
 
-        public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues)
+        public IEnumerable<BinaryExpression> GetUnsatisfiedConstraintsFromEvaluation(BinaryExpression constraintExpression)
         {
             throw new NotImplementedException();
         }

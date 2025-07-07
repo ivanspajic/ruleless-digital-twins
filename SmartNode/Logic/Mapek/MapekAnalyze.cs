@@ -32,7 +32,7 @@ namespace Logic.Mapek
             var optimizationActions = GetOptimizationActions(instanceModel, propertyCache, mitigationActions);
 
             // Combine the Action collections into one.
-            mitigationActions.Concat(optimizationActions);
+            mitigationActions = mitigationActions.Concat(optimizationActions);
 
             return new (optimalConditions, mitigationActions);
         }
@@ -288,8 +288,14 @@ namespace Logic.Mapek
                 return constraintExpressions;
             }
 
-            // TODO: write a comment explaining the need for passing in the collection of constrainttypes due to the impossibility of
-            // linking bnodes in sparql (paste the link in here)!!
+            // This could be made more streamlined and elegant through the use of fewer, more cleverly combined queries, however,
+            // SPARQL doesn't handle bNode identities, so these can't be used as variables for later referencing. For this reason, it's
+            // necessary to loop through all range constraint operators (">", ">=", "<", "<=") to execute the same queries with each.
+            //
+            // Documentation: (https://www.w3.org/TR/sparql11-query/#BlankNodesInResults)
+            // "An application writer should not expect blank node labels in a query to refer to a particular blank node in the data."
+            // For this reason, queries can be constructed with contiguous chains of bNodes, however, saving their INode objects and
+            // using them as variables in subsequent queries doesn't work.
             var operatorFilters = new List<ConstraintType>
             {
                 ConstraintType.GreaterThan,

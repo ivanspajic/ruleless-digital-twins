@@ -288,8 +288,8 @@ namespace Logic.Mapek
                 return constraintExpressions;
             }
 
-            // Since every query method will have to check for all four operators, we can simply iterate over the collection
-            // for each method.
+            // TODO: write a comment explaining the need for passing in the collection of constrainttypes due to the impossibility of
+            // linking bnodes in sparql (paste the link in here)!!
             var operatorFilters = new List<ConstraintType>
             {
                 ConstraintType.GreaterThan,
@@ -298,56 +298,46 @@ namespace Logic.Mapek
                 ConstraintType.LessThanOrEqualTo
             };
 
-            foreach (var operatorFilter in operatorFilters)
-            {
-                AddConstraintsOfFirstOrOnlyRangeValues(constraintExpressions,
-                    instanceModel,
-                    optimalCondition,
-                    property,
-                    reachedInMaximumSeconds,
-                    propertyValue,
-                    operatorFilter);
+            AddConstraintsOfFirstOrOnlyRangeValues(constraintExpressions,
+                instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue,
+                operatorFilters);
 
-                AddConstraintsOfSecondRangeValues(constraintExpressions,
-                    instanceModel,
-                    optimalCondition,
-                    property,
-                    reachedInMaximumSeconds,
-                    propertyValue,
-                    operatorFilter);
+            AddConstraintsOfSecondRangeValues(constraintExpressions,
+                instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue,
+                operatorFilters);
 
-                //AddConstraintsOfDisjunctionsOfOneAndOne(constraintExpressions,
-                //    instanceModel,
-                //    optimalCondition,
-                //    property,
-                //    reachedInMaximumSeconds,
-                //    propertyValue,
-                //    operatorFilter);
+            AddConstraintsOfDisjunctionsOfOneAndOne(constraintExpressions,
+                instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue,
+                operatorFilters);
 
-                //AddConstraintsOfDisjunctionsOfOneAndTwo(constraintExpressions,
-                //    instanceModel,
-                //    optimalCondition,
-                //    property,
-                //    reachedInMaximumSeconds,
-                //    propertyValue,
-                //    operatorFilter);
+            // For models created with Protege (and the OWL API), disjunctions containing 1 and then 2 values will be converted to those containing 2 and then 1.
+            AddConstraintsOfDisjunctionsOfTwoAndOne(constraintExpressions,
+                instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue,
+                operatorFilters);
 
-                //AddConstraintsOfDisjunctionsOfTwoAndOne(constraintExpressions,
-                //    instanceModel,
-                //    optimalCondition,
-                //    property,
-                //    reachedInMaximumSeconds,
-                //    propertyValue,
-                //    operatorFilter);
-
-                //AddConstraintsOfDisjunctionsOfTwoAndTwo(constraintExpressions,
-                //    instanceModel,
-                //    optimalCondition,
-                //    property,
-                //    reachedInMaximumSeconds,
-                //    propertyValue,
-                //    operatorFilter);
-            }
+            AddConstraintsOfDisjunctionsOfTwoAndTwo(constraintExpressions,
+                instanceModel,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                propertyValue,
+                operatorFilters);
 
             return constraintExpressions;
         }
@@ -400,13 +390,15 @@ namespace Logic.Mapek
             INode property,
             INode reachedInMaximumSeconds,
             object propertyValue,
-            ConstraintType constraintType)
+            IEnumerable<ConstraintType> constraintTypes)
         {
-            var query = MapekUtilities.GetParameterizedStringQuery();
-            var operatorFilter = GetOperatorFilterFromConstraintType(constraintType);
+            foreach (var constraintType in constraintTypes)
+            {
+                var operatorFilter = GetOperatorFilterFromConstraintType(constraintType);
+                var query = MapekUtilities.GetParameterizedStringQuery();
 
-            // Gets the constraints of first or only values of ranges.
-            query.CommandText = @"SELECT ?constraint WHERE {
+                // Gets the constraints of first or only values of ranges.
+                query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
                     @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
                     @optimalCondition rdf:type ?bNode1 .
@@ -415,24 +407,25 @@ namespace Logic.Mapek
                     ?bNode2 owl:withRestrictions ?bNode3 .
                     ?bNode3 rdf:first [ " + operatorFilter + " ?constraint ] .}";
 
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+                query.SetParameter("optimalCondition", optimalCondition);
+                query.SetParameter("property", property);
+                query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+                var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
 
-            foreach (var result in queryResult.Results)
-            {
-                var constraint = result["constraint"].ToString().Split('^')[0];
-
-                var constraintExpression = new AtomicConstraintExpression
+                foreach (var result in queryResult.Results)
                 {
-                    Left = propertyValue,
-                    Right = constraint,
-                    ConstraintType = constraintType
-                };
+                    var constraint = result["constraint"].ToString().Split('^')[0];
 
-                constraintExpressions.Add(constraintExpression);
+                    var constraintExpression = new AtomicConstraintExpression
+                    {
+                        Left = propertyValue,
+                        Right = constraint,
+                        ConstraintType = constraintType
+                    };
+
+                    constraintExpressions.Add(constraintExpression);
+                }
             }
         }
 
@@ -442,12 +435,15 @@ namespace Logic.Mapek
             INode property,
             INode reachedInMaximumSeconds,
             object propertyValue,
-            ConstraintType constraintType)
+            IEnumerable<ConstraintType> constraintTypes)
         {
-            var query = MapekUtilities.GetParameterizedStringQuery();
-            var operatorFilter = GetOperatorFilterFromConstraintType(constraintType);
+            foreach (var constraintType in constraintTypes)
+            {
+                var operatorFilter = GetOperatorFilterFromConstraintType(constraintType);
+                var query = MapekUtilities.GetParameterizedStringQuery();
 
-            query.CommandText = @"SELECT ?constraint WHERE {
+                // Gets the constraints of the second values of ranges.
+                query.CommandText = @"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
                     @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
                     @optimalCondition rdf:type ?bNode1 .
@@ -457,24 +453,25 @@ namespace Logic.Mapek
                     ?bNode3 rdf:rest ?bNode4 .
                     ?bNode4 rdf:first [ " + operatorFilter + " ?constraint ] . }";
 
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+                query.SetParameter("optimalCondition", optimalCondition);
+                query.SetParameter("property", property);
+                query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+                var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
 
-            foreach (var result in queryResult.Results)
-            {
-                var constraint = result["constraint"].ToString().Split('^')[0];
-
-                var constraintExpression = new AtomicConstraintExpression
+                foreach (var result in queryResult.Results)
                 {
-                    Left = propertyValue,
-                    Right = constraint,
-                    ConstraintType = constraintType
-                };
+                    var constraint = result["constraint"].ToString().Split('^')[0];
 
-                constraintExpressions.Add(constraintExpression);
+                    var constraintExpression = new AtomicConstraintExpression
+                    {
+                        Left = propertyValue,
+                        Right = constraint,
+                        ConstraintType = constraintType
+                    };
+
+                    constraintExpressions.Add(constraintExpression);
+                }
             }
         }
 
@@ -483,100 +480,69 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            object propertyValue)
+            object propertyValue,
+            IEnumerable<ConstraintType> constraintTypes)
         {
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            query.CommandText = @"SELECT ?bNode5_1 ?bNode6_1 ?bNode6_2 ?bNode7_2 WHERE {
-                @optimalCondition ssn:forProperty @property .
-                @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                @optimalCondition rdf:type ?bNode1 .
-                ?bNode1 owl:onProperty meta:hasValueConstraint .
-                ?bNode1 owl:onDataRange ?bNode2 .
-                ?bNode2 owl:unionOf ?bNode3 .
-                ?bNode3 rdf:first ?bNode4_1 .
-                ?bNode3 rdf:rest ?bNode4_2 .
-                ?bNode4_1 owl:withRestrictions ?bNode5_1 .
-                ?bNode5_1 rdf:rest ?bNode6_1 .
-                ?bNode4_2 rdf:first ?bNode5_2 .
-                ?bNode5_2 owl:withRestrictions ?bNode6_2 .
-                ?bNode6_2 rdf:rest ?bNode7_2 . }";
-
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
-
-            foreach (var result in queryResult.Results)
+            foreach (var constraintType1 in constraintTypes)
             {
-                var leftBNode = result["bNode5_1"];
-                var rightBNode = result["bNode6_2"];
+                var operatorFilter1 = GetOperatorFilterFromConstraintType(constraintType1);
 
-                // We know there is only one result per bNode.
-                var leftExpression = GetConstraintsFromBNodes(instanceModel, propertyValue, leftBNode).First();
-                var rightExpression = GetConstraintsFromBNodes(instanceModel, propertyValue, rightBNode).First();
-
-                var disjunctiveExpression = new NestedConstraintExpression
+                foreach (var constraintType2 in constraintTypes)
                 {
-                    Left = leftExpression,
-                    Right = rightExpression,
-                    ConstraintType = ConstraintType.Or
-                };
+                    var operatorFilter2 = GetOperatorFilterFromConstraintType(constraintType2);
+                    var query = MapekUtilities.GetParameterizedStringQuery();
 
-                constraintExpressions.Add(disjunctiveExpression);
-            }
-        }
+                    // Gets the constraints of two disjunctive, single-valued ranges.
+                    query.CommandText = @"SELECT ?constraint1 ?constraint2 WHERE {
+                        @optimalCondition ssn:forProperty @property .
+                        @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                        @optimalCondition rdf:type ?bNode1 .
+                        ?bNode1 owl:onProperty meta:hasValueConstraint .
+                        ?bNode1 owl:onDataRange ?bNode2 .
+                        ?bNode2 owl:unionOf ?bNode3 .
+                        ?bNode3 rdf:first ?bNode4_1 .
+                        ?bNode4_1 owl:withRestrictions ?bNode5_1 .
+                        ?bNode5_1 rdf:first [ " + operatorFilter1 + @" ?constraint1 ] .
+                        ?bNode5_1 rdf:rest () .
+                        ?bNode3 rdf:rest ?bNode4_2 .
+                        ?bNode4_2 rdf:first ?bNode5_2 .
+                        ?bNode5_2 owl:withRestrictions ?bNode6_2 .
+                        ?bNode6_2 rdf:first [ " + operatorFilter2 + @" ?constraint2 ] .
+                        ?bNode6_2 rdf:rest () . }";
 
-        private void AddConstraintsOfDisjunctionsOfOneAndTwo(IList<ConstraintExpression> constraintExpressions,
-            IGraph instanceModel,
-            INode optimalCondition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            object propertyValue)
-        {
-            var query = MapekUtilities.GetParameterizedStringQuery();
+                    query.SetParameter("optimalCondition", optimalCondition);
+                    query.SetParameter("property", property);
+                    query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-            query.CommandText = @"SELECT ?bNode5_1 ?bNode6_1 ?bNode5_2 ?bNode6_2 WHERE {
-                @optimalCondition ssn:forProperty @property .
-                @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                @optimalCondition rdf:type ?bNode1 .
-                ?bNode1 owl:onProperty meta:hasValueConstraint .
-                ?bNode1 owl:onDataRange ?bNode2 .
-                ?bNode2 owl:unionOf ?bNode3 .
-                ?bNode3 rdf:first ?bNode4_1 .
-                ?bNode3 rdf:rest ?bNode4_2 .
-                ?bNode4_1 owl:withRestrictions ?bNode5_1 .
-                ?bNode5_1 rdf:rest ?bNode6_1 .
-                ?bNode4_2 rdf:first ?bNode5_2 .
-                ?bNode5_2 owl:withRestrictions ?bNode5_2 .
-                ?bNode5_2 rdf:rest ?bNode6_2 . }";
+                    var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
 
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+                    foreach (var result in queryResult.Results)
+                    {
+                        var leftConstraint = result["constraint1"].ToString().Split('^')[0];
+                        var rightConstraint = result["constraint2"].ToString().Split('^')[0];
 
-            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+                        var leftConstraintExpression = new AtomicConstraintExpression
+                        {
+                            Left = propertyValue,
+                            Right = leftConstraint,
+                            ConstraintType = constraintType1
+                        };
+                        var rightConstraintExpression = new AtomicConstraintExpression
+                        {
+                            Left = propertyValue,
+                            Right = rightConstraint,
+                            ConstraintType = constraintType2
+                        };
+                        var disjunctiveExpression = new NestedConstraintExpression
+                        {
+                            Left = leftConstraintExpression,
+                            Right = rightConstraintExpression,
+                            ConstraintType = ConstraintType.Or
+                        };
 
-            foreach (var result in queryResult.Results)
-            {
-                var leftBNode = result["bNode5_1"];
-                var rightBNode1 = result["bNode6_2"];
-                var rightBNode2 = result["bNode7_2"];
-
-                // We know there is only one result per bNode.
-                var leftExpression = GetConstraintsFromBNodes(instanceModel, propertyValue, leftBNode).First();
-                var rightExpressions = GetConstraintsFromBNodes(instanceModel, propertyValue, rightBNode1, rightBNode2);
-                var finalRightExpression = BuildConjunctiveConstraintExpression(rightExpressions);
-
-                var disjunctiveExpression = new NestedConstraintExpression
-                {
-                    Left = leftExpression,
-                    Right = finalRightExpression,
-                    ConstraintType = ConstraintType.Or
-                };
-
-                constraintExpressions.Add(disjunctiveExpression);
+                        constraintExpressions.Add(disjunctiveExpression);
+                    }
+                }
             }
         }
 
@@ -585,50 +551,88 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            object propertyValue)
+            object propertyValue,
+            IEnumerable<ConstraintType> constraintTypes)
         {
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            query.CommandText = @"SELECT ?bNode5_1 ?bNode6_1 ?bNode5_2 ?bNode6_2 WHERE {
-                @optimalCondition ssn:forProperty @property .
-                @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                @optimalCondition rdf:type ?bNode1 .
-                ?bNode1 owl:onProperty meta:hasValueConstraint .
-                ?bNode1 owl:onDataRange ?bNode2 .
-                ?bNode2 owl:unionOf ?bNode3 .
-                ?bNode3 rdf:first ?bNode4_1 .
-                ?bNode3 rdf:rest ?bNode4_2 .
-                ?bNode4_1 owl:withRestrictions ?bNode5_1 .
-                ?bNode5_1 rdf:rest ?bNode6_1 .
-                ?bNode4_2 rdf:first ?bNode5_2 .
-                ?bNode5_2 owl:withRestrictions ?bNode5_2 .
-                ?bNode5_2 rdf:rest ?bNode6_2 . }";
-
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
-
-            foreach (var result in queryResult.Results)
+            foreach (var constraintType1 in constraintTypes)
             {
-                var leftBNode1 = result["bNode5_1"];
-                var leftBNode2 = result["bNode6_1"];
-                var rightBNode = result["bNode6_2"];
+                var operatorFilter1 = GetOperatorFilterFromConstraintType(constraintType1);
 
-                var leftExpressions = GetConstraintsFromBNodes(instanceModel, propertyValue, leftBNode1, leftBNode2);
-                // We know there is only one result per bNode.
-                var rightExpression = GetConstraintsFromBNodes(instanceModel, propertyValue, rightBNode).First();
-                var finalLeftExpression = BuildConjunctiveConstraintExpression(leftExpressions);
-
-                var disjunctiveExpression = new NestedConstraintExpression
+                foreach (var constraintType2 in constraintTypes)
                 {
-                    Left = finalLeftExpression,
-                    Right = rightExpression,
-                    ConstraintType = ConstraintType.Or
-                };
+                    var operatorFilter2 = GetOperatorFilterFromConstraintType(constraintType2);
 
-                constraintExpressions.Add(disjunctiveExpression);
+                    foreach (var constraintType3 in constraintTypes)
+                    {
+                        var operatorFilter3 = GetOperatorFilterFromConstraintType(constraintType3);
+                        var query = MapekUtilities.GetParameterizedStringQuery();
+
+                        // Gets the constraints of two disjunctive ranges, one two-valued and the other single-valued.
+                        query.CommandText = @"SELECT ?constraint1 ?constraint2 ?constraint3 WHERE {
+                            @optimalCondition ssn:forProperty @property .
+                            @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                            @optimalCondition rdf:type ?bNode1 .
+                            ?bNode1 owl:onProperty meta:hasValueConstraint .
+                            ?bNode1 owl:onDataRange ?bNode2 .
+                            ?bNode2 owl:unionOf ?bNode3 .
+                            ?bNode3 rdf:first ?bNode4_1 .
+                            ?bNode4_1 owl:withRestrictions ?bNode5_1 .
+                            ?bNode5_1 rdf:first [ " + operatorFilter1 + @" ?constraint1 ] .
+                            ?bNode5_1 rdf:rest ?bNode6_1 .
+                            ?bNode6_1 rdf:first [ " + operatorFilter2 + @" ?constraint2 ] .
+                            ?bNode3 rdf:rest ?bNode4_2 .
+                            ?bNode4_2 rdf:first ?bNode5_2 .
+                            ?bNode5_2 owl:withRestrictions ?bNode6_2 .
+                            ?bNode6_2 rdf:first [ " + operatorFilter3 + @" ?constraint3 ] .
+                            ?bNode6_2 rdf:rest () . }";
+
+                        query.SetParameter("optimalCondition", optimalCondition);
+                        query.SetParameter("property", property);
+                        query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+                        var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+
+                        foreach (var result in queryResult.Results)
+                        {
+                            var leftConstraint1 = result["constraint1"].ToString().Split('^')[0];
+                            var leftConstraint2 = result["constraint2"].ToString().Split('^')[0];
+                            var rightConstraint = result["constraint3"].ToString().Split('^')[0];
+
+                            var leftConstraintExpression1 = new AtomicConstraintExpression
+                            {
+                                Left = propertyValue,
+                                Right = leftConstraint1,
+                                ConstraintType = constraintType1
+                            };
+                            var leftConstraintExpression2 = new AtomicConstraintExpression
+                            {
+                                Left = propertyValue,
+                                Right = leftConstraint2,
+                                ConstraintType = constraintType2
+                            };
+                            var rightConstraintExpression = new AtomicConstraintExpression
+                            {
+                                Left = propertyValue,
+                                Right = rightConstraint,
+                                ConstraintType = constraintType3
+                            };
+                            var leftConstraintExpression = new NestedConstraintExpression
+                            {
+                                Left = leftConstraintExpression1,
+                                Right = leftConstraintExpression2,
+                                ConstraintType = ConstraintType.And
+                            };
+                            var disjunctiveExpression = new NestedConstraintExpression
+                            {
+                                Left = leftConstraintExpression,
+                                Right = rightConstraintExpression,
+                                ConstraintType = ConstraintType.Or
+                            };
+
+                            constraintExpressions.Add(disjunctiveExpression);
+                        }
+                    }
+                }
             }
         }
 
@@ -637,53 +641,106 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            object propertyValue)
+            object propertyValue,
+            IEnumerable<ConstraintType> constraintTypes)
         {
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            query.CommandText = @"SELECT ?bNode5_1 ?bNode6_1 ?bNode5_2 ?bNode6_2 WHERE {
-                @optimalCondition ssn:forProperty @property .
-                @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                @optimalCondition rdf:type ?bNode1 .
-                ?bNode1 owl:onProperty meta:hasValueConstraint .
-                ?bNode1 owl:onDataRange ?bNode2 .
-                ?bNode2 owl:unionOf ?bNode3 .
-                ?bNode3 rdf:first ?bNode4_1 .
-                ?bNode3 rdf:rest ?bNode4_2 .
-                ?bNode4_1 owl:withRestrictions ?bNode5_1 .
-                ?bNode5_1 rdf:rest ?bNode6_1 .
-                ?bNode4_2 rdf:first ?bNode5_2 .
-                ?bNode5_2 owl:withRestrictions ?bNode5_2 .
-                ?bNode5_2 rdf:rest ?bNode6_2 . }";
-
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
-
-            BinaryExpression finalExpression = null!;
-
-            foreach (var result in queryResult.Results)
+            foreach (var constraintType1 in constraintTypes)
             {
-                var leftBNode1 = result["bNode5_1"];
-                var leftBNode2 = result["bNode6_1"];
-                var rightBNode1 = result["bNode5_2"];
-                var rightBNode2 = result["bNode6_2"];
+                var operatorFilter1 = GetOperatorFilterFromConstraintType(constraintType1);
 
-                var leftExpressions = GetConstraintsFromBNodes(instanceModel, propertyValue, leftBNode1, leftBNode2);
-                var rightExpressions = GetConstraintsFromBNodes(instanceModel, propertyValue, rightBNode1, rightBNode2);
-                var finalLeftExpression = BuildConjunctiveConstraintExpression(leftExpressions);
-                var finalRightExpression = BuildConjunctiveConstraintExpression(rightExpressions);
-
-                var disjunctiveExpression = new NestedConstraintExpression
+                foreach (var constraintType2 in constraintTypes)
                 {
-                    Left = finalLeftExpression,
-                    Right = finalRightExpression,
-                    ConstraintType = ConstraintType.Or
-                };
+                    var operatorFilter2 = GetOperatorFilterFromConstraintType(constraintType2);
 
-                constraintExpressions.Add(disjunctiveExpression);
+                    foreach (var constraintType3 in constraintTypes)
+                    {
+                        var operatorFilter3 = GetOperatorFilterFromConstraintType(constraintType3);
+
+                        foreach (var constraintType4 in constraintTypes)
+                        {
+                            var operatorFilter4 = GetOperatorFilterFromConstraintType(constraintType4);
+                            var query = MapekUtilities.GetParameterizedStringQuery();
+
+                            query.CommandText = @"SELECT ?constraint1 ?constraint2 ?constraint3 ?constraint4 WHERE {
+                                @optimalCondition ssn:forProperty @property .
+                                @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                                @optimalCondition rdf:type ?bNode1 .
+                                ?bNode1 owl:onProperty meta:hasValueConstraint .
+                                ?bNode1 owl:onDataRange ?bNode2 .
+                                ?bNode2 owl:unionOf ?bNode3 .
+                                ?bNode3 rdf:first ?bNode4_1 .
+                                ?bNode4_1 owl:withRestrictions ?bNode5_1 .
+                                ?bNode5_1 rdf:first [ " + operatorFilter1 + @" ?constraint1 ] .
+                                ?bNode5_1 rdf:rest ?bNode6_1 .
+                                ?bNode6_1 rdf:first [ " + operatorFilter2 + @" ?constraint2 ] .
+                                ?bNode3 rdf:rest ?bNode4_2 .
+                                ?bNode4_2 rdf:first ?bNode5_2 .
+                                ?bNode5_2 owl:withRestrictions ?bNode6_2 .
+                                ?bNode6_2 rdf:first [ " + operatorFilter3 + @" ?constraint3 ] .
+                                ?bNode6_2 rdf:rest ?bNode7_2 .
+                                ?bNode7_2 rdf:first [ " + operatorFilter4 + " ?constraint4 ] . }";
+
+                            query.SetParameter("optimalCondition", optimalCondition);
+                            query.SetParameter("property", property);
+                            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+                            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+
+                            foreach (var result in queryResult.Results)
+                            {
+                                var leftConstraint1 = result["constraint1"].ToString().Split('^')[0];
+                                var leftConstraint2 = result["constraint2"].ToString().Split('^')[0];
+                                var rightConstraint1 = result["constraint3"].ToString().Split('^')[0];
+                                var rightConstraint2 = result["constraint4"].ToString().Split('^')[0];
+
+                                var leftConstraintExpression1 = new AtomicConstraintExpression
+                                {
+                                    Left = propertyValue,
+                                    Right = leftConstraint1,
+                                    ConstraintType = constraintType1
+                                };
+                                var leftConstraintExpression2 = new AtomicConstraintExpression
+                                {
+                                    Left = propertyValue,
+                                    Right = leftConstraint2,
+                                    ConstraintType = constraintType2
+                                };
+                                var rightConstraintExpression1 = new AtomicConstraintExpression
+                                {
+                                    Left = propertyValue,
+                                    Right = rightConstraint1,
+                                    ConstraintType = constraintType3
+                                };
+                                var rightConstraintExpression2 = new AtomicConstraintExpression
+                                {
+                                    Left = propertyValue,
+                                    Right = rightConstraint2,
+                                    ConstraintType = constraintType4
+                                };
+                                var leftConstraintExpression = new NestedConstraintExpression
+                                {
+                                    Left = leftConstraintExpression1,
+                                    Right = leftConstraintExpression2,
+                                    ConstraintType = ConstraintType.And
+                                };
+                                var rightConstraintExpression = new NestedConstraintExpression
+                                {
+                                    Left = rightConstraintExpression1,
+                                    Right = rightConstraintExpression2,
+                                    ConstraintType = ConstraintType.And
+                                };
+                                var disjunctiveExpression = new NestedConstraintExpression
+                                {
+                                    Left = leftConstraintExpression,
+                                    Right = rightConstraintExpression,
+                                    ConstraintType = ConstraintType.Or
+                                };
+
+                                constraintExpressions.Add(disjunctiveExpression);
+                            }
+                        }
+                    }
+                }
             }
         }
 

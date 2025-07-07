@@ -3,7 +3,6 @@ using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Text;
 using VDS.RDF;
 using VDS.RDF.Query;
 
@@ -29,10 +28,12 @@ namespace Logic.Mapek
             var mitigationActions = GetMitigationActionsFromUnsatisfiedOptimalConditions(instanceModel,
                 propertyCache,
                 unsatisfiedOptimalConditions);
-            var optimizationActions = GetOptimizationActions(instanceModel, propertyCache, mitigationActions);
+            var optimizationActions = GetOptimizationActions(instanceModel, propertyCache);
 
             // Combine the Action collections into one.
             mitigationActions = mitigationActions.Concat(optimizationActions);
+            // Filter out any potential duplicates.
+            mitigationActions = mitigationActions.DistinctBy(x => x.Name);
 
             return new (optimalConditions, mitigationActions);
         }
@@ -148,61 +149,9 @@ namespace Logic.Mapek
             return unsatisfiedOptimalConditions.DistinctBy(x => x.Name);
         }
 
-        private IEnumerable<Models.OntologicalModels.Action> GetOptimizationActions(IGraph instanceModel,
-            PropertyCache propertyCache,
-            IEnumerable<Models.OntologicalModels.Action> mitigationActions)
+        private IEnumerable<Models.OntologicalModels.Action> GetOptimizationActions(IGraph instanceModel, PropertyCache propertyCache)
         {
             var actions = new List<Models.OntologicalModels.Action>();
-
-            // Construct a filter for eliminating Actions that are duplicate or contradicting to those
-            // already in the mitigation Action collection.
-            //
-            // Duplicate Actions are those whose PropertyChanges' Properties and Effects are the same.
-            // Contradictory Actions are those whose PropertyChanges' Properties are the same but whose
-            // Effects are different. Because there are only two types of Effects (at least in the current
-            // version of the ontology), this means that a filter can simply ignore Actions whose
-            // PropertyChanges contain the same Properties. This filter thus constructs a set of Properties
-            // referenced by the OptimalConditions in the mitigation Action collection.
-            var filterStringBuilder = new StringBuilder();
-
-            var firstMitigationAction = mitigationActions.First();
-            var lastMitigationAction = mitigationActions.Last();
-
-            foreach (var mitigationAction in mitigationActions)
-            {
-                if (mitigationAction == firstMitigationAction)
-                {
-                    filterStringBuilder.Append("FILTER(?property NOT IN (");
-                }
-
-                string propertyName;
-
-                if (mitigationAction is ActuationAction actuationAction)
-                {
-                    propertyName = actuationAction.ActedOnProperty;
-                }
-                else
-                {
-                    propertyName = ((ReconfigurationAction)mitigationAction).ConfigurableParameter.Name;
-                }
-
-                // The angle brackets are required around the full Property names to be successfully used
-                // in the filter.
-                filterStringBuilder.Append('<');
-                filterStringBuilder.Append(propertyName);
-                filterStringBuilder.Append('>');
-
-                if (mitigationAction != lastMitigationAction)
-                {
-                    filterStringBuilder.Append(", ");
-                }
-                else
-                {
-                    filterStringBuilder.Append("))");
-                }
-            }
-
-            var filterString = filterStringBuilder.ToString();
 
             var actuationQuery = MapekUtilities.GetParameterizedStringQuery();
 
@@ -217,8 +166,7 @@ namespace Logic.Mapek
                 ?actuatorState meta:enacts ?propertyChange .
                 ?platform rdf:type sosa:Platform .
                 ?platform meta:optimizesFor ?propertyChange .
-                ?propertyChange ssn:forProperty ?property .
-                " + filterString + " }";
+                ?propertyChange ssn:forProperty ?property . }";
 
             var actuationQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(actuationQuery);
 
@@ -246,8 +194,7 @@ namespace Logic.Mapek
                 ?propertyChange meta:alteredBy ?effect .
                 ?platform rdf:type sosa:Platform .
                 ?platform meta:optimizesFor ?propertyChange .
-                ?propertyChange ssn:forProperty ?property .
-                " + filterString + " }";
+                ?propertyChange ssn:forProperty ?property . }";
 
             var reconfigurationQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(reconfigurationQuery);
 

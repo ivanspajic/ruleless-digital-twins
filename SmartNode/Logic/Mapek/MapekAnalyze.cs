@@ -1,10 +1,8 @@
 ﻿using Logic.FactoryInterface;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
-using Lucene.Net.Util;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Linq.Expressions;
 using System.Text;
 using VDS.RDF;
 using VDS.RDF.Query;
@@ -138,9 +136,11 @@ namespace Logic.Mapek
 
                     foreach (var unsatisfiedConstraint in unsatisfiedConstraints)
                     {
-                        _logger.LogInformation("Unsatisfied constraint in OptimalCondition {optimalCondition}: {unsatisfiedConstraint}.",
+                        _logger.LogInformation("Unsatisfied constraint in OptimalCondition {optimalCondition}: {leftValue} {constraintType} {rightValue}.",
                             optimalCondition.Name,
-                            unsatisfiedConstraint.ToString());
+                            unsatisfiedConstraint.Left.ToString(),
+                            unsatisfiedConstraint.ConstraintType.ToString(),
+                            unsatisfiedConstraint.Right.ToString());
                     }
                 }
             }
@@ -661,6 +661,7 @@ namespace Logic.Mapek
                             var operatorFilter4 = GetOperatorFilterFromConstraintType(constraintType4);
                             var query = MapekUtilities.GetParameterizedStringQuery();
 
+                            // Gets the constraints of two disjunctive, two-valued ranges.
                             query.CommandText = @"SELECT ?constraint1 ?constraint2 ?constraint3 ?constraint4 WHERE {
                                 @optimalCondition ssn:forProperty @property .
                                 @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
@@ -754,167 +755,6 @@ namespace Logic.Mapek
                 ConstraintType.LessThanOrEqualTo => "xsd:maxInclusive",
                 _ => throw new Exception($"{constraintType} is an invalid comparison operator.")
             };
-        }
-
-        private IEnumerable<AtomicConstraintExpression> GetConstraintsFromBNodes(IGraph instanceModel, object propertyValue, params INode[] bNodes)
-        {
-            var constraintExpressions = new List<AtomicConstraintExpression>();
-
-            foreach (var bNode in bNodes)
-            {
-                AtomicConstraintExpression constraintExpression = null!;
-
-                // Check if the constraint uses a '>' operator.
-                var minExclusiveQuery = MapekUtilities.GetParameterizedStringQuery();
-
-                minExclusiveQuery.CommandText = @"SELECT ?constraint WHERE {
-                _:b25 rdf:first ?constraint . }";
-
-                minExclusiveQuery.SetParameter("bNode", bNode);
-
-                var minExclusiveQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(minExclusiveQuery);
-
-                // Due to bNodes being unique, there should only be a maximum of 1 result.
-                foreach (var result in minExclusiveQueryResult.Results)
-                {
-                    var constraint = result["constraint"].ToString();
-                    constraint = constraint.Split('^')[0];
-
-                    constraintExpression = new AtomicConstraintExpression
-                    {
-                        Left = propertyValue,
-                        Right = constraint,
-                        ConstraintType = ConstraintType.GreaterThan
-                    };
-
-                    constraintExpressions.Add(constraintExpression);
-                }
-
-                // Since there can only be one kind of constraint on the bNode, continue to the next iteration in case it has already been found.
-                if (constraintExpression != null)
-                {
-                    continue;
-                }
-
-                // Check if the constraint uses a '>=' operator.
-                var minInclusiveQuery = MapekUtilities.GetParameterizedStringQuery();
-
-                minInclusiveQuery.CommandText = @"SELECT ?constraint WHERE {
-                @bNode rdf:first ?anonymousNode .
-                ?anonymousNode xsd:minInclusive ?constraint . }";
-
-                minInclusiveQuery.SetParameter("bNode", bNode);
-
-                var minInclusiveQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(minInclusiveQuery);
-
-                // Due to bNodes being unique, there should only be a maximum of 1 result.
-                foreach (var result in minInclusiveQueryResult.Results)
-                {
-                    var constraint = result["constraint"].ToString();
-                    constraint = constraint.Split('^')[0];
-
-                    constraintExpression = new AtomicConstraintExpression
-                    {
-                        Left = propertyValue,
-                        Right = constraint,
-                        ConstraintType = ConstraintType.GreaterThanOrEqualTo
-                    };
-
-                    constraintExpressions.Add(constraintExpression);
-                }
-
-                // Since there can only be one kind of constraint on the bNode, continue to the next iteration in case it has already been found.
-                if (constraintExpression != null)
-                {
-                    continue;
-                }
-
-                // Check if the constraint uses a '<' operator.
-                var maxExclusiveQuery = MapekUtilities.GetParameterizedStringQuery();
-
-                maxExclusiveQuery.CommandText = @"SELECT ?constraint WHERE {
-                @bNode rdf:first ?anonymousNode .
-                ?anonymousNode xsd:maxExclusive ?constraint . }";
-
-                maxExclusiveQuery.SetParameter("bNode", bNode);
-
-                var maxExclusiveQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(maxExclusiveQuery);
-
-                // Due to bNodes being unique, there should only be a maximum of 1 result.
-                foreach (var result in maxExclusiveQueryResult.Results)
-                {
-                    var constraint = result["constraint"].ToString();
-                    constraint = constraint.Split('^')[0];
-
-                    constraintExpression = new AtomicConstraintExpression
-                    {
-                        Left = propertyValue,
-                        Right = constraint,
-                        ConstraintType = ConstraintType.LessThan
-                    };
-
-                    constraintExpressions.Add(constraintExpression);
-                }
-
-                // Since there can only be one kind of constraint on the bNode, continue to the next iteration in case it has already been found.
-                if (constraintExpression != null)
-                {
-                    continue;
-                }
-
-                // Check if the constraint uses a '<=' operator.
-                var maxInclusiveQuery = MapekUtilities.GetParameterizedStringQuery();
-
-                maxInclusiveQuery.CommandText = @"SELECT ?constraint WHERE {
-                @bNode rdf:first ?anonymousNode .
-                ?anonymousNode xsd:maxInclusive ?constraint . }";
-
-                maxInclusiveQuery.SetParameter("bNode", bNode);
-
-                var maxInclusiveQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(maxInclusiveQuery);
-
-                // Due to bNodes being unique, there should only be a maximum of 1 result.
-                foreach (var result in maxInclusiveQueryResult.Results)
-                {
-                    var constraint = result["constraint"].ToString();
-                    constraint = constraint.Split('^')[0];
-
-                    constraintExpression = new AtomicConstraintExpression
-                    {
-                        Left = propertyValue,
-                        Right = constraint,
-                        ConstraintType = ConstraintType.LessThanOrEqualTo
-                    };
-
-                    constraintExpressions.Add(constraintExpression);
-                }
-            }
-
-            return constraintExpressions;
-        }
-
-        private ConstraintExpression BuildConjunctiveConstraintExpression(IEnumerable<ConstraintExpression> expressions)
-        {
-            ConstraintExpression finalExpression = null!;
-
-            foreach (var expression in expressions)
-            {
-                if (finalExpression == null)
-                {
-                    finalExpression = expression;
-                }
-                else
-                {
-                    finalExpression = new NestedConstraintExpression
-                    {
-                        Left = expression,
-                        Right = finalExpression,
-                        ConstraintType = ConstraintType.And
-                    };
-                }
-            }
-
-            return finalExpression;
         }
 
         private IEnumerable<Models.OntologicalModels.Action> GetMitigationActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel,

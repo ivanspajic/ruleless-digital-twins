@@ -71,7 +71,7 @@ namespace SensorActuatorImplementations.ValueHandlers
                 var leftUnsatisfiedConstraints = GetUnsatisfiedConstraintsFromEvaluation(nestedConstraintExpression.Left);
                 var rightUnsatisfiedConstraints = GetUnsatisfiedConstraintsFromEvaluation(nestedConstraintExpression.Right);
 
-                var evaluation = constraintCombinationEvaluator(leftUnsatisfiedConstraints.Any(), rightUnsatisfiedConstraints.Any());
+                var evaluation = constraintCombinationEvaluator(!leftUnsatisfiedConstraints.Any(), !rightUnsatisfiedConstraints.Any());
 
                 if (!evaluation)
                 {

@@ -48,6 +48,8 @@ namespace Logic.Mapek
 
         private HashSet<HashSet<Models.OntologicalModels.Action>> GetActionCombinations(IEnumerable<Models.OntologicalModels.Action> actions)
         {
+            // TODO: include a filter for not having combinations with contradictory actions...
+
             // Ensure that the set of sets has unique elements with the equality comparer.
             var actionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(_actionSetEqualityComparer);
 

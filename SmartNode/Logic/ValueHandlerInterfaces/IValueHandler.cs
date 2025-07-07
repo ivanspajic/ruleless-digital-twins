@@ -1,11 +1,11 @@
-﻿using Logic.Models.OntologicalModels;
-using System.Linq.Expressions;
+﻿using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
 
 namespace Logic.ValueHandlerInterfaces
 {
     public interface IValueHandler
     {
-        public IEnumerable<BinaryExpression> GetUnsatisfiedConstraintsFromEvaluation(BinaryExpression constraintExpression);
+        public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression);
 
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues);
 

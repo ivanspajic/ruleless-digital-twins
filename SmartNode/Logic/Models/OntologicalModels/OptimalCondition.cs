@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+﻿using Logic.Models.MapekModels;
 
 namespace Logic.Models.OntologicalModels
 {
@@ -6,9 +6,9 @@ namespace Logic.Models.OntologicalModels
     {
         public required string Property { get; init; }
 
-        public required IEnumerable<BinaryExpression> Constraints { get; init; }
+        public required IEnumerable<ConstraintExpression> Constraints { get; init; }
 
-        public IEnumerable<BinaryExpression> UnsatisfiedAtomicConstraints { get; set; }
+        public IEnumerable<AtomicConstraintExpression> UnsatisfiedAtomicConstraints { get; set; }
 
         public int ReachedInMaximumSeconds { get; init; }
 

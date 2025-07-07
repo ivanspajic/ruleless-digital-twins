@@ -1,6 +1,6 @@
-﻿using Logic.Models.OntologicalModels;
+﻿using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
-using System.Linq.Expressions;
 
 namespace SensorActuatorImplementations.ValueHandlers
 {
@@ -16,7 +16,7 @@ namespace SensorActuatorImplementations.ValueHandlers
             throw new NotImplementedException();
         }
 
-        public IEnumerable<BinaryExpression> GetUnsatisfiedConstraintsFromEvaluation(BinaryExpression constraintExpression)
+        public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression)
         {
             throw new NotImplementedException();
         }

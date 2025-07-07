@@ -1,8 +1,7 @@
-﻿using Logic.Models.OntologicalModels;
+﻿using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 using System.Globalization;
-using System.Linq.Expressions;
-using VDS.RDF.Writing.Formatting;
 
 namespace SensorActuatorImplementations.ValueHandlers
 {
@@ -10,21 +9,21 @@ namespace SensorActuatorImplementations.ValueHandlers
     public class ExampleDoubleValueHandler : IValueHandler
     {
         // In case of new ExpressionTypes being supported, this could be used to register new delegates.
-        private static readonly Dictionary<ExpressionType, Func<double, double, bool>> _expressionDelegateMap = new()
+        private static readonly Dictionary<ConstraintType, Func<double, double, bool>> _expressionDelegateMap = new()
         {
-            { ExpressionType.Equal, EvaluateEqualTo },
-            { ExpressionType.GreaterThan, EvaluateGreaterThan },
-            { ExpressionType.GreaterThanOrEqual, EvaluateGreaterThanOrEqualTo },
-            { ExpressionType.LessThan, EvaluateLessThan },
-            { ExpressionType.LessThanOrEqual, EvaluateLessThanOrEqualTo },
+            { ConstraintType.EqualTo, EvaluateEqualTo },
+            { ConstraintType.GreaterThan, EvaluateGreaterThan },
+            { ConstraintType.GreaterThanOrEqualTo, EvaluateGreaterThanOrEqualTo },
+            { ConstraintType.LessThan, EvaluateLessThan },
+            { ConstraintType.LessThanOrEqualTo, EvaluateLessThanOrEqualTo },
         };
 
         // In case of more ways of combining constraint propositions of OptimalConditions, this could be used to register new
         // delegates.
-        private static readonly Dictionary<ExpressionType, Func<bool, bool, bool>> _expressionCombinationDelegateMap = new()
+        private static readonly Dictionary<ConstraintType, Func<bool, bool, bool>> _expressionCombinationDelegateMap = new()
         {
-            { ExpressionType.And, EvaluateAnd },
-            { ExpressionType.Or, EvaluateOr }
+            { ConstraintType.And, EvaluateAnd },
+            { ConstraintType.Or, EvaluateOr }
         };
 
         // In case of new Effects being added, this could be used to register new delegates.
@@ -34,16 +33,17 @@ namespace SensorActuatorImplementations.ValueHandlers
             { Effect.ValueDecrease, DecreaseValueByAmount }
         };
 
-        public IEnumerable<BinaryExpression> GetUnsatisfiedConstraintsFromEvaluation(BinaryExpression constraintExpression)
+        public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression)
         {
-            var unsatisfiedConstraints = new List<BinaryExpression>();
+            var unsatisfiedConstraints = new List<AtomicConstraintExpression>();
 
-            if (_expressionDelegateMap.TryGetValue(constraintExpression.NodeType, out Func<double, double, bool> valueComparisonEvaluator))
+            if (_expressionDelegateMap.TryGetValue(constraintExpression.ConstraintType, out Func<double, double, bool> valueComparisonEvaluator))
             {
                 // In case of finding the node type in the expression delegate map, we know it must be a binary expression with constant values
                 // to be compared.
-                var left = ((ConstantExpression)constraintExpression.Left).Value!;
-                var right = ((ConstantExpression)constraintExpression.Right).Value!;
+                var atomicConstraintExpression = (AtomicConstraintExpression)constraintExpression;
+                var left = atomicConstraintExpression.Left;
+                var right = atomicConstraintExpression.Right;
 
                 if (left is not double)
                 {
@@ -60,15 +60,16 @@ namespace SensorActuatorImplementations.ValueHandlers
 
                 if (!evaluation)
                 {
-                    unsatisfiedConstraints.Add(constraintExpression);
+                    unsatisfiedConstraints.Add(atomicConstraintExpression);
                 }
             }
-            else if (_expressionCombinationDelegateMap.TryGetValue(constraintExpression.NodeType, out Func<bool, bool, bool> constraintCombinationEvaluator))
+            else if (_expressionCombinationDelegateMap.TryGetValue(constraintExpression.ConstraintType, out Func<bool, bool, bool> constraintCombinationEvaluator))
             {
                 // In case of finding the node type in the expression combination delegate map, we know it must be a binary expression with more
                 // sub-expression either containing more combinations or value comparisons.
-                var leftUnsatisfiedConstraints = GetUnsatisfiedConstraintsFromEvaluation((BinaryExpression)constraintExpression.Left);
-                var rightUnsatisfiedConstraints = GetUnsatisfiedConstraintsFromEvaluation((BinaryExpression)constraintExpression.Right);
+                var nestedConstraintExpression = (NestedConstraintExpression)constraintExpression;
+                var leftUnsatisfiedConstraints = GetUnsatisfiedConstraintsFromEvaluation(nestedConstraintExpression.Left);
+                var rightUnsatisfiedConstraints = GetUnsatisfiedConstraintsFromEvaluation(nestedConstraintExpression.Right);
 
                 var evaluation = constraintCombinationEvaluator(leftUnsatisfiedConstraints.Any(), rightUnsatisfiedConstraints.Any());
 
@@ -80,7 +81,7 @@ namespace SensorActuatorImplementations.ValueHandlers
             }
             else
             {
-                throw new Exception($"Unsupported expression node type: {constraintExpression.NodeType}");
+                throw new Exception($"Unsupported expression node type: {constraintExpression.ConstraintType}");
             }
 
             return unsatisfiedConstraints;

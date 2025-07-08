@@ -26,6 +26,8 @@ namespace Logic.Mapek
             _logger.LogInformation("Starting the Plan phase.");
 
             var plannedActions = new List<Models.OntologicalModels.Action>();
+            var actionCombinations = GetActionCombinations(actions);
+            var simulationResults = SimulateActionCombinations(actionCombinations, optimalConditions, propertyCache);
 
             // TODO:
             // for each combination, check that the combination satisfies all optimalconditions
@@ -35,9 +37,6 @@ namespace Logic.Mapek
                     // pick the one containing the most properties optimized
                     // then pick the first in the collection
 
-            var actionCombinations = GetActionCombinations(actions);
-            var simulationResults = SimulateActionCombinations(actionCombinations, optimalConditions, propertyCache);
-
             // TODO: get the minimal number of time from all optimal conditions to use as the maximum for the simulations
 
             return plannedActions;
@@ -45,7 +44,9 @@ namespace Logic.Mapek
 
         private HashSet<HashSet<Models.OntologicalModels.Action>> GetActionCombinations(IEnumerable<Models.OntologicalModels.Action> actions)
         {
-            // TODO: include a filter for not having combinations with contradictory actions...
+            // This method creates combinations Actions to simulate in tandem. Since there are no possibilities of encountering contradicting
+            // Actions for the same property (due to validations disallowing contradicting OptimalCondition constraints), there will also be
+            // no Actions with contradicting Effects.
 
             // Ensure that the set of sets has unique elements with the equality comparer.
             var actionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(_actionSetEqualityComparer);
@@ -73,10 +74,11 @@ namespace Logic.Mapek
                     var remainingActionCombinations = GetActionCombinations(remainingActions);
                     actionCombinations.UnionWith(remainingActionCombinations);
 
+                    // For each Action combination from the collection of remaining Actions, create a new
+                    // set and add the current Action to it to make a new combination before adding it to the
+                    // set of combinations.
                     foreach (var remainingActionCombination in remainingActionCombinations)
                     {
-                        // For each Action combination from the collection of remaining Actions, create a new
-                        // set and add the current Action to it before adding it to the set of combinations.
                         var multipleActionSet = new HashSet<Models.OntologicalModels.Action>();
 
                         multipleActionSet.UnionWith(remainingActionCombination);

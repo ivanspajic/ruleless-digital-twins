@@ -32,11 +32,8 @@ namespace Logic.Mapek
                     // if the combination satisfied optimalconditions, add it to the list of possible execution plans
             // out of the passing combinations, find the optimal combination per distinct property
                 // this requires comparing the values of the optimized properties
-                    // each property will need to have some form of user-defined precedence to assist with choosing the most
-                    // optimal value outcome
-                        // pick the one containing the most properties optimized
-                        // then pick the one containing the property with the highest precedence
-                        // then pick the first in the collection
+                    // pick the one containing the most properties optimized
+                    // then pick the first in the collection
 
             var actionCombinations = GetActionCombinations(actions);
             var simulationResults = SimulateActionCombinations(actionCombinations, optimalConditions, propertyCache);

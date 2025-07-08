@@ -5,13 +5,11 @@ using System.Globalization;
 
 namespace SensorActuatorImplementations.ValueHandlers
 {
-    // Compares doubles in a simplistic way, but it should do for most intents and purposes.
     public class ExampleDoubleValueHandler : IValueHandler
     {
         // In case of new ExpressionTypes being supported, this could be used to register new delegates.
         private static readonly Dictionary<ConstraintType, Func<double, double, bool>> _expressionDelegateMap = new()
         {
-            { ConstraintType.EqualTo, EvaluateEqualTo },
             { ConstraintType.GreaterThan, EvaluateGreaterThan },
             { ConstraintType.GreaterThanOrEqualTo, EvaluateGreaterThanOrEqualTo },
             { ConstraintType.LessThan, EvaluateLessThan },
@@ -119,11 +117,6 @@ namespace SensorActuatorImplementations.ValueHandlers
             }
 
             throw new Exception($"Unsupported Effect {typeOfChange}.");
-        }
-
-        private static bool EvaluateEqualTo(double sensorValue, double optimalConditionValue)
-        {
-            return sensorValue == optimalConditionValue;
         }
 
         private static bool EvaluateGreaterThan(double sensorValue, double optimalConditionValue)

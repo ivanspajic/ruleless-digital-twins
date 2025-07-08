@@ -137,8 +137,9 @@ namespace Logic.Mapek
 
                     foreach (var unsatisfiedConstraint in unsatisfiedConstraints)
                     {
-                        _logger.LogInformation("Unsatisfied constraint in OptimalCondition {optimalCondition}: {leftValue} {constraintType} {rightValue}.",
+                        _logger.LogInformation("Unsatisfied constraint in OptimalCondition {optimalCondition}: (property {property}) {leftValue} {constraintType} {rightValue}.",
                             optimalCondition.Name,
+                            optimalCondition.Property,
                             unsatisfiedConstraint.Left.ToString(),
                             unsatisfiedConstraint.ConstraintType.ToString(),
                             unsatisfiedConstraint.Right.ToString());
@@ -220,29 +221,17 @@ namespace Logic.Mapek
         {
             var constraintExpressions = new List<ConstraintExpression>();
 
-            // Process the constraints from specific queries that check for different kinds of restrictions in OptimalConditions.
-            AddEqualsConstraint(constraintExpressions,
-                    instanceModel,
-                    optimalCondition,
-                    property,
-                    reachedInMaximumSeconds,
-                    propertyValue);
-
-            // If there is an equals constraint for this Property in this OptimalCondition, then there can't be any other kinds of
-            // constraints.
-            if (constraintExpressions.Count > 0)
-            {
-                return constraintExpressions;
-            }
-
             // This could be made more streamlined and elegant through the use of fewer, more cleverly combined queries, however,
             // SPARQL doesn't handle bNode identities, so these can't be used as variables for later referencing. For this reason, it's
-            // necessary to loop through all range constraint operators (">", ">=", "<", "<=") to execute the same queries with each.
+            // necessary to loop through all range constraint operators (">", ">=", "<", "<=") to execute the same queries with each one.
             //
             // Documentation: (https://www.w3.org/TR/sparql11-query/#BlankNodesInResults)
             // "An application writer should not expect blank node labels in a query to refer to a particular blank node in the data."
             // For this reason, queries can be constructed with contiguous chains of bNodes, however, saving their INode objects and
             // using them as variables in subsequent queries doesn't work.
+            //
+            // A workaround would certainly be to insert triples as markings (much like for the inference rules), but the instance
+            // model should probably not be polluted in light of other options.
             var operatorFilters = new List<ConstraintType>
             {
                 ConstraintType.GreaterThan,
@@ -275,7 +264,8 @@ namespace Logic.Mapek
                 propertyValue,
                 operatorFilters);
 
-            // For models created with Protege (and the OWL API), disjunctions containing 1 and then 2 values will be converted to those containing 2 and then 1.
+            // For models created with Protege (and the OWL API), disjunctions containing 1 and then 2 values will be converted to those
+            // containing 2 and then 1.
             AddConstraintsOfDisjunctionsOfTwoAndOne(constraintExpressions,
                 instanceModel,
                 optimalCondition,
@@ -293,48 +283,6 @@ namespace Logic.Mapek
                 operatorFilters);
 
             return constraintExpressions;
-        }
-
-        private void AddEqualsConstraint(IList<ConstraintExpression> constraintExpressions,
-            IGraph instanceModel,
-            INode optimalCondition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            object propertyValue)
-        {
-            ConstraintExpression constraintExpression = null!;
-
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            // Check if the OptimalCondition has a single-valued equals constraint (e.g., =15).
-            query.CommandText = @"SELECT ?constraint WHERE {
-                    @optimalCondition ssn:forProperty @property .
-                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                    @optimalCondition rdf:type ?bNode1 .
-                    ?bNode1 owl:onProperty meta:hasValueConstraint .
-                    ?bNode1 owl:hasValue ?constraint . }";
-
-            query.SetParameter("optimalCondition", optimalCondition);
-            query.SetParameter("property", property);
-            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
-
-            // There should be a maximum of 1 such result after validation.
-            foreach (var result in queryResult.Results)
-            {
-                var constraint = queryResult.Results[0]["constraint"].ToString();
-                constraint = constraint.Split('^')[0];
-
-                constraintExpression = new AtomicConstraintExpression
-                {
-                    Left = propertyValue,
-                    Right = constraint,
-                    ConstraintType = ConstraintType.EqualTo
-                };
-
-                constraintExpressions.Add(constraintExpression);
-            }
         }
 
         private void AddConstraintsOfFirstOrOnlyRangeValues(IList<ConstraintExpression> constraintExpressions,

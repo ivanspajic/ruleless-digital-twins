@@ -18,41 +18,141 @@
                 print()
 ]
 
+// Checks for two different OptimalConditions with conflicting constraints for the same Property. This is only an
+// issue in the case of impossible values for specific combinations of operators. In other words, using some
+// combinations of operators in conjunction is legitimate if they produce a legitimate range for a value. E.g.,
+// OptimalCondition1 having a constraint of >15 and OptimalCondition2 having a constraint of <20. However, such
+// combinations are not valid in cases of swapped values, i.e., OptimalCondition1 having a constraint of >20
+// and OptimalCondition2 having a constraint of <15, meaning the same Property would have to have a value of
+// >20 and <15 at the same time.
+//
+// To represent disjoint ranges, we offer support for disjunctions. E.g., >20 or <15.
 
-// The following rules validate against any conflicting or useless constraints in the same or across multiple
-// OptimalConditions for the same Property. E.g., for the same Property value, useless constraints could be >15
-// and <=15. These rules do not check the combination of minExclusive (>) and maxExclusive (<) since this reduces
-// to everything but the excluded value. E.g., >15 and <15 = !15.
+// Checks for OptimalConditions with single-valued range constraints.
+[rule4b:    (?individual1 rdf:type meta:OptimalCondition)
+            (?individual1 ssn:forProperty ?property)
+            (?individual1 rdf:type ?bNode1_1)
+            (?bNode1_1 owl:onProperty meta:hasValueConstraint)
+            (?bNode1_1 owl:onDataRange ?bNode2_1)
+            (?bNode2_1 owl:withRestrictions ?bNode3_1)
+            (?bNode3_1 rdf:first ?restriction1)
+            noValue(?bNode3_1, rdf:rest, isBNode(?bNode4_1))
+            (?individual2 rdf:type meta:OptimalCondition)
+            (?individual2 ssn:forProperty ?property)
+            (?individual2 rdf:type ?bNode1_2)
+            (?bNode1_2 owl:onProperty meta:hasValueConstraint)
+            (?bNode1_2 owl:onDataRange ?bNode2_2)
+            (?bNode2_2 owl:withRestrictions ?bNode3_2)
+            (?bNode3_2 rdf:first ?restriction2)
+            noValue(?bNode3_2, rdf:rest, isBNode(?bNode4_2))
+            ->  (?restriction1 rdf:comment "validation mark")
+                (?restriction2 rdf:comment "validation mark")
+]
 
-// Checks for simultaneous >= and <= with the same value.
-[rule4b:    (?restriction1 rdf:comment ?property)
-            (?restriction1 xsd:minInclusive ?value)
+// Checks for OptimalConditions where one has a single-valued and the other a double-valued range constraint.
+[rule4c:    (?individual1 rdf:type meta:OptimalCondition)
+            (?individual1 ssn:forProperty ?property)
+            (?individual1 rdf:type ?bNode1_1)
+            (?bNode1_1 owl:onProperty meta:hasValueConstraint)
+            (?bNode1_1 owl:onDataRange ?bNode2_1)
+            (?bNode2_1 owl:withRestrictions ?bNode3_1)
+            (?bNode3_1 rdf:first ?restriction1)
+            (?bNode3_1 rdf:rest ?bNode4_1)
+            (?bNode4_1 rdf:first ?restriction2)
+            (?individual2 rdf:type meta:OptimalCondition)
+            (?individual2 ssn:forProperty ?property)
+            (?individual2 rdf:type ?bNode1_2)
+            (?bNode1_2 owl:onProperty meta:hasValueConstraint)
+            (?bNode1_2 owl:onDataRange ?bNode2_2)
+            (?bNode2_2 owl:withRestrictions ?bNode3_2)
+            (?bNode3_2 rdf:first ?restriction3)
+            noValue(?bNode3_2, rdf:rest, isBNode(?bNode4_2))
+            ->  (?restriction1 rdf:comment "validation mark")
+                (?restriction2 rdf:comment "validation mark")
+                (?restriction3 rdf:comment "validation mark")
+]
+
+// Checks for OptimalConditions with double-valued range constraints.
+[rule4d:    (?individual1 rdf:type meta:OptimalCondition)
+            (?individual1 ssn:forProperty ?property)
+            (?individual1 rdf:type ?bNode1_1)
+            (?bNode1_1 owl:onProperty meta:hasValueConstraint)
+            (?bNode1_1 owl:onDataRange ?bNode2_1)
+            (?bNode2_1 owl:withRestrictions ?bNode3_1)
+            (?bNode3_1 rdf:first ?restriction1)
+            (?bNode3_1 rdf:rest ?bNode4_1)
+            (?bNode4_1 rdf:first ?restriction2)
+            (?individual2 rdf:type meta:OptimalCondition)
+            (?individual2 ssn:forProperty ?property)
+            (?individual2 rdf:type ?bNode1_2)
+            (?bNode1_2 owl:onProperty meta:hasValueConstraint)
+            (?bNode1_2 owl:onDataRange ?bNode2_2)
+            (?bNode2_2 owl:withRestrictions ?bNode3_2)
+            (?bNode3_2 rdf:first ?restriction3)
+            (?bNode3_2 rdf:rest ?bNode4_2)
+            (?bNode4_2 rdf:first ?restriction4)
+            ->  (?restriction1 rdf:comment "validation mark")
+                (?restriction2 rdf:comment "validation mark")
+                (?restriction3 rdf:comment "validation mark")
+                (?restriction4 rdf:comment "validation mark")
+]
+
+// Checks if the marked constraints have disallowed values for '>' and '<' operators.
+[rule4e:    (?restriction1 rdf:comment ?property)
+            (?restriction1 rdf:comment "validation mark")
+            (?restriction1 xsd:minExclusive ?value1)
             (?restriction2 rdf:comment ?property)
-            (?restriction2 xsd:maxInclusive ?value)
+            (?restriction2 rdf:comment "validation mark")
+            (?restriction2 xsd:maxExclusive ?value2)
+            notEqual(?property, "validation mark")
+            ge(?value1, ?value2)
             ->  print()
                 print("Conflicting conditions detected!")
-                print("Conditions for", ?property, "are >=", ?value, "and <=", ?value, "at the same time.")
+                print("Conditions for", ?property, "are >", ?value1, "and <", ?value2, "at the same time.")
                 print()
 ]
 
-// Checks for simultaneous >= and < with the same value.
-[rule4c:    (?restriction1 rdf:comment ?property)
-            (?restriction1 xsd:minInclusive ?value)
+// Checks if the marked constraints have disallowed values for '>=' and '<' operators.
+[rule4f:    (?restriction1 rdf:comment ?property)
+            (?restriction1 rdf:comment "validation mark")
+            (?restriction1 xsd:minInclusive ?value1)
             (?restriction2 rdf:comment ?property)
-            (?restriction2 xsd:maxExclusive ?value)
+            (?restriction2 rdf:comment "validation mark")
+            (?restriction2 xsd:maxExclusive ?value2)
+            notEqual(?property, "validation mark")
+            ge(?value1, ?value2)
             ->  print()
                 print("Conflicting conditions detected!")
-                print("Conditions for", ?property, "are >=", ?value, "and <", ?value, "at the same time.")
+                print("Conditions for", ?property, "are >=", ?value1, "and <", ?value2, "at the same time.")
                 print()
 ]
 
-// Checks for simultaneous > and <= with the same value.
-[rule4d:    (?restriction1 rdf:comment ?property)
-            (?restriction1 xsd:minExclusive ?value)
+// Checks if the marked constraints have disallowed values for '>' and '<=' operators.
+[rule4g:    (?restriction1 rdf:comment ?property)
+            (?restriction1 rdf:comment "validation mark")
+            (?restriction1 xsd:minExclusive ?value1)
             (?restriction2 rdf:comment ?property)
-            (?restriction2 xsd:maxInclusive ?value)
+            (?restriction2 rdf:comment "validation mark")
+            (?restriction2 xsd:maxInclusive ?value2)
+            notEqual(?property, "validation mark")
+            ge(?value1, ?value2)
             ->  print()
                 print("Conflicting conditions detected!")
-                print("Conditions for", ?property, "are >", ?value, "and <=", ?value, "at the same time.")
+                print("Conditions for", ?property, "are >", ?value1, "and <=", ?value2, "at the same time.")
+                print()
+]
+
+// Checks if the marked constraints have disallowed values for '>=' and '<=' operators.
+[rule4h:    (?restriction1 rdf:comment ?property)
+            (?restriction1 rdf:comment "validation mark")
+            (?restriction1 xsd:minInclusive ?value1)
+            (?restriction2 rdf:comment ?property)
+            (?restriction2 rdf:comment "validation mark")
+            (?restriction2 xsd:maxInclusive ?value2)
+            notEqual(?property, "validation mark")
+            greaterThan(?value1, ?value2)
+            ->  print()
+                print("Conflicting conditions detected!")
+                print("Conditions for", ?property, "are >=", ?value1, "and <=", ?value2, "at the same time.")
                 print()
 ]

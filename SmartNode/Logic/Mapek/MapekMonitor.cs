@@ -8,7 +8,7 @@ using VDS.RDF.Query;
 
 namespace Logic.Mapek
 {
-    public class MapekMonitor : IMapekMonitor
+    internal class MapekMonitor : IMapekMonitor
     {
         private readonly ILogger<MapekMonitor> _logger;
         private readonly IFactory _factory;

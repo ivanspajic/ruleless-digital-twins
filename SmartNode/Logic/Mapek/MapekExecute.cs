@@ -6,7 +6,7 @@ using Logic.Models.OntologicalModels;
 
 namespace Logic.Mapek
 {
-    public class MapekExecute : IMapekExecute
+    internal class MapekExecute : IMapekExecute
     {
         private readonly ILogger<MapekExecute> _logger;
         private readonly IFactory _factory;

@@ -2,7 +2,7 @@
 
 namespace Logic.Models.MapekModels
 {
-    public class SimulationResult
+    internal class SimulationResult
     {
         public required IEnumerable<OntologicalModels.Action> Actions { get; init; }
 

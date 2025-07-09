@@ -1,6 +1,6 @@
 ﻿namespace Logic.Models.OntologicalModels
 {
-    public class ActuationAction : Action
+    internal class ActuationAction : Action
     {
         public required ActuatorState ActuatorState { get; init; }
 

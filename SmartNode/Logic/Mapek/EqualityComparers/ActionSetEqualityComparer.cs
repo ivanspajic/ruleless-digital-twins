@@ -2,7 +2,7 @@
 
 namespace Logic.Mapek.EqualityComparers
 {
-    public class ActionSetEqualityComparer : IEqualityComparer<HashSet<Models.OntologicalModels.Action>>
+    internal class ActionSetEqualityComparer : IEqualityComparer<HashSet<Models.OntologicalModels.Action>>
     {
         public bool Equals(HashSet<Models.OntologicalModels.Action>? x, HashSet<Models.OntologicalModels.Action>? y)
         {

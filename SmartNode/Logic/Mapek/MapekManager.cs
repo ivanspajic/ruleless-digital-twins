@@ -20,10 +20,10 @@ namespace Logic.Mapek
         public MapekManager(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekManager>>();
-            _mapekMonitor = serviceProvider.GetRequiredService<IMapekMonitor>();
-            _mapekAnalyze = serviceProvider.GetRequiredService<IMapekAnalyze>();
-            _mapekPlan = serviceProvider.GetRequiredService<IMapekPlan>();
-            _mapekExecute = serviceProvider.GetRequiredService<IMapekExecute>();
+            _mapekMonitor = new MapekMonitor(serviceProvider);
+            _mapekAnalyze = new MapekAnalyze(serviceProvider);
+            _mapekPlan = new MapekPlan(serviceProvider);
+            _mapekExecute = new MapekExecute(serviceProvider);
         }
 
         public void StartLoop(string instanceModelFilePath)

@@ -3,7 +3,7 @@ using VDS.RDF;
 
 namespace Logic.Mapek
 {
-    public interface IMapekMonitor
+    internal interface IMapekMonitor
     {
         public PropertyCache Monitor(IGraph instanceModel);
     }

@@ -2,7 +2,7 @@
 
 namespace Logic.Models.OntologicalModels
 {
-    public class OptimalCondition : NamedIndividual
+    internal class OptimalCondition : NamedIndividual
     {
         public required string Property { get; init; }
 

@@ -4,7 +4,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Logic.FactoryInterface;
 using System.Reflection;
-using Logic.Mapek.EqualityComparers;
 
 namespace SmartNode
 {
@@ -25,11 +24,6 @@ namespace SmartNode
             });
             // Register a factory to allow for dynamic constructor argument passing through DI.
             builder.Services.AddSingleton<IFactory, Factory>();
-            builder.Services.AddSingleton<IMapekMonitor, MapekMonitor>();
-            builder.Services.AddSingleton<IMapekAnalyze, MapekAnalyze>();
-            builder.Services.AddSingleton<IMapekPlan, MapekPlan>();
-            builder.Services.AddSingleton<IMapekExecute, MapekExecute>();
-            builder.Services.AddSingleton<IEqualityComparer<HashSet<Logic.Models.OntologicalModels.Action>>, ActionSetEqualityComparer>();
 
             using var host = builder.Build();
 

@@ -2,7 +2,7 @@
 
 namespace Logic.Mapek
 {
-    public interface IMapekExecute
+    internal interface IMapekExecute
     {
         public void Execute(IEnumerable<Models.OntologicalModels.Action> actions, PropertyCache propertyCache);
     }

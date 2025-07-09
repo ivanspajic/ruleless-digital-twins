@@ -3,31 +3,42 @@ using Logic.Models.MapekModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Logic.Models.OntologicalModels;
+using Logic.Mapek.EqualityComparers;
 
 namespace Logic.Mapek
 {
-    public class MapekPlan : IMapekPlan
+    internal class MapekPlan : IMapekPlan
     {
-        private const int ReconfigurationValueSimulationGranularity = 5;
-
         private readonly ILogger<MapekPlan> _logger;
         private readonly IFactory _factory;
-        private readonly IEqualityComparer<HashSet<Models.OntologicalModels.Action>> _actionSetEqualityComparer;
 
         public MapekPlan(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekPlan>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
-            _actionSetEqualityComparer = serviceProvider.GetRequiredService<IEqualityComparer<HashSet<Models.OntologicalModels.Action>>>();
         }
 
-        public IEnumerable<Models.OntologicalModels.Action> Plan(IEnumerable<OptimalCondition> optimalConditions, IEnumerable<Models.OntologicalModels.Action> actions, PropertyCache propertyCache)
+        public IEnumerable<Models.OntologicalModels.Action> Plan(IEnumerable<OptimalCondition> optimalConditions,
+            IEnumerable<Models.OntologicalModels.Action> actions,
+            PropertyCache propertyCache)
         {
             _logger.LogInformation("Starting the Plan phase.");
 
+            var simulationGranularity = 5;
             var plannedActions = new List<Models.OntologicalModels.Action>();
-            var actionCombinations = GetActionCombinations(actions);
-            var simulationResults = SimulateActionCombinations(actionCombinations, optimalConditions, propertyCache);
+
+            // Split the ActuationActions and ReconfigurationActions for later handling.
+            var actuationActions = actions.Where(action => action is ActuationAction);
+            var reconfigurationActions = actions.Where(action => action is ReconfigurationAction);
+
+            // Get all possible combinations for both kinds of Actions.
+            var actuationActionCombinations = GetActionCombinations(actuationActions);
+            var reconfigurationActionCombinations = GetActionCombinations(reconfigurationActions);
+
+            // Get the simulation tick setup for each ActuationAction combination to determine which ActuationAction should be run at which tick (interval).
+            // ReconfigurationActions don't need this as soft sensor FMUs won't rely on time as an input parameter.
+            //var simulationConfigurations = GetSimulationConfigurationsFromActuationActionCombinations(actuationActionCombinations, simulationGranularity);
+            //var simulationResults = Simulate(simulationConfigurations, optimalConditions, propertyCache);
 
             // TODO:
             // for each combination, check that the combination satisfies all optimalconditions
@@ -49,7 +60,7 @@ namespace Logic.Mapek
             // no Actions with contradicting Effects.
 
             // Ensure that the set of sets has unique elements with the equality comparer.
-            var actionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(_actionSetEqualityComparer);
+            var actionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(new ActionSetEqualityComparer());
 
             foreach (var action in actions)
             {
@@ -92,7 +103,13 @@ namespace Logic.Mapek
             return actionCombinations;
         }
 
-        private IEnumerable<SimulationResult> SimulateActionCombinations(IEnumerable<IEnumerable<Models.OntologicalModels.Action>> actionCombinations,
+        //private ActuationAction[][] GetSimulationConfigurationsFromActuationActionCombinations(IEnumerable<IEnumerable<Models.OntologicalModels.Action>> actionCombinations,
+        //    int simulationGranularity)
+        //{
+
+        //}
+
+        private IEnumerable<SimulationResult> Simulate(IEnumerable<IEnumerable<Models.OntologicalModels.Action>> actionCombinations,
             IEnumerable<OptimalCondition> optimalConditions,
             PropertyCache propertyCache)
         {

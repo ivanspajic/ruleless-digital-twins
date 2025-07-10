@@ -27,17 +27,24 @@ namespace Logic.Mapek
             var simulationGranularity = 5;
             var plannedActions = new List<Models.OntologicalModels.Action>();
 
-            // Split the ActuationActions and ReconfigurationActions for later handling.
+            // The two Action types should be split to facilitate simulations. ActuationActions may be de/activated at any point during
+            // the available time to restore an OptimalCondition. On the other hand, ReconfigurationActions aren't dependent on a time
+            // factor (although the underlying soft Sensor algorithms may take long to run) but will nonetheless be included in simulation
+            // configurations to ensure that all OptimalConditions are met when simulating different types fo Actions in conjunction.
+            // To avoid generating duplicate combinations for simulation ticks (intervals) when removing ReconfigurationActions,
+            // generating the combinations of the two types should be done separately.
             var actuationActions = actions.Where(action => action is ActuationAction);
             var reconfigurationActions = actions.Where(action => action is ReconfigurationAction);
 
-            // Get all possible combinations for both kinds of Actions.
+            // Get all possible combinations for both types of Actions.
             var actuationActionCombinations = GetActionCombinations(actuationActions);
             var reconfigurationActionCombinations = GetActionCombinations(reconfigurationActions);
 
-            // Get the simulation tick setup for each ActuationAction combination to determine which ActuationAction should be run at which tick (interval).
-            // ReconfigurationActions don't need this as soft sensor FMUs won't rely on time as an input parameter.
-            //var simulationConfigurations = GetSimulationConfigurationsFromActuationActionCombinations(actuationActionCombinations, simulationGranularity);
+            // Get all possible simulation configurations for the given Actions.
+            var simulationConfigurations = GetSimulationConfigurationsFromActionCombinations(actuationActionCombinations,
+                reconfigurationActionCombinations,
+                simulationGranularity);
+
             //var simulationResults = Simulate(simulationConfigurations, optimalConditions, propertyCache);
 
             // TODO:
@@ -46,6 +53,7 @@ namespace Logic.Mapek
             // out of the passing combinations, find the optimal combination per distinct property
                 // this requires comparing the values of the optimized properties
                     // pick the one containing the most properties optimized
+                    // pick the one with the least number of actions
                     // then pick the first in the collection
 
             // TODO: get the minimal number of time from all optimal conditions to use as the maximum for the simulations
@@ -103,13 +111,23 @@ namespace Logic.Mapek
             return actionCombinations;
         }
 
-        //private ActuationAction[][] GetSimulationConfigurationsFromActuationActionCombinations(IEnumerable<IEnumerable<Models.OntologicalModels.Action>> actionCombinations,
-        //    int simulationGranularity)
-        //{
+        private IEnumerable<SimulationConfiguration> GetSimulationConfigurationsFromActionCombinations(IEnumerable<IEnumerable<ActuationAction>> actuationActionCombinations,
+            IEnumerable<IEnumerable<ReconfigurationAction>> reconfigurationActionCombinations,
+            int simulationGranularity)
+        {
+            // get the number of intervals from the simulation granularity
+            // for every combination, we need to generate all possible tick simulation combinations with respect to the number of intervals we have
+                // every action has to happen at least once per full simulation! otherwise, it's the same as not having it in the simulation anyway
+                // this means for combinations of actions with fewer actions than intervals, there are already many possibilities with reshuffled intervals
+                // the simulation tick combinations can't include reconfigurationactions as these aren't time dependent
+                    // these will instead be separate in the returned simulation configuration
 
-        //}
+            var simulationConfigurations = new List<SimulationConfiguration>();
 
-        private IEnumerable<SimulationResult> Simulate(IEnumerable<IEnumerable<Models.OntologicalModels.Action>> actionCombinations,
+
+        }
+
+        private IEnumerable<SimulationResult> Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations,
             IEnumerable<OptimalCondition> optimalConditions,
             PropertyCache propertyCache)
         {

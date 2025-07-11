@@ -37,20 +37,14 @@ namespace Logic.Mapek
             var reconfigurationActions = actions.Where(action => action is ReconfigurationAction);
 
             // Get all possible combinations for ActuationActions.
-            var actionCombinations1 = GetActionCombinations(actuationActions);
-            var actuationActionCombinations = actionCombinations1.Select(actuationActionCombination =>
-                actuationActionCombination.Select(actuationAction =>
-                    actuationAction as ActuationAction));
+            var actuationActionCombinations = GetActuationActionCombinations(actuationActions);
 
             // Get all possible combinations for ReconfigurationActions.
-            var actionCombinations2 = GetActionCombinations(reconfigurationActions);
-            var reconfigurationActionCombinations = actionCombinations2.Select(reconfigurationActionCombination =>
-                reconfigurationActionCombination.Select(reconfigurationAction =>
-                    reconfigurationAction as ReconfigurationAction));
+            var reconfigurationActionCombinations = GetReconfigurationActionCombinations(reconfigurationActions);
 
             // Get all possible simulation configurations for the given Actions.
-            var simulationConfigurations = GetSimulationConfigurationsFromActionCombinations(actuationActionCombinations!,
-                reconfigurationActionCombinations!,
+            var simulationConfigurations = GetSimulationConfigurationsFromActionCombinations(actuationActionCombinations,
+                reconfigurationActionCombinations,
                 simulationGranularity);
 
             //var simulationResults = Simulate(simulationConfigurations, optimalConditions, propertyCache);
@@ -67,6 +61,34 @@ namespace Logic.Mapek
             // TODO: get the minimal number of time from all optimal conditions to use as the maximum for the simulations
 
             return plannedActions;
+        }
+
+        private IEnumerable<IEnumerable<ActuationAction>> GetActuationActionCombinations(IEnumerable<Models.OntologicalModels.Action> actions)
+        {
+            var actionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>();
+
+            // TODO:
+            // select from actions by unique actuators and get back a collection of collections (actions by actuator)
+            // combine exactly like you combine simulation ticks!!
+
+            // Get all possible combinations.
+            var actionCombinationsa = GetActionCombinations(actions);
+
+            // Perform a conversion to the ActuationAction type for easier handling.
+            return actionCombinations.Select(actionCombination =>
+                actionCombination.Select(action =>
+                    action as ActuationAction))!;
+        }
+
+        private IEnumerable<IEnumerable<ReconfigurationAction>> GetReconfigurationActionCombinations(IEnumerable<Models.OntologicalModels.Action> actions)
+        {
+            // Get all possible combinations.
+            var actionCombinations = GetActionCombinations(actions);
+
+            // Perform a conversion to the ReconfigurationAction type for easier handling.
+            return actionCombinations.Select(actionCombination =>
+                actionCombination.Select(action =>
+                    action as ReconfigurationAction))!;
         }
 
         private HashSet<HashSet<Models.OntologicalModels.Action>> GetActionCombinations(IEnumerable<Models.OntologicalModels.Action> actions)
@@ -123,22 +145,15 @@ namespace Logic.Mapek
             IEnumerable<IEnumerable<ReconfigurationAction>> reconfigurationActionCombinations,
             int simulationGranularity)
         {
-            // get the number of intervals from the simulation granularity
-            // for every combination, we need to generate all possible tick simulation combinations with respect to the number of intervals we have
-                // every action has to happen at least once per full simulation! otherwise, it's the same as not having it in the simulation anyway
-                // this means for combinations of actions with fewer actions than intervals, there are already many possibilities with reshuffled intervals
-                // the simulation tick combinations can't include reconfigurationactions as these aren't time dependent
-                    // these will instead be separate in the returned simulation configuration
-
             var simulationConfigurations = new List<SimulationConfiguration>();
             var simulationTicks = new SimulationTick[simulationGranularity];
 
-            // Bind a simulation tick with every index to every ActuationAction combination.
-            var preliminarySimulationTickCombinations = new HashSet<HashSet<SimulationTick>>();
+            // Populate simulation ticks with every possible ActuationAction combination by index.
+            var allSimulationTicksByIndex = new List<List<SimulationTick>>();
 
             for (var i = 0; i < simulationTicks.Length; i++)
             {
-                var preliminarySimulationTickCombination = new HashSet<SimulationTick>();
+                var simulationTicksWithCurrentIndex = new List<SimulationTick>();
 
                 foreach (var actuationActionCombination in actuationActionCombinations)
                 {
@@ -148,28 +163,54 @@ namespace Logic.Mapek
                         TickIndex = i
                     };
 
-                    preliminarySimulationTickCombination.Add(simulationTick);
+                    simulationTicksWithCurrentIndex.Add(simulationTick);
                 }
 
-                preliminarySimulationTickCombinations.Add(preliminarySimulationTickCombination);
+                allSimulationTicksByIndex.Add(simulationTicksWithCurrentIndex);
             }
 
-            // Get all possible ActuationAction combinations for this number of 
-            var simulationTickCombinations = GetAllSimulationTickCombinations(preliminarySimulationTickCombinations);
+            // Get all possible Cartesian pairings of simulation ticks that together form full simulation configurations.
+            var simulationTickCombinations = GetAllSimulationTickCombinations(allSimulationTicksByIndex);
 
             // get the longest action combination as this is the only one where all actions are present
 
             return simulationConfigurations;
         }
 
-        private IEnumerable<IEnumerable<SimulationTick>> GetAllSimulationTickCombinations(IEnumerable<IEnumerable<SimulationTick>> preliminarySimulationTickCombinations)
+        private HashSet<HashSet<SimulationTick>> GetAllSimulationTickCombinations(IEnumerable<IEnumerable<SimulationTick>> allSimulationTicksByIndex)
         {
             var simulationTickCombinations = new HashSet<HashSet<SimulationTick>>();
 
-            foreach (var preliminarySimulationTickCombination in preliminarySimulationTickCombinations)
+            foreach (var simulationTicksWithCurrentIndex in allSimulationTicksByIndex)
             {
-                
+                var simulationTicksWithNotCurrentIndices = allSimulationTicksByIndex.Where(simulationTicks => simulationTicks != simulationTicksWithCurrentIndex);
+
+                foreach (var simulationTick in simulationTicksWithCurrentIndex)
+                {
+                    if (!simulationTicksWithNotCurrentIndices.Any())
+                    {
+                        var singleSimulationTickCombination = new HashSet<SimulationTick>()
+                        {
+                            simulationTick
+                        };
+
+                        simulationTickCombinations.Add(singleSimulationTickCombination);
+                    }
+                    else
+                    {
+                        var remainingSimulationTickCombinations = GetAllSimulationTickCombinations(simulationTicksWithNotCurrentIndices);
+
+                        foreach (var remainingSimulationTickCombination in remainingSimulationTickCombinations)
+                        {
+                            remainingSimulationTickCombination.Add(simulationTick);
+                        }
+
+                        simulationTickCombinations.UnionWith(remainingSimulationTickCombinations);
+                    }
+                }
             }
+
+            return simulationTickCombinations;
         }
 
         //private IEnumerable<SimulationResult> Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations,

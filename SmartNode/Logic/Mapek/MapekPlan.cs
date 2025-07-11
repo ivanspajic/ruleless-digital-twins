@@ -24,7 +24,7 @@ namespace Logic.Mapek
         {
             _logger.LogInformation("Starting the Plan phase.");
 
-            var simulationGranularity = 5;
+            var simulationGranularity = 4;
             var plannedActions = new List<Models.OntologicalModels.Action>();
 
             // The two Action types should be split to facilitate simulations. ActuationActions may be de/activated at any point during
@@ -36,13 +36,21 @@ namespace Logic.Mapek
             var actuationActions = actions.Where(action => action is ActuationAction);
             var reconfigurationActions = actions.Where(action => action is ReconfigurationAction);
 
-            // Get all possible combinations for both types of Actions.
-            var actuationActionCombinations = GetActionCombinations(actuationActions);
-            var reconfigurationActionCombinations = GetActionCombinations(reconfigurationActions);
+            // Get all possible combinations for ActuationActions.
+            var actionCombinations1 = GetActionCombinations(actuationActions);
+            var actuationActionCombinations = actionCombinations1.Select(actuationActionCombination =>
+                actuationActionCombination.Select(actuationAction =>
+                    actuationAction as ActuationAction));
+
+            // Get all possible combinations for ReconfigurationActions.
+            var actionCombinations2 = GetActionCombinations(reconfigurationActions);
+            var reconfigurationActionCombinations = actionCombinations2.Select(reconfigurationActionCombination =>
+                reconfigurationActionCombination.Select(reconfigurationAction =>
+                    reconfigurationAction as ReconfigurationAction));
 
             // Get all possible simulation configurations for the given Actions.
-            var simulationConfigurations = GetSimulationConfigurationsFromActionCombinations(actuationActionCombinations,
-                reconfigurationActionCombinations,
+            var simulationConfigurations = GetSimulationConfigurationsFromActionCombinations(actuationActionCombinations!,
+                reconfigurationActionCombinations!,
                 simulationGranularity);
 
             //var simulationResults = Simulate(simulationConfigurations, optimalConditions, propertyCache);
@@ -123,89 +131,126 @@ namespace Logic.Mapek
                     // these will instead be separate in the returned simulation configuration
 
             var simulationConfigurations = new List<SimulationConfiguration>();
+            var simulationTicks = new SimulationTick[simulationGranularity];
 
+            // Bind a simulation tick with every index to every ActuationAction combination.
+            var preliminarySimulationTickCombinations = new HashSet<HashSet<SimulationTick>>();
 
-        }
-
-        private IEnumerable<SimulationResult> Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations,
-            IEnumerable<OptimalCondition> optimalConditions,
-            PropertyCache propertyCache)
-        {
-            var simulationResults = new List<SimulationResult>();
-
-            foreach (var actionCombination in actionCombinations)
+            for (var i = 0; i < simulationTicks.Length; i++)
             {
-                var actuationActions = actionCombination.Where(action => action is ActuationAction)
-                    .Select(action => (ActuationAction)action);
-                var reconfigurationActions = actionCombination.Where(action => action is ReconfigurationAction)
-                    .Select(action => (ReconfigurationAction)action);
+                var preliminarySimulationTickCombination = new HashSet<SimulationTick>();
 
-                // Make a deep copy of the property cache for simulations.
-                var propertyCacheCopy = new PropertyCache
+                foreach (var actuationActionCombination in actuationActionCombinations)
                 {
-                    Properties = new Dictionary<string, Property>(),
-                    ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
-                };
-
-                foreach (var keyValuePair in propertyCache.Properties)
-                {
-                    propertyCacheCopy.Properties.Add(keyValuePair.Key, new Property
+                    var simulationTick = new SimulationTick
                     {
-                        Name = keyValuePair.Value.Name,
-                        OwlType = keyValuePair.Value.OwlType,
-                        Value = keyValuePair.Value.Value
-                    });
-                }
-
-                foreach (var keyValuePair in propertyCache.ConfigurableParameters)
-                {
-                    propertyCacheCopy.Properties.Add(keyValuePair.Key, new ConfigurableParameter
-                    {
-                        Name = keyValuePair.Value.Name,
-                        OwlType = keyValuePair.Value.OwlType,
-                        Value = keyValuePair.Value.Value,
-                        LowerLimitValue = keyValuePair.Value.LowerLimitValue,
-                        UpperLimitValue = keyValuePair.Value.UpperLimitValue
-                    });
-                }
-
-                // Simulate each ActuationAction and update the property cache copy.
-                foreach (var actuationAction in actuationActions)
-                {
-                    var inputs = new Dictionary<string, object>
-                    {
-                        { "actuator", actuationAction.ActuatorState.Actuator },
-                        { "actuatorState", actuationAction.ActuatorState.Name }
+                        ActionsToExecute = actuationActionCombination,
+                        TickIndex = i
                     };
 
-                    //var outputs = GetOutputsFromSimulation(actuationAction.ActuatorState.Actuator.Model, inputs);
+                    preliminarySimulationTickCombination.Add(simulationTick);
                 }
 
-                // Simulate each ReconfigurationAction and update the property cache copy.
-                foreach (var reconfigurationAction in reconfigurationActions)
-                {
-                    
-                }
-
-                // Check that every OptimalCondition passes with respect to the values in the property cache copy.
-                foreach (var optimalCondition in optimalConditions)
-                {
-
-                }
-
-                // based on the optimalcondition check, make a simulationresult and add it to the collection
+                preliminarySimulationTickCombinations.Add(preliminarySimulationTickCombination);
             }
 
-            // 1. run simulations for all actions present
-            // this should be done with some heuristics. spawn them all but don't run them all for the entire
-            // duration of the simulation (e.g., 1h). cut this up into smaller, granular chunks, and then
-            // continue with those that seem to get closer. we could outsource this deciding logic via a
-            // user-defined delegate
-            // 2. check the results of all remaining simulations at the end of the whole duration (e.g., 1h) and
-            // pick those whose results meet their respective optimalconditions (and don't break other constraints)
+            // Get all possible ActuationAction combinations for this number of 
+            var simulationTickCombinations = GetAllSimulationTickCombinations(preliminarySimulationTickCombinations);
 
-            return new List<SimulationResult>();
+            // get the longest action combination as this is the only one where all actions are present
+
+            return simulationConfigurations;
         }
+
+        private IEnumerable<IEnumerable<SimulationTick>> GetAllSimulationTickCombinations(IEnumerable<IEnumerable<SimulationTick>> preliminarySimulationTickCombinations)
+        {
+            var simulationTickCombinations = new HashSet<HashSet<SimulationTick>>();
+
+            foreach (var preliminarySimulationTickCombination in preliminarySimulationTickCombinations)
+            {
+                
+            }
+        }
+
+        //private IEnumerable<SimulationResult> Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations,
+        //    IEnumerable<OptimalCondition> optimalConditions,
+        //    PropertyCache propertyCache)
+        //{
+        //    var simulationResults = new List<SimulationResult>();
+
+        //    foreach (var actionCombination in actionCombinations)
+        //    {
+        //        var actuationActions = actionCombination.Where(action => action is ActuationAction)
+        //            .Select(action => (ActuationAction)action);
+        //        var reconfigurationActions = actionCombination.Where(action => action is ReconfigurationAction)
+        //            .Select(action => (ReconfigurationAction)action);
+
+        //        // Make a deep copy of the property cache for simulations.
+        //        var propertyCacheCopy = new PropertyCache
+        //        {
+        //            Properties = new Dictionary<string, Property>(),
+        //            ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
+        //        };
+
+        //        foreach (var keyValuePair in propertyCache.Properties)
+        //        {
+        //            propertyCacheCopy.Properties.Add(keyValuePair.Key, new Property
+        //            {
+        //                Name = keyValuePair.Value.Name,
+        //                OwlType = keyValuePair.Value.OwlType,
+        //                Value = keyValuePair.Value.Value
+        //            });
+        //        }
+
+        //        foreach (var keyValuePair in propertyCache.ConfigurableParameters)
+        //        {
+        //            propertyCacheCopy.Properties.Add(keyValuePair.Key, new ConfigurableParameter
+        //            {
+        //                Name = keyValuePair.Value.Name,
+        //                OwlType = keyValuePair.Value.OwlType,
+        //                Value = keyValuePair.Value.Value,
+        //                LowerLimitValue = keyValuePair.Value.LowerLimitValue,
+        //                UpperLimitValue = keyValuePair.Value.UpperLimitValue
+        //            });
+        //        }
+
+        //        // Simulate each ActuationAction and update the property cache copy.
+        //        foreach (var actuationAction in actuationActions)
+        //        {
+        //            var inputs = new Dictionary<string, object>
+        //            {
+        //                { "actuator", actuationAction.ActuatorState.Actuator },
+        //                { "actuatorState", actuationAction.ActuatorState.Name }
+        //            };
+
+        //            //var outputs = GetOutputsFromSimulation(actuationAction.ActuatorState.Actuator.Model, inputs);
+        //        }
+
+        //        // Simulate each ReconfigurationAction and update the property cache copy.
+        //        foreach (var reconfigurationAction in reconfigurationActions)
+        //        {
+                    
+        //        }
+
+        //        // Check that every OptimalCondition passes with respect to the values in the property cache copy.
+        //        foreach (var optimalCondition in optimalConditions)
+        //        {
+
+        //        }
+
+        //        // based on the optimalcondition check, make a simulationresult and add it to the collection
+        //    }
+
+        //    // 1. run simulations for all actions present
+        //    // this should be done with some heuristics. spawn them all but don't run them all for the entire
+        //    // duration of the simulation (e.g., 1h). cut this up into smaller, granular chunks, and then
+        //    // continue with those that seem to get closer. we could outsource this deciding logic via a
+        //    // user-defined delegate
+        //    // 2. check the results of all remaining simulations at the end of the whole duration (e.g., 1h) and
+        //    // pick those whose results meet their respective optimalconditions (and don't break other constraints)
+
+        //    return new List<SimulationResult>();
+        //}
 
         //private IDictionary<string, object> GetOutputsFromSimulation(string fmuFilePath, IDictionary<string, object> inputs)
         //{

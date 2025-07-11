@@ -4,8 +4,8 @@ namespace Logic.Models.MapekModels
 {
     internal class SimulationConfiguration
     {
-        public IEnumerable<IEnumerable<ActuationAction>> TickActions { get; init; }
+        public required IEnumerable<SimulationTick> SimulationTicks { get; init; }
 
-        public IEnumerable<ReconfigurationAction> PostTickActions { get; init; }
+        public required IEnumerable<ReconfigurationAction> PostTickActions { get; init; }
     }
 }

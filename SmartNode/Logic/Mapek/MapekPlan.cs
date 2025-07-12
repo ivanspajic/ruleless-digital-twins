@@ -1,21 +1,19 @@
-﻿using Logic.FactoryInterface;
-using Logic.Models.MapekModels;
+﻿using Logic.Models.MapekModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Logic.Models.OntologicalModels;
 using Logic.Mapek.EqualityComparers;
+using System.Net.Http.Headers;
 
 namespace Logic.Mapek
 {
     internal class MapekPlan : IMapekPlan
     {
         private readonly ILogger<MapekPlan> _logger;
-        private readonly IFactory _factory;
 
         public MapekPlan(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekPlan>>();
-            _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
         public IEnumerable<Models.OntologicalModels.Action> Plan(IEnumerable<OptimalCondition> optimalConditions,
@@ -181,12 +179,11 @@ namespace Logic.Mapek
             int simulationGranularity)
         {
             var simulationConfigurations = new List<SimulationConfiguration>();
-            var simulationTicks = new SimulationTick[simulationGranularity];
 
             // Populate simulation ticks with every possible ActuationAction combination by index.
             var allSimulationTicksByIndex = new List<List<SimulationTick>>();
 
-            for (var i = 0; i < simulationTicks.Length; i++)
+            for (var i = 0; i < simulationGranularity; i++)
             {
                 var simulationTicksWithCurrentIndex = new List<SimulationTick>();
 
@@ -207,7 +204,75 @@ namespace Logic.Mapek
             // Get all possible Cartesian pairings of simulation ticks that together form full simulation configurations.
             var simulationTickCombinations = GetNaryCartesianProducts(allSimulationTicksByIndex);
 
-            // get the longest action combination as this is the only one where all actions are present
+            // Get all unique Actuators from ActuationAction combinations by getting the longest combination and extracting those ActuationActions' Actuators.
+            // This ensures that all Actuators that should be present are present.
+            var greatestCombinationLength = 0;
+
+            foreach (var actuationActionCombination in actuationActionCombinations)
+            {
+                if (greatestCombinationLength < actuationActionCombination.Count())
+                {
+                    greatestCombinationLength = actuationActionCombination.Count();
+                }
+            }
+
+            var actuationActionCombinationLongest = actuationActionCombinations.Where(actuationActionCombination => actuationActionCombination.Count() == greatestCombinationLength)
+                .First();
+            var allActuators = actuationActionCombinationLongest.Select(actuationAction => actuationAction.ActuatorState.Actuator.Name);
+
+            // Filter out simulation tick combinations where every Actuator isn't present in at least one tick per combination and construct simulation
+            // configurations with the ones that pass.
+            foreach (var simulationTickCombination in simulationTickCombinations)
+            {
+                var actuatorsPresent = new List<bool>();
+
+                foreach (var actuatorName in allActuators)
+                {
+                    var actuatorPresent = false;
+
+                    foreach (var simulationTick in simulationTickCombination)
+                    {
+                        foreach (var actuationAction in simulationTick.ActionsToExecute)
+                        {
+                            if (actuationAction.ActuatorState.Actuator.Name.Equals(actuatorName))
+                            {
+                                actuatorPresent = true;
+                            }
+                        }
+                    }
+
+                    actuatorsPresent.Add(actuatorPresent);
+                }
+
+                var allActuatorsPresent = actuatorsPresent.All(actuatorPresent => actuatorPresent == true);
+
+                if (allActuatorsPresent)
+                {
+                    SimulationConfiguration simulationConfiguration = null!;
+
+                    if (reconfigurationActionCombinations.Any())
+                    {
+                        foreach (var reconfigurationActionCombination in reconfigurationActionCombinations)
+                        {
+                            simulationConfiguration = new SimulationConfiguration
+                            {
+                                SimulationTicks = simulationTickCombination,
+                                PostTickActions = reconfigurationActionCombination
+                            };
+                        }
+                    }
+                    else
+                    {
+                        simulationConfiguration = new SimulationConfiguration
+                        {
+                            SimulationTicks = simulationTickCombination,
+                            PostTickActions = []
+                        };
+                    }
+
+                    simulationConfigurations.Add(simulationConfiguration);
+                }
+            }
 
             return simulationConfigurations;
         }

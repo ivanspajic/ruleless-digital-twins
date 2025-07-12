@@ -822,8 +822,8 @@ namespace Logic.Mapek
             var reconfigurationAction = new ReconfigurationAction
             {
                 ConfigurableParameter = configurableParameter,
-                Effect = effect,
-                Name = reconfigurationActionName
+                Name = reconfigurationActionName,
+                Effect = effect
             };
 
             actions.Add(reconfigurationAction);

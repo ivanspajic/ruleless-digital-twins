@@ -9,6 +9,11 @@ namespace Logic.ValueHandlerInterfaces
 
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues);
 
-        public object ChangeValueByAmount(object value, object amountToChangeBy, Effect typeOfChange);
+        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(object currentValue,
+            object minimumValue,
+            object maximumValue,
+            int simulationGranularity,
+            Effect effect,
+            string configurableParameterName);
     }
 }

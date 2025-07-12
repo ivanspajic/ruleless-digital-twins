@@ -50,14 +50,11 @@ namespace Logic.Mapek
         {
             _logger.LogInformation("Reconfiguring property {configurableProperty} with {effect}.",
                 reconfigurationAction.ConfigurableParameter.Name,
-                reconfigurationAction.Effect);
+                reconfigurationAction.NewParameterValue);
 
             var valueHandler = _factory.GetValueHandlerImplementation(reconfigurationAction.ConfigurableParameter.OwlType);
 
-            propertyCache.ConfigurableParameters[reconfigurationAction.ConfigurableParameter.Name].Value =
-                valueHandler.ChangeValueByAmount(reconfigurationAction.ConfigurableParameter.Value,
-                    reconfigurationAction.AltersBy,
-                    reconfigurationAction.Effect);
+            propertyCache.ConfigurableParameters[reconfigurationAction.ConfigurableParameter.Name].Value = reconfigurationAction.NewParameterValue;
         }
     }
 }

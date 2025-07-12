@@ -113,12 +113,12 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Data properties
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/altersBy
-:altersBy rdf:type owl:DatatypeProperty ;
-          rdfs:domain :ReconfigurationAction ;
-          rdfs:range rdfs:Literal ;
-          rdfs:comment "Represents the relation between a ReconfiguationAction and the literal (value) it alters a ConfigurableParameter with."@en ;
-          rdfs:label "altersBy"@en .
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/configuresNewValue
+:configuresNewValue rdf:type owl:DatatypeProperty ;
+                    rdfs:domain :ReconfigurationAction ;
+                    rdfs:range rdfs:Literal ;
+                    rdfs:comment "Represents the relation between a ReconfiguationAction and the literal (value) it changes a ConfigurableParameter to."@en ;
+                    rdfs:label "configuresNewValue"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasIdentifier
@@ -316,17 +316,12 @@ xsd:duration rdf:type rdfs:Datatype .
 :ReconfigurationAction rdf:type owl:Class ;
                        rdfs:subClassOf :Action ,
                                        [ rdf:type owl:Restriction ;
-                                         owl:onProperty :affectsPropertyWith ;
-                                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                         owl:onClass :Effect
-                                       ] ,
-                                       [ rdf:type owl:Restriction ;
                                          owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
                                          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                          owl:onClass :ConfigurableParameter
                                        ] ,
                                        [ rdf:type owl:Restriction ;
-                                         owl:onProperty :altersBy ;
+                                         owl:onProperty :configuresNewValue ;
                                          owl:cardinality "1"^^xsd:nonNegativeInteger
                                        ] ;
                        rdfs:comment "Represents a single system Action with a parameter reconfiguration, either for optimization or regaining optimal conditions."@en ;

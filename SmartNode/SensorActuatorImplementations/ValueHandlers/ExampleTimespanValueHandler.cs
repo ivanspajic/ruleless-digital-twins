@@ -6,12 +6,17 @@ namespace SensorActuatorImplementations.ValueHandlers
 {
     public class ExampleTimespanValueHandler : IValueHandler
     {
-        public object ChangeValueByAmount(object value, object amountToChangeBy, Effect typeOfChange)
+        public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues)
         {
             throw new NotImplementedException();
         }
 
-        public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues)
+        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(object currentValue,
+            object minimumValue,
+            object maximumValue,
+            int simulationGranularity,
+            Effect effect,
+            string configurableParameterName)
         {
             throw new NotImplementedException();
         }

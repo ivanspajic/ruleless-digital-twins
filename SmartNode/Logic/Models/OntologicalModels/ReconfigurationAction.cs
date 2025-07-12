@@ -7,7 +7,7 @@
         public required Effect Effect { get; init; }
 
         // This isn't required on instantiation as the reconfiguration value isn't known until
-        // after the simulations have been completed.
-        public object AltersBy { get; set; }
+        // the Plan phase has been reached and a simulation granularity has been provided.
+        public object NewParameterValue { get; set; }
     }
 }

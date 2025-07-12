@@ -31,6 +31,11 @@ namespace SensorActuatorImplementations.ValueHandlers
             { Effect.ValueDecrease, DecreaseValueByAmount }
         };
 
+        // When calculating possible reconfiguration values for ConfigurableParameters, some parameters may need specific logic to do so. For example,
+        // it may be inaccurate to simply take the min-max value range and divide it by the simulation granularity in a completely linear way. For this
+        // reason, the user may register custom logic delegates and map them to specific ConfigurableParameter names.
+        private static readonly Dictionary<string, Func<double, double, int, IEnumerable<object>>> _configurableParameterGranularityMap = new() { };
+
         public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression)
         {
             var unsatisfiedConstraints = new List<AtomicConstraintExpression>();
@@ -101,22 +106,57 @@ namespace SensorActuatorImplementations.ValueHandlers
             return measuredPropertyDoubleValues.Sum() / measuredPropertyDoubleValues.Length;
         }
 
-        public object ChangeValueByAmount(object value, object amountToChangeBy, Effect typeOfChange)
+        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(object currentValue,
+            object minimumValue,
+            object maximumValue,
+            int simulationGranularity,
+            Effect effect,
+            string configurableParameterName)
         {
-            if (_amountChangeDelegateMap.TryGetValue(typeOfChange, out Func<double, double, double>? valueUpdater))
+            IEnumerable<object> possibleValues;
+
+            if (currentValue is not double)
             {
-                // Check if the value is not already a double to parse it before proceeding. This ensures that we parse
-                // during the initial run when the value is given as a string directly from the instance model graph.
-                // In all other cases, since the ConfigurableParameter's value is cached, it will be a double (object).
-                if (value is not double)
-                {
-                    value = double.Parse(value.ToString()!, CultureInfo.InvariantCulture);
-                }
-                
-                return valueUpdater((double)value, (double)amountToChangeBy);
+                currentValue = double.Parse(currentValue.ToString()!, CultureInfo.InvariantCulture);
             }
 
-            throw new Exception($"Unsupported Effect {typeOfChange}.");
+            if (minimumValue is not double)
+            {
+                minimumValue = double.Parse(minimumValue.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            if (maximumValue is not double)
+            {
+                maximumValue = double.Parse(maximumValue.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            var currentValueDouble = (double)currentValue;
+            var minimumValueDouble = (double)minimumValue;
+            var maximumValueDouble = (double)maximumValue;
+
+            if (_configurableParameterGranularityMap.TryGetValue(configurableParameterName, out Func<double, double, int, IEnumerable<object>> configurableParameterLogic))
+            {
+                possibleValues = configurableParameterLogic(minimumValueDouble, maximumValueDouble, simulationGranularity);
+            }
+            else
+            {
+                var possibleValueList = new List<object>();
+
+                var valueRange = maximumValueDouble - minimumValueDouble;
+                var intervalSize = valueRange / simulationGranularity;
+
+                for (var i = minimumValueDouble; i < maximumValueDouble; i += intervalSize)
+                {
+                    if ((effect == Effect.ValueIncrease && i > currentValueDouble) || (effect == Effect.ValueDecrease && i < currentValueDouble))
+                    {
+                        possibleValueList.Add(i);
+                    }
+                }
+
+                possibleValues = possibleValueList;
+            }
+
+            return possibleValues;
         }
 
         private static bool EvaluateGreaterThan(double sensorValue, double optimalConditionValue)

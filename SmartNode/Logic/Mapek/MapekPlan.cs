@@ -65,30 +65,65 @@ namespace Logic.Mapek
 
         private IEnumerable<IEnumerable<ActuationAction>> GetActuationActionCombinations(IEnumerable<Models.OntologicalModels.Action> actions)
         {
-            var actionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>();
+            var actuationActionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(new ActionSetEqualityComparer());
 
-            // TODO:
-            // select from actions by unique actuators and get back a collection of collections (actions by actuator)
-            // combine exactly like you combine simulation ticks!!
+            var actuationActions = actions.Select(action => action as ActuationAction);
 
-            // Get all possible combinations.
-            var actionCombinationsa = GetActionCombinations(actions);
+            // Group ActuationActions by their Actuators to allow creating combinations that don't consist of states of the same Actuator.
+            var actuationActionsByActuatorMap = new Dictionary<string, List<ActuationAction>>();
+
+            foreach (var actuationAction in actuationActions)
+            {
+                if (actuationActionsByActuatorMap.TryGetValue(actuationAction.ActuatorState.Actuator.Name, out List<ActuationAction> actuationActionsInMap))
+                {
+                    actuationActionsInMap.Add(actuationAction);
+                }
+                else
+                {
+                    actuationActionsByActuatorMap.Add(actuationAction.ActuatorState.Actuator.Name, new List<ActuationAction>
+                    {
+                        actuationAction
+                    });
+                }
+            }
+
+            // Convert to a simple collection.
+            var actuatorActuationsByActuator = new List<List<ActuationAction>>();
+
+            foreach (var keyValuePair in actuationActionsByActuatorMap)
+            {
+                actuatorActuationsByActuator.Add(keyValuePair.Value);
+            }
+
+            // Get the Cartesian product of ActuationActions that don't share Actuators.
+            var actuationActionByActuatorCartesianProducts = GetNaryCartesianProducts(actuatorActuationsByActuator);
+            var actionByActuatorCartesianProducts = actuationActionByActuatorCartesianProducts.Select(actuationActionByActuatorCartesianProduct =>
+                actuationActionByActuatorCartesianProduct.Select(actuationAction =>
+                    actuationAction as Models.OntologicalModels.Action));
+
+            // Get all possible combinations for each ActuationAction by Actuator Cartesian product.
+            foreach (var actionByActuatorCartesianProduct in actionByActuatorCartesianProducts)
+            {
+                var actionCombinations = GetActionCombinations(actionByActuatorCartesianProduct);
+
+                actuationActionCombinations.UnionWith(actionCombinations);
+            }
 
             // Perform a conversion to the ActuationAction type for easier handling.
-            return actionCombinations.Select(actionCombination =>
-                actionCombination.Select(action =>
-                    action as ActuationAction))!;
+            return actuationActionCombinations.Select(actuationActionCombination =>
+                actuationActionCombination.Select(actuationAction =>
+                    actuationAction as ActuationAction))!;
         }
 
         private IEnumerable<IEnumerable<ReconfigurationAction>> GetReconfigurationActionCombinations(IEnumerable<Models.OntologicalModels.Action> actions)
         {
             // Get all possible combinations.
-            var actionCombinations = GetActionCombinations(actions);
+            var reconfigurationActionCombinations = GetActionCombinations(actions);
 
             // Perform a conversion to the ReconfigurationAction type for easier handling.
-            return actionCombinations.Select(actionCombination =>
-                actionCombination.Select(action =>
-                    action as ReconfigurationAction))!;
+            return reconfigurationActionCombinations.Select(reconfigurationActionCombination =>
+                reconfigurationActionCombination.Select(reconfigurationAction =>
+                    reconfigurationAction as ReconfigurationAction))!;
         }
 
         private HashSet<HashSet<Models.OntologicalModels.Action>> GetActionCombinations(IEnumerable<Models.OntologicalModels.Action> actions)
@@ -98,7 +133,7 @@ namespace Logic.Mapek
             // no Actions with contradicting Effects.
 
             // Ensure that the set of sets has unique elements with the equality comparer.
-            var actionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(new ActionSetEqualityComparer());
+            var actionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(new SetEqualityComparer<Models.OntologicalModels.Action>());
 
             foreach (var action in actions)
             {
@@ -170,47 +205,47 @@ namespace Logic.Mapek
             }
 
             // Get all possible Cartesian pairings of simulation ticks that together form full simulation configurations.
-            var simulationTickCombinations = GetAllSimulationTickCombinations(allSimulationTicksByIndex);
+            var simulationTickCombinations = GetNaryCartesianProducts(allSimulationTicksByIndex);
 
             // get the longest action combination as this is the only one where all actions are present
 
             return simulationConfigurations;
         }
 
-        private HashSet<HashSet<SimulationTick>> GetAllSimulationTickCombinations(IEnumerable<IEnumerable<SimulationTick>> allSimulationTicksByIndex)
+        private HashSet<HashSet<T>> GetNaryCartesianProducts<T>(IEnumerable<IEnumerable<T>> originalCollectionOfCollections)
         {
-            var simulationTickCombinations = new HashSet<HashSet<SimulationTick>>();
+            var combinations = new HashSet<HashSet<T>>(new SetEqualityComparer<T>());
 
-            foreach (var simulationTicksWithCurrentIndex in allSimulationTicksByIndex)
+            foreach (var currentCollection in originalCollectionOfCollections)
             {
-                var simulationTicksWithNotCurrentIndices = allSimulationTicksByIndex.Where(simulationTicks => simulationTicks != simulationTicksWithCurrentIndex);
+                var collectionOfRemainingCollections = originalCollectionOfCollections.Where(collection => collection != currentCollection);
 
-                foreach (var simulationTick in simulationTicksWithCurrentIndex)
+                foreach (var element in currentCollection)
                 {
-                    if (!simulationTicksWithNotCurrentIndices.Any())
+                    if (!collectionOfRemainingCollections.Any())
                     {
-                        var singleSimulationTickCombination = new HashSet<SimulationTick>()
+                        var singleElementCombination = new HashSet<T>()
                         {
-                            simulationTick
+                            element
                         };
 
-                        simulationTickCombinations.Add(singleSimulationTickCombination);
+                        combinations.Add(singleElementCombination);
                     }
                     else
                     {
-                        var remainingSimulationTickCombinations = GetAllSimulationTickCombinations(simulationTicksWithNotCurrentIndices);
+                        var remainingCombinations = GetNaryCartesianProducts(collectionOfRemainingCollections);
 
-                        foreach (var remainingSimulationTickCombination in remainingSimulationTickCombinations)
+                        foreach (var remainingCombination in remainingCombinations)
                         {
-                            remainingSimulationTickCombination.Add(simulationTick);
+                            remainingCombination.Add(element);
                         }
 
-                        simulationTickCombinations.UnionWith(remainingSimulationTickCombinations);
+                        combinations.UnionWith(remainingCombinations);
                     }
                 }
             }
 
-            return simulationTickCombinations;
+            return combinations;
         }
 
         //private IEnumerable<SimulationResult> Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations,

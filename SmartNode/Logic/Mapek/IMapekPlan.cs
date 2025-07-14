@@ -1,5 +1,6 @@
 ﻿using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
+using VDS.RDF;
 
 namespace Logic.Mapek
 {
@@ -7,6 +8,7 @@ namespace Logic.Mapek
     {
         public IEnumerable<Models.OntologicalModels.Action> Plan(IEnumerable<OptimalCondition> optimalConditions,
             IEnumerable<Models.OntologicalModels.Action> actions,
-            PropertyCache propertyCache);
+            PropertyCache propertyCache,
+            IGraph instanceModel);
     }
 }

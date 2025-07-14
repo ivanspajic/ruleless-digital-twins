@@ -5,7 +5,7 @@ namespace Logic.ValueHandlerInterfaces
 {
     public interface IValueHandler
     {
-        public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression);
+        public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression, object propertyValue);
 
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues);
 

@@ -11,7 +11,7 @@ namespace SensorActuatorImplementations.ValueHandlers
         // When calculating possible reconfiguration values for ConfigurableParameters, some parameters may need specific logic to do so. For example,
         // it may be inaccurate to simply take the min-max value range and divide it by the simulation granularity in a completely linear way. For this
         // reason, the user may register custom logic delegates and map them to specific ConfigurableParameter names.
-        private static readonly Dictionary<string, Func<int, int, int, IEnumerable<object>>> _configurableParameterGranularityMap = new() { };
+        private static readonly Dictionary<string, Func<int, int, int, int, IEnumerable<object>>> _configurableParameterGranularityMap = new() { };
 
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues)
         {
@@ -46,9 +46,9 @@ namespace SensorActuatorImplementations.ValueHandlers
             var minimumValueInt = (int)minimumValue;
             var maximumValueInt = (int)maximumValue;
 
-            if (_configurableParameterGranularityMap.TryGetValue(configurableParameterName, out Func<int, int, int, IEnumerable<object>> configurableParameterLogic))
+            if (_configurableParameterGranularityMap.TryGetValue(configurableParameterName, out Func<int, int, int, int, IEnumerable<object>> configurableParameterLogic))
             {
-                possibleValues = configurableParameterLogic(minimumValueInt, maximumValueInt, simulationGranularity);
+                possibleValues = configurableParameterLogic(currentValueInt, minimumValueInt, maximumValueInt, simulationGranularity);
             }
             else
             {
@@ -72,7 +72,7 @@ namespace SensorActuatorImplementations.ValueHandlers
             return possibleValues;
         }
 
-        public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression)
+        public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression, object propertyValue)
         {
             throw new NotImplementedException();
         }

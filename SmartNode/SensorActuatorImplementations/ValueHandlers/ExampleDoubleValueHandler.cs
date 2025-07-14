@@ -34,9 +34,9 @@ namespace SensorActuatorImplementations.ValueHandlers
         // When calculating possible reconfiguration values for ConfigurableParameters, some parameters may need specific logic to do so. For example,
         // it may be inaccurate to simply take the min-max value range and divide it by the simulation granularity in a completely linear way. For this
         // reason, the user may register custom logic delegates and map them to specific ConfigurableParameter names.
-        private static readonly Dictionary<string, Func<double, double, int, IEnumerable<object>>> _configurableParameterGranularityMap = new() { };
+        private static readonly Dictionary<string, Func<double, double, double, int, IEnumerable<object>>> _configurableParameterGranularityMap = new() { };
 
-        public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression)
+        public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression, object propertyValue)
         {
             var unsatisfiedConstraints = new List<AtomicConstraintExpression>();
 
@@ -45,12 +45,11 @@ namespace SensorActuatorImplementations.ValueHandlers
                 // In case of finding the node type in the expression delegate map, we know it must be a binary expression with constant values
                 // to be compared.
                 var atomicConstraintExpression = (AtomicConstraintExpression)constraintExpression;
-                var left = atomicConstraintExpression.Left;
                 var right = atomicConstraintExpression.Right;
 
-                if (left is not double)
+                if (propertyValue is not double)
                 {
-                    left = double.Parse(left.ToString()!, CultureInfo.InvariantCulture);
+                    propertyValue = double.Parse(propertyValue.ToString()!, CultureInfo.InvariantCulture);
                 }
 
                 if (right is not double)
@@ -59,7 +58,7 @@ namespace SensorActuatorImplementations.ValueHandlers
                 }
 
                 // Evaluate the comparison and add the atomic 
-                var evaluation = valueComparisonEvaluator((double)left, (double)right);
+                var evaluation = valueComparisonEvaluator((double)propertyValue, (double)right);
 
                 if (!evaluation)
                 {
@@ -71,8 +70,8 @@ namespace SensorActuatorImplementations.ValueHandlers
                 // In case of finding the node type in the expression combination delegate map, we know it must be a binary expression with more
                 // sub-expression either containing more combinations or value comparisons.
                 var nestedConstraintExpression = (NestedConstraintExpression)constraintExpression;
-                var leftUnsatisfiedConstraints = GetUnsatisfiedConstraintsFromEvaluation(nestedConstraintExpression.Left);
-                var rightUnsatisfiedConstraints = GetUnsatisfiedConstraintsFromEvaluation(nestedConstraintExpression.Right);
+                var leftUnsatisfiedConstraints = GetUnsatisfiedConstraintsFromEvaluation(nestedConstraintExpression.Left, propertyValue);
+                var rightUnsatisfiedConstraints = GetUnsatisfiedConstraintsFromEvaluation(nestedConstraintExpression.Right, propertyValue);
 
                 var evaluation = constraintCombinationEvaluator(!leftUnsatisfiedConstraints.Any(), !rightUnsatisfiedConstraints.Any());
 
@@ -134,9 +133,9 @@ namespace SensorActuatorImplementations.ValueHandlers
             var minimumValueDouble = (double)minimumValue;
             var maximumValueDouble = (double)maximumValue;
 
-            if (_configurableParameterGranularityMap.TryGetValue(configurableParameterName, out Func<double, double, int, IEnumerable<object>> configurableParameterLogic))
+            if (_configurableParameterGranularityMap.TryGetValue(configurableParameterName, out Func<double, double, double, int, IEnumerable<object>> configurableParameterLogic))
             {
-                possibleValues = configurableParameterLogic(minimumValueDouble, maximumValueDouble, simulationGranularity);
+                possibleValues = configurableParameterLogic(currentValueDouble, minimumValueDouble, maximumValueDouble, simulationGranularity);
             }
             else
             {

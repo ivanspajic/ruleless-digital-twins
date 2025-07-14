@@ -333,11 +333,6 @@ xsd:duration rdf:type rdfs:Datatype .
                                                        owl:onProperty :hasActuatorState ;
                                                        owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                        owl:onClass :ActuatorState
-                                                     ] ,
-                                                     [ rdf:type owl:Restriction ;
-                                                       owl:onProperty :hasModel ;
-                                                       owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                       owl:onDataRange xsd:anyURI
                                                      ] .
 
 
@@ -358,7 +353,20 @@ xsd:duration rdf:type rdfs:Datatype .
                                                        owl:onProperty <http://www.w3.org/ns/ssn/implements> ;
                                                        owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                        owl:onClass :OptimalCondition
+                                                     ] ,
+                                                     [ rdf:type owl:Restriction ;
+                                                       owl:onProperty :hasModel ;
+                                                       owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                       owl:onDataRange xsd:anyURI
                                                      ] .
+
+
+###  http://www.w3.org/ns/sosa/Procedure
+<http://www.w3.org/ns/sosa/Procedure> rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                                        owl:onProperty :hasModel ;
+                                                        owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                        owl:onDataRange xsd:anyURI
+                                                      ] .
 
 
 ###  http://www.w3.org/ns/ssn/Input

@@ -126,7 +126,7 @@ namespace Logic.Mapek
                 // If the OptimalCondition is unsatisfied, add it to the collection.
                 foreach (var constraint in optimalCondition.Constraints)
                 {
-                    var unsatisfiedConstraints = valueHandler.GetUnsatisfiedConstraintsFromEvaluation(constraint);
+                    var unsatisfiedConstraints = valueHandler.GetUnsatisfiedConstraintsFromEvaluation(constraint, propertyValue);
 
                     if (unsatisfiedConstraints.Any())
                     {
@@ -140,7 +140,7 @@ namespace Logic.Mapek
                         _logger.LogInformation("Unsatisfied constraint in OptimalCondition {optimalCondition}: (property {property}) {leftValue} {constraintType} {rightValue}.",
                             optimalCondition.Name,
                             optimalCondition.Property,
-                            unsatisfiedConstraint.Left.ToString(),
+                            propertyValue.ToString(),
                             unsatisfiedConstraint.ConstraintType.ToString(),
                             unsatisfiedConstraint.Right.ToString());
                     }
@@ -245,7 +245,6 @@ namespace Logic.Mapek
                 optimalCondition,
                 property,
                 reachedInMaximumSeconds,
-                propertyValue,
                 operatorFilters);
 
             AddConstraintsOfSecondRangeValues(constraintExpressions,
@@ -253,7 +252,6 @@ namespace Logic.Mapek
                 optimalCondition,
                 property,
                 reachedInMaximumSeconds,
-                propertyValue,
                 operatorFilters);
 
             AddConstraintsOfDisjunctionsOfOneAndOne(constraintExpressions,
@@ -261,7 +259,6 @@ namespace Logic.Mapek
                 optimalCondition,
                 property,
                 reachedInMaximumSeconds,
-                propertyValue,
                 operatorFilters);
 
             // For models created with Protege (and the OWL API), disjunctions containing 1 and then 2 values will be converted to those
@@ -271,7 +268,6 @@ namespace Logic.Mapek
                 optimalCondition,
                 property,
                 reachedInMaximumSeconds,
-                propertyValue,
                 operatorFilters);
 
             AddConstraintsOfDisjunctionsOfTwoAndTwo(constraintExpressions,
@@ -279,7 +275,6 @@ namespace Logic.Mapek
                 optimalCondition,
                 property,
                 reachedInMaximumSeconds,
-                propertyValue,
                 operatorFilters);
 
             return constraintExpressions;
@@ -290,7 +285,6 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            object propertyValue,
             IEnumerable<ConstraintType> constraintTypes)
         {
             foreach (var constraintType in constraintTypes)
@@ -320,7 +314,6 @@ namespace Logic.Mapek
 
                     var constraintExpression = new AtomicConstraintExpression
                     {
-                        Left = propertyValue,
                         Right = constraint,
                         ConstraintType = constraintType
                     };
@@ -335,7 +328,6 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            object propertyValue,
             IEnumerable<ConstraintType> constraintTypes)
         {
             foreach (var constraintType in constraintTypes)
@@ -366,7 +358,6 @@ namespace Logic.Mapek
 
                     var constraintExpression = new AtomicConstraintExpression
                     {
-                        Left = propertyValue,
                         Right = constraint,
                         ConstraintType = constraintType
                     };
@@ -381,7 +372,6 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            object propertyValue,
             IEnumerable<ConstraintType> constraintTypes)
         {
             foreach (var constraintType1 in constraintTypes)
@@ -424,13 +414,11 @@ namespace Logic.Mapek
 
                         var leftConstraintExpression = new AtomicConstraintExpression
                         {
-                            Left = propertyValue,
                             Right = leftConstraint,
                             ConstraintType = constraintType1
                         };
                         var rightConstraintExpression = new AtomicConstraintExpression
                         {
-                            Left = propertyValue,
                             Right = rightConstraint,
                             ConstraintType = constraintType2
                         };
@@ -452,7 +440,6 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            object propertyValue,
             IEnumerable<ConstraintType> constraintTypes)
         {
             foreach (var constraintType1 in constraintTypes)
@@ -501,19 +488,16 @@ namespace Logic.Mapek
 
                             var leftConstraintExpression1 = new AtomicConstraintExpression
                             {
-                                Left = propertyValue,
                                 Right = leftConstraint1,
                                 ConstraintType = constraintType1
                             };
                             var leftConstraintExpression2 = new AtomicConstraintExpression
                             {
-                                Left = propertyValue,
                                 Right = leftConstraint2,
                                 ConstraintType = constraintType2
                             };
                             var rightConstraintExpression = new AtomicConstraintExpression
                             {
-                                Left = propertyValue,
                                 Right = rightConstraint,
                                 ConstraintType = constraintType3
                             };
@@ -542,7 +526,6 @@ namespace Logic.Mapek
             INode optimalCondition,
             INode property,
             INode reachedInMaximumSeconds,
-            object propertyValue,
             IEnumerable<ConstraintType> constraintTypes)
         {
             foreach (var constraintType1 in constraintTypes)
@@ -597,25 +580,21 @@ namespace Logic.Mapek
 
                                 var leftConstraintExpression1 = new AtomicConstraintExpression
                                 {
-                                    Left = propertyValue,
                                     Right = leftConstraint1,
                                     ConstraintType = constraintType1
                                 };
                                 var leftConstraintExpression2 = new AtomicConstraintExpression
                                 {
-                                    Left = propertyValue,
                                     Right = leftConstraint2,
                                     ConstraintType = constraintType2
                                 };
                                 var rightConstraintExpression1 = new AtomicConstraintExpression
                                 {
-                                    Left = propertyValue,
                                     Right = rightConstraint1,
                                     ConstraintType = constraintType3
                                 };
                                 var rightConstraintExpression2 = new AtomicConstraintExpression
                                 {
-                                    Left = propertyValue,
                                     Right = rightConstraint2,
                                     ConstraintType = constraintType4
                                 };

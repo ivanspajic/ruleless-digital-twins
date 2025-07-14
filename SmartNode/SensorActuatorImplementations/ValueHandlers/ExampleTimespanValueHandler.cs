@@ -21,7 +21,7 @@ namespace SensorActuatorImplementations.ValueHandlers
             throw new NotImplementedException();
         }
 
-        public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression)
+        public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression, object propertyValue)
         {
             throw new NotImplementedException();
         }

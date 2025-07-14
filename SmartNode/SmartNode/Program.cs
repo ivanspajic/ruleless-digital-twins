@@ -35,7 +35,7 @@ namespace SmartNode
             // Get executing assembly path.
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             // Combine it with the relative path of the inferred model file.
-            var modelFilePath = Path.Combine(executingAssemblyPath!, @"..\..\..\..\..\models-and-rules\inferred-model-2.ttl");
+            var modelFilePath = Path.Combine(executingAssemblyPath!, @"..\..\..\..\..\models-and-rules\inferred-model-1.ttl");
             // Make it system-agnostic.
             modelFilePath = Path.GetFullPath(modelFilePath);
 

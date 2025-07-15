@@ -17,21 +17,11 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public void Execute(IEnumerable<Models.OntologicalModels.Action> actions, PropertyCache propertyCache)
+        public void Execute(SimulationConfiguration optimalConfiguration, PropertyCache propertyCache)
         {
             _logger.LogInformation("Starting the Execute phase.");
 
-            foreach (var action in actions)
-            {
-                if (action is ActuationAction actuationAction)
-                {
-                    ExecuteActuationAction(actuationAction);
-                }
-                else
-                {
-                    ExecuteReconfigurationAction((ReconfigurationAction)action, propertyCache);
-                }
-            }
+            
         }
 
         private void ExecuteActuationAction(ActuationAction actuationAction)

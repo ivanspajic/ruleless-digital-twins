@@ -22,7 +22,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public IEnumerable<Models.OntologicalModels.Action> Plan(IEnumerable<OptimalCondition> optimalConditions,
+        public SimulationConfiguration Plan(IEnumerable<OptimalCondition> optimalConditions,
             IEnumerable<Models.OntologicalModels.Action> actions,
             PropertyCache propertyCache,
             IGraph instanceModel)
@@ -63,18 +63,13 @@ namespace Logic.Mapek
 
             _logger.LogInformation("Generated a total of {total} simulation configurations.", simulationConfigurations.Count());
 
-            var simulationResults = Simulate(simulationConfigurations, optimalConditions, propertyCache, instanceModel, actuationSimulationGranularity);
+            var successfulConfigurations = Simulate(simulationConfigurations, optimalConditions, propertyCache, instanceModel, actuationSimulationGranularity);
 
-            // TODO:
-            // for each combination, check that the combination satisfies all optimalconditions
-                    // if the combination satisfied optimalconditions, add it to the list of possible execution plans
-            // out of the passing combinations, find the optimal combination per distinct property
-                // this requires comparing the values of the optimized properties
-                    // pick the one containing the most properties optimized
-                    // pick the one with the least number of actions
-                    // then pick the first in the collection
+            _logger.LogInformation("Found a total of {total} successful configurations.", successfulConfigurations.Count());
 
-            return plannedActions;
+            var optimalConfiguration = GetOptimalConfiguration(successfulConfigurations);
+
+            return optimalConfiguration;
         }
 
         private IEnumerable<IEnumerable<ActuationAction>> GetActuationActionCombinations(IEnumerable<ActuationAction> actuationActions)
@@ -416,35 +411,16 @@ namespace Logic.Mapek
             return combinations;
         }
 
-        private IEnumerable<SimulationResult> Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations,
+        private IEnumerable<SimulationConfiguration> Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations,
             IEnumerable<OptimalCondition> optimalConditions,
             PropertyCache propertyCache,
             IGraph instanceModel,
             int simulationGranularity)
         {
-            var simulationResults = new List<SimulationResult>();
+            var successfulSimulationConfigurations = new List<SimulationConfiguration>();
 
-            string fmuFilePath = string.Empty;
-
-            // Retrieve all Actuators to be used in the simulations and ensure that they belong to the same host Platform such that the Platform's
-            // FMU will contain all of their relevant input/output variables.
-            if (simulationConfigurations.First().SimulationTicks.Any())
-            {
-                var actuatorNames = new HashSet<string>();
-
-                foreach (var simulationTick in simulationConfigurations.First().SimulationTicks)
-                {
-                    foreach (var actuationAction in simulationTick.ActionsToExecute)
-                    {
-                        if (!actuatorNames.Contains(actuationAction.ActuatorState.Actuator.Name))
-                        {
-                            actuatorNames.Add(actuationAction.ActuatorState.Actuator.Name);
-                        }
-                    }
-                }
-
-                fmuFilePath = GetHostPlatformFmu(instanceModel, actuatorNames);
-            }
+            // Retrieve the host platform FMU for ActuationAction simulations.
+            var fmuFilePath = GetHostPlatformFmu(instanceModel, simulationConfigurations.First());
 
             // Get the unsatisfied OptimalCondition with the lowest mitigation time to use it as the simulation's maximum time.
             var unsatisfiedOptimalConditions = optimalConditions.Where(optimalCondition => optimalCondition.UnsatisfiedAtomicConstraints.Any());
@@ -455,62 +431,90 @@ namespace Logic.Mapek
                 // Make a deep copy of the property cache for simulations.
                 var propertyCacheCopy = GetPropertyCacheCopy(propertyCache);
 
-                // Run the simulation.
+                // Run the simulation by executing ActuationActions in their respective simulation ticks followed by ReconfigurationActions.
                 foreach (var simulationTick in simulationConfiguration.SimulationTicks)
                 {
                     var timeInterval = maximumSimulationTime / simulationGranularity;
                     var simulationTime = (simulationTick.TickIndex + 1) * timeInterval;
 
-                    var fmuInputs = new Dictionary<string, object>();
+                    var fmuActuationInputs = new Dictionary<string, object>();
 
                     foreach (var actuationAction in simulationTick.ActionsToExecute)
                     {
                         // Shave off the long name URIs from the instance model.
-                        var simpleActuatorName = actuationAction.ActuatorState.Actuator.Name.Split('#')[1];
-                        var simpleActuatorStateName = actuationAction.ActuatorState.Name.Split('#')[1];
+                        var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Actuator.Name);
+                        var simpleActuatorStateName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Name);
 
-                        fmuInputs.Add(simpleActuatorName + "_state", simpleActuatorStateName);
+                        fmuActuationInputs.Add(simpleActuatorName + "_state", simpleActuatorStateName);
                     }
 
-                    var propertyKeyValuePairs = ExecuteFmu(fmuFilePath, fmuInputs, simulationTime);
+                    var propertyKeyValuePairs = ExecuteFmu(fmuFilePath, fmuActuationInputs, simulationTime);
 
                     AssignPropertyCacheCopyValues(propertyCacheCopy, propertyKeyValuePairs);
                 }
 
                 foreach (var reconfigurationAction in simulationConfiguration.PostTickActions)
                 {
-                    var fmuInputs = new Dictionary<string, object>();
+                    var fmuReconfigurationInputs = new Dictionary<string, object>();
 
-                    // TODO: make a method for querying soft-sensor fmus
+                    // Shave off the long name URIs from the instance model.
+                    var simpleConfigurableParameterName = MapekUtilities.GetSimpleName(reconfigurationAction.ConfigurableParameter.Name);
 
-                    var propertyKeyValuePairs = ExecuteFmu(fmuFilePath, fmuInputs);
+                    fmuReconfigurationInputs.Add(simpleConfigurableParameterName, reconfigurationAction.NewParameterValue);
 
-                    AssignPropertyCacheCopyValues(propertyCacheCopy, propertyKeyValuePairs);
+                    // Get FMUs of all soft-sensors that take the current ConfigurableParameter as an Input Property.
+                    var softSensorFmus = GetSoftSensorFmuFilePathsFromConfigurableParameterName(instanceModel, reconfigurationAction.ConfigurableParameter.Name);
+
+                    // Execute all FMUs and adjust the property cache accordingly.
+                    foreach (var softSensorFmu in softSensorFmus)
+                    {
+                        var propertyKeyValuePairs = ExecuteFmu(fmuFilePath, fmuReconfigurationInputs);
+
+                        AssignPropertyCacheCopyValues(propertyCacheCopy, propertyKeyValuePairs);
+                    }
                 }
 
                 // Check that every OptimalCondition passes with respect to the values in the property cache copy.
-                foreach (var optimalCondition in optimalConditions)
-                {
-                    // TODO: use the same valuehandler logic as from the analyze phase to evaluate the constraints with new property values
-                }
+                var allOptimalConditionsSatisfied = AreAllOptimalConditionsSatisfied(optimalConditions, propertyCacheCopy);
 
-                // TODO: based on the optimalcondition check, make a simulationresult and add it to the collection
+                if (allOptimalConditionsSatisfied)
+                {
+                    simulationConfiguration.ResultingPropertyCache = propertyCacheCopy;
+
+                    successfulSimulationConfigurations.Add(simulationConfiguration);
+                }
             }
 
-            return new List<SimulationResult>();
+            return successfulSimulationConfigurations;
         }
 
-        private string GetHostPlatformFmu(IGraph instanceModel, IEnumerable<string> actuatorNames)
+        private string GetHostPlatformFmu(IGraph instanceModel, SimulationConfiguration simulationConfiguration)
         {
-            var query = MapekUtilities.GetParameterizedStringQuery();
+            if (!simulationConfiguration.SimulationTicks.Any())
+            {
+                return string.Empty;
+            }
 
-            // Build the necessary SPARQL query containing all Actuators.
+            // Retrieve all Actuators to be used in the simulations and ensure that they belong to the same host Platform such that the Platform's
+            // FMU will contain all of their relevant input/output variables.
+            var actuatorNames = new HashSet<string>();
             var clauseBuilder = new StringBuilder();
 
-            foreach (var actuatorName in actuatorNames)
+            foreach (var simulationTick in simulationConfiguration.SimulationTicks)
             {
-                clauseBuilder.AppendLine("?platform sosa:hosts <" + actuatorName + "> .");
+                foreach (var actuationAction in simulationTick.ActionsToExecute)
+                {
+                    if (!actuatorNames.Contains(actuationAction.ActuatorState.Actuator.Name))
+                    {
+                        actuatorNames.Add(actuationAction.ActuatorState.Actuator.Name);
+
+                        // Add the Actuator name to the query filter.
+                        clauseBuilder.AppendLine("?platform sosa:hosts <" + actuationAction.ActuatorState.Actuator.Name + "> .");
+                    }
+                }
             }
+
+            var query = MapekUtilities.GetParameterizedStringQuery();
 
             var clause = clauseBuilder.ToString();
 
@@ -577,10 +581,7 @@ namespace Logic.Mapek
         private IDictionary<string, object> ExecuteFmu(string fmuFilePath, IDictionary<string, object> inputs, double timeValue = -1)
         {
             // TODO: make reading from and writing to fmus work!
-            return new Dictionary<string, object>()
-            {
-                { "RoomTemperature", 14.3 }
-            };
+            return new Dictionary<string, object>();
         }
 
         private void AssignPropertyCacheCopyValues(PropertyCache propertyCacheCopy, IDictionary<string, object> fmuOutputs)
@@ -596,6 +597,91 @@ namespace Logic.Mapek
                     }
                 }
             }
+        }
+
+        private IEnumerable<string> GetSoftSensorFmuFilePathsFromConfigurableParameterName(IGraph instanceModel, string configurableParameterName)
+        {
+            var fmuFilePaths = new List<string>();
+
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            query.CommandText = @"SELECT ?fmuFilePath WHERE {
+                @inputParameter rdf:type meta:ConfigurableParameter .
+                ?procedure rdf:type sosa:Procedure .
+                ?procedure ssn:hasInput @inputParameter .
+                ?procedure meta:hasModel ?fmuFilePath . }";
+
+            query.SetUri("inputParameter", new Uri(configurableParameterName));
+
+            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+
+            foreach (var result in queryResult.Results)
+            {
+                var fmuFilePath = result["fmuFilePath"].ToString().Split('^')[0];
+
+                fmuFilePaths.Add(fmuFilePath);
+            }
+
+            return fmuFilePaths;
+        }
+
+        private bool AreAllOptimalConditionsSatisfied(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
+        {
+            foreach (var optimalCondition in optimalConditions)
+            {
+                var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.ConstraintValueType);
+
+                object propertyValue;
+
+                if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property, out ConfigurableParameter configurableParameter))
+                {
+                    propertyValue = configurableParameter.Value;
+                }
+                else if (propertyCache.Properties.TryGetValue(optimalCondition.Property, out Property property))
+                {
+                    propertyValue = property.Value;
+                }
+                else
+                {
+                    throw new Exception($"Property {optimalCondition.Property} was not found in the system.");
+                }
+
+                foreach (var constraint in optimalCondition.Constraints)
+                {
+                    var unsatisfiedConstraints = valueHandler.GetUnsatisfiedConstraintsFromEvaluation(constraint, propertyValue);
+
+                    if (unsatisfiedConstraints.Any())
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private SimulationConfiguration GetOptimalConfiguration(IEnumerable<SimulationConfiguration> successfulSimulationConfigurations)
+        {
+            SimulationConfiguration optimalConfiguration = null!;
+
+            // TODO:
+            // find out which properties are optimized and in what way (effect)
+                // save the propertychanges here?
+
+            foreach (var successfulSimulationConfiguration in successfulSimulationConfigurations)
+            {
+                // 
+            }
+
+            // TODO:
+            // out of the passing combinations, find the optimal
+                // this requires comparing the values of the optimized properties
+                    // pick the one containing the most optimized properties
+                    // pick the one with the lowest number of actions
+                    // then pick the first in the collection
+                    // write a comment about this logic potentially being delegated to the user
+
+            return optimalConfiguration;
         }
     }
 }

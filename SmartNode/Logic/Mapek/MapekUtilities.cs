@@ -67,6 +67,24 @@ namespace Logic.Mapek
             throw new Exception("The property " + propertyNode.ToString() + " was found without a value type.");
         }
 
+        public static string GetSimpleName(string longName)
+        {
+            var simpleName = string.Empty;
+            var simpleNameArray = longName.Split('#');
+
+            // Check if the name URI ends with a '/' instead of a '#'.
+            if (simpleNameArray.Length == 1)
+            {
+                simpleName = longName.Split('/')[^1];
+            }
+            else
+            {
+                simpleName = simpleNameArray[1];
+            }
+
+            return simpleName;
+        }
+
         private static string GetPropertyValueType(SparqlParameterizedString query, IGraph instanceModel, string parameterName, INode propertyNode)
         {
             query.SetParameter(parameterName, propertyNode);

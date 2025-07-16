@@ -601,6 +601,9 @@ namespace Logic.Mapek
         private IDictionary<string, object> ExecuteFmu(string fmuFilePath, IDictionary<string, object> inputs, double timeValue = -1)
         {
             // TODO: make reading from and writing to fmus work!
+
+
+
             return new Dictionary<string, object>();
         }
 

@@ -60,6 +60,7 @@ namespace Logic.Mapek
             // Get all possible simulation configurations for the given Actions.
             var simulationConfigurations = GetSimulationConfigurationsFromActionCombinations(actuationActionCombinations,
                 reconfigurationActionCombinations,
+                optimalConditions,
                 actuationSimulationGranularity);
 
             _logger.LogInformation("Generated a total of {total} simulation configurations.", simulationConfigurations.Count());
@@ -265,9 +266,14 @@ namespace Logic.Mapek
 
         private IEnumerable<SimulationConfiguration> GetSimulationConfigurationsFromActionCombinations(IEnumerable<IEnumerable<ActuationAction>> actuationActionCombinations,
             IEnumerable<IEnumerable<ReconfigurationAction>> reconfigurationActionCombinations,
+            IEnumerable<OptimalCondition> optimalConditions,
             int simulationGranularity)
         {
             var simulationConfigurations = new List<SimulationConfiguration>();
+
+            // Get the unsatisfied OptimalCondition with the lowest mitigation time to use it as the simulation's maximum time.
+            var unsatisfiedOptimalConditions = optimalConditions.Where(optimalCondition => optimalCondition.UnsatisfiedAtomicConstraints.Any());
+            var maximumSimulationTime = GetMaximumSimulationTime(unsatisfiedOptimalConditions);
 
             if (actuationActionCombinations.Any())
             {
@@ -280,10 +286,13 @@ namespace Logic.Mapek
 
                     foreach (var actuationActionCombination in actuationActionCombinations)
                     {
+                        var timeInterval = maximumSimulationTime / simulationGranularity;
+
                         var simulationTick = new SimulationTick
                         {
                             ActionsToExecute = actuationActionCombination,
-                            TickIndex = i
+                            TickIndex = i,
+                            TickDurationSeconds = timeInterval
                         };
 
                         simulationTicksWithCurrentIndex.Add(simulationTick);
@@ -435,21 +444,16 @@ namespace Logic.Mapek
             // Retrieve the host platform FMU for ActuationAction simulations.
             var fmuFilePath = GetHostPlatformFmu(instanceModel, simulationConfigurations.First());
 
-            // Get the unsatisfied OptimalCondition with the lowest mitigation time to use it as the simulation's maximum time.
-            var unsatisfiedOptimalConditions = optimalConditions.Where(optimalCondition => optimalCondition.UnsatisfiedAtomicConstraints.Any());
-            var maximumSimulationTime = GetMaximumSimulationTime(unsatisfiedOptimalConditions);
-
             foreach (var simulationConfiguration in simulationConfigurations)
             {
                 // Make a deep copy of the property cache for simulations.
                 var propertyCacheCopy = GetPropertyCacheCopy(propertyCache);
 
+                var simulationTime = 0.0;
+
                 // Run the simulation by executing ActuationActions in their respective simulation ticks followed by ReconfigurationActions.
                 foreach (var simulationTick in simulationConfiguration.SimulationTicks)
                 {
-                    var timeInterval = maximumSimulationTime / simulationGranularity;
-                    var simulationTime = (simulationTick.TickIndex + 1) * timeInterval;
-
                     var fmuActuationInputs = new Dictionary<string, object>();
 
                     foreach (var actuationAction in simulationTick.ActionsToExecute)
@@ -460,6 +464,9 @@ namespace Logic.Mapek
 
                         fmuActuationInputs.Add(simpleActuatorName + "_state", simpleActuatorStateName);
                     }
+
+                    // Advance the simulation time.
+                    simulationTime += simulationTick.TickDurationSeconds;
 
                     var propertyKeyValuePairs = ExecuteFmu(fmuFilePath, fmuActuationInputs, simulationTime);
 

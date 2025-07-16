@@ -4,12 +4,11 @@ namespace SensorActuatorImplementations.Actuators
 {
     public class ExampleActuator : IActuatorDevice
     {
-        public string ActuatorName { get; init; }
+        public required string ActuatorName { get; init; }
 
-        public void Actuate(string state)
+        public void Actuate(string state, double durationSeconds)
         {
-            // Simulates an actuation. For example, this could contain a procedure to connect to a Bluetooth device
-            // or similar.
+            // Simulates an actuation. For example, this could contain a procedure to connect to a Bluetooth device or similar.
         }
     }
 }

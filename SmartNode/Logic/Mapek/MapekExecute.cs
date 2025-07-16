@@ -11,6 +11,8 @@ namespace Logic.Mapek
         private readonly ILogger<MapekExecute> _logger;
         private readonly IFactory _factory;
 
+        private const int MaximumParallelThreads = 4;
+
         public MapekExecute(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekExecute>>();
@@ -21,19 +23,35 @@ namespace Logic.Mapek
         {
             _logger.LogInformation("Starting the Execute phase.");
 
-            
+            foreach (var simulationTick in optimalConfiguration.SimulationTicks)
+            {
+                var parallelOptions = new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = MaximumParallelThreads
+                };
+
+                Parallel.ForEach(simulationTick.ActionsToExecute, parallelOptions, (actuationAction) =>
+                {
+                    ExecuteActuationAction(actuationAction, simulationTick.TickDurationSeconds);
+                });
+            }
+
+            foreach (var reconfigurationAction in optimalConfiguration.PostTickActions)
+            {
+                ExecuteReconfigurationAction(reconfigurationAction, propertyCache);
+            }
         }
 
-        private void ExecuteActuationAction(ActuationAction actuationAction)
+        private void ExecuteActuationAction(ActuationAction actuationAction, double durationSeconds)
         {
-            _logger.LogInformation("Actuating actuator {actuator} with state {actuatorState}.",
+            _logger.LogInformation("Actuating actuator {actuator} with state {actuatorState} and duration of {duration} seconds.",
                 actuationAction.ActuatorState.Actuator,
-                actuationAction.ActuatorState);
+                actuationAction.ActuatorState,
+                durationSeconds);
 
             var actuator = _factory.GetActuatorDeviceImplementation(actuationAction.ActuatorState.Actuator.Name);
 
-            // TODO: expand the logic here when we add more actuation methods.
-            actuator.Actuate(actuationAction.ActuatorState.Name);
+            actuator.Actuate(actuationAction.ActuatorState.Name, durationSeconds);
         }
 
         private void ExecuteReconfigurationAction(ReconfigurationAction reconfigurationAction, PropertyCache propertyCache)
@@ -41,8 +59,6 @@ namespace Logic.Mapek
             _logger.LogInformation("Reconfiguring property {configurableProperty} with {effect}.",
                 reconfigurationAction.ConfigurableParameter.Name,
                 reconfigurationAction.NewParameterValue);
-
-            var valueHandler = _factory.GetValueHandlerImplementation(reconfigurationAction.ConfigurableParameter.OwlType);
 
             propertyCache.ConfigurableParameters[reconfigurationAction.ConfigurableParameter.Name].Value = reconfigurationAction.NewParameterValue;
         }

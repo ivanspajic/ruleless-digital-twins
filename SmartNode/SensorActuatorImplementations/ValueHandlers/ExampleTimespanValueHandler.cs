@@ -6,6 +6,16 @@ namespace SensorActuatorImplementations.ValueHandlers
 {
     public class ExampleTimespanValueHandler : IValueHandler
     {
+        public bool IsGreaterThan(object comparingValue, object targetValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsLessThan(object comparingValue, object targetValue)
+        {
+            throw new NotImplementedException();
+        }
+
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues)
         {
             throw new NotImplementedException();

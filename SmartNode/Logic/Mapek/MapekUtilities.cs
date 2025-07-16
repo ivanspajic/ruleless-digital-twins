@@ -1,4 +1,5 @@
-﻿using VDS.RDF;
+﻿using Logic.Models.OntologicalModels;
+using VDS.RDF;
 using VDS.RDF.Query;
 
 namespace Logic.Mapek

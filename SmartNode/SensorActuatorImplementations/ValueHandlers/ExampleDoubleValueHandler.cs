@@ -158,6 +158,36 @@ namespace SensorActuatorImplementations.ValueHandlers
             return possibleValues;
         }
 
+        public bool IsGreaterThan(object comparingValue, object targetValue)
+        {
+            if (comparingValue is not double)
+            {
+                comparingValue = double.Parse(comparingValue.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            if (targetValue is not double)
+            {
+                targetValue = double.Parse(targetValue.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            return EvaluateGreaterThan((double)comparingValue, (double)targetValue);
+        }
+
+        public bool IsLessThan(object comparingValue, object targetValue)
+        {
+            if (comparingValue is not double)
+            {
+                comparingValue = double.Parse(comparingValue.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            if (targetValue is not double)
+            {
+                targetValue = double.Parse(targetValue.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            return EvaluateLessThan((double)comparingValue, (double)targetValue);
+        }
+
         private static bool EvaluateGreaterThan(double sensorValue, double optimalConditionValue)
         {
             return sensorValue > optimalConditionValue;

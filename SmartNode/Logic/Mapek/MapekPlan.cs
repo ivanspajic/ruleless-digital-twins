@@ -5,6 +5,7 @@ using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
 using System.Text;
 using VDS.RDF;
 using VDS.RDF.Query;
@@ -65,9 +66,21 @@ namespace Logic.Mapek
 
             var successfulConfigurations = Simulate(simulationConfigurations, optimalConditions, propertyCache, instanceModel, actuationSimulationGranularity);
 
+            if (!successfulConfigurations.Any())
+            {
+                _logger.LogWarning("No successful simulation configurations found. This indicates that no Actions the system can take will restore " +
+                    "OptimalConditions. Consider adding additional Actuators or setting up soft-Sensors with different ConfigurableParameters.");
+
+                return new SimulationConfiguration
+                {
+                    PostTickActions = [],
+                    SimulationTicks = []
+                };
+            }
+
             _logger.LogInformation("Found a total of {total} successful configurations.", successfulConfigurations.Count());
 
-            var optimalConfiguration = GetOptimalConfiguration(successfulConfigurations);
+            var optimalConfiguration = GetOptimalConfiguration(instanceModel, propertyCache, successfulConfigurations);
 
             return optimalConfiguration;
         }
@@ -660,28 +673,163 @@ namespace Logic.Mapek
             return true;
         }
 
-        private SimulationConfiguration GetOptimalConfiguration(IEnumerable<SimulationConfiguration> successfulSimulationConfigurations)
+        private SimulationConfiguration GetOptimalConfiguration(IGraph instanceModel,
+            PropertyCache propertyCache,
+            IEnumerable<SimulationConfiguration> successfulSimulationConfigurations)
         {
-            SimulationConfiguration optimalConfiguration = null!;
+            // This method finds the optimal configuration out of the collection of successful simulation configurations. It does so by first
+            // finding a subset that contains the highest number of optimized Properties. For simplicity, the value optimized by is not checked
+            // since deciding on the 'worth' of each Property's amount with respect to another is pure domain knowledge and could thus be
+            // out-sourced as custom logic to the user. In case of multiple configurations remaining after the first filter, a further subset
+            // is picked consisting of configurations with the lowest total number of Actions to take. In case of multiple configurations still
+            // remaining, the first one is returned.
 
-            // TODO:
-            // find out which properties are optimized and in what way (effect)
-                // save the propertychanges here?
+            var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(instanceModel, propertyCache);
+
+            // Keep count of the maximum number of optimized Properties for caching the configurations with the greatest numbers of optimized
+            // Properties.
+            var currentMaximumOptimizedProperties = 0;
+            var configurationsWithOptimizedProperties = new List<SimulationConfiguration>();
 
             foreach (var successfulSimulationConfiguration in successfulSimulationConfigurations)
             {
-                // 
+                var optimizedProperties = 0;
+
+                foreach (var propertyChangeToOptimizeFor in propertyChangesToOptimizeFor)
+                {
+                    Property propertyToCompare = null!;
+
+                    bool propertyFound = propertyCache.Properties.TryGetValue(propertyChangeToOptimizeFor.Property.Name, out propertyToCompare);
+
+                    if (!propertyFound)
+                    {
+                        // If the first cache doesn't contain the Property, it must be in the second one.
+                        propertyToCompare = propertyCache.ConfigurableParameters[propertyChangeToOptimizeFor.Property.Name];
+                    }
+
+                    var valueHandler = _factory.GetValueHandlerImplementation(propertyToCompare.OwlType);
+
+                    var isOptimized = false;
+
+                    if (propertyChangeToOptimizeFor.OptimizeFor == Effect.ValueIncrease)
+                    {
+                        isOptimized = valueHandler.IsGreaterThan(propertyToCompare.Value, propertyChangeToOptimizeFor.Property.Value);
+                    }
+                    else
+                    {
+                        isOptimized = valueHandler.IsLessThan(propertyToCompare.Value, propertyChangeToOptimizeFor.Property.Value);
+                    }
+
+                    if (isOptimized)
+                    {
+                        optimizedProperties++;
+                    }
+                }
+
+                if (optimizedProperties > currentMaximumOptimizedProperties)
+                {
+                    // If there are more optimized Properties than the current maximum, create a new collection.
+                    currentMaximumOptimizedProperties = optimizedProperties;
+                    configurationsWithOptimizedProperties = new List<SimulationConfiguration>
+                    {
+                        successfulSimulationConfiguration
+                    };
+                }
+                else if (optimizedProperties == currentMaximumOptimizedProperties)
+                {
+                    // Otherwise, if there is a matching number of optimized Properties, simply add the current configuration to the collection.
+                    configurationsWithOptimizedProperties.Add(successfulSimulationConfiguration);
+                }
             }
 
-            // TODO:
-            // out of the passing combinations, find the optimal
-                // this requires comparing the values of the optimized properties
-                    // pick the one containing the most optimized properties
-                    // pick the one with the lowest number of actions
-                    // then pick the first in the collection
-                    // write a comment about this logic potentially being delegated to the user
+            // Keep count of the lowest number of Actions per simulation configuration to cache the most 'efficient' ones.
+            var lowestNumberOfActions = int.MaxValue;
+            var configurationsWithLowestActions = new List<SimulationConfiguration>();
 
-            return optimalConfiguration;
+            foreach (var configurationWithOptimizedProperties in configurationsWithOptimizedProperties)
+            {
+                var numberOfActionsToTake = 0;
+
+                foreach (var simulationTick in configurationWithOptimizedProperties.SimulationTicks)
+                {
+                    numberOfActionsToTake += simulationTick.ActionsToExecute.Count();
+                }
+
+                numberOfActionsToTake += configurationWithOptimizedProperties.PostTickActions.Count();
+
+                if (numberOfActionsToTake < lowestNumberOfActions)
+                {
+                    lowestNumberOfActions = numberOfActionsToTake;
+                    configurationsWithLowestActions = new List<SimulationConfiguration>
+                    {
+                        configurationWithOptimizedProperties
+                    };
+                }
+                else if (numberOfActionsToTake == lowestNumberOfActions)
+                {
+                    configurationsWithLowestActions.Add(configurationWithOptimizedProperties);
+                }
+            }
+
+            // In case there are still multiple Actions, simply return the first one.
+            return configurationsWithLowestActions[0];
+        }
+
+        private IEnumerable<PropertyChange> GetPropertyChangesToOptimizeFor(IGraph instanceModel, PropertyCache propertyCache)
+        {
+            var propertyChangesToOptimizeFor = new List<PropertyChange>();
+
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            query.CommandText = @"SELECT ?propertyChange ?property ?effect WHERE {
+                ?platform rdf:type sosa:Platform .
+                ?platform meta:optimizesFor ?propertyChange .
+                ?propertyChange ssn:forProperty ?property .
+                ?propertyChange meta:affectsPropertyWith ?effect . }";
+
+            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+
+            foreach (var result in queryResult.Results)
+            {
+                var propertyChangeName = result["propertyChange"].ToString();
+                var propertyName = result["property"].ToString();
+                var effectName = result["effect"].ToString().Split("/")[^1];
+
+                Property property = null!;
+
+                var propertyFound = propertyCache.Properties.TryGetValue(propertyName, out property!);
+
+                // Check where in the property cache the Property is.
+                if (!propertyFound)
+                {
+                    var configurableParameterFound = propertyCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? configurableParameter);
+
+                    if (!configurableParameterFound)
+                    {
+                        throw new Exception($"Property {property} was not found in the Property cache.");
+                    }
+                    else
+                    {
+                        property = configurableParameter!;
+                    }
+                }
+
+                if (!Enum.TryParse(effectName, out Effect effect))
+                {
+                    throw new Exception($"Enum value {effectName} is not supported.");
+                }
+
+                var propertyChange = new PropertyChange
+                {
+                    Name = propertyChangeName,
+                    Property = property,
+                    OptimizeFor = effect
+                };
+
+                propertyChangesToOptimizeFor.Add(propertyChange);
+            }
+
+            return propertyChangesToOptimizeFor;
         }
     }
 }

@@ -15,5 +15,9 @@ namespace Logic.ValueHandlerInterfaces
             int simulationGranularity,
             Effect effect,
             string configurableParameterName);
+
+        public bool IsGreaterThan(object comparingValue, object targetValue);
+
+        public bool IsLessThan(object comparingValue, object targetValue);
     }
 }

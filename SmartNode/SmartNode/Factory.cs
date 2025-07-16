@@ -59,6 +59,22 @@ namespace SmartNode
                     ProcedureName = "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1Procedure",
                     SensorName = "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1"
                 }
+            },
+            {
+                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeter",
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterProcedure"), new ExampleSensor
+                {
+                    ProcedureName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterProcedure",
+                    SensorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeter"
+                }
+            },
+            {
+                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor",
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure"), new ExampleSensor
+                {
+                    ProcedureName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure",
+                    SensorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor"
+                }
             }
         };
         private readonly Dictionary<string, IActuatorDevice> _actuators = new()

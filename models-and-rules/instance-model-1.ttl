@@ -56,12 +56,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 :EnergyConsumption rdf:type owl:NamedIndividual ,
                             <http://www.w3.org/ns/sosa/ObservableProperty> ,
                             [ rdf:type owl:Restriction ;
-                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasLowerLimitValue> ;
-                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                              owl:onDataRange xsd:double
-                            ] ,
-                            [ rdf:type owl:Restriction ;
-                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasUpperLimitValue> ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
                               owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                               owl:onDataRange xsd:double
                             ] .
@@ -79,6 +74,29 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> ;
                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
                            <http://www.w3.org/ns/ssn/forProperty> :EnergyConsumption .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeter
+:EnergyConsumptionMeter rdf:type owl:NamedIndividual ,
+                                 <http://www.w3.org/ns/sosa/Sensor> ;
+                        <http://www.w3.org/ns/sosa/observes> :EnergyConsumption ;
+                        <http://www.w3.org/ns/ssn/implements> :EnergyConsumptionMeterProcedure .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterMeasuredEnergyConsumption
+:EnergyConsumptionMeterMeasuredEnergyConsumption rdf:type owl:NamedIndividual ,
+                                                          <http://www.w3.org/ns/ssn/Output> ,
+                                                          [ rdf:type owl:Restriction ;
+                                                            owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                                                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                            owl:onDataRange xsd:double
+                                                          ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterProcedure
+:EnergyConsumptionMeterProcedure rdf:type owl:NamedIndividual ,
+                                          <http://www.w3.org/ns/sosa/Procedure> ;
+                                 <http://www.w3.org/ns/ssn/hasOutput> :EnergyConsumptionMeterMeasuredEnergyConsumption .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan
@@ -123,6 +141,29 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState> ;
             <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyConsumptionIncrease ,
                                                                                          :RoomTemperatureIncrease .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor
+:HumiditySensor rdf:type owl:NamedIndividual ,
+                         <http://www.w3.org/ns/sosa/Sensor> ;
+                <http://www.w3.org/ns/sosa/observes> :RoomHumidity ;
+                <http://www.w3.org/ns/ssn/implements> :HumiditySensorProcedure .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorMeasuredHumidity
+:HumiditySensorMeasuredHumidity rdf:type owl:NamedIndividual ,
+                                         <http://www.w3.org/ns/ssn/Output> ,
+                                         [ rdf:type owl:Restriction ;
+                                           owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                           owl:onDataRange xsd:double
+                                         ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure
+:HumiditySensorProcedure rdf:type owl:NamedIndividual ,
+                                  <http://www.w3.org/ns/sosa/Procedure> ;
+                         <http://www.w3.org/ns/ssn/hasOutput> :HumiditySensorMeasuredHumidity .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition1
@@ -186,6 +227,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor> :EnergyConsumptionDecrease ,
                                                                                              :RoomHumidityDecrease ;
           <http://www.w3.org/ns/sosa/hosts> :Dehumidifier ,
+                                            :EnergyConsumptionMeter ,
                                             :Fan ,
                                             :Heater ,
                                             :SoftSensor1 ,
@@ -289,13 +331,13 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
-[ xsd:maxInclusive "3"^^xsd:int
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
 [ xsd:minInclusive "1"^^xsd:int
  ] .
 
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+[ xsd:maxInclusive "3"^^xsd:int
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger

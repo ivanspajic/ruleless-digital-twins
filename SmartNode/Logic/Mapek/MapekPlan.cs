@@ -603,8 +603,20 @@ namespace Logic.Mapek
         {
             // TODO: make reading from and writing to fmus work!
 
-            using var model = Model.Load("../../../../SensorActuatorImplementations/FMUs/bouncingBallTest2.fmu");
+            using var model = Model.Load("../../../../SensorActuatorImplementations/FMUs/ctest.fmu");
+            //var height = model.Variables["h"];
+            //var velocity = model.Variables["v"];
+            //double h = 60.0, v = 0.0;
             using var instance = model.CreateCoSimulationInstance("demo");
+            //instance.WriteReal((height, h), (velocity, v));
+            //instance.StartTime(0.0);
+            //while (h > 0 || Math.Abs(v) > 0)
+            //{
+            //    var values = instance.ReadReal(height, velocity).ToArray();
+            //    h = values[0];
+            //    v = values[1];
+            //    instance.AdvanceTime(0.1);
+            //}
 
             return new Dictionary<string, object>();
         }

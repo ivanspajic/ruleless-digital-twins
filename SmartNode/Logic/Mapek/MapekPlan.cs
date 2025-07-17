@@ -1,4 +1,5 @@
-﻿using J2N.Text;
+﻿using Femyou;
+using J2N.Text;
 using Logic.FactoryInterface;
 using Logic.Mapek.EqualityComparers;
 using Logic.Models.MapekModels;
@@ -602,7 +603,8 @@ namespace Logic.Mapek
         {
             // TODO: make reading from and writing to fmus work!
 
-
+            using var model = Model.Load("../../../../SensorActuatorImplementations/FMUs/bouncingBallTest2.fmu");
+            using var instance = model.CreateCoSimulationInstance("demo");
 
             return new Dictionary<string, object>();
         }

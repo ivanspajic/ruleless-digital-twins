@@ -463,7 +463,7 @@ namespace Logic.Mapek
                         var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Actuator.Name);
                         var simpleActuatorStateName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Name);
 
-                        fmuActuationInputs.Add(simpleActuatorName + "_state", simpleActuatorStateName);
+                        fmuActuationInputs.Add(simpleActuatorName + "State", simpleActuatorStateName);
                     }
 
                     // Advance the simulation time.
@@ -603,20 +603,40 @@ namespace Logic.Mapek
         {
             // TODO: make reading from and writing to fmus work!
 
-            using var model = Model.Load("../../../../SensorActuatorImplementations/FMUs/ctest.fmu");
-            //var height = model.Variables["h"];
-            //var velocity = model.Variables["v"];
-            //double h = 60.0, v = 0.0;
-            using var instance = model.CreateCoSimulationInstance("demo");
-            //instance.WriteReal((height, h), (velocity, v));
-            //instance.StartTime(0.0);
-            //while (h > 0 || Math.Abs(v) > 0)
-            //{
-            //    var values = instance.ReadReal(height, velocity).ToArray();
-            //    h = values[0];
-            //    v = values[1];
-            //    instance.AdvanceTime(0.1);
-            //}
+            var model = Model.Load("../../../../SensorActuatorImplementations/FMUs/roomM370.fmu");
+
+            var roomTemperature = model.Variables["RoomTemperature"];
+            var heaterState = model.Variables["HeaterState"];
+
+            // This instantiation fails frequently due to a "memory protected" error, so it might be worth it to change instance names in case it helps.
+            var instance = model.CreateCoSimulationInstance("demo1");
+
+            instance.StartTime(0);
+
+            instance.WriteString((heaterState, ""));
+            instance.AdvanceTime(300);
+
+            var realValues = instance.ReadReal(roomTemperature).ToArray();
+            var roomTemperatureValue = realValues[0];
+            var stringValues = instance.ReadString(heaterState).ToArray();
+            var heaterStateValue = stringValues[0];
+
+            instance.WriteString((heaterState, "HeaterStrong"));
+
+            // The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
+            // TODO: figure out why 1100 here equals 3600 in the fmu, and maybe how to fix it with scaling (weird stuff)??
+            instance.AdvanceTime(300);
+
+            realValues = instance.ReadReal(roomTemperature).ToArray();
+            roomTemperatureValue = realValues[0];
+            stringValues = instance.ReadString(heaterState).ToArray();
+            heaterStateValue = stringValues[0];
+
+            // Calling instance.Dispose() creates a problem in the underlying external code which crashed the application. This could be due to improper implementations
+            // or handling of resources in the Femyou (.NET) library used to read from and write to FMUs.
+            //instance.Dispose();
+
+            model.Dispose();
 
             return new Dictionary<string, object>();
         }

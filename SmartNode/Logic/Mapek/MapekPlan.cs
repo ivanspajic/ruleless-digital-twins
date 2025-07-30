@@ -6,7 +6,6 @@ using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.ComponentModel;
 using System.Text;
 using VDS.RDF;
 using VDS.RDF.Query;
@@ -231,13 +230,15 @@ namespace Logic.Mapek
 
                 if (!remainingActions.Any())
                 {
-                    // If there are no remaining Actions in the collection, we have to create the set of
-                    // Actions with the current Action and add it to the set of combinations.
+                    // If there are no remaining Actions in the collection, we have to create the set of Actions with the current Action and add it
+                    // to the set of combinations. Additionally, to allow for empty simulations with no Actions, we also have to add the empty set.
+                    var zeroActionSet = new HashSet<Models.OntologicalModels.Action>();
                     var singleActionSet = new HashSet<Models.OntologicalModels.Action>
                     {
                         action
                     };
 
+                    actionCombinations.Add(zeroActionSet);
                     actionCombinations.Add(singleActionSet);
                 }
                 else

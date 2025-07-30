@@ -11,7 +11,7 @@ namespace Logic.Mapek.EqualityComparers
 
         public int GetHashCode([DisallowNull] HashSet<T> obj)
         {
-            var hashCode = 0;
+            var hashCode = obj.GetHashCode();
 
             foreach (var element in obj)
             {

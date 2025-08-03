@@ -4,6 +4,7 @@ using Logic.FactoryInterface;
 using Logic.Mapek.EqualityComparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
+using Lucene.Net.Search;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Text;
@@ -458,6 +459,17 @@ namespace Logic.Mapek
                 {
                     var fmuActuationInputs = new Dictionary<string, object>();
 
+                    // Get all ObservableProperties and add them to the inputs for the FMU.
+                    var observableProperties = GetObservablePropertiesFromPropertyCache(instanceModel, propertyCache);
+
+                    foreach (var observableProperty in observableProperties)
+                    {
+                        // Shave off the long name URIs from the instance model.
+                        var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
+
+                        fmuActuationInputs.Add(simpleObservablePropertyName, observableProperty.Value);
+                    }
+
                     foreach (var actuationAction in simulationTick.ActionsToExecute)
                     {
                         // Shave off the long name URIs from the instance model.
@@ -467,10 +479,9 @@ namespace Logic.Mapek
                         fmuActuationInputs.Add(simpleActuatorName + "State", simpleActuatorStateName);
                     }
 
-                    // Advance the simulation time.
-                    simulationTime += simulationTick.TickDurationSeconds;
+                    
 
-                    var propertyKeyValuePairs = ExecuteFmu(fmuFilePath, fmuActuationInputs, simulationTime);
+                    var propertyKeyValuePairs = ExecuteFmuForSimulationConfiguration(fmuFilePath, fmuActuationInputs, simulationTime);
 
                     AssignPropertyCacheCopyValues(propertyCacheCopy, propertyKeyValuePairs);
                 }
@@ -484,13 +495,15 @@ namespace Logic.Mapek
 
                     fmuReconfigurationInputs.Add(simpleConfigurableParameterName, reconfigurationAction.NewParameterValue);
 
-                    // Get FMUs of all soft-sensors that take the current ConfigurableParameter as an Input Property.
+                    // Get FMUs of all soft sensors that take the current ConfigurableParameter as an Input Property.
                     var softSensorFmus = GetSoftSensorFmuFilePathsFromConfigurableParameterName(instanceModel, reconfigurationAction.ConfigurableParameter.Name);
 
                     // Execute all FMUs and adjust the property cache accordingly.
                     foreach (var softSensorFmu in softSensorFmus)
                     {
-                        var propertyKeyValuePairs = ExecuteFmu(fmuFilePath, fmuReconfigurationInputs);
+                        // TODO: get and add all inputs to the fmu into the same dictionary of inputs!!!!
+
+                        var propertyKeyValuePairs = ExecuteFmuForSimulationConfiguration(fmuFilePath, fmuReconfigurationInputs);
 
                         AssignPropertyCacheCopyValues(propertyCacheCopy, propertyKeyValuePairs);
                     }
@@ -585,6 +598,35 @@ namespace Logic.Mapek
             return propertyCacheCopy;
         }
 
+        private IEnumerable<Property> GetObservablePropertiesFromPropertyCache(IGraph instanceModel, PropertyCache propertyCache)
+        {
+            var observableProperties = new List<Property>();
+
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            query.CommandText = @"SELECT DISTINCT ?observableProperty WHERE {
+                ?sensor rdf:type sosa:Sensor .
+                ?sensor sosa:observes ?observableProperty . }";
+
+            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+
+            foreach (var result in queryResult.Results)
+            {
+                var propertyName = result["observableProperty"].ToString();
+
+                if (propertyCache.Properties.TryGetValue(propertyName, out Property property))
+                {
+                    observableProperties.Add(property);
+                }
+                else
+                {
+                    throw new Exception($"ObservableProperty {propertyName} was not in the cache.");
+                }
+            }
+
+            return observableProperties;
+        }
+
         private int GetMaximumSimulationTime(IEnumerable<OptimalCondition> optimalConditions)
         {
             var maximumSimulationTime = int.MaxValue;
@@ -600,22 +642,23 @@ namespace Logic.Mapek
             return maximumSimulationTime;
         }
 
-        private IDictionary<string, object> ExecuteFmu(string fmuFilePath, IDictionary<string, object> inputs, double timeValue = -1)
+        private IDictionary<string, object> ExecuteFmuForSimulationConfiguration(string fmuFilePath, IDictionary<string, object> inputs, double timeValue = -1)
         {
-            // TODO: make reading from and writing to fmus work!
-
-            var model = Model.Load("../../../../SensorActuatorImplementations/FMUs/roomM370.fmu");
+            var model = Model.Load(fmuFilePath);
 
             var roomTemperature = model.Variables["RoomTemperature"];
             var heaterState = model.Variables["HeaterState"];
 
-            // This instantiation fails frequently due to a "memory protected" error, so it might be worth it to change instance names in case it helps.
-            var instance = model.CreateCoSimulationInstance("demo1");
+            // This instantiation fails frequently due to a "memory protected" error (even when no other simulations have been run beforehand), so it might be worth it
+            // to change instance names in case it helps.
+            var instance = model.CreateCoSimulationInstance("demo3");
 
             instance.StartTime(0);
 
+            instance.WriteReal((roomTemperature, 28));
+
             instance.WriteString((heaterState, ""));
-            instance.AdvanceTime(300);
+            instance.AdvanceTime(500);
 
             var realValues = instance.ReadReal(roomTemperature).ToArray();
             var roomTemperatureValue = realValues[0];
@@ -626,7 +669,7 @@ namespace Logic.Mapek
 
             // The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
             // TODO: figure out why 1100 here equals 3600 in the fmu, and maybe how to fix it with scaling (weird stuff)??
-            instance.AdvanceTime(300);
+            instance.AdvanceTime(10);
 
             realValues = instance.ReadReal(roomTemperature).ToArray();
             roomTemperatureValue = realValues[0];

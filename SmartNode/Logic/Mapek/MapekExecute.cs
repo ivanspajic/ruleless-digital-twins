@@ -49,7 +49,7 @@ namespace Logic.Mapek
                 actuationAction.ActuatorState,
                 durationSeconds);
 
-            var actuator = _factory.GetActuatorDeviceImplementation(actuationAction.ActuatorState.Actuator.Name);
+            var actuator = _factory.GetActuatorDeviceImplementation(actuationAction.ActuatorState.Actuator);
 
             actuator.Actuate(actuationAction.ActuatorState.Name, durationSeconds);
         }

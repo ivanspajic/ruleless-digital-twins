@@ -96,13 +96,13 @@ namespace Logic.Mapek
 
             foreach (var actuationAction in actuationActions)
             {
-                if (actuationActionsByActuatorMap.TryGetValue(actuationAction.ActuatorState.Actuator.Name, out List<ActuationAction> actuationActionsInMap))
+                if (actuationActionsByActuatorMap.TryGetValue(actuationAction.ActuatorState.Actuator, out List<ActuationAction> actuationActionsInMap))
                 {
                     actuationActionsInMap.Add(actuationAction);
                 }
                 else
                 {
-                    actuationActionsByActuatorMap.Add(actuationAction.ActuatorState.Actuator.Name, new List<ActuationAction>
+                    actuationActionsByActuatorMap.Add(actuationAction.ActuatorState.Actuator, new List<ActuationAction>
                     {
                         actuationAction
                     });
@@ -321,7 +321,7 @@ namespace Logic.Mapek
 
                 var actuationActionCombinationLongest = actuationActionCombinations.Where(actuationActionCombination => actuationActionCombination.Count() == greatestCombinationLength)
                     .First();
-                var allActuators = actuationActionCombinationLongest.Select(actuationAction => actuationAction.ActuatorState.Actuator.Name);
+                var allActuators = actuationActionCombinationLongest.Select(actuationAction => actuationAction.ActuatorState.Actuator);
 
                 // Filter out simulation tick combinations where every Actuator isn't present in at least one tick per combination and construct simulation
                 // configurations with the combinations that pass.
@@ -337,7 +337,7 @@ namespace Logic.Mapek
                         {
                             foreach (var actuationAction in simulationTick.ActionsToExecute)
                             {
-                                if (actuationAction.ActuatorState.Actuator.Name.Equals(actuatorName))
+                                if (actuationAction.ActuatorState.Actuator.Equals(actuatorName))
                                 {
                                     actuatorPresent = true;
                                 }
@@ -473,7 +473,7 @@ namespace Logic.Mapek
                     foreach (var actuationAction in simulationTick.ActionsToExecute)
                     {
                         // Shave off the long name URIs from the instance model.
-                        var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Actuator.Name);
+                        var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Actuator);
                         var simpleActuatorStateName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Name);
 
                         fmuActuationInputs.Add(simpleActuatorName + "State", simpleActuatorStateName);
@@ -539,12 +539,12 @@ namespace Logic.Mapek
             {
                 foreach (var actuationAction in simulationTick.ActionsToExecute)
                 {
-                    if (!actuatorNames.Contains(actuationAction.ActuatorState.Actuator.Name))
+                    if (!actuatorNames.Contains(actuationAction.ActuatorState.Actuator))
                     {
-                        actuatorNames.Add(actuationAction.ActuatorState.Actuator.Name);
+                        actuatorNames.Add(actuationAction.ActuatorState.Actuator);
 
                         // Add the Actuator name to the query filter.
-                        clauseBuilder.AppendLine("?platform sosa:hosts <" + actuationAction.ActuatorState.Actuator.Name + "> .");
+                        clauseBuilder.AppendLine("?platform sosa:hosts <" + actuationAction.ActuatorState.Actuator + "> .");
                     }
                 }
             }
@@ -657,19 +657,29 @@ namespace Logic.Mapek
 
             instance.WriteReal((roomTemperature, 28));
 
-            instance.WriteString((heaterState, ""));
-            instance.AdvanceTime(500);
+            instance.AdvanceTime(100);
 
             var realValues = instance.ReadReal(roomTemperature).ToArray();
             var roomTemperatureValue = realValues[0];
             var stringValues = instance.ReadString(heaterState).ToArray();
             var heaterStateValue = stringValues[0];
 
-            instance.WriteString((heaterState, "HeaterStrong"));
+            instance.WriteString((heaterState, ""));
+            instance.AdvanceTime(500);
+
+            realValues = instance.ReadReal(roomTemperature).ToArray();
+            roomTemperatureValue = realValues[0];
+            stringValues = instance.ReadString(heaterState).ToArray();
+            heaterStateValue = stringValues[0];
+
+            //instance.WriteString((heaterState, "HeaterStrong"));
 
             // The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
             // TODO: figure out why 1100 here equals 3600 in the fmu, and maybe how to fix it with scaling (weird stuff)??
-            instance.AdvanceTime(10);
+
+            instance.WriteReal((roomTemperature, 28));
+
+            instance.AdvanceTime(100);
 
             realValues = instance.ReadReal(roomTemperature).ToArray();
             roomTemperatureValue = realValues[0];
@@ -680,7 +690,7 @@ namespace Logic.Mapek
             // or handling of resources in the Femyou (.NET) library used to read from and write to FMUs.
             //instance.Dispose();
 
-            model.Dispose();
+            //model.Dispose();
 
             return new Dictionary<string, object>();
         }

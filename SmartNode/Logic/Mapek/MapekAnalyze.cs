@@ -3,8 +3,11 @@ using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Runtime.CompilerServices;
 using VDS.RDF;
 using VDS.RDF.Query;
+
+[assembly: InternalsVisibleTo("TestProject")]
 
 namespace Logic.Mapek
 {
@@ -158,12 +161,11 @@ namespace Logic.Mapek
 
             // Get all ActuationActions, their ActuatorStates, and their Actuators that cause PropertyChanges equal to those that the system
             // wishes to optimize for.
-            actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuatorState ?actuator ?actuatorModel ?property WHERE {
+            actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuatorState ?actuator ?property WHERE {
                 ?actuationAction rdf:type meta:ActuationAction .
                 ?actuationAction meta:hasActuatorState ?actuatorState .
                 ?actuatorState meta:isActuatorStateOf ?actuator .
                 ?actuator rdf:type sosa:Actuator .
-                ?actuator meta:hasModel ?actuatorModel .
                 ?actuatorState meta:enacts ?propertyChange .
                 ?platform rdf:type sosa:Platform .
                 ?platform meta:optimizesFor ?propertyChange .
@@ -179,7 +181,6 @@ namespace Logic.Mapek
                     "actuationAction",
                     "actuatorState",
                     "actuator",
-                    "actuatorModel",
                     "property");
             }
 
@@ -674,13 +675,12 @@ namespace Logic.Mapek
 
                     // Get all ActuationActions, ActuatorStates, and Actuators that match as relevant Actions given the appropriate
                     // filter.
-                    actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuatorState ?actuator ?actuatorModel ?property WHERE {
+                    actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuatorState ?actuator ?property WHERE {
                         ?actuationAction rdf:type meta:ActuationAction.
                         ?actuationAction meta:hasActuatorState ?actuatorState .
                         ?actuatorState meta:enacts ?propertyChange .
                         ?actuator meta:hasActuatorState ?actuatorState .
                         ?actuator rdf:type sosa:Actuator .
-                        ?actuator meta:hasModel ?actuatorModel .
                         ?propertyChange ssn:forProperty ?property .
                         ?property owl:sameAs @property .
                         " + filter + " }";
@@ -697,7 +697,6 @@ namespace Logic.Mapek
                             "actuationAction",
                             "actuatorState",
                             "actuator",
-                            "actuatorModel",
                             "property");
 
                         _logger.LogInformation("Found ActuationAction {actuationActionName} as a relevant Action.",
@@ -746,24 +745,16 @@ namespace Logic.Mapek
             string actuationActionQueryParameter,
             string actuatorStateQueryParameter,
             string actuatorQueryParameter,
-            string actuatorModelQueryParameter,
             string propertyQueryParameter)
         {
             var actuationActionName = result[actuationActionQueryParameter].ToString();
             var actuatorStateName = result[actuatorStateQueryParameter].ToString();
             var actuatorName = result[actuatorQueryParameter].ToString();
-            var actuatorModel = result[actuatorModelQueryParameter].ToString().Split("^")[0];
             var propertyName = result[propertyQueryParameter].ToString();
-
-            var actuator = new Actuator
-            {
-                Name = actuatorName,
-                Model = actuatorModel
-            };
 
             var actuatorState = new ActuatorState
             {
-                Actuator = actuator,
+                Actuator = actuatorName,
                 Name = actuatorStateName
             };
 

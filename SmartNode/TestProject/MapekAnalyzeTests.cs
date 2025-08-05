@@ -2,6 +2,8 @@ using Logic.Mapek;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using System.Reflection;
+using TestProject.Mocks;
+using TestProject.Mocks.EqualityComparers;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 
@@ -20,6 +22,8 @@ namespace TestProject
             var instanceModel = new Graph();
             var turtleParser = new TurtleParser();
             turtleParser.Load(instanceModel, modelFilePath);
+
+            var mapekAnalyze = new MapekAnalyze(new ServiceProviderMock());
 
             var propertyCacheMock = new PropertyCache
             {
@@ -100,9 +104,6 @@ namespace TestProject
                     }
                 }
             };
-
-            var mapekAnalyze = new MapekAnalyze(new ServiceProviderMock());
-
             var expectedOptimalConditions = new List<OptimalCondition>
             {
                 new OptimalCondition
@@ -211,7 +212,21 @@ namespace TestProject
             var actualOptimalConditionActionTuple = mapekAnalyze.Analyze(instanceModel, propertyCacheMock);
 
             // Assert
-            Assert.Equal(expectedOptimalConditionActionTuple, actualOptimalConditionActionTuple);
+            // Check that the two collections in the tuple have the same number of elements.
+            Assert.Equal(expectedOptimalConditionActionTuple.Item1.Count(), actualOptimalConditionActionTuple.Item1.Count());
+            Assert.Equal(expectedOptimalConditionActionTuple.Item2.Count(), actualOptimalConditionActionTuple.Item2.Count());
+            
+            // Check that the OptimalConditions are equal to those expected.
+            foreach (var optimalCondition in expectedOptimalConditionActionTuple.Item1)
+            {
+                Assert.Contains(optimalCondition, actualOptimalConditionActionTuple.Item1, new OptimalConditionEqualityComparer());
+            }
+
+            // Check that the Actions are equal to those expected.
+            foreach (var action in expectedOptimalConditionActionTuple.Item2)
+            {
+                Assert.Contains(action, actualOptimalConditionActionTuple.Item2, new ActionEqualityComparer());
+            }
         }
     }
 }

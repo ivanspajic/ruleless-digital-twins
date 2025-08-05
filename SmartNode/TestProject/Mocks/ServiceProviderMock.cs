@@ -2,7 +2,7 @@
 using Logic.Mapek;
 using Microsoft.Extensions.Logging;
 
-namespace TestProject
+namespace TestProject.Mocks
 {
     internal class ServiceProviderMock : IServiceProvider
     {

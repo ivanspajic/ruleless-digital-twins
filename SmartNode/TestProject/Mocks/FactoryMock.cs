@@ -2,10 +2,15 @@
 using Logic.FactoryInterface;
 using Logic.ValueHandlerInterfaces;
 
-namespace TestProject
+namespace TestProject.Mocks
 {
     internal class FactoryMock : IFactory
     {
+        private Dictionary<string, IValueHandler> _valueHandlerImplementations = new()
+        {
+            { "double", new DoubleValueHandlerMock() }
+        };
+
         public IActuatorDevice GetActuatorDeviceImplementation(string actuatorName)
         {
             throw new NotImplementedException();
@@ -18,8 +23,12 @@ namespace TestProject
 
         public IValueHandler GetValueHandlerImplementation(string owlType)
         {
-            // TODO: implement a mock of this!!
-            return null;
+            if (_valueHandlerImplementations.TryGetValue(owlType, out IValueHandler valueHandler))
+            {
+                return valueHandler;
+            }
+
+            return null!;
         }
     }
 }

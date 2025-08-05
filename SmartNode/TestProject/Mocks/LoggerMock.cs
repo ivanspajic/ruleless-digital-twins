@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace TestProject
+namespace TestProject.Mocks
 {
     internal class LoggerMock<T> : ILogger<T>
     {

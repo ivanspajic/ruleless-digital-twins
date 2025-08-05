@@ -16,7 +16,7 @@ namespace TestProject
         {
             // Arrange
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var modelFilePath = Path.Combine(executingAssemblyPath!, @"..\..\..\..\..\models-and-rules\inferred-model-1.ttl");
+            var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}models-and-rules{Path.DirectorySeparatorChar}inferred-model-1.ttl");
             modelFilePath = Path.GetFullPath(modelFilePath);
 
             var instanceModel = new Graph();

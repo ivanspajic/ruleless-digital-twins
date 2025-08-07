@@ -1,6 +1,6 @@
 ﻿namespace Logic.Models.OntologicalModels
 {
-    internal class Property : NamedIndividual
+    public class Property : NamedIndividual
     {
         public required object Value { get; set; }
 

@@ -8,6 +8,10 @@ namespace Logic.Mapek
     public class MapekManager : IMapekManager
     {
         private const int SleepyTimeMilliseconds = 2_000;
+        // Decides on the number of intervals in ActuationAction simulations.
+        private const int ActuationSimulationGranularity = 4;
+        // Decides on the granularity of steps in increasing/decreasing ConfigurableParameter values.
+        private const int ConfigurableParameterGranularity = 7;
 
         private readonly ILogger<MapekManager> _logger;
         private readonly IMapekMonitor _mapekMonitor;
@@ -58,9 +62,9 @@ namespace Logic.Mapek
                 var propertyCache = _mapekMonitor.Monitor(instanceModel);
                 // Analyze - Out of all possible Actions, filter out the irrelevant ones based on current Property values and return
                 // them with all OptimalConditions.
-                var optimalConditionsAndActions = _mapekAnalyze.Analyze(instanceModel, propertyCache);
+                var optimalConditionsAndActions = _mapekAnalyze.Analyze(instanceModel, propertyCache, ConfigurableParameterGranularity);
                 // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
-                var optimalConfiguration = _mapekPlan.Plan(optimalConditionsAndActions.Item1, optimalConditionsAndActions.Item2, propertyCache, instanceModel);
+                var optimalConfiguration = _mapekPlan.Plan(optimalConditionsAndActions.Item1, optimalConditionsAndActions.Item2, propertyCache, instanceModel, ActuationSimulationGranularity);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
                 _mapekExecute.Execute(optimalConfiguration, propertyCache);
 

@@ -4,7 +4,6 @@ using Logic.FactoryInterface;
 using Logic.Mapek.EqualityComparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
-using Lucene.Net.Search;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Text;
@@ -27,13 +26,10 @@ namespace Logic.Mapek
         public SimulationConfiguration Plan(IEnumerable<OptimalCondition> optimalConditions,
             IEnumerable<Models.OntologicalModels.Action> actions,
             PropertyCache propertyCache,
-            IGraph instanceModel)
+            IGraph instanceModel,
+            int actuationSimulationGranularity)
         {
             _logger.LogInformation("Starting the Plan phase.");
-
-            // Set some granularity values for different types Action simulations.
-            var actuationSimulationGranularity = 4;
-            var reconfigurationSimulationGranularity = 7;
 
             var plannedActions = new List<Models.OntologicalModels.Action>();
 
@@ -54,7 +50,7 @@ namespace Logic.Mapek
             var actuationActionCombinations = GetActuationActionCombinations(actuationActions!);
 
             // Get all possible combinations for ReconfigurationActions.
-            var reconfigurationActionCombinations = GetReconfigurationActionCombinations(reconfigurationActions!, reconfigurationSimulationGranularity);
+            var reconfigurationActionCombinations = GetReconfigurationActionCombinations(reconfigurationActions!);
 
             _logger.LogInformation("Generating simulation configurations.");
 
@@ -137,42 +133,14 @@ namespace Logic.Mapek
                     actuationAction as ActuationAction))!;
         }
 
-        private IEnumerable<IEnumerable<ReconfigurationAction>> GetReconfigurationActionCombinations(IEnumerable<ReconfigurationAction> reconfigurationActions,
-            int simulationGranularity)
+        private IEnumerable<IEnumerable<ReconfigurationAction>> GetReconfigurationActionCombinations(IEnumerable<ReconfigurationAction> reconfigurationActions)
         {
             var reconfigurationActionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(new ActionSetEqualityComparer());
-
-            // Create ReconfigurationActions with new values to set for their respective ConfigurableParameters.
-            var reconfigurationActionsWithValues = new List<ReconfigurationAction>();
-
-            foreach (var reconfigurationAction in reconfigurationActions)
-            {
-                var valueHandler = _factory.GetValueHandlerImplementation(reconfigurationAction.ConfigurableParameter.OwlType);
-                var possibleValues = valueHandler.GetPossibleValuesForReconfigurationAction(reconfigurationAction.ConfigurableParameter.Value,
-                    reconfigurationAction.ConfigurableParameter.LowerLimitValue,
-                    reconfigurationAction.ConfigurableParameter.UpperLimitValue,
-                    simulationGranularity,
-                    reconfigurationAction.Effect,
-                    reconfigurationAction.ConfigurableParameter.Name);
-
-                foreach (var possibleValue in possibleValues)
-                {
-                    var reconfigurationActionWithValue = new ReconfigurationAction
-                    {
-                        ConfigurableParameter = reconfigurationAction.ConfigurableParameter,
-                        Effect = reconfigurationAction.Effect,
-                        Name = reconfigurationAction.Name,
-                        NewParameterValue = possibleValue
-                    };
-
-                    reconfigurationActionsWithValues.Add(reconfigurationActionWithValue);
-                }
-            }
 
             // Group ReconfigurationActions by their ConfigurableParameter to allow creating combinations that don't consist of different reconfigurations of the same Property.
             var reconfigurationActionsByConfigurableParameterMap = new Dictionary<string, List<ReconfigurationAction>>();
 
-            foreach (var reconfigurationAction in reconfigurationActionsWithValues)
+            foreach (var reconfigurationAction in reconfigurationActions)
             {
                 if (reconfigurationActionsByConfigurableParameterMap.TryGetValue(reconfigurationAction.ConfigurableParameter.Name, out List<ReconfigurationAction> reconfigurationActionsInMap))
                 {

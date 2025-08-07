@@ -1,4 +1,5 @@
 ﻿using Logic.FactoryInterface;
+using Logic.Mapek.EqualityComparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +23,9 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public Tuple<IEnumerable<OptimalCondition>, IEnumerable<Models.OntologicalModels.Action>> Analyze(IGraph instanceModel, PropertyCache propertyCache)
+        public Tuple<IEnumerable<OptimalCondition>, IEnumerable<Models.OntologicalModels.Action>> Analyze(IGraph instanceModel,
+            PropertyCache propertyCache,
+            int configurableParameterGranularity)
         {
             _logger.LogInformation("Starting the Analyze phase.");
 
@@ -30,13 +33,14 @@ namespace Logic.Mapek
             var unsatisfiedOptimalConditions = GetAllUnsatisfiedOptimalConditions(optimalConditions, propertyCache);
             var mitigationActions = GetMitigationActionsFromUnsatisfiedOptimalConditions(instanceModel,
                 propertyCache,
-                unsatisfiedOptimalConditions);
-            var optimizationActions = GetOptimizationActions(instanceModel, propertyCache);
+                unsatisfiedOptimalConditions,
+                configurableParameterGranularity);
+            var optimizationActions = GetOptimizationActions(instanceModel, propertyCache, configurableParameterGranularity);
 
             // Combine the Action collections into one.
             mitigationActions = mitigationActions.Concat(optimizationActions);
-            // Filter out any potential duplicates.
-            mitigationActions = mitigationActions.DistinctBy(x => x.Name);
+            // Filter out duplicates.
+            mitigationActions = mitigationActions.Distinct(new ActionEqualityComparer());
 
             return new (optimalConditions, mitigationActions);
         }
@@ -140,7 +144,8 @@ namespace Logic.Mapek
 
                     foreach (var unsatisfiedConstraint in unsatisfiedConstraints)
                     {
-                        _logger.LogInformation("Unsatisfied constraint in OptimalCondition {optimalCondition}: (property {property}) {leftValue} {constraintType} {rightValue}.",
+                        _logger.LogInformation("Unsatisfied constraint in OptimalCondition {optimalCondition}:" +
+                            " (property {property}) {leftValue} {constraintType} {rightValue}.",
                             optimalCondition.Name,
                             optimalCondition.Property,
                             propertyValue.ToString(),
@@ -153,7 +158,9 @@ namespace Logic.Mapek
             return unsatisfiedOptimalConditions.DistinctBy(x => x.Name);
         }
 
-        private IEnumerable<Models.OntologicalModels.Action> GetOptimizationActions(IGraph instanceModel, PropertyCache propertyCache)
+        private IEnumerable<Models.OntologicalModels.Action> GetOptimizationActions(IGraph instanceModel,
+            PropertyCache propertyCache,
+            int configurableParameterGranularity)
         {
             var actions = new List<Models.OntologicalModels.Action>();
 
@@ -191,24 +198,30 @@ namespace Logic.Mapek
             reconfigurationQuery.CommandText = @"SELECT DISTINCT ?reconfigurationAction ?configurableParameter ?effect WHERE {
                 ?reconfigurationAction rdf:type meta:ReconfigurationAction .
                 ?reconfigurationAction ssn:forProperty ?configurableParameter .
-                ?reconfigurationAction meta:affectsPropertyWith ?effect .
                 ?configurableParameter meta:enacts ?propertyChange .
-                ?propertyChange meta:alteredBy ?effect .
+                ?platform meta:optimizesFor ?propertyChange . 
                 ?platform rdf:type sosa:Platform .
-                ?platform meta:optimizesFor ?propertyChange .
-                ?propertyChange ssn:forProperty ?property . }";
+                ?propertyChange meta:alteredBy ?effect . }";
 
             var reconfigurationQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(reconfigurationQuery);
 
             foreach (var result in reconfigurationQueryResult.Results)
             {
+                var effectName = result["effect"].ToString().Split("/")[^1];
+
+                if (!Enum.TryParse(effectName, out Effect effect))
+                {
+                    throw new Exception($"Enum value {effectName} is not supported.");
+                }
+
                 // Passing in the query parameter names is required since their result order is not guaranteed.
-                AddReconfigurationActionToCollectionFromQueryResult(result,
+                AddReconfigurationActionsToCollectionFromQueryResult(result,
                     actions,
                     propertyCache,
+                    configurableParameterGranularity,
+                    effect,
                     "reconfigurationAction",
-                    "configurableParameter",
-                    "effect");
+                    "configurableParameter");
             }
 
             return actions;
@@ -640,7 +653,8 @@ namespace Logic.Mapek
 
         private IEnumerable<Models.OntologicalModels.Action> GetMitigationActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel,
             PropertyCache propertyCache,
-            IEnumerable<OptimalCondition> optimalConditions)
+            IEnumerable<OptimalCondition> optimalConditions,
+            int configurableParameterGranularity)
         {
             var actions = new List<Models.OntologicalModels.Action>();
 
@@ -649,6 +663,7 @@ namespace Logic.Mapek
                 foreach (var unsatisfiedConstraint in optimalCondition.UnsatisfiedAtomicConstraints)
                 {
                     var filter = string.Empty;
+                    var effect = Effect.ValueDecrease;
 
                     switch (unsatisfiedConstraint.ConstraintType)
                     {
@@ -656,25 +671,25 @@ namespace Logic.Mapek
                         // to result in a PropertyChange with a ValueDecrease to mitigate it.
                         case ConstraintType.LessThan:
                         case ConstraintType.LessThanOrEqualTo:
-                            filter = "?propertyChange meta:affectsPropertyWith meta:ValueDecrease .";
+                            filter = "meta:ValueDecrease";
+                            effect = Effect.ValueDecrease;
 
                             break;
                         // In case the unsatisfied constraint is GreaterThan or GreaterThanOrEqualTo, any appropriate Action will
                         // need to result in a PropertyChange with a ValueIncrease to mitigate it.
                         case ConstraintType.GreaterThan:
                         case ConstraintType.GreaterThanOrEqualTo:
-                            filter = "?propertyChange meta:affectsPropertyWith meta:ValueIncrease .";
+                            filter = "meta:ValueIncrease";
+                            effect = Effect.ValueIncrease;
 
                             break;
-                        // Constraints like Equals through both ValueIncrease and ValueDecrease, so they fall under the default case.
                         default:
                             break;
                     }
 
                     var actuationQuery = MapekUtilities.GetParameterizedStringQuery();
 
-                    // Get all ActuationActions, ActuatorStates, and Actuators that match as relevant Actions given the appropriate
-                    // filter.
+                    // Get all ActuationActions, ActuatorStates, and Actuators that match as relevant Actions given the appropriate filter.
                     actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuatorState ?actuator ?property WHERE {
                         ?actuationAction rdf:type meta:ActuationAction.
                         ?actuationAction meta:hasActuatorState ?actuatorState .
@@ -683,7 +698,7 @@ namespace Logic.Mapek
                         ?actuator rdf:type sosa:Actuator .
                         ?propertyChange ssn:forProperty ?property .
                         ?property owl:sameAs @property .
-                        " + filter + " }";
+                        ?propertyChange meta:affectsPropertyWith " + filter + " . }";
 
                     actuationQuery.SetUri("property", new Uri(optimalCondition.Property));
 
@@ -705,16 +720,12 @@ namespace Logic.Mapek
 
                     var reconfigurationQuery = MapekUtilities.GetParameterizedStringQuery();
 
-                    // Get all ReconfigurationActions, ConfigurableParameters, and Effects that match as relevant Actions given the appropriate
-                    // filter.
-                    reconfigurationQuery.CommandText = @"SELECT DISTINCT ?reconfigurationAction ?configurableParameter ?effect WHERE {
+                    // Get all ReconfigurationActions and ConfigurableParameters that match as relevant Actions given the appropriate filter.
+                    reconfigurationQuery.CommandText = @"SELECT DISTINCT ?reconfigurationAction ?configurableParameter WHERE {
                         ?reconfigurationAction rdf:type meta:ReconfigurationAction .
                         ?reconfigurationAction ssn:forProperty ?configurableParameter .
-                        ?reconfigurationAction meta:affectsPropertyWith ?effect .
                         ?configurableParameter meta:enacts ?propertyChange .
-                        ?propertyChange ssn:forProperty @property .
-                        ?propertyChange meta:alteredBy ?effect .
-                        " + filter + " }";
+                        ?propertyChange ssn:forProperty @property . }";
 
                     reconfigurationQuery.SetUri("property", new Uri(optimalCondition.Property));
 
@@ -723,12 +734,13 @@ namespace Logic.Mapek
                     foreach (var result in reconfigurationQueryResult.Results)
                     {
                         // Passing in the query parameter names is required since their result order is not guaranteed.
-                        AddReconfigurationActionToCollectionFromQueryResult(result,
+                        AddReconfigurationActionsToCollectionFromQueryResult(result,
                             actions,
                             propertyCache,
+                            configurableParameterGranularity,
+                            effect,
                             "reconfigurationAction",
-                            "configurableParameter",
-                            "effect");
+                            "configurableParameter");
 
                         _logger.LogInformation("Found ActuationAction {actuationActionName} as a relevant Action.",
                             result["reconfigurationAction"].ToString());
@@ -736,8 +748,7 @@ namespace Logic.Mapek
                 }
             }
 
-            // Returns distinct Actions since they're added from every OptimalCondition's unsatisfied constraint.
-            return actions.DistinctBy(x => x.Name);
+            return actions;
         }
 
         private void AddActuationActionToCollectionFromQueryResult(ISparqlResult result,
@@ -768,35 +779,38 @@ namespace Logic.Mapek
             actions.Add(actuationAction);
         }
 
-        private void AddReconfigurationActionToCollectionFromQueryResult(ISparqlResult result,
+        private void AddReconfigurationActionsToCollectionFromQueryResult(ISparqlResult result,
             IList<Models.OntologicalModels.Action> actions,
             PropertyCache propertyCache,
+            int configurableParameterGranularity,
+            Effect effect,
             string reconfigurationActionQueryParameter,
-            string configurableParameterQueryParameter,
-            string effectNameQueryParameter)
+            string configurableParameterQueryParameter)
         {
             var reconfigurationActionName = result[reconfigurationActionQueryParameter].ToString();
             var configurableParameterName = result[configurableParameterQueryParameter].ToString();
-            var effectName = result[effectNameQueryParameter].ToString().Split("/")[^1];
 
             if (!propertyCache.ConfigurableParameters.TryGetValue(configurableParameterName, out ConfigurableParameter configurableParameter))
             {
                 throw new Exception($"ConfigurableParameter {configurableParameterName} was not found in the Property cache.");
             }
 
-            if (!Enum.TryParse(effectName, out Effect effect))
+            // Create ReconfigurationActions with new values to set for their respective ConfigurableParameters.
+            var valueHandler = _factory.GetValueHandlerImplementation(configurableParameter.OwlType);
+            var possibleValues = valueHandler.GetPossibleValuesForReconfigurationAction(configurableParameter, configurableParameterGranularity, effect);
+
+            foreach (var possibleValue in possibleValues)
             {
-                throw new Exception($"Enum value {effectName} is not supported.");
+                var reconfigurationAction = new ReconfigurationAction
+                {
+                    ConfigurableParameter = configurableParameter,
+                    Effect = effect,
+                    Name = reconfigurationActionName,
+                    NewParameterValue = possibleValue
+                };
+
+                actions.Add(reconfigurationAction);
             }
-
-            var reconfigurationAction = new ReconfigurationAction
-            {
-                ConfigurableParameter = configurableParameter,
-                Name = reconfigurationActionName,
-                Effect = effect
-            };
-
-            actions.Add(reconfigurationAction);
         }
     }
 }

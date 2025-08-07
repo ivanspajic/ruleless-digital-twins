@@ -28,14 +28,13 @@ namespace SensorActuatorImplementations.ValueHandlers
             throw new NotImplementedException();
         }
 
-        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(object currentValue,
-            object minimumValue,
-            object maximumValue,
-            int simulationGranularity,
-            Effect effect,
-            string configurableParameterName)
+        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, int simulationGranularity, Effect effect)
         {
             IEnumerable<object> possibleValues;
+
+            var currentValue = configurableParameter.Value;
+            var minimumValue = configurableParameter.LowerLimitValue;
+            var maximumValue = configurableParameter.UpperLimitValue;
 
             if (currentValue is not int)
             {
@@ -56,7 +55,7 @@ namespace SensorActuatorImplementations.ValueHandlers
             var minimumValueInt = (int)minimumValue;
             var maximumValueInt = (int)maximumValue;
 
-            if (_configurableParameterGranularityMap.TryGetValue(configurableParameterName, out Func<int, int, int, int, IEnumerable<object>> configurableParameterLogic))
+            if (_configurableParameterGranularityMap.TryGetValue(configurableParameter.Name, out Func<int, int, int, int, IEnumerable<object>>? configurableParameterLogic))
             {
                 possibleValues = configurableParameterLogic(currentValueInt, minimumValueInt, maximumValueInt, simulationGranularity);
             }

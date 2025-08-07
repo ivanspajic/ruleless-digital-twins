@@ -21,12 +21,7 @@ namespace SensorActuatorImplementations.ValueHandlers
             throw new NotImplementedException();
         }
 
-        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(object currentValue,
-            object minimumValue,
-            object maximumValue,
-            int simulationGranularity,
-            Effect effect,
-            string configurableParameterName)
+        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, int simulationGranularity, Effect effect)
         {
             throw new NotImplementedException();
         }

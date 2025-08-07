@@ -40,7 +40,7 @@ namespace SensorActuatorImplementations.ValueHandlers
         {
             var unsatisfiedConstraints = new List<AtomicConstraintExpression>();
 
-            if (_expressionDelegateMap.TryGetValue(constraintExpression.ConstraintType, out Func<double, double, bool> valueComparisonEvaluator))
+            if (_expressionDelegateMap.TryGetValue(constraintExpression.ConstraintType, out Func<double, double, bool>? valueComparisonEvaluator))
             {
                 // In case of finding the node type in the expression delegate map, we know it must be a binary expression with constant values
                 // to be compared.
@@ -65,7 +65,7 @@ namespace SensorActuatorImplementations.ValueHandlers
                     unsatisfiedConstraints.Add(atomicConstraintExpression);
                 }
             }
-            else if (_expressionCombinationDelegateMap.TryGetValue(constraintExpression.ConstraintType, out Func<bool, bool, bool> constraintCombinationEvaluator))
+            else if (_expressionCombinationDelegateMap.TryGetValue(constraintExpression.ConstraintType, out Func<bool, bool, bool>? constraintCombinationEvaluator))
             {
                 // In case of finding the node type in the expression combination delegate map, we know it must be a binary expression with more
                 // sub-expression either containing more combinations or value comparisons.
@@ -105,14 +105,13 @@ namespace SensorActuatorImplementations.ValueHandlers
             return measuredPropertyDoubleValues.Sum() / measuredPropertyDoubleValues.Length;
         }
 
-        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(object currentValue,
-            object minimumValue,
-            object maximumValue,
-            int simulationGranularity,
-            Effect effect,
-            string configurableParameterName)
+        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, int simulationGranularity, Effect effect)
         {
             IEnumerable<object> possibleValues;
+
+            var currentValue = configurableParameter.Value;
+            var minimumValue = configurableParameter.LowerLimitValue;
+            var maximumValue = configurableParameter.UpperLimitValue;
 
             if (currentValue is not double)
             {
@@ -133,7 +132,7 @@ namespace SensorActuatorImplementations.ValueHandlers
             var minimumValueDouble = (double)minimumValue;
             var maximumValueDouble = (double)maximumValue;
 
-            if (_configurableParameterGranularityMap.TryGetValue(configurableParameterName, out Func<double, double, double, int, IEnumerable<object>> configurableParameterLogic))
+            if (_configurableParameterGranularityMap.TryGetValue(configurableParameter.Name, out Func<double, double, double, int, IEnumerable<object>>? configurableParameterLogic))
             {
                 possibleValues = configurableParameterLogic(currentValueDouble, minimumValueDouble, maximumValueDouble, simulationGranularity);
             }

@@ -9,6 +9,7 @@ namespace Logic.Mapek
         public SimulationConfiguration Plan(IEnumerable<OptimalCondition> optimalConditions,
             IEnumerable<Models.OntologicalModels.Action> actions,
             PropertyCache propertyCache,
-            IGraph instanceModel);
+            IGraph instanceModel,
+            int actuationSimulationGranularity);
     }
 }

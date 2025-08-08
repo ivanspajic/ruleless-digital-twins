@@ -11,7 +11,7 @@ namespace Logic.Mapek.EqualityComparers
 
         public int GetHashCode([DisallowNull] HashSet<Models.OntologicalModels.Action> obj)
         {
-            var hashCode = 0;
+            var hashCode = 1;
 
             foreach (var element in obj)
             {

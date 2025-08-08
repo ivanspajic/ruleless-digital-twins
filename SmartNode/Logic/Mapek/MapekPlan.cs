@@ -62,23 +62,9 @@ namespace Logic.Mapek
 
             _logger.LogInformation("Generated a total of {total} simulation configurations.", simulationConfigurations.Count());
 
-            var successfulConfigurations = Simulate(simulationConfigurations, optimalConditions, propertyCache, instanceModel, actuationSimulationGranularity);
+            Simulate(simulationConfigurations, propertyCache, instanceModel);
 
-            if (!successfulConfigurations.Any())
-            {
-                _logger.LogWarning("No successful simulation configurations found. This indicates that no Actions the system can take will restore " +
-                    "OptimalConditions. Consider adding additional Actuators or setting up soft-Sensors with different ConfigurableParameters.");
-
-                return new SimulationConfiguration
-                {
-                    PostTickActions = [],
-                    SimulationTicks = []
-                };
-            }
-
-            _logger.LogInformation("Found a total of {total} successful configurations.", successfulConfigurations.Count());
-
-            var optimalConfiguration = GetOptimalConfiguration(instanceModel, propertyCache, successfulConfigurations);
+            var optimalConfiguration = GetOptimalConfiguration(instanceModel, propertyCache, optimalConditions, simulationConfigurations);
 
             return optimalConfiguration;
         }
@@ -275,74 +261,31 @@ namespace Logic.Mapek
                 // Get all possible Cartesian pairings of simulation ticks that together form full simulation configurations.
                 var simulationTickCombinations = GetNaryCartesianProducts(allSimulationTicksByIndex);
 
-                // Get all unique Actuators from ActuationAction combinations by getting the longest combination and extracting those ActuationActions' Actuators.
-                // This ensures that all Actuators that should be present in a simulation are present.
-                var greatestCombinationLength = 0;
-
-                foreach (var actuationActionCombination in actuationActionCombinations)
-                {
-                    if (greatestCombinationLength < actuationActionCombination.Count())
-                    {
-                        greatestCombinationLength = actuationActionCombination.Count();
-                    }
-                }
-
-                var actuationActionCombinationLongest = actuationActionCombinations.Where(actuationActionCombination => actuationActionCombination.Count() == greatestCombinationLength)
-                    .First();
-                var allActuators = actuationActionCombinationLongest.Select(actuationAction => actuationAction.ActuatorState.Actuator);
-
-                // Filter out simulation tick combinations where every Actuator isn't present in at least one tick per combination and construct simulation
-                // configurations with the combinations that pass.
                 foreach (var simulationTickCombination in simulationTickCombinations)
                 {
-                    var actuatorsPresent = new List<bool>();
+                    SimulationConfiguration simulationConfiguration = null!;
 
-                    foreach (var actuatorName in allActuators)
+                    if (reconfigurationActionCombinations.Any())
                     {
-                        var actuatorPresent = false;
-
-                        foreach (var simulationTick in simulationTickCombination)
-                        {
-                            foreach (var actuationAction in simulationTick.ActionsToExecute)
-                            {
-                                if (actuationAction.ActuatorState.Actuator.Equals(actuatorName))
-                                {
-                                    actuatorPresent = true;
-                                }
-                            }
-                        }
-
-                        actuatorsPresent.Add(actuatorPresent);
-                    }
-
-                    var allActuatorsPresent = actuatorsPresent.All(actuatorPresent => actuatorPresent == true);
-
-                    if (allActuatorsPresent)
-                    {
-                        SimulationConfiguration simulationConfiguration = null!;
-
-                        if (reconfigurationActionCombinations.Any())
-                        {
-                            foreach (var reconfigurationActionCombination in reconfigurationActionCombinations)
-                            {
-                                simulationConfiguration = new SimulationConfiguration
-                                {
-                                    SimulationTicks = simulationTickCombination.Reverse(), // Must be reversed due to how the combinations are constructed.
-                                    PostTickActions = reconfigurationActionCombination
-                                };
-                            }
-                        }
-                        else
+                        foreach (var reconfigurationActionCombination in reconfigurationActionCombinations)
                         {
                             simulationConfiguration = new SimulationConfiguration
                             {
                                 SimulationTicks = simulationTickCombination.Reverse(), // Must be reversed due to how the combinations are constructed.
-                                PostTickActions = []
+                                PostTickActions = reconfigurationActionCombination
                             };
                         }
-
-                        simulationConfigurations.Add(simulationConfiguration);
                     }
+                    else
+                    {
+                        simulationConfiguration = new SimulationConfiguration
+                        {
+                            SimulationTicks = simulationTickCombination.Reverse(), // Must be reversed due to how the combinations are constructed.
+                            PostTickActions = []
+                        };
+                    }
+
+                    simulationConfigurations.Add(simulationConfiguration);
                 }
             }
             else
@@ -359,7 +302,7 @@ namespace Logic.Mapek
                     simulationConfigurations.Add(simulationConfiguration);
                 }
             }
-            
+
             return simulationConfigurations;
         }
 
@@ -404,20 +347,14 @@ namespace Logic.Mapek
             return combinations;
         }
 
-        private IEnumerable<SimulationConfiguration> Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations,
-            IEnumerable<OptimalCondition> optimalConditions,
-            PropertyCache propertyCache,
-            IGraph instanceModel,
-            int simulationGranularity)
+        private void Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations, PropertyCache propertyCache, IGraph instanceModel)
         {
-            var successfulSimulationConfigurations = new List<SimulationConfiguration>();
-
             // Retrieve the host platform FMU for ActuationAction simulations.
             var fmuFilePath = GetHostPlatformFmu(instanceModel, simulationConfigurations.First());
 
             foreach (var simulationConfiguration in simulationConfigurations)
             {
-                // Make a deep copy of the property cache for simulations.
+                // Make a deep copy of the property cache for the current simulation configuration.
                 var propertyCacheCopy = GetPropertyCacheCopy(propertyCache);
 
                 var simulationTime = 0.0;
@@ -477,18 +414,9 @@ namespace Logic.Mapek
                     }
                 }
 
-                // Check that every OptimalCondition passes with respect to the values in the property cache copy.
-                var allOptimalConditionsSatisfied = AreAllOptimalConditionsSatisfied(optimalConditions, propertyCacheCopy);
-
-                if (allOptimalConditionsSatisfied)
-                {
-                    simulationConfiguration.ResultingPropertyCache = propertyCacheCopy;
-
-                    successfulSimulationConfigurations.Add(simulationConfiguration);
-                }
+                // Assign the final Property values to the results of the simulation configuration.
+                simulationConfiguration.ResultingPropertyCache = propertyCacheCopy;
             }
-
-            return successfulSimulationConfigurations;
         }
 
         private string GetHostPlatformFmu(IGraph instanceModel, SimulationConfiguration simulationConfiguration)
@@ -612,53 +540,53 @@ namespace Logic.Mapek
 
         private IDictionary<string, object> ExecuteFmuForSimulationConfiguration(string fmuFilePath, IDictionary<string, object> inputs, double timeValue = -1)
         {
-            var model = Model.Load(fmuFilePath);
+            //var model = Model.Load(fmuFilePath);
 
-            var roomTemperature = model.Variables["RoomTemperature"];
-            var heaterState = model.Variables["HeaterState"];
+            //var roomTemperature = model.Variables["RoomTemperature"];
+            //var heaterState = model.Variables["HeaterState"];
 
-            // This instantiation fails frequently due to a "memory protected" error (even when no other simulations have been run beforehand), so it might be worth it
-            // to change instance names in case it helps.
-            var instance = model.CreateCoSimulationInstance("demo3");
+            //// This instantiation fails frequently due to a "memory protected" error (even when no other simulations have been run beforehand), so it might be worth it
+            //// to change instance names in case it helps.
+            //var instance = model.CreateCoSimulationInstance("demo3");
 
-            instance.StartTime(0);
+            //instance.StartTime(0);
 
-            instance.WriteReal((roomTemperature, 28));
+            //instance.WriteReal((roomTemperature, 28));
 
-            instance.AdvanceTime(100);
+            //instance.AdvanceTime(100);
 
-            var realValues = instance.ReadReal(roomTemperature).ToArray();
-            var roomTemperatureValue = realValues[0];
-            var stringValues = instance.ReadString(heaterState).ToArray();
-            var heaterStateValue = stringValues[0];
+            //var realValues = instance.ReadReal(roomTemperature).ToArray();
+            //var roomTemperatureValue = realValues[0];
+            //var stringValues = instance.ReadString(heaterState).ToArray();
+            //var heaterStateValue = stringValues[0];
 
-            instance.WriteString((heaterState, ""));
-            instance.AdvanceTime(500);
+            //instance.WriteString((heaterState, ""));
+            //instance.AdvanceTime(500);
 
-            realValues = instance.ReadReal(roomTemperature).ToArray();
-            roomTemperatureValue = realValues[0];
-            stringValues = instance.ReadString(heaterState).ToArray();
-            heaterStateValue = stringValues[0];
+            //realValues = instance.ReadReal(roomTemperature).ToArray();
+            //roomTemperatureValue = realValues[0];
+            //stringValues = instance.ReadString(heaterState).ToArray();
+            //heaterStateValue = stringValues[0];
 
-            //instance.WriteString((heaterState, "HeaterStrong"));
+            ////instance.WriteString((heaterState, "HeaterStrong"));
 
-            // The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
-            // TODO: figure out why 1100 here equals 3600 in the fmu, and maybe how to fix it with scaling (weird stuff)??
+            //// The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
+            //// TODO: figure out why 1100 here equals 3600 in the fmu, and maybe how to fix it with scaling (weird stuff)??
 
-            instance.WriteReal((roomTemperature, 28));
+            //instance.WriteReal((roomTemperature, 28));
 
-            instance.AdvanceTime(100);
+            //instance.AdvanceTime(100);
 
-            realValues = instance.ReadReal(roomTemperature).ToArray();
-            roomTemperatureValue = realValues[0];
-            stringValues = instance.ReadString(heaterState).ToArray();
-            heaterStateValue = stringValues[0];
+            //realValues = instance.ReadReal(roomTemperature).ToArray();
+            //roomTemperatureValue = realValues[0];
+            //stringValues = instance.ReadString(heaterState).ToArray();
+            //heaterStateValue = stringValues[0];
 
-            // Calling instance.Dispose() creates a problem in the underlying external code which crashed the application. This could be due to improper implementations
-            // or handling of resources in the Femyou (.NET) library used to read from and write to FMUs.
-            //instance.Dispose();
+            //// Calling instance.Dispose() creates a problem in the underlying external code which crashed the application. This could be due to improper implementations
+            //// or handling of resources in the Femyou (.NET) library used to read from and write to FMUs.
+            ////instance.Dispose();
 
-            //model.Dispose();
+            ////model.Dispose();
 
             return new Dictionary<string, object>();
         }
@@ -741,14 +669,41 @@ namespace Logic.Mapek
 
         private SimulationConfiguration GetOptimalConfiguration(IGraph instanceModel,
             PropertyCache propertyCache,
-            IEnumerable<SimulationConfiguration> successfulSimulationConfigurations)
+            IEnumerable<OptimalCondition> optimalConditions,
+            IEnumerable<SimulationConfiguration> simulationConfigurations)
         {
             // This method finds the optimal configuration out of the collection of successful simulation configurations. It does so by first
-            // finding a subset that contains the highest number of optimized Properties. For simplicity, the value optimized by is not checked
-            // since deciding on the 'worth' of each Property's amount with respect to another is pure domain knowledge and could thus be
-            // out-sourced as custom logic to the user. In case of multiple configurations remaining after the first filter, a further subset
-            // is picked consisting of configurations with the lowest total number of Actions to take. In case of multiple configurations still
-            // remaining, the first one is returned.
+            // selecting simulations that have achieved restoring their OptimalConditions. In case no simulations have done so, the set of all
+            // simulation configurations is used for the rest of the filter to attempt to find the best out of the unsuccessful ones. The filter
+            // continues by finding a subset that contains the highest number of optimized Properties. For simplicity, the value optimized by is
+            // not checked since deciding on the 'worth' of each Property's amount with respect to another is pure domain knowledge and could
+            // thus be out-sourced as custom logic to the user. In case of multiple configurations remaining after the first filter, a further
+            // subset is picked consisting of configurations with the lowest total number of Actions to take. In case of multiple configurations
+            // still remaining, the first one is returned.
+
+            IEnumerable<SimulationConfiguration> simulationConfigurationsToFilter;
+            var successfulSimulationConfigurations = new List<SimulationConfiguration>();
+
+            foreach (var simulationConfiguration in simulationConfigurations)
+            {
+                // Check that every OptimalCondition passes with respect to the values in the resulting property cache.
+                var allOptimalConditionsSatisfied = AreAllOptimalConditionsSatisfied(optimalConditions, simulationConfiguration.ResultingPropertyCache);
+
+                if (allOptimalConditionsSatisfied)
+                {
+                    successfulSimulationConfigurations.Add(simulationConfiguration);
+                }
+            }
+            
+            // If there are successful simulations, filter from those. If there aren't, simply find the best out of all unsuccessful ones.
+            if (successfulSimulationConfigurations.Any())
+            {
+                simulationConfigurationsToFilter = successfulSimulationConfigurations;
+            }
+            else
+            {
+                simulationConfigurationsToFilter = simulationConfigurations;
+            }
 
             var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(instanceModel, propertyCache);
 
@@ -757,7 +712,7 @@ namespace Logic.Mapek
             var currentMaximumOptimizedProperties = 0;
             var configurationsWithOptimizedProperties = new List<SimulationConfiguration>();
 
-            foreach (var successfulSimulationConfiguration in successfulSimulationConfigurations)
+            foreach (var simulationConfiguration in simulationConfigurationsToFilter)
             {
                 var optimizedProperties = 0;
 
@@ -798,13 +753,13 @@ namespace Logic.Mapek
                     currentMaximumOptimizedProperties = optimizedProperties;
                     configurationsWithOptimizedProperties = new List<SimulationConfiguration>
                     {
-                        successfulSimulationConfiguration
+                        simulationConfiguration
                     };
                 }
                 else if (optimizedProperties == currentMaximumOptimizedProperties)
                 {
                     // Otherwise, if there is a matching number of optimized Properties, simply add the current configuration to the collection.
-                    configurationsWithOptimizedProperties.Add(successfulSimulationConfiguration);
+                    configurationsWithOptimizedProperties.Add(simulationConfiguration);
                 }
             }
 

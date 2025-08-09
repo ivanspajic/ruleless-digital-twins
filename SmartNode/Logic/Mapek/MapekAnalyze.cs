@@ -4,11 +4,8 @@ using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Runtime.CompilerServices;
 using VDS.RDF;
 using VDS.RDF.Query;
-
-[assembly: InternalsVisibleTo("TestProject")]
 
 namespace Logic.Mapek
 {

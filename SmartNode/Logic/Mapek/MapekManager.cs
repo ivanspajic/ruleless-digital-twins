@@ -1,7 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Runtime.CompilerServices;
 using VDS.RDF;
 using VDS.RDF.Parsing;
+
+[assembly: InternalsVisibleTo("TestProject")]
 
 namespace Logic.Mapek
 {

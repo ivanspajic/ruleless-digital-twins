@@ -6,7 +6,7 @@ namespace Logic.Mapek.EqualityComparers
 {
     internal class SimulationConfigurationEqualityComparer : IEqualityComparer<SimulationConfiguration>
     {
-        private readonly ActionEqualityComparer _actionEqualityComparer = new ActionEqualityComparer();
+        private readonly ActionEqualityComparer _actionEqualityComparer = new();
 
         public bool Equals(SimulationConfiguration? x, SimulationConfiguration? y)
         {

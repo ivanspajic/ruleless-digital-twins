@@ -63,7 +63,7 @@ namespace Logic.Mapek
             _logger.LogInformation("Generated a total of {total} simulation configurations.", simulationConfigurations.Count());
 
             // Execute the simulations and obtain their results.
-            Simulate(simulationConfigurations, propertyCache, instanceModel);
+            Simulate(simulationConfigurations, instanceModel, propertyCache);
 
             // Find the optimal simulation configuration.
             return GetOptimalConfiguration(instanceModel, propertyCache, optimalConditions, simulationConfigurations);
@@ -347,7 +347,7 @@ namespace Logic.Mapek
             return combinations;
         }
 
-        private void Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations, PropertyCache propertyCache, IGraph instanceModel)
+        private void Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations, IGraph instanceModel, PropertyCache propertyCache)
         {
             // Retrieve the host platform FMU for ActuationAction simulations.
             var fmuFilePath = GetHostPlatformFmu(instanceModel, simulationConfigurations.First());
@@ -357,61 +357,14 @@ namespace Logic.Mapek
                 // Make a deep copy of the property cache for the current simulation configuration.
                 var propertyCacheCopy = GetPropertyCacheCopy(propertyCache);
 
-                var simulationTime = 0.0;
-
-                // Run the simulation by executing ActuationActions in their respective simulation ticks followed by ReconfigurationActions.
-                foreach (var simulationTick in simulationConfiguration.SimulationTicks)
+                if (simulationConfiguration.SimulationTicks.Any())
                 {
-                    var fmuActuationInputs = new Dictionary<string, object>();
-
-                    // Get all ObservableProperties and add them to the inputs for the FMU.
-                    var observableProperties = GetObservablePropertiesFromPropertyCache(instanceModel, propertyCache);
-
-                    foreach (var observableProperty in observableProperties)
-                    {
-                        // Shave off the long name URIs from the instance model.
-                        var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
-
-                        fmuActuationInputs.Add(simpleObservablePropertyName, observableProperty.Value);
-                    }
-
-                    foreach (var actuationAction in simulationTick.ActionsToExecute)
-                    {
-                        // Shave off the long name URIs from the instance model.
-                        var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Actuator);
-                        var simpleActuatorStateName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Name);
-
-                        fmuActuationInputs.Add(simpleActuatorName + "State", simpleActuatorStateName);
-                    }
-
-
-
-                    var propertyKeyValuePairs = ExecuteFmuForSimulationConfiguration(fmuFilePath, fmuActuationInputs, simulationTime);
-
-                    AssignPropertyCacheCopyValues(propertyCacheCopy, propertyKeyValuePairs);
+                    ExecuteActuationActionFmu(fmuFilePath, simulationConfiguration, instanceModel, propertyCacheCopy);
                 }
 
-                foreach (var reconfigurationAction in simulationConfiguration.PostTickActions)
+                if (simulationConfiguration.PostTickActions.Any())
                 {
-                    var fmuReconfigurationInputs = new Dictionary<string, object>();
-
-                    // Shave off the long name URIs from the instance model.
-                    var simpleConfigurableParameterName = MapekUtilities.GetSimpleName(reconfigurationAction.ConfigurableParameter.Name);
-
-                    fmuReconfigurationInputs.Add(simpleConfigurableParameterName, reconfigurationAction.NewParameterValue);
-
-                    // Get FMUs of all soft sensors that take the current ConfigurableParameter as an Input Property.
-                    var softSensorFmus = GetSoftSensorFmuFilePathsFromConfigurableParameterName(instanceModel, reconfigurationAction.ConfigurableParameter.Name);
-
-                    // Execute all FMUs and adjust the property cache accordingly.
-                    foreach (var softSensorFmu in softSensorFmus)
-                    {
-                        // TODO: get and add all inputs to the fmu into the same dictionary of inputs!!!!
-
-                        var propertyKeyValuePairs = ExecuteFmuForSimulationConfiguration(fmuFilePath, fmuReconfigurationInputs);
-
-                        AssignPropertyCacheCopyValues(propertyCacheCopy, propertyKeyValuePairs);
-                    }
+                    ExecuteReconfigurationActionFmu(simulationConfiguration, instanceModel, propertyCacheCopy);
                 }
 
                 // Assign the final Property values to the results of the simulation configuration.
@@ -538,69 +491,98 @@ namespace Logic.Mapek
             return maximumSimulationTime;
         }
 
-        private IDictionary<string, object> ExecuteFmuForSimulationConfiguration(string fmuFilePath, IDictionary<string, object> inputs, double timeValue = -1)
+        private void ExecuteActuationActionFmu(string fmuFilePath, SimulationConfiguration simulationConfiguration, IGraph instanceModel, PropertyCache propertyCacheCopy)
         {
-            //var model = Model.Load(fmuFilePath);
+            var model = Model.Load(fmuFilePath);
 
-            //var roomTemperature = model.Variables["RoomTemperature"];
-            //var heaterState = model.Variables["HeaterState"];
+            // This instantiation fails frequently due to a "memory protected" error (even when no other simulations have been run beforehand), so it might be worth it
+            // to change instance names in case it helps.
+            var fmuInstance = model.CreateCoSimulationInstance("demo103");
+            
+            fmuInstance.StartTime(0);
 
-            //// This instantiation fails frequently due to a "memory protected" error (even when no other simulations have been run beforehand), so it might be worth it
-            //// to change instance names in case it helps.
-            //var instance = model.CreateCoSimulationInstance("demo");
+            // Run the simulation by executing ActuationActions in their respective simulation ticks.
+            foreach (var simulationTick in simulationConfiguration.SimulationTicks)
+            {
+                var fmuActuationInputs = new Dictionary<string, object>();
 
-            //instance.StartTime(0);
+                // Get all ObservableProperties and add them to the inputs for the FMU.
+                var observableProperties = GetObservablePropertiesFromPropertyCache(instanceModel, propertyCacheCopy);
 
-            //instance.WriteReal((roomTemperature, 28));
+                foreach (var observableProperty in observableProperties)
+                {
+                    // Shave off the long name URIs from the instance model.
+                    var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
 
-            //instance.AdvanceTime(100);
+                    fmuActuationInputs.Add(simpleObservablePropertyName, observableProperty.Value);
+                }
 
-            //var realValues = instance.ReadReal(roomTemperature).ToArray();
+                foreach (var actuationAction in simulationTick.ActionsToExecute)
+                {
+                    // Shave off the long name URIs from the instance model.
+                    var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Actuator);
+                    var simpleActuatorStateName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Name);
+
+                    fmuActuationInputs.Add(simpleActuatorName + "State", simpleActuatorStateName);
+                }
+
+                AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
+            }
+
+            var roomTemperature = model.Variables["RoomTemperature"];
+
+            var realValues = fmuInstance.ReadReal(roomTemperature).ToArray();
             //var roomTemperatureValue = realValues[0];
             //var stringValues = instance.ReadString(heaterState).ToArray();
             //var heaterStateValue = stringValues[0];
 
-            //instance.WriteString((heaterState, ""));
-            //instance.AdvanceTime(500);
-
-            //realValues = instance.ReadReal(roomTemperature).ToArray();
-            //roomTemperatureValue = realValues[0];
-            //stringValues = instance.ReadString(heaterState).ToArray();
-            //heaterStateValue = stringValues[0];
-
-            ////instance.WriteString((heaterState, "HeaterStrong"));
-
             //// The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
             //// TODO: figure out why 1100 here equals 3600 in the fmu, and maybe how to fix it with scaling (weird stuff)??
 
-            //instance.WriteReal((roomTemperature, 28));
+            // Calling instance.Dispose() creates a problem in the underlying external code which crashed the application. This could be due to improper implementations
+            // or handling of resources in the Femyou (.NET) library used to read from and write to FMUs.
+            //instance.Dispose();
 
-            //instance.AdvanceTime(100);
-
-            //realValues = instance.ReadReal(roomTemperature).ToArray();
-            //roomTemperatureValue = realValues[0];
-            //stringValues = instance.ReadString(heaterState).ToArray();
-            //heaterStateValue = stringValues[0];
-
-            //// Calling instance.Dispose() creates a problem in the underlying external code which crashed the application. This could be due to improper implementations
-            //// or handling of resources in the Femyou (.NET) library used to read from and write to FMUs.
-            ////instance.Dispose();
-
-            ////model.Dispose();
-
-            return new Dictionary<string, object>();
+            //model.Dispose();
         }
 
-        private void AssignPropertyCacheCopyValues(PropertyCache propertyCacheCopy, IDictionary<string, object> fmuOutputs)
+        private void ExecuteReconfigurationActionFmu(SimulationConfiguration simulationConfiguration, IGraph instanceModel, PropertyCache propertyCache)
+        {
+            foreach (var reconfigurationAction in simulationConfiguration.PostTickActions)
+            {
+                var fmuReconfigurationInputs = new Dictionary<string, object>();
+
+                // Shave off the long name URIs from the instance model.
+                var simpleConfigurableParameterName = MapekUtilities.GetSimpleName(reconfigurationAction.ConfigurableParameter.Name);
+
+                fmuReconfigurationInputs.Add(simpleConfigurableParameterName, reconfigurationAction.NewParameterValue);
+
+                // Get FMUs of all soft sensors that take the current ConfigurableParameter as an Input Property.
+                var softSensorFmus = GetSoftSensorFmuFilePathsFromConfigurableParameterName(instanceModel, reconfigurationAction.ConfigurableParameter.Name);
+
+                // Execute all FMUs and adjust the property cache accordingly.
+                foreach (var softSensorFmu in softSensorFmus)
+                {
+                    // TODO: get and add all inputs to the fmu into the same dictionary of inputs!!!!
+
+
+                    //AssignPropertyCacheCopyValues(propertyCacheCopy, propertyKeyValuePairs);
+                }
+            }
+        }
+
+        private void AssignPropertyCacheCopyValues(IInstance fmuInstance, PropertyCache propertyCacheCopy, IReadOnlyDictionary<string, IVariable> fmuOutputs)
         {
             // Find the correct Property from the simpler output variable name and assign its value.
             foreach (var fmuOutput in fmuOutputs)
             {
-                foreach (var property in propertyCacheCopy.Properties.Keys)
+                foreach (var propertyName in propertyCacheCopy.Properties.Keys)
                 {
-                    if (property.EndsWith(fmuOutput.Key))
+                    if (propertyName.EndsWith(fmuOutput.Key))
                     {
-                        propertyCacheCopy.Properties[property].Value = fmuOutput.Value;
+                        var valueHandler = _factory.GetValueHandlerImplementation(propertyCacheCopy.Properties[propertyName].OwlType);
+
+                        propertyCacheCopy.Properties[propertyName].Value = valueHandler.GetValueFromSimulationParameter(fmuInstance, fmuOutput.Value);
                     }
                 }
             }

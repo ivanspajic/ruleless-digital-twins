@@ -1,4 +1,5 @@
-﻿using Logic.Models.MapekModels;
+﻿using Femyou;
+using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 using TestProject.Mocks.EqualityComparers;
@@ -71,6 +72,11 @@ namespace TestProject.Mocks
             throw new NotImplementedException();
         }
 
+        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, int simulationGranularity, Effect effect)
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression, object propertyValue)
         {
             if (_unsatisfiedConstraints.TryGetValue((constraintExpression, propertyValue), out IEnumerable<AtomicConstraintExpression> unsatisfiedConstraints))
@@ -81,12 +87,22 @@ namespace TestProject.Mocks
             return null!;
         }
 
+        public object GetValueFromSimulationParameter(IInstance fmuInstance, IVariable parameter)
+        {
+            throw new NotImplementedException();
+        }
+
         public bool IsGreaterThan(object comparingValue, object targetValue)
         {
             throw new NotImplementedException();
         }
 
         public bool IsLessThan(object comparingValue, object targetValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WriteValueToSimulationParameter(IInstance fmuInstance, IVariable parameter, object value)
         {
             throw new NotImplementedException();
         }

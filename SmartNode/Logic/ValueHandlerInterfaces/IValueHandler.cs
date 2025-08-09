@@ -1,4 +1,5 @@
-﻿using Logic.Models.MapekModels;
+﻿using Femyou;
+using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 
 namespace Logic.ValueHandlerInterfaces
@@ -14,5 +15,9 @@ namespace Logic.ValueHandlerInterfaces
         public bool IsGreaterThan(object comparingValue, object targetValue);
 
         public bool IsLessThan(object comparingValue, object targetValue);
+
+        public object GetValueFromSimulationParameter(IInstance fmuInstance, IVariable parameter);
+
+        public void WriteValueToSimulationParameter(IInstance fmuInstance, IVariable parameter, object value);
     }
 }

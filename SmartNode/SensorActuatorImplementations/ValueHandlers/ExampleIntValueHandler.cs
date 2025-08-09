@@ -1,4 +1,5 @@
-﻿using Logic.Models.MapekModels;
+﻿using Femyou;
+using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 using System.Globalization;
@@ -84,6 +85,21 @@ namespace SensorActuatorImplementations.ValueHandlers
         public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression, object propertyValue)
         {
             throw new NotImplementedException();
+        }
+
+        public object GetValueFromSimulationParameter(IInstance fmuInstance, IVariable parameter)
+        {
+            return fmuInstance.ReadInteger(parameter).ToArray()[0];
+        }
+
+        public void WriteValueToSimulationParameter(IInstance fmuInstance, IVariable parameter, object value)
+        {
+            if (value is not int)
+            {
+                value = int.Parse(value.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            fmuInstance.WriteInteger((parameter, (int)value));
         }
     }
 }

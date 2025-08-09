@@ -25,6 +25,8 @@ namespace TestProject
 
             var mapekAnalyze = new MapekAnalyze(new ServiceProviderMock());
 
+            var simulationGranularity = 4;
+
             var propertyCacheMock = new PropertyCache
             {
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
@@ -209,7 +211,7 @@ namespace TestProject
             var expectedOptimalConditionActionTuple = new Tuple<IEnumerable<OptimalCondition>, IEnumerable<Logic.Models.OntologicalModels.Action>>(expectedOptimalConditions, expectedActions);
 
             // Act
-            var actualOptimalConditionActionTuple = mapekAnalyze.Analyze(instanceModel, propertyCacheMock);
+            var actualOptimalConditionActionTuple = mapekAnalyze.Analyze(instanceModel, propertyCacheMock, simulationGranularity);
 
             // Assert
             // Check that the two collections in the tuple have the same number of elements.

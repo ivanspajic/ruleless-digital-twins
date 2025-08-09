@@ -1,4 +1,5 @@
-﻿using Logic.Models.MapekModels;
+﻿using Femyou;
+using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 using System.Globalization;
@@ -185,6 +186,21 @@ namespace SensorActuatorImplementations.ValueHandlers
             }
 
             return EvaluateLessThan((double)comparingValue, (double)targetValue);
+        }
+
+        public object GetValueFromSimulationParameter(IInstance fmuInstance, IVariable parameter)
+        {
+            return fmuInstance.ReadReal(parameter).ToArray()[0];
+        }
+
+        public void WriteValueToSimulationParameter(IInstance fmuInstance, IVariable parameter, object value)
+        {
+            if (value is not double)
+            {
+                value = double.Parse(value.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            fmuInstance.WriteReal((parameter, (double)value));
         }
 
         private static bool EvaluateGreaterThan(double sensorValue, double optimalConditionValue)

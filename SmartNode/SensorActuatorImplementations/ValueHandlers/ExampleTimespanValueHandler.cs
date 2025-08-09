@@ -1,6 +1,8 @@
-﻿using Logic.Models.MapekModels;
+﻿using Femyou;
+using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
+using System.Globalization;
 
 namespace SensorActuatorImplementations.ValueHandlers
 {
@@ -28,6 +30,18 @@ namespace SensorActuatorImplementations.ValueHandlers
 
         public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression, object propertyValue)
         {
+            throw new NotImplementedException();
+        }
+
+        public object GetValueFromSimulationParameter(IInstance fmuInstance, IVariable parameter)
+        {
+            // There does not exist a method in the Femyou library for handling this type.
+            throw new NotImplementedException();
+        }
+
+        public void WriteValueToSimulationParameter(IInstance fmuInstance, IVariable parameter, object value)
+        {
+            // There does not exist a method in the Femyou library for handling this type.
             throw new NotImplementedException();
         }
     }

@@ -6,7 +6,7 @@ using System.Globalization;
 
 namespace SensorActuatorImplementations.ValueHandlers
 {
-    public class ExampleDoubleValueHandler : IValueHandler
+    public class DoubleValueHandler : IValueHandler
     {
         // In case of new ExpressionTypes being supported, this could be used to register new delegates.
         private static readonly Dictionary<ConstraintType, Func<double, double, bool>> _expressionDelegateMap = new()

@@ -17,6 +17,8 @@ namespace Logic.Mapek
         private readonly ILogger<MapekPlan> _logger;
         private readonly IFactory _factory;
 
+        private int _simulationInstanceCount = 0;
+
         public MapekPlan(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekPlan>>();
@@ -493,57 +495,63 @@ namespace Logic.Mapek
 
         private void ExecuteActuationActionFmu(string fmuFilePath, SimulationConfiguration simulationConfiguration, IGraph instanceModel, PropertyCache propertyCacheCopy)
         {
-            var model = Model.Load(fmuFilePath);
+            //var model = Model.Load(fmuFilePath);
 
-            // This instantiation fails frequently due to a "memory protected" error (even when no other simulations have been run beforehand), so it might be worth it
-            // to change instance names in case it helps.
-            var fmuInstance = model.CreateCoSimulationInstance("demo103");
-            
+            var model = Model.Load("../../../../SensorActuatorImplementations/FMUs/BouncingBall.fmu");
+
+            // This instantiation fails frequently due to a "protected memory" exception (even when no other simulations have been run beforehand). Because it's thrown from
+            // external code, the exception can't be caught for retries. This only works consistently with the Modelica reference FMUs.
+            var fmuInstance = model.CreateCoSimulationInstance("demo");
+
             fmuInstance.StartTime(0);
 
-            // Run the simulation by executing ActuationActions in their respective simulation ticks.
-            foreach (var simulationTick in simulationConfiguration.SimulationTicks)
-            {
-                var fmuActuationInputs = new Dictionary<string, object>();
+            // Run the simulation by executing ActuationActions in their respective simulation intervals.
+            //foreach (var simulationTick in simulationConfiguration.SimulationTicks)
+            //{
+            //    var fmuActuationInputs = new List<(string, string, object)>();
 
-                // Get all ObservableProperties and add them to the inputs for the FMU.
-                var observableProperties = GetObservablePropertiesFromPropertyCache(instanceModel, propertyCacheCopy);
+            //    // Get all ObservableProperties and add them to the inputs for the FMU.
+            //    var observableProperties = GetObservablePropertiesFromPropertyCache(instanceModel, propertyCacheCopy);
 
-                foreach (var observableProperty in observableProperties)
-                {
-                    // Shave off the long name URIs from the instance model.
-                    var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
+            //    foreach (var observableProperty in observableProperties)
+            //    {
+            //        // Shave off the long name URIs from the instance model.
+            //        var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
 
-                    fmuActuationInputs.Add(simpleObservablePropertyName, observableProperty.Value);
-                }
+            //        fmuActuationInputs.Add((simpleObservablePropertyName, observableProperty.OwlType, observableProperty.Value));
+            //    }
 
-                foreach (var actuationAction in simulationTick.ActionsToExecute)
-                {
-                    // Shave off the long name URIs from the instance model.
-                    var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Actuator);
-                    var simpleActuatorStateName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Name);
+            //    // Add all ActuatorStates to the inputs for the FMU.
+            //    foreach (var actuationAction in simulationTick.ActionsToExecute)
+            //    {
+            //        // Shave off the long name URIs from the instance model.
+            //        var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Actuator);
+            //        var simpleActuatorStateName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Name);
 
-                    fmuActuationInputs.Add(simpleActuatorName + "State", simpleActuatorStateName);
-                }
+            //        // Add the ActuatorStates with their names as values and hardcoded "(xsd:)string" types as OWL types.
+            //        fmuActuationInputs.Add((simpleActuatorName + "State", "string", simpleActuatorStateName));
+            //    }
 
-                AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
-            }
+            //    foreach (var input in fmuActuationInputs)
+            //    {
+            //        var valueHandler = _factory.GetValueHandlerImplementation(input.Item2);
+            //        var fmuVariable = model.Variables[input.Item1];
 
-            var roomTemperature = model.Variables["RoomTemperature"];
+            //        valueHandler.WriteValueToSimulationParameter(fmuInstance, fmuVariable, input.Item3);
+            //    }
 
-            var realValues = fmuInstance.ReadReal(roomTemperature).ToArray();
-            //var roomTemperatureValue = realValues[0];
-            //var stringValues = instance.ReadString(heaterState).ToArray();
-            //var heaterStateValue = stringValues[0];
+            //    // The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
+            //    // TODO: figure out why 1100 here equals 3600 in the fmu, and maybe how to fix it with scaling (weird stuff)??
 
-            //// The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
-            //// TODO: figure out why 1100 here equals 3600 in the fmu, and maybe how to fix it with scaling (weird stuff)??
+            //    AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
+            //}
 
-            // Calling instance.Dispose() creates a problem in the underlying external code which crashed the application. This could be due to improper implementations
-            // or handling of resources in the Femyou (.NET) library used to read from and write to FMUs.
-            //instance.Dispose();
-
-            //model.Dispose();
+            // Calling Dispose() on the instance creates a problem in the underlying external code which crashes the application approximately 95% of the time.
+            // This could be due to improper implementations or handling of resources in the Femyou (.NET) library used to read from and write to FMUs. Note that
+            // calling Dispose() while running a Modelica reference FMU (against which the Femyou library was checked), this issue doesn't occur. Our FMUs are
+            // generated as standard FMUs by OpenModelica.
+            fmuInstance.Dispose();
+            model.Dispose();
         }
 
         private void ExecuteReconfigurationActionFmu(SimulationConfiguration simulationConfiguration, IGraph instanceModel, PropertyCache propertyCache)
@@ -581,8 +589,9 @@ namespace Logic.Mapek
                     if (propertyName.EndsWith(fmuOutput.Key))
                     {
                         var valueHandler = _factory.GetValueHandlerImplementation(propertyCacheCopy.Properties[propertyName].OwlType);
+                        var value = valueHandler.GetValueFromSimulationParameter(fmuInstance, fmuOutput.Value);
 
-                        propertyCacheCopy.Properties[propertyName].Value = valueHandler.GetValueFromSimulationParameter(fmuInstance, fmuOutput.Value);
+                        propertyCacheCopy.Properties[propertyName].Value = value;
                     }
                 }
             }

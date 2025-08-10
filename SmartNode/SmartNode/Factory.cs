@@ -88,15 +88,16 @@ namespace SmartNode
         };
 
         // The keys represent the OWL (RDF/XSD) types supported by Protege, and the values are user implementations.
-        private readonly Dictionary<string, IValueHandler> _sensorValueHandlers = new()
+        private readonly Dictionary<string, IValueHandler> _valueHandlers = new()
         {
-            { "double", new ExampleDoubleValueHandler() },
-            { "int", new ExampleIntValueHandler() }
+            { "double", new DoubleValueHandler() },
+            { "int", new IntValueHandler() },
+            { "string", new StringValueHandler() }
         };
 
         public ISensorDevice GetSensorDeviceImplementation(string sensorName, string procedureName)
         {
-            if (_sensors.TryGetValue((sensorName, procedureName), out ISensorDevice sensor))
+            if (_sensors.TryGetValue((sensorName, procedureName), out ISensorDevice? sensor))
             {
                 return sensor;
             }
@@ -106,7 +107,7 @@ namespace SmartNode
 
         public IActuatorDevice GetActuatorDeviceImplementation(string actuatorName)
         {
-            if (_actuators.TryGetValue(actuatorName, out IActuatorDevice actuator))
+            if (_actuators.TryGetValue(actuatorName, out IActuatorDevice? actuator))
             {
                 return actuator;
             }
@@ -116,7 +117,7 @@ namespace SmartNode
 
         public IValueHandler GetValueHandlerImplementation(string owlType)
         {
-            if (_sensorValueHandlers.TryGetValue(owlType, out IValueHandler sensorValueHandler))
+            if (_valueHandlers.TryGetValue(owlType, out IValueHandler? sensorValueHandler))
             {
                 return sensorValueHandler;
             }

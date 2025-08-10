@@ -6,7 +6,7 @@ using System.Globalization;
 
 namespace SensorActuatorImplementations.ValueHandlers
 {
-    public class ExampleTimespanValueHandler : IValueHandler
+    public class TimespanValueHandler : IValueHandler
     {
         public bool IsGreaterThan(object comparingValue, object targetValue)
         {

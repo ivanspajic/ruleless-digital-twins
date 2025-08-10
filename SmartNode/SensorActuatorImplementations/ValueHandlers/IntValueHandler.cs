@@ -7,7 +7,7 @@ using System.Globalization;
 namespace SensorActuatorImplementations.ValueHandlers
 {
     // Example int Sensor value handler implementation.
-    public class ExampleIntValueHandler : IValueHandler
+    public class IntValueHandler : IValueHandler
     {
         // When calculating possible reconfiguration values for ConfigurableParameters, some parameters may need specific logic to do so. For example,
         // it may be inaccurate to simply take the min-max value range and divide it by the simulation granularity in a completely linear way. For this

@@ -265,8 +265,8 @@ namespace Logic.Mapek
                     }
                 }
 
-                var sensorValueHandler = _factory.GetValueHandlerImplementation(valueType);
-                var observablePropertyValue = sensorValueHandler.GetObservablePropertyValueFromMeasuredPropertyValues(measuredPropertyValues);
+                var valueHandler = _factory.GetValueHandlerImplementation(valueType);
+                var observablePropertyValue = valueHandler.GetObservablePropertyValueFromMeasuredPropertyValues(measuredPropertyValues);
                 var observableProperty = new Property
                 {
                     Name = observablePropertyName,

@@ -29,16 +29,6 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 #    Individuals
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageRoomTemperature
-:AverageRoomTemperature rdf:type owl:NamedIndividual ,
-                                 <http://www.w3.org/ns/ssn/Output> ,
-                                 [ rdf:type owl:Restriction ;
-                                   owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
-                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                   owl:onDataRange xsd:double
-                                 ] .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier
 :Dehumidifier rdf:type owl:NamedIndividual ,
                        <http://www.w3.org/ns/sosa/Actuator> ;
@@ -228,7 +218,6 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                             :EnergyConsumptionMeter ,
                                             :Fan ,
                                             :Heater ,
-                                            :SoftSensor1 ,
                                             :TemperatureSensor1 ,
                                             :TemperatureSensor2 ;
           <http://www.w3.org/ns/ssn/implements> :OptimalCondition1 ,
@@ -260,21 +249,6 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                          <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1
-:SoftSensor1 rdf:type owl:NamedIndividual ,
-                      <http://www.w3.org/ns/sosa/Sensor> ;
-             <http://www.w3.org/ns/ssn/implements> :SoftSensor1Algorithm .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm
-:SoftSensor1Algorithm rdf:type owl:NamedIndividual ,
-                               <http://www.w3.org/ns/sosa/Procedure> ;
-                      <http://www.w3.org/ns/ssn/hasInput> :TemperatureSensor1MeasuredTemperature ,
-                                                          :TemperatureSensor2MeasuredTemperature ;
-                      <http://www.w3.org/ns/ssn/hasOutput> :AverageRoomTemperature ;
-                      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "../../../../SensorActuatorImplementations/FMUs/averageTemperature.fmu"^^xsd:anyURI .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1
 :TemperatureSensor1 rdf:type owl:NamedIndividual ,
                              <http://www.w3.org/ns/sosa/Sensor> ;
@@ -284,7 +258,6 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1MeasuredTemperature
 :TemperatureSensor1MeasuredTemperature rdf:type owl:NamedIndividual ,
-                                                <http://www.w3.org/ns/ssn/Input> ,
                                                 <http://www.w3.org/ns/ssn/Output> ,
                                                 [ rdf:type owl:Restriction ;
                                                   owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
@@ -308,7 +281,6 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2MeasuredTemperature
 :TemperatureSensor2MeasuredTemperature rdf:type owl:NamedIndividual ,
-                                                <http://www.w3.org/ns/ssn/Input> ,
                                                 <http://www.w3.org/ns/ssn/Output> ,
                                                 [ rdf:type owl:Restriction ;
                                                   owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
@@ -332,19 +304,19 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
 [ xsd:minInclusive "1"^^xsd:int
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
-[ xsd:maxInclusive "3"^^xsd:int
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ xsd:maxInclusive "3"^^xsd:int
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger

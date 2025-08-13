@@ -497,13 +497,11 @@ namespace Logic.Mapek
         {
             //var model = Model.Load(fmuFilePath);
 
-            var model = Model.Load("../../../../SensorActuatorImplementations/FMUs/BouncingBall.fmu");
-
             // This instantiation fails frequently due to a "protected memory" exception (even when no other simulations have been run beforehand). Because it's thrown from
             // external code, the exception can't be caught for retries. This only works consistently with the Modelica reference FMUs.
-            var fmuInstance = model.CreateCoSimulationInstance("demo");
+            //var fmuInstance = model.CreateCoSimulationInstance("demo");
 
-            fmuInstance.StartTime(0);
+            //fmuInstance.StartTime(0);
 
             // Run the simulation by executing ActuationActions in their respective simulation intervals.
             //foreach (var simulationTick in simulationConfiguration.SimulationTicks)
@@ -550,8 +548,8 @@ namespace Logic.Mapek
             // This could be due to improper implementations or handling of resources in the Femyou (.NET) library used to read from and write to FMUs. Note that
             // calling Dispose() while running a Modelica reference FMU (against which the Femyou library was checked), this issue doesn't occur. Our FMUs are
             // generated as standard FMUs by OpenModelica.
-            fmuInstance.Dispose();
-            model.Dispose();
+            //fmuInstance.Dispose();
+            //model.Dispose();
         }
 
         private void ExecuteReconfigurationActionFmu(SimulationConfiguration simulationConfiguration, IGraph instanceModel, PropertyCache propertyCache)
@@ -694,24 +692,32 @@ namespace Logic.Mapek
                 return simulationsConfigurationsToContinueWith.First();
             }
 
+            _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationsConfigurationsToContinueWith.Count());
+
             // Filter for simulation configurations that satisfy the most OptimalConditions.
-            var simulationConfigurationsWithMostOptimalConditionsSatisfied = GetSimulationConfigurationsWithMostOptimalConditionsSatisfied(simulationConfigurations, optimalConditions);
+            var simulationConfigurationsWithMostOptimalConditionsSatisfied = GetSimulationConfigurationsWithMostOptimalConditionsSatisfied(simulationsConfigurationsToContinueWith, optimalConditions);
 
             if (simulationConfigurationsWithMostOptimalConditionsSatisfied.Count() == 1)
             {
                 return simulationConfigurationsWithMostOptimalConditionsSatisfied.First();
             }
 
+            _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationConfigurationsWithMostOptimalConditionsSatisfied.Count());
+
             // Filter for simulation configurations that optimize the most targeted Properties.
-            var simulationConfigurationsWithMostOptimizedProperties = GetSimulationConfigurationsWithMostOptimizedProperties(simulationConfigurations, instanceModel, propertyCache);
+            var simulationConfigurationsWithMostOptimizedProperties = GetSimulationConfigurationsWithMostOptimizedProperties(simulationConfigurationsWithMostOptimalConditionsSatisfied, instanceModel, propertyCache);
 
             if (simulationConfigurationsWithMostOptimizedProperties.Count() == 1)
             {
                 return simulationConfigurationsWithMostOptimizedProperties.First();
             }
 
+            _logger.LogInformation("{count} simulation configurations remaining after the third filter.", simulationConfigurationsWithMostOptimizedProperties.Count());
+
             // Filter for simulation configurations with the lowest number of Actions.
-            var simulationConfigurationsWithLowestNumberOfActions = GetSimulationConfigurationsWithLowestNumberOfActions(simulationConfigurations);
+            var simulationConfigurationsWithLowestNumberOfActions = GetSimulationConfigurationsWithLowestNumberOfActions(simulationConfigurationsWithMostOptimizedProperties);
+
+            _logger.LogInformation("{count} simulation configurations remaining after the fourth and last filter. Selecting the first...", simulationConfigurationsWithLowestNumberOfActions.Count());
 
             // At this point, arbitrarily return the first one regardless of the number of simulation configurations remaining.
             return simulationConfigurationsWithLowestNumberOfActions.First();
@@ -766,71 +772,61 @@ namespace Logic.Mapek
             IGraph instanceModel,
             PropertyCache propertyCache)
         {
-            var passingSimulationConfigurations = new List<SimulationConfiguration>();
+            var simulationConfigurationOptimizedPropertyCount = new Dictionary<SimulationConfiguration, int>(new SimulationConfigurationEqualityComparer());
             var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(instanceModel, propertyCache);
-            var currentMostOptimizedProperties = new Dictionary<string, Property>();
-            var currentMaximumOptimizedProperties = 0;
 
-            // Initialize the dictionary of optimized Properties.
             foreach (var propertyChangeToOptimizeFor in propertyChangesToOptimizeFor)
             {
-                currentMostOptimizedProperties.Add(propertyChangeToOptimizeFor.Property.Name, propertyChangeToOptimizeFor.Property);
+                var valueHandler = _factory.GetValueHandlerImplementation(propertyChangeToOptimizeFor.Property.OwlType);
+
+                var simulationConfigurationsWithOptimizedProperty = simulationConfigurations.Where(simulationConfiguration =>
+                {
+                    var comparingProperty = GetPropertyFromPropertyCacheByName(simulationConfiguration.ResultingPropertyCache, propertyChangeToOptimizeFor.Property.Name);
+
+                    return simulationConfigurations.All(innerSimulationConfiguration =>
+                    {
+                        var targetProperty = GetPropertyFromPropertyCacheByName(innerSimulationConfiguration.ResultingPropertyCache, propertyChangeToOptimizeFor.Property.Name);                                                
+
+                        if (propertyChangeToOptimizeFor.OptimizeFor == Effect.ValueIncrease)
+                        {
+                            return valueHandler.IsGreaterThanOrEqualTo(comparingProperty.Value, targetProperty.Value);
+                        }
+                        else
+                        {
+                            return valueHandler.IsLessThanOrEqualTo(comparingProperty.Value, targetProperty.Value);
+                        }
+                    });
+                });
+
+                foreach (var simulationConfigurationWithOptimizedProperty in simulationConfigurationsWithOptimizedProperty)
+                {
+                    if (!simulationConfigurationOptimizedPropertyCount.ContainsKey(simulationConfigurationWithOptimizedProperty))
+                    {
+                        simulationConfigurationOptimizedPropertyCount.Add(simulationConfigurationWithOptimizedProperty, 0);
+                    }
+
+                    simulationConfigurationOptimizedPropertyCount[simulationConfigurationWithOptimizedProperty]++;
+                }
             }
 
-            foreach (var simulationConfiguration in simulationConfigurations)
+            var maximumOptimizedProperties = simulationConfigurationOptimizedPropertyCount.Max(keyValuePair => keyValuePair.Value);
+            var simulationConfigurationsWithThatManyOptimizedProperties = simulationConfigurationOptimizedPropertyCount.Where(keyValuePair => keyValuePair.Value == maximumOptimizedProperties)
+                .Select(keyValuePair => keyValuePair.Key);
+
+            return simulationConfigurationsWithThatManyOptimizedProperties;
+        }
+
+        private Property GetPropertyFromPropertyCacheByName(PropertyCache propertyCache, string propertyName)
+        {
+            bool propertyFound = propertyCache.Properties.TryGetValue(propertyName, out Property property);
+
+            if (!propertyFound)
             {
-                var localOptimizedProperties = new Dictionary<string, Property>();
-                var moreOptimizedProperties = 0;
-
-                foreach (var propertyChangeToOptimizeFor in propertyChangesToOptimizeFor)
-                {
-                    Property propertyToCompare = null!;
-
-                    bool propertyFound = propertyCache.Properties.TryGetValue(propertyChangeToOptimizeFor.Property.Name, out propertyToCompare);
-
-                    if (!propertyFound)
-                    {
-                        // If the first cache doesn't contain the Property, it must be in the second one.
-                        propertyToCompare = propertyCache.ConfigurableParameters[propertyChangeToOptimizeFor.Property.Name];
-                    }
-
-                    localOptimizedProperties.Add(propertyToCompare!.Name, propertyToCompare);
-
-                    var valueHandler = _factory.GetValueHandlerImplementation(propertyToCompare.OwlType);
-
-                    var optimized = false;
-
-                    if (propertyChangeToOptimizeFor.OptimizeFor == Effect.ValueIncrease)
-                    {
-                        optimized = valueHandler.IsGreaterThan(propertyToCompare.Value, currentMostOptimizedProperties[propertyToCompare.Name].Value);
-                    }
-                    else
-                    {
-                        optimized = valueHandler.IsLessThan(propertyToCompare.Value, currentMostOptimizedProperties[propertyToCompare.Name].Value);
-                    }
-
-                    if (optimized)
-                    {
-                        moreOptimizedProperties++;
-                    }
-                }
-
-                if (moreOptimizedProperties > currentMaximumOptimizedProperties)
-                {
-                    currentMaximumOptimizedProperties = moreOptimizedProperties;
-                    currentMostOptimizedProperties = localOptimizedProperties;
-                    passingSimulationConfigurations = new List<SimulationConfiguration>
-                    {
-                        simulationConfiguration
-                    };
-                }
-                else if (moreOptimizedProperties == currentMaximumOptimizedProperties)
-                {
-                    passingSimulationConfigurations.Add(simulationConfiguration);
-                }
+                // If the first cache doesn't contain the Property, it must be in the second one.
+                property = propertyCache.ConfigurableParameters[propertyName];
             }
 
-            return passingSimulationConfigurations;
+            return property!;
         }
 
         private IEnumerable<SimulationConfiguration> GetSimulationConfigurationsWithLowestNumberOfActions(IEnumerable<SimulationConfiguration> simulationConfigurations)

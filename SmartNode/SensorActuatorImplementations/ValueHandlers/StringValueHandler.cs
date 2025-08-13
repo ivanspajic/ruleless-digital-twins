@@ -27,12 +27,12 @@ namespace SensorActuatorImplementations.ValueHandlers
             throw new NotImplementedException();
         }
 
-        public bool IsGreaterThan(object comparingValue, object targetValue)
+        public bool IsGreaterThanOrEqualTo(object comparingValue, object targetValue)
         {
             throw new NotImplementedException();
         }
 
-        public bool IsLessThan(object comparingValue, object targetValue)
+        public bool IsLessThanOrEqualTo(object comparingValue, object targetValue)
         {
             throw new NotImplementedException();
         }

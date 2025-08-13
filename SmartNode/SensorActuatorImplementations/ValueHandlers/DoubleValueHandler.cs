@@ -158,7 +158,7 @@ namespace SensorActuatorImplementations.ValueHandlers
             return possibleValues;
         }
 
-        public bool IsGreaterThan(object comparingValue, object targetValue)
+        public bool IsGreaterThanOrEqualTo(object comparingValue, object targetValue)
         {
             if (comparingValue is not double)
             {
@@ -170,10 +170,10 @@ namespace SensorActuatorImplementations.ValueHandlers
                 targetValue = double.Parse(targetValue.ToString()!, CultureInfo.InvariantCulture);
             }
 
-            return EvaluateGreaterThan((double)comparingValue, (double)targetValue);
+            return EvaluateGreaterThanOrEqualTo((double)comparingValue, (double)targetValue);
         }
 
-        public bool IsLessThan(object comparingValue, object targetValue)
+        public bool IsLessThanOrEqualTo(object comparingValue, object targetValue)
         {
             if (comparingValue is not double)
             {
@@ -185,7 +185,7 @@ namespace SensorActuatorImplementations.ValueHandlers
                 targetValue = double.Parse(targetValue.ToString()!, CultureInfo.InvariantCulture);
             }
 
-            return EvaluateLessThan((double)comparingValue, (double)targetValue);
+            return EvaluateLessThanOrEqualTo((double)comparingValue, (double)targetValue);
         }
 
         public object GetValueFromSimulationParameter(IInstance fmuInstance, IVariable parameter)

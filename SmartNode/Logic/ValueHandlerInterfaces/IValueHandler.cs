@@ -12,9 +12,9 @@ namespace Logic.ValueHandlerInterfaces
 
         public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, int simulationGranularity, Effect effect);
 
-        public bool IsGreaterThan(object comparingValue, object targetValue);
+        public bool IsGreaterThanOrEqualTo(object comparingValue, object targetValue);
 
-        public bool IsLessThan(object comparingValue, object targetValue);
+        public bool IsLessThanOrEqualTo(object comparingValue, object targetValue);
 
         public object GetValueFromSimulationParameter(IInstance fmuInstance, IVariable parameter);
 

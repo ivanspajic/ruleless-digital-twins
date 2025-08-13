@@ -1,4 +1,5 @@
-﻿using Logic.Models.OntologicalModels;
+﻿using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
 using VDS.RDF;
 using VDS.RDF.Query;
 

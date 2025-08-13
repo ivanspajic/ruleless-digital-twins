@@ -1,5 +1,4 @@
 ﻿using Logic.Models.MapekModels;
-using Logic.Models.OntologicalModels;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Logic.Mapek.EqualityComparers
@@ -12,10 +11,10 @@ namespace Logic.Mapek.EqualityComparers
         {
             if (x!.SimulationTicks.Count() == y!.SimulationTicks.Count())
             {
-                var xSimulationTicks = x.SimulationTicks as List<SimulationTick>;
-                var ySimulationTicks = y.SimulationTicks as List<SimulationTick>;
-                var xPostTickActions = x.PostTickActions as List<ReconfigurationAction>;
-                var yPostTickActions = y.PostTickActions as List<ReconfigurationAction>;
+                var xSimulationTicks = x.SimulationTicks.ToList();
+                var ySimulationTicks = y.SimulationTicks.ToList();
+                var xPostTickActions = x.PostTickActions.ToList();
+                var yPostTickActions = y.PostTickActions.ToList();
 
                 for (var i = 0; i < xSimulationTicks!.Count; i++)
                 {
@@ -23,8 +22,8 @@ namespace Logic.Mapek.EqualityComparers
                         xSimulationTicks[i].TickDurationSeconds == ySimulationTicks[i].TickDurationSeconds &&
                         xSimulationTicks[i].ActionsToExecute.Count() == ySimulationTicks[i].ActionsToExecute.Count())
                     {
-                        var xTickActionsToExecute = xSimulationTicks[i].ActionsToExecute as List<Models.OntologicalModels.Action>;
-                        var yTickActionsToExecute = ySimulationTicks[i].ActionsToExecute as List<Models.OntologicalModels.Action>;
+                        var xTickActionsToExecute = xSimulationTicks[i].ActionsToExecute.ToList();
+                        var yTickActionsToExecute = ySimulationTicks[i].ActionsToExecute.ToList();
 
                         foreach (var xTickActionToExecute in xTickActionsToExecute!)
                         {

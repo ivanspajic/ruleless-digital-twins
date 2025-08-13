@@ -2,22 +2,11 @@
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
-using System.Globalization;
 
 namespace SensorActuatorImplementations.ValueHandlers
 {
     public class TimespanValueHandler : IValueHandler
     {
-        public bool IsGreaterThan(object comparingValue, object targetValue)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool IsLessThan(object comparingValue, object targetValue)
-        {
-            throw new NotImplementedException();
-        }
-
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues)
         {
             throw new NotImplementedException();
@@ -36,6 +25,16 @@ namespace SensorActuatorImplementations.ValueHandlers
         public object GetValueFromSimulationParameter(IInstance fmuInstance, IVariable parameter)
         {
             // There does not exist a method in the Femyou library for handling this type.
+            throw new NotImplementedException();
+        }
+
+        public bool IsGreaterThanOrEqualTo(object comparingValue, object targetValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsLessThanOrEqualTo(object comparingValue, object targetValue)
+        {
             throw new NotImplementedException();
         }
 

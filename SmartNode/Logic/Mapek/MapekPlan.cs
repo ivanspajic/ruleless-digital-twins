@@ -497,13 +497,13 @@ namespace Logic.Mapek
         {
             //var model = Model.Load(fmuFilePath);
 
-            // This instantiation fails frequently due to a "protected memory" exception (even when no other simulations have been run beforehand). Because it's thrown from
-            // external code, the exception can't be caught for retries. This only works consistently with the Modelica reference FMUs.
+            //// This instantiation fails frequently due to a "protected memory" exception(even when no other simulations have been run beforehand).Because it's thrown from
+            //// external code, the exception can't be caught for retries. This only works consistently with the Modelica reference FMUs.
             //var fmuInstance = model.CreateCoSimulationInstance("demo");
 
             //fmuInstance.StartTime(0);
 
-            // Run the simulation by executing ActuationActions in their respective simulation intervals.
+            //// Run the simulation by executing ActuationActions in their respective simulation intervals.
             //foreach (var simulationTick in simulationConfiguration.SimulationTicks)
             //{
             //    var fmuActuationInputs = new List<(string, string, object)>();
@@ -530,13 +530,7 @@ namespace Logic.Mapek
             //        fmuActuationInputs.Add((simpleActuatorName + "State", "string", simpleActuatorStateName));
             //    }
 
-            //    foreach (var input in fmuActuationInputs)
-            //    {
-            //        var valueHandler = _factory.GetValueHandlerImplementation(input.Item2);
-            //        var fmuVariable = model.Variables[input.Item1];
-
-            //        valueHandler.WriteValueToSimulationParameter(fmuInstance, fmuVariable, input.Item3);
-            //    }
+            //    AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
 
             //    // The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
             //    // TODO: figure out why 1100 here equals 3600 in the fmu, and maybe how to fix it with scaling (weird stuff)??
@@ -544,10 +538,10 @@ namespace Logic.Mapek
             //    AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
             //}
 
-            // Calling Dispose() on the instance creates a problem in the underlying external code which crashes the application approximately 95% of the time.
-            // This could be due to improper implementations or handling of resources in the Femyou (.NET) library used to read from and write to FMUs. Note that
-            // calling Dispose() while running a Modelica reference FMU (against which the Femyou library was checked), this issue doesn't occur. Our FMUs are
-            // generated as standard FMUs by OpenModelica.
+            //// Calling Dispose() on the instance creates a problem in the underlying external code which crashes the application approximately 95% of the time.
+            //// This could be due to improper implementations or handling of resources in the Femyou (.NET) library used to read from and write to FMUs. Note that
+            //// calling Dispose() while running a Modelica reference FMU (against which the Femyou library was checked), this issue doesn't occur. Our FMUs are
+            //// generated as standard FMUs by OpenModelica.
             //fmuInstance.Dispose();
             //model.Dispose();
         }
@@ -556,24 +550,49 @@ namespace Logic.Mapek
         {
             foreach (var reconfigurationAction in simulationConfiguration.PostTickActions)
             {
-                var fmuReconfigurationInputs = new Dictionary<string, object>();
+                var fmuReconfigurationInputs = new List<(string, string, object)>();
 
                 // Shave off the long name URIs from the instance model.
                 var simpleConfigurableParameterName = MapekUtilities.GetSimpleName(reconfigurationAction.ConfigurableParameter.Name);
-
-                fmuReconfigurationInputs.Add(simpleConfigurableParameterName, reconfigurationAction.NewParameterValue);
+                fmuReconfigurationInputs.Add((simpleConfigurableParameterName, reconfigurationAction.ConfigurableParameter.OwlType, reconfigurationAction.NewParameterValue));
 
                 // Get FMUs of all soft sensors that take the current ConfigurableParameter as an Input Property.
-                var softSensorFmus = GetSoftSensorFmuFilePathsFromConfigurableParameterName(instanceModel, reconfigurationAction.ConfigurableParameter.Name);
+                var fmuFilePathsAndInputProperties = GetSoftSensorFmuAndInputPropertiesFromConfigurableParameterName(instanceModel, propertyCache, reconfigurationAction.ConfigurableParameter.Name);
 
-                // Execute all FMUs and adjust the property cache accordingly.
-                foreach (var softSensorFmu in softSensorFmus)
+                foreach (var fmuFilePathAndInputParameters in fmuFilePathsAndInputProperties)
                 {
-                    // TODO: get and add all inputs to the fmu into the same dictionary of inputs!!!!
+                    foreach (var inputProperty in fmuFilePathAndInputParameters.Value)
+                    {
+                        // Shave off the long name URIs from the instance model.
+                        var simpleName = MapekUtilities.GetSimpleName(inputProperty.Name);
+                        fmuReconfigurationInputs.Add((simpleName, inputProperty.OwlType, inputProperty.Value));
+                    }
 
+                    //var model = Model.Load(fmuFilePathAndInputParameters.Key);
+                    //var fmuInstance = model.CreateCoSimulationInstance("demo");
 
-                    //AssignPropertyCacheCopyValues(propertyCacheCopy, propertyKeyValuePairs);
+                    //fmuInstance.StartTime(0);
+
+                    //AssignSimulationInputsToParameters(model, fmuInstance, fmuReconfigurationInputs);
+
+                    //// There is no planned time advancement for soft sensors between assigning input parameters and getting outputs here.
+
+                    //AssignPropertyCacheCopyValues(fmuInstance, simulationConfiguration.ResultingPropertyCache, model.Variables);
+
+                    //fmuInstance.Dispose();
+                    //model.Dispose();
                 }
+            }
+        }
+
+        private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs)
+        {
+            foreach (var input in fmuInputs)
+            {
+                var valueHandler = _factory.GetValueHandlerImplementation(input.Item2);
+                var fmuVariable = model.Variables[input.Item1];
+
+                valueHandler.WriteValueToSimulationParameter(fmuInstance, fmuVariable, input.Item3);
             }
         }
 
@@ -595,30 +614,61 @@ namespace Logic.Mapek
             }
         }
 
-        private IEnumerable<string> GetSoftSensorFmuFilePathsFromConfigurableParameterName(IGraph instanceModel, string configurableParameterName)
+        private IDictionary<string, IEnumerable<Property>> GetSoftSensorFmuAndInputPropertiesFromConfigurableParameterName(IGraph instanceModel,
+            PropertyCache propertyCache,
+            string configurableParameterName)
         {
-            var fmuFilePaths = new List<string>();
+            var fmuFilePathsAndInputProperties = new Dictionary<string, IEnumerable<Property>>();
 
-            var query = MapekUtilities.GetParameterizedStringQuery();
+            // Find the FMU's URI.
+            var fmuFilePathQuery = MapekUtilities.GetParameterizedStringQuery();
 
-            query.CommandText = @"SELECT ?fmuFilePath WHERE {
+            fmuFilePathQuery.CommandText = @"SELECT ?fmuFilePath WHERE {
                 @inputParameter rdf:type meta:ConfigurableParameter .
                 ?procedure rdf:type sosa:Procedure .
                 ?procedure ssn:hasInput @inputParameter .
                 ?procedure meta:hasModel ?fmuFilePath . }";
 
-            query.SetUri("inputParameter", new Uri(configurableParameterName));
+            fmuFilePathQuery.SetUri("inputParameter", new Uri(configurableParameterName));
 
-            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+            var fmuFilePathQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(fmuFilePathQuery);
 
-            foreach (var result in queryResult.Results)
+            // For each FMU, find the corresponding Inputs.
+            foreach (var fmuFilePathResult in fmuFilePathQueryResult.Results)
             {
-                var fmuFilePath = result["fmuFilePath"].ToString().Split('^')[0];
+                var fmuFilePath = fmuFilePathResult["fmuFilePath"].ToString().Split('^')[0];
 
-                fmuFilePaths.Add(fmuFilePath);
+                var inputQuery = MapekUtilities.GetParameterizedStringQuery();
+
+                inputQuery.CommandText = @"SELECT ?propertyName WHERE {
+                    ?procedure rdf:type sosa:Procedure .
+                    ?procedure meta:hasModel @fmuFilePath .
+                    ?procedure ssn:hasInput ?propertyName . }";
+
+                var propertyList = new List<Property>();
+
+                inputQuery.SetLiteral("fmuFilePath", fmuFilePath, false);
+
+                var inputQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(inputQuery);
+
+                var propertiesToAdd = new List<Property>();
+
+                // Add each input to the list for its respective FMU but skip the ConfigurableParameter as this will be added with a new value anyway.
+                foreach (var inputResult in inputQueryResult.Results)
+                {
+                    var propertyName = inputResult["propertyName"].ToString();
+
+                    if (!propertyName.Equals(configurableParameterName))
+                    {
+                        var property = GetPropertyFromPropertyCacheByName(propertyCache, propertyName);
+                        propertiesToAdd.Add(property);
+                    }
+                }
+
+                fmuFilePathsAndInputProperties.Add(fmuFilePath, propertiesToAdd);
             }
 
-            return fmuFilePaths;
+            return fmuFilePathsAndInputProperties;
         }
 
         private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
@@ -818,15 +868,12 @@ namespace Logic.Mapek
 
         private Property GetPropertyFromPropertyCacheByName(PropertyCache propertyCache, string propertyName)
         {
-            bool propertyFound = propertyCache.Properties.TryGetValue(propertyName, out Property property);
-
-            if (!propertyFound)
+            if (!propertyCache.Properties.TryGetValue(propertyName, out Property? property))
             {
-                // If the first cache doesn't contain the Property, it must be in the second one.
                 property = propertyCache.ConfigurableParameters[propertyName];
             }
 
-            return property!;
+            return property;
         }
 
         private IEnumerable<SimulationConfiguration> GetSimulationConfigurationsWithLowestNumberOfActions(IEnumerable<SimulationConfiguration> simulationConfigurations)

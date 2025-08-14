@@ -49,7 +49,7 @@ namespace Logic.Mapek
                 ?procedure ssn:hasOutput ?property .
                 FILTER NOT EXISTS { ?property meta:isInputOf ?otherProcedure } . }";
 
-            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+            var queryResult = instanceModel.ExecuteQuery(query, _logger);
 
             // Get the values of all measured Properties (Sensor Inputs/Outputs and ConfigurableParameters) and populate the
             // cache.
@@ -80,7 +80,7 @@ namespace Logic.Mapek
             }   
 
             // Get the type of the Property.
-            var propertyType = MapekUtilities.GetPropertyType(instanceModel, propertyNode);
+            var propertyType = MapekUtilities.GetPropertyType(_logger, instanceModel, propertyNode);
 
             var query = MapekUtilities.GetParameterizedStringQuery();
 
@@ -94,7 +94,7 @@ namespace Logic.Mapek
 
             query.SetParameter("property", propertyNode);
 
-            var procedureQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+            var procedureQueryResult = instanceModel.ExecuteQuery(query, _logger);
 
             // If the current Property is not an Output of any other Procedures, then it must be a ConfigurableParameter.
             if (procedureQueryResult.IsEmpty)
@@ -122,7 +122,7 @@ namespace Logic.Mapek
                 query.SetParameter("procedure", procedureNode);
                 query.SetParameter("sensor", sensorNode);
 
-                var innerQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+                var innerQueryResult = instanceModel.ExecuteQuery(query, _logger);
 
                 // Construct the required Input Property array.
                 var inputProperties = new object[innerQueryResult.Count];
@@ -180,7 +180,7 @@ namespace Logic.Mapek
 
             query.SetParameter("property", propertyNode);
 
-            var configurableParameterQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+            var configurableParameterQueryResult = instanceModel.ExecuteQuery(query, _logger);
 
             // If the Property isn't a ConfigurableParameter, throw an error.
             if (configurableParameterQueryResult.IsEmpty)
@@ -227,7 +227,7 @@ namespace Logic.Mapek
                 ?bNode owl:onProperty meta:hasValue .
                 ?bNode owl:onDataRange ?valueType . }";
 
-            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+            var queryResult = instanceModel.ExecuteQuery(query, _logger);
 
             foreach (var result in queryResult.Results)
             {
@@ -246,7 +246,7 @@ namespace Logic.Mapek
 
                 innerQuery.SetParameter("observableProperty", observablePropertyNode);
 
-                var innerQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(innerQuery);
+                var innerQueryResult = instanceModel.ExecuteQuery(innerQuery, _logger);
 
                 var measuredPropertyValues = new object[innerQueryResult.Results.Count];
 

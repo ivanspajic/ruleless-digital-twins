@@ -54,7 +54,7 @@ namespace Logic.Mapek
                 ?optimalCondition ssn:forProperty ?property .
                 ?optimalCondition meta:reachedInMaximumSeconds ?reachedInMaximumSeconds . }";
 
-            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+            var queryResult = instanceModel.ExecuteQuery(query, _logger);
 
             // For each OptimalCondition, process its respective constraints and get the appropriate Actions
             // for mitigation.
@@ -175,7 +175,7 @@ namespace Logic.Mapek
                 ?platform meta:optimizesFor ?propertyChange .
                 ?propertyChange ssn:forProperty ?property . }";
 
-            var actuationQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(actuationQuery);
+            var actuationQueryResult = instanceModel.ExecuteQuery(actuationQuery, _logger);
 
             foreach (var result in actuationQueryResult.Results)
             {
@@ -200,7 +200,7 @@ namespace Logic.Mapek
                 ?platform rdf:type sosa:Platform .
                 ?propertyChange meta:alteredBy ?effect . }";
 
-            var reconfigurationQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(reconfigurationQuery);
+            var reconfigurationQueryResult = instanceModel.ExecuteQuery(reconfigurationQuery, _logger);
 
             foreach (var result in reconfigurationQueryResult.Results)
             {
@@ -317,7 +317,7 @@ namespace Logic.Mapek
                 query.SetParameter("property", property);
                 query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+                var queryResult = instanceModel.ExecuteQuery(query, _logger);
 
                 foreach (var result in queryResult.Results)
                 {
@@ -361,7 +361,7 @@ namespace Logic.Mapek
                 query.SetParameter("property", property);
                 query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+                var queryResult = instanceModel.ExecuteQuery(query, _logger);
 
                 foreach (var result in queryResult.Results)
                 {
@@ -416,7 +416,7 @@ namespace Logic.Mapek
                     query.SetParameter("property", property);
                     query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                    var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+                    var queryResult = instanceModel.ExecuteQuery(query, _logger);
 
                     foreach (var result in queryResult.Results)
                     {
@@ -489,7 +489,7 @@ namespace Logic.Mapek
                         query.SetParameter("property", property);
                         query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                        var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+                        var queryResult = instanceModel.ExecuteQuery(query, _logger);
 
                         foreach (var result in queryResult.Results)
                         {
@@ -580,7 +580,7 @@ namespace Logic.Mapek
                             query.SetParameter("property", property);
                             query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+                            var queryResult = instanceModel.ExecuteQuery(query, _logger);
 
                             foreach (var result in queryResult.Results)
                             {
@@ -699,7 +699,7 @@ namespace Logic.Mapek
 
                     actuationQuery.SetUri("property", new Uri(optimalCondition.Property));
 
-                    var actuationQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(actuationQuery);
+                    var actuationQueryResult = instanceModel.ExecuteQuery(actuationQuery, _logger);
 
                     foreach (var result in actuationQueryResult.Results)
                     {
@@ -726,7 +726,7 @@ namespace Logic.Mapek
 
                     reconfigurationQuery.SetUri("property", new Uri(optimalCondition.Property));
 
-                    var reconfigurationQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(reconfigurationQuery);
+                    var reconfigurationQueryResult = instanceModel.ExecuteQuery(reconfigurationQuery, _logger);
 
                     foreach (var result in reconfigurationQueryResult.Results)
                     {

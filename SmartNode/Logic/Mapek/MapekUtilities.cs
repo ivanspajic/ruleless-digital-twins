@@ -1,5 +1,4 @@
-﻿using Logic.Models.MapekModels;
-using Logic.Models.OntologicalModels;
+﻿using Microsoft.Extensions.Logging;
 using VDS.RDF;
 using VDS.RDF.Query;
 
@@ -35,7 +34,7 @@ namespace Logic.Mapek
             return query;
         }
 
-        public static string GetPropertyType(IGraph instanceModel, INode propertyNode)
+        public static string GetPropertyType<T>(ILogger<T> logger, IGraph instanceModel, INode propertyNode)
         {
             var query = GetParameterizedStringQuery();
 
@@ -44,7 +43,7 @@ namespace Logic.Mapek
                 ?bNode owl:onProperty meta:hasValue .
                 ?bNode owl:onDataRange ?valueType . }";
 
-            var propertyType = GetPropertyValueType(query, instanceModel, "property", propertyNode);
+            var propertyType = GetPropertyValueType(query, logger, instanceModel, "property", propertyNode);
 
             if (!string.IsNullOrEmpty(propertyType))
             {
@@ -59,7 +58,7 @@ namespace Logic.Mapek
                 ?bNode owl:onProperty meta:hasUpperLimitValue .
                 ?bNode owl:onDataRange ?valueType . }";
 
-            propertyType = GetPropertyValueType(query, instanceModel, "property", propertyNode);
+            propertyType = GetPropertyValueType(query, logger, instanceModel, "property", propertyNode);
 
             if (!string.IsNullOrEmpty(propertyType))
             {
@@ -87,11 +86,30 @@ namespace Logic.Mapek
             return simpleName;
         }
 
-        private static string GetPropertyValueType(SparqlParameterizedString query, IGraph instanceModel, string parameterName, INode propertyNode)
+        public static SparqlResultSet ExecuteQuery<T>(this IGraph instanceModel, SparqlParameterizedString query, ILogger<T> logger)
+        {
+            logger.LogInformation("\n");
+            logger.LogInformation("Executing query: {query}", query.CommandText);
+
+            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+
+            logger.LogInformation("Query result:");
+
+            foreach (var result in queryResult.Results)
+            {
+                logger.LogInformation("\n {result}", result.ToString());
+            }
+
+            logger.LogInformation("\n");
+
+            return queryResult;
+        }
+
+        private static string GetPropertyValueType<T>(SparqlParameterizedString query, ILogger<T> logger, IGraph instanceModel, string parameterName, INode propertyNode)
         {
             query.SetParameter(parameterName, propertyNode);
 
-            var propertyTypeQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+            var propertyTypeQueryResult = instanceModel.ExecuteQuery(query, logger);
 
             if (propertyTypeQueryResult.IsEmpty)
             {

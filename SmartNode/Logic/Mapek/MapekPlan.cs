@@ -409,7 +409,7 @@ namespace Logic.Mapek
                 clause +
                 "?platform meta:hasModel ?fmuFilePath . }";
 
-            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+            var queryResult = instanceModel.ExecuteQuery(query, _logger);
 
             // There can theoretically be multiple Platforms hosting the same Actuator, but we limit ourselves to expect a single Platform
             // per instance model. There should therefore be only one result.
@@ -459,7 +459,7 @@ namespace Logic.Mapek
                 ?sensor rdf:type sosa:Sensor .
                 ?sensor sosa:observes ?observableProperty . }";
 
-            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+            var queryResult = instanceModel.ExecuteQuery(query, _logger);
 
             foreach (var result in queryResult.Results)
             {
@@ -546,43 +546,47 @@ namespace Logic.Mapek
             //model.Dispose();
         }
 
-        private void ExecuteReconfigurationActionFmu(SimulationConfiguration simulationConfiguration, IGraph instanceModel, PropertyCache propertyCache)
+        private void ExecuteReconfigurationActionFmu(SimulationConfiguration simulationConfiguration, IGraph instanceModel, PropertyCache propertyCacheCopy)
         {
-            foreach (var reconfigurationAction in simulationConfiguration.PostTickActions)
-            {
-                var fmuReconfigurationInputs = new List<(string, string, object)>();
+            var fmusToExecute = new List<(string, IEnumerable<Property>)>();
 
-                // Shave off the long name URIs from the instance model.
-                var simpleConfigurableParameterName = MapekUtilities.GetSimpleName(reconfigurationAction.ConfigurableParameter.Name);
-                fmuReconfigurationInputs.Add((simpleConfigurableParameterName, reconfigurationAction.ConfigurableParameter.OwlType, reconfigurationAction.NewParameterValue));
+            // TODO: create a tree of soft sensor fmus to execute because their order matters!!
+            
+            //foreach (var reconfigurationAction in simulationConfiguration.PostTickActions)
+            //{
+            //    var fmuReconfigurationInputs = new List<(string, string, object)>();
 
-                // Get FMUs of all soft sensors that take the current ConfigurableParameter as an Input Property.
-                var fmuFilePathsAndInputProperties = GetSoftSensorFmuAndInputPropertiesFromConfigurableParameterName(instanceModel, propertyCache, reconfigurationAction.ConfigurableParameter.Name);
+            //    // Shave off the long name URIs from the instance model.
+            //    var simpleConfigurableParameterName = MapekUtilities.GetSimpleName(reconfigurationAction.ConfigurableParameter.Name);
+            //    fmuReconfigurationInputs.Add((simpleConfigurableParameterName, reconfigurationAction.ConfigurableParameter.OwlType, reconfigurationAction.NewParameterValue));
 
-                foreach (var fmuFilePathAndInputParameters in fmuFilePathsAndInputProperties)
-                {
-                    foreach (var inputProperty in fmuFilePathAndInputParameters.Value)
-                    {
-                        // Shave off the long name URIs from the instance model.
-                        var simpleName = MapekUtilities.GetSimpleName(inputProperty.Name);
-                        fmuReconfigurationInputs.Add((simpleName, inputProperty.OwlType, inputProperty.Value));
-                    }
+            //    // Get FMUs of all soft sensors that take the current ConfigurableParameter as an Input Property.
+            //    var fmuFilePathsAndInputProperties = GetSoftSensorFmuAndInputPropertiesFromConfigurableParameterName(instanceModel, propertyCacheCopy, reconfigurationAction.ConfigurableParameter.Name);
 
-                    //var model = Model.Load(fmuFilePathAndInputParameters.Key);
-                    //var fmuInstance = model.CreateCoSimulationInstance("demo");
+            //    foreach (var fmuFilePathAndInputParameters in fmuFilePathsAndInputProperties)
+            //    {
+            //        foreach (var inputProperty in fmuFilePathAndInputParameters.Value)
+            //        {
+            //            // Shave off the long name URIs from the instance model.
+            //            var simpleName = MapekUtilities.GetSimpleName(inputProperty.Name);
+            //            fmuReconfigurationInputs.Add((simpleName, inputProperty.OwlType, inputProperty.Value));
+            //        }
 
-                    //fmuInstance.StartTime(0);
+            //        var model = Model.Load(fmuFilePathAndInputParameters.Key);
+            //        var fmuInstance = model.CreateCoSimulationInstance("demo");
 
-                    //AssignSimulationInputsToParameters(model, fmuInstance, fmuReconfigurationInputs);
+            //        fmuInstance.StartTime(0);
 
-                    //// There is no planned time advancement for soft sensors between assigning input parameters and getting outputs here.
+            //        AssignSimulationInputsToParameters(model, fmuInstance, fmuReconfigurationInputs);
 
-                    //AssignPropertyCacheCopyValues(fmuInstance, simulationConfiguration.ResultingPropertyCache, model.Variables);
+            //        // There is no planned time advancement for soft sensors between assigning input parameters and getting outputs.
 
-                    //fmuInstance.Dispose();
-                    //model.Dispose();
-                }
-            }
+            //        AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
+
+            //        fmuInstance.Dispose();
+            //        model.Dispose();
+            //    }
+            //}
         }
 
         private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs)
@@ -631,7 +635,7 @@ namespace Logic.Mapek
 
             fmuFilePathQuery.SetUri("inputParameter", new Uri(configurableParameterName));
 
-            var fmuFilePathQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(fmuFilePathQuery);
+            var fmuFilePathQueryResult = instanceModel.ExecuteQuery(fmuFilePathQuery, _logger);
 
             // For each FMU, find the corresponding Inputs.
             foreach (var fmuFilePathResult in fmuFilePathQueryResult.Results)
@@ -649,7 +653,7 @@ namespace Logic.Mapek
 
                 inputQuery.SetLiteral("fmuFilePath", fmuFilePath, false);
 
-                var inputQueryResult = (SparqlResultSet)instanceModel.ExecuteQuery(inputQuery);
+                var inputQueryResult = instanceModel.ExecuteQuery(inputQuery, _logger);
 
                 var propertiesToAdd = new List<Property>();
 
@@ -921,7 +925,7 @@ namespace Logic.Mapek
                 ?propertyChange ssn:forProperty ?property .
                 ?propertyChange meta:affectsPropertyWith ?effect . }";
 
-            var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+            var queryResult = instanceModel.ExecuteQuery(query, _logger);
 
             foreach (var result in queryResult.Results)
             {

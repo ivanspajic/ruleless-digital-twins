@@ -8,7 +8,8 @@ namespace TestProject.Mocks
     {
         private Dictionary<string, IValueHandler> _valueHandlerImplementations = new()
         {
-            { "double", new DoubleValueHandlerMock() }
+            { "double", new DoubleValueHandlerMock() },
+            { "int", new IntValueHandlerMock() }
         };
 
         public IActuatorDevice GetActuatorDeviceImplementation(string actuatorName)
@@ -23,7 +24,7 @@ namespace TestProject.Mocks
 
         public IValueHandler GetValueHandlerImplementation(string owlType)
         {
-            if (_valueHandlerImplementations.TryGetValue(owlType, out IValueHandler valueHandler))
+            if (_valueHandlerImplementations.TryGetValue(owlType, out IValueHandler? valueHandler))
             {
                 return valueHandler;
             }

@@ -45,13 +45,13 @@ namespace Logic.Mapek
         private void ExecuteActuationAction(ActuationAction actuationAction, double durationSeconds)
         {
             _logger.LogInformation("Actuating actuator {actuator} with state {actuatorState} and duration of {duration} seconds.",
-                actuationAction.ActuatorState.Actuator,
-                actuationAction.ActuatorState,
+                actuationAction.Actuator.Name,
+                actuationAction.NewStateValue.ToString(),
                 durationSeconds);
 
-            var actuator = _factory.GetActuatorDeviceImplementation(actuationAction.ActuatorState.Actuator);
+            var actuator = _factory.GetActuatorDeviceImplementation(actuationAction.Actuator.Name);
 
-            actuator.Actuate(actuationAction.ActuatorState.Name, durationSeconds);
+            actuator.Actuate(actuationAction.NewStateValue, durationSeconds);
         }
 
         private void ExecuteReconfigurationAction(ReconfigurationAction reconfigurationAction, PropertyCache propertyCache)

@@ -35,7 +35,15 @@ namespace SensorActuatorImplementations.ValueHandlers
         // When calculating possible reconfiguration values for ConfigurableParameters, some parameters may need specific logic to do so. For example,
         // it may be inaccurate to simply take the min-max value range and divide it by the simulation granularity in a completely linear way. For this
         // reason, the user may register custom logic delegates and map them to specific ConfigurableParameter names.
-        private static readonly Dictionary<string, Func<double, double, double, int, IEnumerable<object>>> _configurableParameterGranularityMap = new() { };
+        private static readonly Dictionary<string, Func<object, Effect, IEnumerable<object>>> _configurableParameterPossibleValuesMap = new()
+        {
+            { "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/Epsilon", GetPossibleEpsilonValues }
+        };
+
+        private static readonly Dictionary<string, object> _initialConfigurableParameterValues = new()
+        {
+            { "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/Epsilon", 2.3 }
+        };
 
         public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression, object propertyValue)
         {
@@ -106,56 +114,33 @@ namespace SensorActuatorImplementations.ValueHandlers
             return measuredPropertyDoubleValues.Sum() / measuredPropertyDoubleValues.Length;
         }
 
-        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, int simulationGranularity, Effect effect)
+        public IEnumerable<object> GetPossibleValuesForActuationAction(Actuator actuator)
         {
-            IEnumerable<object> possibleValues;
+            throw new NotImplementedException();
+        }
 
-            var currentValue = configurableParameter.Value;
-            var minimumValue = configurableParameter.LowerLimitValue;
-            var maximumValue = configurableParameter.UpperLimitValue;
-
-            if (currentValue is not double)
+        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, Effect effect)
+        {
+            if (_configurableParameterPossibleValuesMap.TryGetValue(configurableParameter.Name, out Func<object, Effect, IEnumerable<object>>? configurableParameterLogic))
             {
-                currentValue = double.Parse(currentValue.ToString()!, CultureInfo.InvariantCulture);
-            }
-
-            if (minimumValue is not double)
-            {
-                minimumValue = double.Parse(minimumValue.ToString()!, CultureInfo.InvariantCulture);
-            }
-
-            if (maximumValue is not double)
-            {
-                maximumValue = double.Parse(maximumValue.ToString()!, CultureInfo.InvariantCulture);
-            }
-
-            var currentValueDouble = (double)currentValue;
-            var minimumValueDouble = (double)minimumValue;
-            var maximumValueDouble = (double)maximumValue;
-
-            if (_configurableParameterGranularityMap.TryGetValue(configurableParameter.Name, out Func<double, double, double, int, IEnumerable<object>>? configurableParameterLogic))
-            {
-                possibleValues = configurableParameterLogic(currentValueDouble, minimumValueDouble, maximumValueDouble, simulationGranularity);
+                return configurableParameterLogic(configurableParameter.Value, effect);
             }
             else
             {
-                var possibleValueList = new List<object>();
-
-                var valueRange = maximumValueDouble - minimumValueDouble;
-                var intervalSize = valueRange / simulationGranularity;
-
-                for (var i = minimumValueDouble; i < maximumValueDouble; i += intervalSize)
-                {
-                    if ((effect == Effect.ValueIncrease && i > currentValueDouble) || (effect == Effect.ValueDecrease && i < currentValueDouble))
-                    {
-                        possibleValueList.Add(i);
-                    }
-                }
-
-                possibleValues = possibleValueList;
+                throw new ArgumentException($"ConfigurableParameter {configurableParameter.Name} has no implementation for possible values.");
             }
+        }
 
-            return possibleValues;
+        public object GetInitialValueForConfigurableParameter(string configurableParameter)
+        {
+            if (_initialConfigurableParameterValues.TryGetValue(configurableParameter, out object? initialValue))
+            {
+                return initialValue;
+            }
+            else
+            {
+                throw new ArgumentException($"ConfigurableParameter {configurableParameter} has no added initial value.");
+            }
         }
 
         public bool IsGreaterThanOrEqualTo(object comparingValue, object targetValue)
@@ -241,6 +226,36 @@ namespace SensorActuatorImplementations.ValueHandlers
         private static double DecreaseValueByAmount(double value, double amountToDecreaseBy)
         {
             return value - amountToDecreaseBy;
+        }
+
+        private static IEnumerable<object> GetPossibleEpsilonValues(object currentValue, Effect effect)
+        {
+            var rangeGranularity = 10;
+
+            if (currentValue is not double)
+            {
+                currentValue = double.Parse(currentValue.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            var currentValueDouble = (double)currentValue;
+
+            var minimumValue = 0.0;
+            var maximumValue = 12.0;
+
+            var possibleValues = new List<object>();
+
+            var valueRange = maximumValue - minimumValue;
+            var intervalSize = valueRange / rangeGranularity;
+
+            for (var i = minimumValue; i < maximumValue; i += intervalSize)
+            {
+                if ((effect == Effect.ValueIncrease && i > currentValueDouble) || (effect == Effect.ValueDecrease && i < currentValueDouble))
+                {
+                    possibleValues.Add(i);
+                }
+            }
+
+            return possibleValues;
         }
     }
 }

@@ -10,7 +10,11 @@ namespace Logic.ValueHandlerInterfaces
 
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues);
 
-        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, int simulationGranularity, Effect effect);
+        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, Effect effect);
+
+        public IEnumerable<object> GetPossibleValuesForActuationAction(Actuator actuator);
+
+        public object GetInitialValueForConfigurableParameter(string configurableParameter);
 
         public bool IsGreaterThanOrEqualTo(object comparingValue, object targetValue);
 

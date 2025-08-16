@@ -163,29 +163,22 @@ namespace Logic.Mapek
 
             var actuationQuery = MapekUtilities.GetParameterizedStringQuery();
 
-            // Get all ActuationActions, their ActuatorStates, and their Actuators that cause PropertyChanges equal to those that the system
+            // Get all ActuationActions and their Actuators that cause PropertyChanges equal to those that the system
             // wishes to optimize for.
-            actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuatorState ?actuator ?property WHERE {
+            actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuator WHERE {
                 ?actuationAction rdf:type meta:ActuationAction .
-                ?actuationAction meta:hasActuatorState ?actuatorState .
-                ?actuatorState meta:isActuatorStateOf ?actuator .
+                ?actuationAction meta:hasActuator ?actuator .
                 ?actuator rdf:type sosa:Actuator .
-                ?actuatorState meta:enacts ?propertyChange .
+                ?actuator meta:enacts ?propertyChange .
                 ?platform rdf:type sosa:Platform .
-                ?platform meta:optimizesFor ?propertyChange .
-                ?propertyChange ssn:forProperty ?property . }";
+                ?platform meta:optimizesFor ?propertyChange . }";
 
             var actuationQueryResult = instanceModel.ExecuteQuery(actuationQuery, _logger);
 
             foreach (var result in actuationQueryResult.Results)
             {
                 // Passing in the query parameter names is required since their result order is not guaranteed.
-                AddActuationActionToCollectionFromQueryResult(result,
-                    actions,
-                    "actuationAction",
-                    "actuatorState",
-                    "actuator",
-                    "property");
+                AddActuationActionToCollectionFromQueryResult(result, actions, "actuationAction", "actuator");
             }
 
             var reconfigurationQuery = MapekUtilities.GetParameterizedStringQuery();
@@ -215,7 +208,6 @@ namespace Logic.Mapek
                 AddReconfigurationActionsToCollectionFromQueryResult(result,
                     actions,
                     propertyCache,
-                    configurableParameterGranularity,
                     effect,
                     "reconfigurationAction",
                     "configurableParameter");
@@ -687,14 +679,12 @@ namespace Logic.Mapek
                     var actuationQuery = MapekUtilities.GetParameterizedStringQuery();
 
                     // Get all ActuationActions, ActuatorStates, and Actuators that match as relevant Actions given the appropriate filter.
-                    actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuatorState ?actuator ?property WHERE {
+                    actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuator WHERE {
                         ?actuationAction rdf:type meta:ActuationAction.
-                        ?actuationAction meta:hasActuatorState ?actuatorState .
-                        ?actuatorState meta:enacts ?propertyChange .
-                        ?actuator meta:hasActuatorState ?actuatorState .
+                        ?actuationAction meta:hasActuator ?actuator .
+                        ?actuator meta:enacts ?propertyChange .
                         ?actuator rdf:type sosa:Actuator .
-                        ?propertyChange ssn:forProperty ?property .
-                        ?property owl:sameAs @property .
+                        ?propertyChange ssn:forProperty @property .
                         ?propertyChange meta:affectsPropertyWith " + filter + " . }";
 
                     actuationQuery.SetUri("property", new Uri(optimalCondition.Property));
@@ -707,9 +697,7 @@ namespace Logic.Mapek
                         AddActuationActionToCollectionFromQueryResult(result,
                             actions,
                             "actuationAction",
-                            "actuatorState",
-                            "actuator",
-                            "property");
+                            "actuator");
 
                         _logger.LogInformation("Found ActuationAction {actuationActionName} as a relevant Action.",
                             result["actuationAction"].ToString());
@@ -734,12 +722,11 @@ namespace Logic.Mapek
                         AddReconfigurationActionsToCollectionFromQueryResult(result,
                             actions,
                             propertyCache,
-                            configurableParameterGranularity,
                             effect,
                             "reconfigurationAction",
                             "configurableParameter");
 
-                        _logger.LogInformation("Found ActuationAction {actuationActionName} as a relevant Action.",
+                        _logger.LogInformation("Found ReconfigurationAction {reconfigurationActionName} as a relevant Action.",
                             result["reconfigurationAction"].ToString());
                     }
                 }
@@ -751,35 +738,36 @@ namespace Logic.Mapek
         private void AddActuationActionToCollectionFromQueryResult(ISparqlResult result,
             IList<Models.OntologicalModels.Action> actions,
             string actuationActionQueryParameter,
-            string actuatorStateQueryParameter,
-            string actuatorQueryParameter,
-            string propertyQueryParameter)
+            string actuatorQueryParameter)
         {
             var actuationActionName = result[actuationActionQueryParameter].ToString();
-            var actuatorStateName = result[actuatorStateQueryParameter].ToString();
             var actuatorName = result[actuatorQueryParameter].ToString();
-            var propertyName = result[propertyQueryParameter].ToString();
 
-            var actuatorState = new ActuatorState
+            var actuator = new Actuator
             {
-                Actuator = actuatorName,
-                Name = actuatorStateName
+                Name = actuatorName
             };
 
-            var actuationAction = new ActuationAction()
-            {
-                Name = actuationActionName,
-                ActuatorState = actuatorState,
-                ActedOnProperty = propertyName
-            };
+            // Create ActuationActions with new states to set for their respective Actuators.
+            var valueHandler = _factory.GetValueHandlerImplementation("int"); // Let integer values designate Actuator states.
+            var possibleValues = valueHandler.GetPossibleValuesForActuationAction(actuator);
 
-            actions.Add(actuationAction);
+            foreach (var possibleValue in possibleValues)
+            {
+                var actuationAction = new ActuationAction
+                {
+                    Name = actuationActionName,
+                    Actuator = actuator,
+                    NewStateValue = possibleValue
+                };
+
+                actions.Add(actuationAction);
+            }
         }
 
         private void AddReconfigurationActionsToCollectionFromQueryResult(ISparqlResult result,
             IList<Models.OntologicalModels.Action> actions,
             PropertyCache propertyCache,
-            int configurableParameterGranularity,
             Effect effect,
             string reconfigurationActionQueryParameter,
             string configurableParameterQueryParameter)
@@ -787,21 +775,20 @@ namespace Logic.Mapek
             var reconfigurationActionName = result[reconfigurationActionQueryParameter].ToString();
             var configurableParameterName = result[configurableParameterQueryParameter].ToString();
 
-            if (!propertyCache.ConfigurableParameters.TryGetValue(configurableParameterName, out ConfigurableParameter configurableParameter))
+            if (!propertyCache.ConfigurableParameters.TryGetValue(configurableParameterName, out ConfigurableParameter? configurableParameter))
             {
                 throw new Exception($"ConfigurableParameter {configurableParameterName} was not found in the Property cache.");
             }
 
             // Create ReconfigurationActions with new values to set for their respective ConfigurableParameters.
             var valueHandler = _factory.GetValueHandlerImplementation(configurableParameter.OwlType);
-            var possibleValues = valueHandler.GetPossibleValuesForReconfigurationAction(configurableParameter, configurableParameterGranularity, effect);
+            var possibleValues = valueHandler.GetPossibleValuesForReconfigurationAction(configurableParameter, effect);
 
             foreach (var possibleValue in possibleValues)
             {
                 var reconfigurationAction = new ReconfigurationAction
                 {
                     ConfigurableParameter = configurableParameter,
-                    Effect = effect,
                     Name = reconfigurationActionName,
                     NewParameterValue = possibleValue
                 };

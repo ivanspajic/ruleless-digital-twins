@@ -1,9 +1,4 @@
 ﻿namespace Logic.Models.OntologicalModels
 {
-    public class ConfigurableParameter : Property
-    {
-        public required object LowerLimitValue { get; init; }
-
-        public required object UpperLimitValue { get; init; }
-    }
+    public class ConfigurableParameter : Property { }
 }

@@ -13,6 +13,14 @@
 #    Annotation properties
 #################################################################
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasLowerLimitValue
+<http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasLowerLimitValue> rdf:type owl:AnnotationProperty .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasUpperLimitValue
+<http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasUpperLimitValue> rdf:type owl:AnnotationProperty .
+
+
 ###  http://www.w3.org/2002/07/owl#qualifiedCardinality
 owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
@@ -36,9 +44,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                        owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                        owl:onDataRange xsd:int
-                     ] ;
-            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasLowerLimitValue> "5"^^xsd:int ;
-            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasUpperLimitValue> "20"^^xsd:int .
+                     ] .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressedTimeSeries
@@ -54,6 +60,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatio
 :CompressionRatio rdf:type owl:NamedIndividual ,
+                           <http://www.w3.org/ns/sosa/ObservableProperty> ,
                            <http://www.w3.org/ns/ssn/Output> ,
                            [ rdf:type owl:Restriction ;
                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;

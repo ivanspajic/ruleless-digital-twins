@@ -62,17 +62,22 @@ namespace TestProject.Mocks
             }
         };
 
+        public object GetInitialValueForConfigurableParameter(string configurableParameter)
+        {
+            throw new NotImplementedException();
+        }
+
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(object currentValue, object minimumValue, object maximumValue, int simulationGranularity, Effect effect, string configurableParameterName)
+        public IEnumerable<object> GetPossibleValuesForActuationAction(Actuator actuator)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, int simulationGranularity, Effect effect)
+        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, Effect effect)
         {
             throw new NotImplementedException();
         }

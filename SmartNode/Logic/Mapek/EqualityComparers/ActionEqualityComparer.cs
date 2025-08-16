@@ -12,10 +12,9 @@ namespace Logic.Mapek.EqualityComparers
                 var xActuationAction = x as ActuationAction;
                 var yActuationAction = y as ActuationAction;
 
-                if (xActuationAction!.ActuatorState.Actuator.Equals(yActuationAction!.ActuatorState.Actuator) &&
-                    xActuationAction.ActuatorState.Name.Equals(yActuationAction.ActuatorState.Name) &&
-                    xActuationAction.Name.Equals(yActuationAction.Name) &&
-                    xActuationAction.ActedOnProperty.Equals(yActuationAction.ActedOnProperty))
+                if (xActuationAction!.Actuator.Name.Equals(yActuationAction!.Actuator.Name) &&
+                    xActuationAction.NewStateValue.Equals(yActuationAction.NewStateValue) &&
+                    xActuationAction.Name.Equals(yActuationAction.Name))
                 {
                     return true;
                 }
@@ -25,13 +24,10 @@ namespace Logic.Mapek.EqualityComparers
                 var xReconfigurationAction = x as ReconfigurationAction;
                 var yReconfigurationAction = y as ReconfigurationAction;
 
-                if (xReconfigurationAction!.Effect == yReconfigurationAction!.Effect &&
-                    xReconfigurationAction.NewParameterValue.Equals(yReconfigurationAction.NewParameterValue) &&
+                if (xReconfigurationAction!.NewParameterValue.Equals(yReconfigurationAction!.NewParameterValue) &&
                     xReconfigurationAction.Name.Equals(yReconfigurationAction.Name) &&
                     xReconfigurationAction.ConfigurableParameter.OwlType.Equals(yReconfigurationAction.ConfigurableParameter.OwlType) &&
-                    xReconfigurationAction.ConfigurableParameter.Value.Equals(yReconfigurationAction.ConfigurableParameter.Value) &&
-                    xReconfigurationAction.ConfigurableParameter.LowerLimitValue.Equals(yReconfigurationAction.ConfigurableParameter.LowerLimitValue) &&
-                    xReconfigurationAction.ConfigurableParameter.UpperLimitValue.Equals(yReconfigurationAction.ConfigurableParameter.UpperLimitValue))
+                    xReconfigurationAction.ConfigurableParameter.Value.Equals(yReconfigurationAction.ConfigurableParameter.Value))
                 {
                     return true;
                 }
@@ -47,21 +43,17 @@ namespace Logic.Mapek.EqualityComparers
                 var objActuationAction = obj as ActuationAction;
 
                 return objActuationAction!.Name.GetHashCode() *
-                    objActuationAction.ActedOnProperty.GetHashCode() *
-                    objActuationAction.ActuatorState.Name.GetHashCode() *
-                    objActuationAction.ActuatorState.Actuator.GetHashCode();
+                    objActuationAction.Actuator.Name.GetHashCode() *
+                    objActuationAction.NewStateValue.GetHashCode();
             }
             else
             {
                 var objReconfigurationAction = obj as ReconfigurationAction;
 
                 return objReconfigurationAction!.Name.GetHashCode() *
-                    objReconfigurationAction.Effect.GetHashCode() *
                     objReconfigurationAction.NewParameterValue.GetHashCode() *
                     objReconfigurationAction.ConfigurableParameter.OwlType.GetHashCode() *
-                    objReconfigurationAction.ConfigurableParameter.Value.GetHashCode() *
-                    objReconfigurationAction.ConfigurableParameter.LowerLimitValue.GetHashCode() *
-                    objReconfigurationAction.ConfigurableParameter.UpperLimitValue.GetHashCode();
+                    objReconfigurationAction.ConfigurableParameter.Value.GetHashCode();
             }
         }
     }

@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using VDS.RDF;
-using VDS.RDF.Query;
 
 namespace Logic.Mapek
 {
@@ -99,7 +98,7 @@ namespace Logic.Mapek
             // If the current Property is not an Output of any other Procedures, then it must be a ConfigurableParameter.
             if (procedureQueryResult.IsEmpty)
             {
-                AddConfigurableParameterToCache(instanceModel, propertyNode, propertyType, propertyCache);
+                AddConfigurableParameterToCache(propertyNode.ToString(), propertyType, propertyCache);
 
                 return;
             }
@@ -163,31 +162,8 @@ namespace Logic.Mapek
             }
         }
 
-        private void AddConfigurableParameterToCache(IGraph instanceModel,
-            INode propertyNode,
-            string propertyType,
-            PropertyCache propertyCache)
+        private void AddConfigurableParameterToCache(string propertyName, string propertyType, PropertyCache propertyCache)
         {
-            var propertyName = propertyNode.ToString();
-
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            // Get all ConfigurableParameters.
-            query.CommandText = @"SELECT ?lowerLimit ?upperLimit ?valueIncrements WHERE {
-                    @property rdf:type meta:ConfigurableParameter .
-                    @property meta:hasLowerLimitValue ?lowerLimit .
-                    @property meta:hasUpperLimitValue ?upperLimit . }";
-
-            query.SetParameter("property", propertyNode);
-
-            var configurableParameterQueryResult = instanceModel.ExecuteQuery(query, _logger);
-
-            // If the Property isn't a ConfigurableParameter, throw an error.
-            if (configurableParameterQueryResult.IsEmpty)
-            {
-                throw new Exception($"The Property {propertyName} was not found as an Output nor as a ConfigurableParameter.");
-            }
-
             if (_oldPropertyCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? value))
             {
                 propertyCache.ConfigurableParameters.Add(propertyName, value);
@@ -195,18 +171,14 @@ namespace Logic.Mapek
                 return;
             }
 
-            var lowerLimit = configurableParameterQueryResult.Results[0]["lowerLimit"].ToString();
-            lowerLimit = lowerLimit.Split('^')[0];
-            var upperLimit = configurableParameterQueryResult.Results[0]["upperLimit"].ToString();
-            upperLimit = upperLimit.Split('^')[0];
+            var valueHandler = _factory.GetValueHandlerImplementation(propertyType);
+            var initialValue = valueHandler.GetInitialValueForConfigurableParameter(propertyName);
 
-            // Instantiate the new ConfigurableParameter with its lower limit as its value and add it to the cache.
+            // Instantiate the new ConfigurableParameter and add it to the cache.
             var configurableParameter = new ConfigurableParameter
             {
                 Name = propertyName,
-                LowerLimitValue = lowerLimit,
-                UpperLimitValue = upperLimit,
-                Value = lowerLimit,
+                Value = initialValue,
                 OwlType = propertyType
             };
 

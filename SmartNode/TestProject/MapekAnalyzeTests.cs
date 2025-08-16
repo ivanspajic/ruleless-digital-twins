@@ -1,4 +1,5 @@
 using Logic.Mapek;
+using Logic.Mapek.EqualityComparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using System.Reflection;
@@ -169,43 +170,39 @@ namespace TestProject
             {
                 new ActuationAction
                 {
-                    ActedOnProperty = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature",
-                    ActuatorState = new ActuatorState
+                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnithttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction",
+                    Actuator = new Actuator
                     {
-                        Actuator = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater",
-                        Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStrong"
+                        Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit"
                     },
-                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStronghttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction"
+                    NewStateValue = 1
                 },
                 new ActuationAction
                 {
-                    ActedOnProperty = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature",
-                    ActuatorState = new ActuatorState
+                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnithttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction",
+                    Actuator = new Actuator
                     {
-                        Actuator = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater",
-                        Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterWeak"
+                        Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit"
                     },
-                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterWeakhttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction"
+                    NewStateValue = 2
                 },
                 new ActuationAction
                 {
-                    ActedOnProperty = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature",
-                    ActuatorState = new ActuatorState
+                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnithttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction",
+                    Actuator = new Actuator
                     {
-                        Actuator = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater",
-                        Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterMedium"
+                        Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit"
                     },
-                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterMediumhttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction"
+                    NewStateValue = 3
                 },
                 new ActuationAction
                 {
-                    ActedOnProperty = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomHumidity",
-                    ActuatorState = new ActuatorState
+                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifierhttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction",
+                    Actuator = new Actuator
                     {
-                        Actuator = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier",
-                        Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DehumidifierOn"
+                        Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
                     },
-                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DehumidifierOnhttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction"
+                    NewStateValue = 1
                 },
             };
             var expectedOptimalConditionActionTuple = new Tuple<IEnumerable<OptimalCondition>, IEnumerable<Logic.Models.OntologicalModels.Action>>(expectedOptimalConditions, expectedActions);

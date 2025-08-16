@@ -169,17 +169,17 @@
 
 
 
-// The following rules locate PropertyChange marks and generate appropriate Actions, either with ActuatorStates
+// The following rules locate PropertyChange marks and generate appropriate Actions, either with Actuators
 // or ConfigurableParameters. URI concatinations are used for generating unique names for unique combinations of
 // elements in an Action. This ensures that no duplicate Actions are generated in cases of, e.g., multiple
 // actuators causing multiple different PropertyChanges.
 
 [rule3a:    (?thing rdf:comment ?propertyChange)
-            (?propertyChange meta:enactedBy ?actuatorState)
-            (?actuatorState rdf:type meta:ActuatorState)
-            uriConcat(?actuatorState, meta:ActuationAction, ?actionName)
+            (?propertyChange meta:enactedBy ?actuator)
+            (?actuator rdf:type sosa:Actuator)
+            uriConcat(?actuator, meta:ActuationAction, ?actionName)
             ->  (?actionName rdf:type meta:ActuationAction)
-                (?actionName meta:hasActuatorState ?actuatorState)
+                (?actionName meta:hasActuator ?actuator)
                 print()
                 print("Generated ActuationAction", ?actionName)
                 print()

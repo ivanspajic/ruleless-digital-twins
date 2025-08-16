@@ -1,5 +1,4 @@
 ﻿using Femyou;
-using J2N.Text;
 using Logic.FactoryInterface;
 using Logic.Mapek.EqualityComparers;
 using Logic.Models.MapekModels;
@@ -8,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using VDS.RDF;
-using VDS.RDF.Query;
 
 namespace Logic.Mapek
 {
@@ -16,8 +14,6 @@ namespace Logic.Mapek
     {
         private readonly ILogger<MapekPlan> _logger;
         private readonly IFactory _factory;
-
-        private int _simulationInstanceCount = 0;
 
         public MapekPlan(IServiceProvider serviceProvider)
         {
@@ -68,7 +64,35 @@ namespace Logic.Mapek
             Simulate(simulationConfigurations, instanceModel, propertyCache);
 
             // Find the optimal simulation configuration.
-            return GetOptimalConfiguration(instanceModel, propertyCache, optimalConditions, simulationConfigurations);
+            var optimalConfiguration = GetOptimalConfiguration(instanceModel, propertyCache, optimalConditions, simulationConfigurations);
+
+            _logger.LogInformation("The chosen optimal configuration is:");
+
+            _logger.LogInformation("Actuation actions:");
+
+            // Convert to a list to use indexing.
+            var simulationTickList = optimalConfiguration.SimulationTicks.ToList();
+
+            for (var i = 0; i < simulationTickList.Count; i++)
+            {
+                _logger.LogInformation("Interval {index}:", i + 1);
+
+                foreach (var action in simulationTickList[i].ActionsToExecute)
+                {
+                    _logger.LogInformation("Actuator: {actuator}", action.Actuator.Name);
+                    _logger.LogInformation("Actuator state: {actuatorState}", action.NewStateValue.ToString());
+                }
+            }
+
+            _logger.LogInformation("Post-tick actions:");
+
+            foreach (var postTickAction in optimalConfiguration.PostTickActions)
+            {
+                _logger.LogInformation("Configurable parameter: {configurableParameter}", postTickAction.ConfigurableParameter.Name);
+                _logger.LogInformation("New Value: {value}", postTickAction.NewParameterValue.ToString());
+            }
+
+            return optimalConfiguration;
         }
 
         private IEnumerable<IEnumerable<ActuationAction>> GetActuationActionCombinations(IEnumerable<ActuationAction> actuationActions)
@@ -80,13 +104,13 @@ namespace Logic.Mapek
 
             foreach (var actuationAction in actuationActions)
             {
-                if (actuationActionsByActuatorMap.TryGetValue(actuationAction.ActuatorState.Actuator, out List<ActuationAction> actuationActionsInMap))
+                if (actuationActionsByActuatorMap.TryGetValue(actuationAction.Actuator.Name, out List<ActuationAction>? actuationActionsInMap))
                 {
                     actuationActionsInMap.Add(actuationAction);
                 }
                 else
                 {
-                    actuationActionsByActuatorMap.Add(actuationAction.ActuatorState.Actuator, new List<ActuationAction>
+                    actuationActionsByActuatorMap.Add(actuationAction.Actuator.Name, new List<ActuationAction>
                     {
                         actuationAction
                     });
@@ -366,7 +390,7 @@ namespace Logic.Mapek
 
                 if (simulationConfiguration.PostTickActions.Any())
                 {
-                    ExecuteReconfigurationActionFmu(simulationConfiguration, instanceModel, propertyCacheCopy);
+                    // Executing/simulating soft sensors during the Plan phase is not yet supported.
                 }
 
                 // Assign the final Property values to the results of the simulation configuration.
@@ -390,12 +414,12 @@ namespace Logic.Mapek
             {
                 foreach (var actuationAction in simulationTick.ActionsToExecute)
                 {
-                    if (!actuatorNames.Contains(actuationAction.ActuatorState.Actuator))
+                    if (!actuatorNames.Contains(actuationAction.Actuator.Name))
                     {
-                        actuatorNames.Add(actuationAction.ActuatorState.Actuator);
+                        actuatorNames.Add(actuationAction.Actuator.Name);
                         
                         // Add the Actuator name to the query filter.
-                        clauseBuilder.AppendLine("?platform sosa:hosts <" + actuationAction.ActuatorState.Actuator + "> .");
+                        clauseBuilder.AppendLine("?platform sosa:hosts <" + actuationAction.Actuator.Name + "> .");
                     }
                 }
             }
@@ -440,9 +464,7 @@ namespace Logic.Mapek
                 {
                     Name = keyValuePair.Value.Name,
                     OwlType = keyValuePair.Value.OwlType,
-                    Value = keyValuePair.Value.Value,
-                    LowerLimitValue = keyValuePair.Value.LowerLimitValue,
-                    UpperLimitValue = keyValuePair.Value.UpperLimitValue
+                    Value = keyValuePair.Value.Value
                 });
             }
 
@@ -546,49 +568,6 @@ namespace Logic.Mapek
             //model.Dispose();
         }
 
-        private void ExecuteReconfigurationActionFmu(SimulationConfiguration simulationConfiguration, IGraph instanceModel, PropertyCache propertyCacheCopy)
-        {
-            var fmusToExecute = new List<(string, IEnumerable<Property>)>();
-
-            // TODO: create a tree of soft sensor fmus to execute because their order matters!!
-            
-            //foreach (var reconfigurationAction in simulationConfiguration.PostTickActions)
-            //{
-            //    var fmuReconfigurationInputs = new List<(string, string, object)>();
-
-            //    // Shave off the long name URIs from the instance model.
-            //    var simpleConfigurableParameterName = MapekUtilities.GetSimpleName(reconfigurationAction.ConfigurableParameter.Name);
-            //    fmuReconfigurationInputs.Add((simpleConfigurableParameterName, reconfigurationAction.ConfigurableParameter.OwlType, reconfigurationAction.NewParameterValue));
-
-            //    // Get FMUs of all soft sensors that take the current ConfigurableParameter as an Input Property.
-            //    var fmuFilePathsAndInputProperties = GetSoftSensorFmuAndInputPropertiesFromConfigurableParameterName(instanceModel, propertyCacheCopy, reconfigurationAction.ConfigurableParameter.Name);
-
-            //    foreach (var fmuFilePathAndInputParameters in fmuFilePathsAndInputProperties)
-            //    {
-            //        foreach (var inputProperty in fmuFilePathAndInputParameters.Value)
-            //        {
-            //            // Shave off the long name URIs from the instance model.
-            //            var simpleName = MapekUtilities.GetSimpleName(inputProperty.Name);
-            //            fmuReconfigurationInputs.Add((simpleName, inputProperty.OwlType, inputProperty.Value));
-            //        }
-
-            //        var model = Model.Load(fmuFilePathAndInputParameters.Key);
-            //        var fmuInstance = model.CreateCoSimulationInstance("demo");
-
-            //        fmuInstance.StartTime(0);
-
-            //        AssignSimulationInputsToParameters(model, fmuInstance, fmuReconfigurationInputs);
-
-            //        // There is no planned time advancement for soft sensors between assigning input parameters and getting outputs.
-
-            //        AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
-
-            //        fmuInstance.Dispose();
-            //        model.Dispose();
-            //    }
-            //}
-        }
-
         private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs)
         {
             foreach (var input in fmuInputs)
@@ -616,63 +595,6 @@ namespace Logic.Mapek
                     }
                 }
             }
-        }
-
-        private IDictionary<string, IEnumerable<Property>> GetSoftSensorFmuAndInputPropertiesFromConfigurableParameterName(IGraph instanceModel,
-            PropertyCache propertyCache,
-            string configurableParameterName)
-        {
-            var fmuFilePathsAndInputProperties = new Dictionary<string, IEnumerable<Property>>();
-
-            // Find the FMU's URI.
-            var fmuFilePathQuery = MapekUtilities.GetParameterizedStringQuery();
-
-            fmuFilePathQuery.CommandText = @"SELECT ?fmuFilePath WHERE {
-                @inputParameter rdf:type meta:ConfigurableParameter .
-                ?procedure rdf:type sosa:Procedure .
-                ?procedure ssn:hasInput @inputParameter .
-                ?procedure meta:hasModel ?fmuFilePath . }";
-
-            fmuFilePathQuery.SetUri("inputParameter", new Uri(configurableParameterName));
-
-            var fmuFilePathQueryResult = instanceModel.ExecuteQuery(fmuFilePathQuery, _logger);
-
-            // For each FMU, find the corresponding Inputs.
-            foreach (var fmuFilePathResult in fmuFilePathQueryResult.Results)
-            {
-                var fmuFilePath = fmuFilePathResult["fmuFilePath"].ToString().Split('^')[0];
-
-                var inputQuery = MapekUtilities.GetParameterizedStringQuery();
-
-                inputQuery.CommandText = @"SELECT ?propertyName WHERE {
-                    ?procedure rdf:type sosa:Procedure .
-                    ?procedure meta:hasModel @fmuFilePath .
-                    ?procedure ssn:hasInput ?propertyName . }";
-
-                var propertyList = new List<Property>();
-
-                inputQuery.SetLiteral("fmuFilePath", fmuFilePath, false);
-
-                var inputQueryResult = instanceModel.ExecuteQuery(inputQuery, _logger);
-
-                var propertiesToAdd = new List<Property>();
-
-                // Add each input to the list for its respective FMU but skip the ConfigurableParameter as this will be added with a new value anyway.
-                foreach (var inputResult in inputQueryResult.Results)
-                {
-                    var propertyName = inputResult["propertyName"].ToString();
-
-                    if (!propertyName.Equals(configurableParameterName))
-                    {
-                        var property = GetPropertyFromPropertyCacheByName(propertyCache, propertyName);
-                        propertiesToAdd.Add(property);
-                    }
-                }
-
-                fmuFilePathsAndInputProperties.Add(fmuFilePath, propertiesToAdd);
-            }
-
-            return fmuFilePathsAndInputProperties;
         }
 
         private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
@@ -719,44 +641,21 @@ namespace Logic.Mapek
             IEnumerable<OptimalCondition> optimalConditions,
             IEnumerable<SimulationConfiguration> simulationConfigurations)
         {
-            // This method is a filter for finding the optimal simulation configuration. It works in several steps of descending precedance, each of which further reduces the set of
+            // This method is a filter for finding the optimal simulation configuration. It works in a few steps of descending precedance, each of which further reduces the set of
             // simulation configurations:
-            // 1. Filter for simulation configurations that satisfied all of their OptimalConditions.
-            //      1.a In case no simulation configurations satisfied all of their OptimalConditions, filter for those that have satisfied the most.
+            // 1. Filter for simulation configurations that satisfy the most OptimalConditions.
             // 2. Filter for simulation configurations that have the highest number of the most optimized Properties.
-            // 3. Filter for simulation configurations that have the lowest number of Actions.
-            // 4. Pick the first one.
-
-            // Filter for simulation configurations that satisfy all OptimalConditions.
-            var simulationConfigurationsWithAllOptimalConditionsSatisfied = GetSimulationConfigurationsWithAllOptimalConditionsSatisfied(simulationConfigurations, optimalConditions);
-
-            IEnumerable<SimulationConfiguration> simulationsConfigurationsToContinueWith;
-
-            if (!simulationConfigurationsWithAllOptimalConditionsSatisfied.Any())
-            {
-                simulationsConfigurationsToContinueWith = simulationConfigurationsWithAllOptimalConditionsSatisfied;
-            }
-            else
-            {
-                simulationsConfigurationsToContinueWith = simulationConfigurations;
-            }
-
-            if (simulationsConfigurationsToContinueWith.Count() == 1)
-            {
-                return simulationsConfigurationsToContinueWith.First();
-            }
-
-            _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationsConfigurationsToContinueWith.Count());
+            // 3. Pick the first one.
 
             // Filter for simulation configurations that satisfy the most OptimalConditions.
-            var simulationConfigurationsWithMostOptimalConditionsSatisfied = GetSimulationConfigurationsWithMostOptimalConditionsSatisfied(simulationsConfigurationsToContinueWith, optimalConditions);
+            var simulationConfigurationsWithMostOptimalConditionsSatisfied = GetSimulationConfigurationsWithMostOptimalConditionsSatisfied(simulationConfigurations, optimalConditions);
 
             if (simulationConfigurationsWithMostOptimalConditionsSatisfied.Count() == 1)
             {
                 return simulationConfigurationsWithMostOptimalConditionsSatisfied.First();
             }
 
-            _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationConfigurationsWithMostOptimalConditionsSatisfied.Count());
+            _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationConfigurationsWithMostOptimalConditionsSatisfied.Count());
 
             // Filter for simulation configurations that optimize the most targeted Properties.
             var simulationConfigurationsWithMostOptimizedProperties = GetSimulationConfigurationsWithMostOptimizedProperties(simulationConfigurationsWithMostOptimalConditionsSatisfied, instanceModel, propertyCache);
@@ -766,33 +665,11 @@ namespace Logic.Mapek
                 return simulationConfigurationsWithMostOptimizedProperties.First();
             }
 
-            _logger.LogInformation("{count} simulation configurations remaining after the third filter.", simulationConfigurationsWithMostOptimizedProperties.Count());
-
-            // Filter for simulation configurations with the lowest number of Actions.
-            var simulationConfigurationsWithLowestNumberOfActions = GetSimulationConfigurationsWithLowestNumberOfActions(simulationConfigurationsWithMostOptimizedProperties);
-
-            _logger.LogInformation("{count} simulation configurations remaining after the fourth and last filter. Selecting the first...", simulationConfigurationsWithLowestNumberOfActions.Count());
+            _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationConfigurationsWithMostOptimizedProperties.Count());
 
             // At this point, arbitrarily return the first one regardless of the number of simulation configurations remaining.
-            return simulationConfigurationsWithLowestNumberOfActions.First();
-        }
-
-        private IEnumerable<SimulationConfiguration> GetSimulationConfigurationsWithAllOptimalConditionsSatisfied(IEnumerable<SimulationConfiguration> simulationConfigurations,
-            IEnumerable<OptimalCondition> optimalConditions)
-        {
-            var passingSimulationConfigurations = new List<SimulationConfiguration>();
-
-            foreach (var simulationConfiguration in simulationConfigurations)
-            {
-                var numberOfSatisfiedOptimalConditions = GetNumberOfSatisfiedOptimalConditions(optimalConditions, simulationConfiguration.ResultingPropertyCache);
-
-                if (numberOfSatisfiedOptimalConditions == optimalConditions.Count())
-                {
-                    passingSimulationConfigurations.Add(simulationConfiguration);
-                }
-            }
-
-            return passingSimulationConfigurations;
+            return simulationConfigurationsWithMostOptimizedProperties.ToList()[1];
+            return simulationConfigurationsWithMostOptimizedProperties.First();
         }
 
         private IEnumerable<SimulationConfiguration> GetSimulationConfigurationsWithMostOptimalConditionsSatisfied(IEnumerable<SimulationConfiguration> simulationConfigurations,
@@ -878,39 +755,6 @@ namespace Logic.Mapek
             }
 
             return property;
-        }
-
-        private IEnumerable<SimulationConfiguration> GetSimulationConfigurationsWithLowestNumberOfActions(IEnumerable<SimulationConfiguration> simulationConfigurations)
-        {
-            var passingSimulationConfigurations = new List<SimulationConfiguration>();
-            var lowestNumberOfActions = int.MaxValue;
-
-            foreach (var configurationWithOptimizedProperties in simulationConfigurations)
-            {
-                var numberOfActionsToTake = 0;
-
-                foreach (var simulationTick in configurationWithOptimizedProperties.SimulationTicks)
-                {
-                    numberOfActionsToTake += simulationTick.ActionsToExecute.Count();
-                }
-
-                numberOfActionsToTake += configurationWithOptimizedProperties.PostTickActions.Count();
-
-                if (numberOfActionsToTake < lowestNumberOfActions)
-                {
-                    lowestNumberOfActions = numberOfActionsToTake;
-                    passingSimulationConfigurations = new List<SimulationConfiguration>
-                    {
-                        configurationWithOptimizedProperties
-                    };
-                }
-                else if (numberOfActionsToTake == lowestNumberOfActions)
-                {
-                    passingSimulationConfigurations.Add(configurationWithOptimizedProperties);
-                }
-            }
-
-            return passingSimulationConfigurations;
         }
 
         private IEnumerable<PropertyChange> GetPropertyChangesToOptimizeFor(IGraph instanceModel, PropertyCache propertyCache)

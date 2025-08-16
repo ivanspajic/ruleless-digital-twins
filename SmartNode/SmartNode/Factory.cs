@@ -91,8 +91,7 @@ namespace SmartNode
         private readonly Dictionary<string, IValueHandler> _valueHandlers = new()
         {
             { "double", new DoubleValueHandler() },
-            { "int", new IntValueHandler() },
-            { "string", new StringValueHandler() }
+            { "int", new IntValueHandler() }
         };
 
         public ISensorDevice GetSensorDeviceImplementation(string sensorName, string procedureName)

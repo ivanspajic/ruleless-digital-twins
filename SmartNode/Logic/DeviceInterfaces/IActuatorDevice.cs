@@ -4,6 +4,6 @@
     {
         public string ActuatorName { get; init; }
 
-        public void Actuate(string state, double durationSeconds);
+        public void Actuate(object state, double durationSeconds);
     }
 }

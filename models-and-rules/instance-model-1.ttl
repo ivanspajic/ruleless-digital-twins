@@ -29,17 +29,31 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 #    Individuals
 #################################################################
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit
+:AirConditioningUnit rdf:type owl:NamedIndividual ,
+                              <http://www.w3.org/ns/sosa/Actuator> ;
+                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyConsumptionIncrease ,
+                                                                                                  :RoomTemperatureDecrease ,
+                                                                                                  :RoomTemperatureIncrease .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnitStateGenerator
+:AirConditioningUnitStateGenerator rdf:type owl:NamedIndividual ,
+                                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActionValueGenerator> ;
+                                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "../../../../SensorActuatorImplementations/FMUs/exampleACUnitStateGenerator.fmu"^^xsd:anyURI .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier
 :Dehumidifier rdf:type owl:NamedIndividual ,
                        <http://www.w3.org/ns/sosa/Actuator> ;
-              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState> :DehumidifierOn .
+              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyConsumptionIncrease ,
+                                                                                           :RoomHumidityDecrease .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DehumidifierOn
-:DehumidifierOn rdf:type owl:NamedIndividual ,
-                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState> ;
-                <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyConsumptionIncrease ,
-                                                                                             :RoomHumidityDecrease .
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DehumidifierStateGenerator
+:DehumidifierStateGenerator rdf:type owl:NamedIndividual ,
+                                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActionValueGenerator> ;
+                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "../../../../SensorActuatorImplementations/FMUs/exampleDehumifierStateGenerator.fmu"^^xsd:anyURI .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption
@@ -89,48 +103,6 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                  <http://www.w3.org/ns/ssn/hasOutput> :EnergyConsumptionMeterMeasuredEnergyConsumption .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan
-:Fan rdf:type owl:NamedIndividual ,
-              <http://www.w3.org/ns/sosa/Actuator> ;
-     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState> :FanOn .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FanOn
-:FanOn rdf:type owl:NamedIndividual ,
-                <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState> ;
-       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyConsumptionIncrease ,
-                                                                                    :RoomTemperatureDecrease .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater
-:Heater rdf:type owl:NamedIndividual ,
-                 <http://www.w3.org/ns/sosa/Actuator> ;
-        <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasActuatorState> :HeaterMedium ,
-                                                                                               :HeaterStrong ,
-                                                                                               :HeaterWeak .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterMedium
-:HeaterMedium rdf:type owl:NamedIndividual ,
-                       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState> ;
-              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyConsumptionIncrease ,
-                                                                                           :RoomTemperatureIncrease .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterStrong
-:HeaterStrong rdf:type owl:NamedIndividual ,
-                       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState> ;
-              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyConsumptionIncrease ,
-                                                                                           :RoomTemperatureIncrease .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HeaterWeak
-:HeaterWeak rdf:type owl:NamedIndividual ,
-                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuatorState> ;
-            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyConsumptionIncrease ,
-                                                                                         :RoomTemperatureIncrease .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor
 :HumiditySensor rdf:type owl:NamedIndividual ,
                          <http://www.w3.org/ns/sosa/Sensor> ;
@@ -141,6 +113,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorMeasuredHumidity
 :HumiditySensorMeasuredHumidity rdf:type owl:NamedIndividual ,
                                          <http://www.w3.org/ns/ssn/Output> ,
+                                         <http://www.w3.org/ns/ssn/Property> ,
                                          [ rdf:type owl:Restriction ;
                                            owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
                                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -214,15 +187,16 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                    <http://www.w3.org/ns/sosa/Platform> ;
           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor> :EnergyConsumptionDecrease ,
                                                                                              :RoomHumidityDecrease ;
-          <http://www.w3.org/ns/sosa/hosts> :Dehumidifier ,
+          <http://www.w3.org/ns/sosa/hosts> :AirConditioningUnit ,
+                                            :Dehumidifier ,
                                             :EnergyConsumptionMeter ,
-                                            :Fan ,
-                                            :Heater ,
+                                            :HumiditySensor ,
                                             :TemperatureSensor1 ,
                                             :TemperatureSensor2 ;
           <http://www.w3.org/ns/ssn/implements> :OptimalCondition1 ,
                                                 :OptimalCondition2 ;
-          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "../../../../SensorActuatorImplementations/FMUs/roomM370.fmu"^^xsd:anyURI .
+          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "../../../../SensorActuatorImplementations/FMUs/roomM370.fmu"^^xsd:anyURI ;
+          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasSimulationTickSizeInSeconds> "900"^^xsd:int .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature
@@ -259,6 +233,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1MeasuredTemperature
 :TemperatureSensor1MeasuredTemperature rdf:type owl:NamedIndividual ,
                                                 <http://www.w3.org/ns/ssn/Output> ,
+                                                <http://www.w3.org/ns/ssn/Property> ,
                                                 [ rdf:type owl:Restriction ;
                                                   owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
                                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -282,6 +257,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2MeasuredTemperature
 :TemperatureSensor2MeasuredTemperature rdf:type owl:NamedIndividual ,
                                                 <http://www.w3.org/ns/ssn/Output> ,
+                                                <http://www.w3.org/ns/ssn/Property> ,
                                                 [ rdf:type owl:Restriction ;
                                                   owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
                                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -301,22 +277,22 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
+[ xsd:maxInclusive "3"^^xsd:int
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
 [ xsd:minInclusive "1"^^xsd:int
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ xsd:maxInclusive "3"^^xsd:int
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger

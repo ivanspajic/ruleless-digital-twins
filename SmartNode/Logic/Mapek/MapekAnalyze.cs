@@ -748,7 +748,9 @@ namespace Logic.Mapek
                 Name = actuatorName
             };
 
-            // Create ActuationActions with new states to set for their respective Actuators.
+            // Create ActuationActions with new states to set for their respective Actuators. Our implementation currently supports direct,
+            // user-provided implementations of ActionValueGenerators, although this could theoretically be an FMU execution, a REST API call,
+            // or something else.
             var valueHandler = _factory.GetValueHandlerImplementation("int"); // Let integer values designate Actuator states.
             var possibleValues = valueHandler.GetPossibleValuesForActuationAction(actuator);
 
@@ -780,7 +782,9 @@ namespace Logic.Mapek
                 throw new Exception($"ConfigurableParameter {configurableParameterName} was not found in the Property cache.");
             }
 
-            // Create ReconfigurationActions with new values to set for their respective ConfigurableParameters.
+            // Create ReconfigurationActions with new values to set for their respective ConfigurableParameters. Out implementation currently
+            // supports direct, user-provided implementations of ActionValueGenerators, although this could theoretically be an FMU execution,
+            // a REST API call, or something else.
             var valueHandler = _factory.GetValueHandlerImplementation(configurableParameter.OwlType);
             var possibleValues = valueHandler.GetPossibleValuesForReconfigurationAction(configurableParameter, effect);
 

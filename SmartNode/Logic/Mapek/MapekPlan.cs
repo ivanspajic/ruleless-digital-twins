@@ -494,12 +494,13 @@ namespace Logic.Mapek
         private void ExecuteActuationActionFmu(string fmuFilePath, SimulationConfiguration simulationConfiguration, IGraph instanceModel, PropertyCache propertyCacheCopy)
         {
             //var model = Model.Load(fmuFilePath);
+            var model = Model.Load("roomM370.fmu");
 
-            //// This instantiation fails frequently due to a "protected memory" exception(even when no other simulations have been run beforehand).Because it's thrown from
-            //// external code, the exception can't be caught for retries. This only works consistently with the Modelica reference FMUs.
-            //var fmuInstance = model.CreateCoSimulationInstance("demo");
+            // This instantiation fails frequently due to a "protected memory" exception(even when no other simulations have been run beforehand).Because it's thrown from
+            // external code, the exception can't be caught for retries. This only works consistently with the Modelica reference FMUs.
+            var fmuInstance = model.CreateCoSimulationInstance("demo");
 
-            //fmuInstance.StartTime(0);
+            fmuInstance.StartTime(0);
 
             //// Run the simulation by executing ActuationActions in their respective simulation intervals.
             //foreach (var simulationTick in simulationConfiguration.SimulationTicks)
@@ -536,12 +537,12 @@ namespace Logic.Mapek
             //    AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
             //}
 
-            //// Calling Dispose() on the instance creates a problem in the underlying external code which crashes the application approximately 95% of the time.
-            //// This could be due to improper implementations or handling of resources in the Femyou (.NET) library used to read from and write to FMUs. Note that
-            //// calling Dispose() while running a Modelica reference FMU (against which the Femyou library was checked), this issue doesn't occur. Our FMUs are
-            //// generated as standard FMUs by OpenModelica.
-            //fmuInstance.Dispose();
-            //model.Dispose();
+            // Calling Dispose() on the instance creates a problem in the underlying external code which crashes the application approximately 95% of the time.
+            // This could be due to improper implementations or handling of resources in the Femyou (.NET) library used to read from and write to FMUs. Note that
+            // calling Dispose() while running a Modelica reference FMU (against which the Femyou library was checked), this issue doesn't occur. Our FMUs are
+            // generated as standard FMUs by OpenModelica.
+            fmuInstance.Dispose();
+            model.Dispose();
         }
 
         private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs)

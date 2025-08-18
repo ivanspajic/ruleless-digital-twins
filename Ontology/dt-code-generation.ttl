@@ -178,6 +178,26 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Classes
 #################################################################
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation#ActuationValueGenerator
+:ActuationValueGenerator rdf:type owl:Class ;
+                         rdfs:subClassOf :ActionValueGenerator ,
+                                         [ rdf:type owl:Restriction ;
+                                           owl:onProperty <http://www.w3.org/ns/ssn/hasInput> ;
+                                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                           owl:onClass <http://www.w3.org/ns/sosa/Actuator>
+                                         ] .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation#ReconfigurationValueGenerator
+:ReconfigurationValueGenerator rdf:type owl:Class ;
+                               rdfs:subClassOf :ActionValueGenerator ,
+                                               [ rdf:type owl:Restriction ;
+                                                 owl:onProperty <http://www.w3.org/ns/ssn/hasInput> ;
+                                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                 owl:onClass :ConfigurableParameter
+                                               ] .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/Action
 :Action rdf:type owl:Class ;
         rdfs:comment "Represents a single system Action."@en ;
@@ -187,19 +207,6 @@ xsd:duration rdf:type rdfs:Datatype .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActionValueGenerator
 :ActionValueGenerator rdf:type owl:Class ;
                       rdfs:subClassOf <http://www.w3.org/ns/sosa/Procedure> ,
-                                      [ rdf:type owl:Class ;
-                                        owl:unionOf ( [ rdf:type owl:Restriction ;
-                                                        owl:onProperty <http://www.w3.org/ns/ssn/hasInput> ;
-                                                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                        owl:onClass :ConfigurableParameter
-                                                      ]
-                                                      [ rdf:type owl:Restriction ;
-                                                        owl:onProperty <http://www.w3.org/ns/ssn/hasInput> ;
-                                                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                        owl:onClass <http://www.w3.org/ns/sosa/Actuator>
-                                                      ]
-                                                    )
-                                      ] ,
                                       [ rdf:type owl:Restriction ;
                                         owl:onProperty <http://www.w3.org/ns/ssn/hasInput> ;
                                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;

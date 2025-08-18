@@ -66,31 +66,7 @@ namespace Logic.Mapek
             // Find the optimal simulation configuration.
             var optimalConfiguration = GetOptimalConfiguration(instanceModel, propertyCache, optimalConditions, simulationConfigurations);
 
-            _logger.LogInformation("The chosen optimal configuration is:");
-
-            _logger.LogInformation("Actuation actions:");
-
-            // Convert to a list to use indexing.
-            var simulationTickList = optimalConfiguration.SimulationTicks.ToList();
-
-            for (var i = 0; i < simulationTickList.Count; i++)
-            {
-                _logger.LogInformation("Interval {index}:", i + 1);
-
-                foreach (var action in simulationTickList[i].ActionsToExecute)
-                {
-                    _logger.LogInformation("Actuator: {actuator}", action.Actuator.Name);
-                    _logger.LogInformation("Actuator state: {actuatorState}", action.NewStateValue.ToString());
-                }
-            }
-
-            _logger.LogInformation("Post-tick actions:");
-
-            foreach (var postTickAction in optimalConfiguration.PostTickActions)
-            {
-                _logger.LogInformation("Configurable parameter: {configurableParameter}", postTickAction.ConfigurableParameter.Name);
-                _logger.LogInformation("New Value: {value}", postTickAction.NewParameterValue.ToString());
-            }
+            LogOptimalSimulationConfiguration(optimalConfiguration);
 
             return optimalConfiguration;
         }
@@ -812,6 +788,35 @@ namespace Logic.Mapek
             }
 
             return propertyChangesToOptimizeFor;
+        }
+
+        private void LogOptimalSimulationConfiguration(SimulationConfiguration optimalSimulationConfiguration)
+        {
+            _logger.LogInformation("The chosen optimal configuration is:");
+
+            _logger.LogInformation("Actuation actions:");
+
+            // Convert to a list to use indexing.
+            var simulationTickList = optimalSimulationConfiguration.SimulationTicks.ToList();
+
+            for (var i = 0; i < simulationTickList.Count; i++)
+            {
+                _logger.LogInformation("Interval {index}:", i + 1);
+
+                foreach (var action in simulationTickList[i].ActionsToExecute)
+                {
+                    _logger.LogInformation("Actuator: {actuator}", action.Actuator.Name);
+                    _logger.LogInformation("Actuator state: {actuatorState}", action.NewStateValue.ToString());
+                }
+            }
+
+            _logger.LogInformation("Post-tick actions:");
+
+            foreach (var postTickAction in optimalSimulationConfiguration.PostTickActions)
+            {
+                _logger.LogInformation("Configurable parameter: {configurableParameter}", postTickAction.ConfigurableParameter.Name);
+                _logger.LogInformation("New Value: {value}", postTickAction.NewParameterValue.ToString());
+            }
         }
     }
 }

@@ -39,7 +39,8 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnitStateGenerator
 :AirConditioningUnitStateGenerator rdf:type owl:NamedIndividual ,
-                                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActionValueGenerator> ;
+                                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationValueGenerator> ;
+                                   <http://www.w3.org/ns/ssn/hasInput> :AirConditioningUnit ;
                                    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "../../../../SensorActuatorImplementations/FMUs/exampleACUnitStateGenerator.fmu"^^xsd:anyURI .
 
 
@@ -52,7 +53,8 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DehumidifierStateGenerator
 :DehumidifierStateGenerator rdf:type owl:NamedIndividual ,
-                                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActionValueGenerator> ;
+                                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationValueGenerator> ;
+                            <http://www.w3.org/ns/ssn/hasInput> :Dehumidifier ;
                             <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "../../../../SensorActuatorImplementations/FMUs/exampleDehumifierStateGenerator.fmu"^^xsd:anyURI .
 
 
@@ -277,10 +279,10 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
-[ xsd:maxInclusive "3"^^xsd:int
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+[ xsd:maxInclusive "3"^^xsd:int
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger

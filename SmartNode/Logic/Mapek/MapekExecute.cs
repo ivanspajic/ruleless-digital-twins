@@ -11,8 +11,6 @@ namespace Logic.Mapek
         private readonly ILogger<MapekExecute> _logger;
         private readonly IFactory _factory;
 
-        private const int MaximumParallelThreads = 4;
-
         public MapekExecute(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekExecute>>();
@@ -25,15 +23,10 @@ namespace Logic.Mapek
 
             foreach (var simulationTick in optimalConfiguration.SimulationTicks)
             {
-                var parallelOptions = new ParallelOptions
-                {
-                    MaxDegreeOfParallelism = MaximumParallelThreads
-                };
-
-                Parallel.ForEach(simulationTick.ActionsToExecute, parallelOptions, (actuationAction) =>
+                foreach (var actuationAction in simulationTick.ActionsToExecute)
                 {
                     ExecuteActuationAction(actuationAction, simulationTick.TickDurationSeconds);
-                });
+                }
             }
 
             foreach (var reconfigurationAction in optimalConfiguration.PostTickActions)
@@ -51,6 +44,7 @@ namespace Logic.Mapek
 
             var actuator = _factory.GetActuatorDeviceImplementation(actuationAction.Actuator.Name);
 
+            // This cannot be a blocking call to ensure that multiple Actuators in an interval get executed for the same duration.
             actuator.Actuate(actuationAction.NewStateValue, durationSeconds);
         }
 

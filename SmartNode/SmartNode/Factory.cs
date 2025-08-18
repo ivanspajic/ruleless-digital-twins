@@ -80,9 +80,9 @@ namespace SmartNode
         private readonly Dictionary<string, IActuatorDevice> _actuators = new()
         {
             {
-                "Heater", new ExampleActuator()
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit", new ExampleActuator()
                 {
-                    ActuatorName = "Heater"
+                    ActuatorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit"
                 }
             }
         };

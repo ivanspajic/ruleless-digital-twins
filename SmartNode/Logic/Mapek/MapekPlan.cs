@@ -529,20 +529,20 @@ namespace Logic.Mapek
             //        fmuActuationInputs.Add((simpleActuatorName + "State", "string", simpleActuatorStateName));
             //    }
 
-            //    AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
+            //    //    AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
 
-            //    // The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
-            //    // TODO: figure out why 1100 here equals 3600 in the fmu, and maybe how to fix it with scaling (weird stuff)??
+            //    //    // The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
+            //    //    // TODO: figure out why 1100 here equals 3600 in the fmu, and maybe how to fix it with scaling (weird stuff)??
 
-            //    AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
-            //}
+            //    //    AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
+            //    //}
 
-            // Calling Dispose() on the instance creates a problem in the underlying external code which crashes the application approximately 95% of the time.
-            // This could be due to improper implementations or handling of resources in the Femyou (.NET) library used to read from and write to FMUs. Note that
-            // calling Dispose() while running a Modelica reference FMU (against which the Femyou library was checked), this issue doesn't occur. Our FMUs are
-            // generated as standard FMUs by OpenModelica.
-            fmuInstance.Dispose();
-            model.Dispose();
+            //    // Calling Dispose() on the instance creates a problem in the underlying external code which crashes the application approximately 95% of the time.
+            //    // This could be due to improper implementations or handling of resources in the Femyou (.NET) library used to read from and write to FMUs. Note that
+            //    // calling Dispose() while running a Modelica reference FMU (against which the Femyou library was checked), this issue doesn't occur. Our FMUs are
+            //    // generated as standard FMUs by OpenModelica.
+            //    fmuInstance.Dispose();
+            //model.Dispose();
         }
 
         private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs)

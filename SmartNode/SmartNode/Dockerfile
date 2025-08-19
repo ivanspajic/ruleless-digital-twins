@@ -25,4 +25,13 @@ RUN dotnet publish "./SmartNode.csproj" -c $BUILD_CONFIGURATION -o /app/publish 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+USER root
+RUN apt-get update ; apt-get install -y ca-certificates curl gnupg ; curl -fsSL http://build.openmodelica.org/apt/openmodelica.asc | \
+     gpg --dearmor -o /usr/share/keyrings/openmodelica-keyring.gpg ; \
+     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/openmodelica-keyring.gpg] \
+  https://build.openmodelica.org/apt \
+  $(cat /etc/os-release | grep "\(UBUNTU\\|DEBIAN\\|VERSION\)_CODENAME" | sort | cut -d= -f 2 | head -1) \
+  stable" | tee /etc/apt/sources.list.d/openmodelica.list ; \
+     apt update ; apt install -y --no-install-recommends omc
+USER $APP_UID
 ENTRYPOINT ["dotnet", "SmartNode.dll"]

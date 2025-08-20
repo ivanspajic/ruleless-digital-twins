@@ -2,6 +2,16 @@
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+# [VS] We keep `omc` in the final product. If we only want the compiled FMU, and never expect the user to invoke `omc`
+#       in the container themselves, we could move this bit up a layer or two.
+USER root
+RUN apt-get update ; apt-get install -y ca-certificates curl gnupg ; curl -fsSL http://build.openmodelica.org/apt/openmodelica.asc | \
+     gpg --dearmor -o /usr/share/keyrings/openmodelica-keyring.gpg ; \
+     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/openmodelica-keyring.gpg] \
+  https://build.openmodelica.org/apt \
+  $(cat /etc/os-release | grep "\(UBUNTU\\|DEBIAN\\|VERSION\)_CODENAME" | sort | cut -d= -f 2 | head -1) \
+  stable" | tee /etc/apt/sources.list.d/openmodelica.list ; \
+     apt update ; apt install -y --no-install-recommends omc ; apt clean
 USER $APP_UID
 WORKDIR /app
 
@@ -25,4 +35,7 @@ RUN dotnet publish "./SmartNode.csproj" -c $BUILD_CONFIGURATION -o /app/publish 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY --from=build --chown=$APP_UID /src /src
+USER $APP_UID
+RUN cd /src/SensorActuatorImplementations/FMUs/Source && omc doit.mos
 ENTRYPOINT ["dotnet", "SmartNode.dll"]

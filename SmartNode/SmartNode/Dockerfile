@@ -25,6 +25,7 @@ RUN dotnet publish "./SmartNode.csproj" -c $BUILD_CONFIGURATION -o /app/publish 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY --from=build --chown=$APP_UID /src /src
 USER root
 RUN apt-get update ; apt-get install -y ca-certificates curl gnupg ; curl -fsSL http://build.openmodelica.org/apt/openmodelica.asc | \
      gpg --dearmor -o /usr/share/keyrings/openmodelica-keyring.gpg ; \

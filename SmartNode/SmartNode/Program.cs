@@ -32,12 +32,18 @@ namespace SmartNode
             // Get an instance of the MAPE-K manager.
             var mapekManager = host.Services.GetRequiredService<IMapekManager>();
 
-            // Get executing assembly path.
-            var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            // Combine it with the relative path of the inferred model file.
-            var modelFilePath = Path.Combine(executingAssemblyPath!, @"..\..\..\..\..\models-and-rules\inferred-model-1.ttl");
-            // Make it system-agnostic.
-            modelFilePath = Path.GetFullPath(modelFilePath);
+            var modelFile = "inferred-model-2.ttl";
+
+            //// For Windows:
+            //// Get executing assembly path.
+            //var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            //// Combine it with the relative path of the inferred model file.
+            //var modelFilePath = Path.Combine(executingAssemblyPath!, modelFile);
+            //// Make it system-agnostic.
+            //modelFilePath = Path.GetFullPath(modelFile);
+
+            // For Docker:
+            var modelFilePath = modelFile;
 
             // Start the loop.
             try

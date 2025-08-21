@@ -82,8 +82,7 @@ namespace Logic.Mapek
             var instanceModel = new Graph();
 
             var turtleParser = new TurtleParser();
-            //turtleParser.Load(instanceModel, instanceModelFilePath);
-            turtleParser.Load(instanceModel, "inferred-model-1.ttl");
+            turtleParser.Load(instanceModel, instanceModelFilePath);
 
             return instanceModel;
         }

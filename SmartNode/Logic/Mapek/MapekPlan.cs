@@ -361,6 +361,8 @@ namespace Logic.Mapek
 
                 if (simulationConfiguration.SimulationTicks.Any())
                 {
+                    // Comment this back in for FMU testing. The Femyou library can seemingly not dispose of resources from FMUs other than Modelica reference ones.
+                    // All other logic of writing inputs and reading outputs works.
                     ExecuteActuationActionFmu(fmuFilePath, simulationConfiguration, instanceModel, propertyCacheCopy);
                 }
 
@@ -493,56 +495,54 @@ namespace Logic.Mapek
 
         private void ExecuteActuationActionFmu(string fmuFilePath, SimulationConfiguration simulationConfiguration, IGraph instanceModel, PropertyCache propertyCacheCopy)
         {
-            //var model = Model.Load(fmuFilePath);
-            var model = Model.Load("roomM370.fmu");
+            var model = Model.Load(fmuFilePath);
+            //var model = Model.Load("../../../../SensorActuatorImplementations/FMUs/roomM370.fmu");
 
-            // This instantiation fails frequently due to a "protected memory" exception(even when no other simulations have been run beforehand).Because it's thrown from
+            // This instantiation fails frequently due to a "protected memory" exception(even when no other simulations have been run beforehand). Because it's thrown from
             // external code, the exception can't be caught for retries. This only works consistently with the Modelica reference FMUs.
             var fmuInstance = model.CreateCoSimulationInstance("demo");
 
             fmuInstance.StartTime(0);
 
-            //// Run the simulation by executing ActuationActions in their respective simulation intervals.
-            //foreach (var simulationTick in simulationConfiguration.SimulationTicks)
-            //{
-            //    var fmuActuationInputs = new List<(string, string, object)>();
+            // Run the simulation by executing ActuationActions in their respective simulation intervals.
+            foreach (var simulationTick in simulationConfiguration.SimulationTicks)
+            {
+                var fmuActuationInputs = new List<(string, string, object)>();
 
-            //    // Get all ObservableProperties and add them to the inputs for the FMU.
-            //    var observableProperties = GetObservablePropertiesFromPropertyCache(instanceModel, propertyCacheCopy);
+                // Get all ObservableProperties and add them to the inputs for the FMU.
+                var observableProperties = GetObservablePropertiesFromPropertyCache(instanceModel, propertyCacheCopy);
 
-            //    foreach (var observableProperty in observableProperties)
-            //    {
-            //        // Shave off the long name URIs from the instance model.
-            //        var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
+                foreach (var observableProperty in observableProperties)
+                {
+                    // Shave off the long name URIs from the instance model.
+                    var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
 
-            //        fmuActuationInputs.Add((simpleObservablePropertyName, observableProperty.OwlType, observableProperty.Value));
-            //    }
+                    fmuActuationInputs.Add((simpleObservablePropertyName, observableProperty.OwlType, observableProperty.Value));
+                }
 
-            //    // Add all ActuatorStates to the inputs for the FMU.
-            //    foreach (var actuationAction in simulationTick.ActionsToExecute)
-            //    {
-            //        // Shave off the long name URIs from the instance model.
-            //        var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Actuator);
-            //        var simpleActuatorStateName = MapekUtilities.GetSimpleName(actuationAction.ActuatorState.Name);
+                // Add all ActuatorStates to the inputs for the FMU.
+                foreach (var actuationAction in simulationTick.ActionsToExecute)
+                {
+                    // Shave off the long name URIs from the instance model.
+                    var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.Actuator.Name);
 
-            //        // Add the ActuatorStates with their names as values and hardcoded "(xsd:)string" types as OWL types.
-            //        fmuActuationInputs.Add((simpleActuatorName + "State", "string", simpleActuatorStateName));
-            //    }
+                    fmuActuationInputs.Add((simpleActuatorName + "State", "int", actuationAction.NewStateValue));
+                }
 
-            //    //    AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
+                AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
 
-            //    //    // The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
-            //    //    // TODO: figure out why 1100 here equals 3600 in the fmu, and maybe how to fix it with scaling (weird stuff)??
+                // The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
+                fmuInstance.AdvanceTime(simulationTick.TickDurationSeconds);
 
-            //    //    AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
-            //    //}
+                AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
+            }
 
-            //    // Calling Dispose() on the instance creates a problem in the underlying external code which crashes the application approximately 95% of the time.
-            //    // This could be due to improper implementations or handling of resources in the Femyou (.NET) library used to read from and write to FMUs. Note that
-            //    // calling Dispose() while running a Modelica reference FMU (against which the Femyou library was checked), this issue doesn't occur. Our FMUs are
-            //    // generated as standard FMUs by OpenModelica.
-            //    fmuInstance.Dispose();
-            //model.Dispose();
+            // Calling Dispose() on the instance creates a problem in the underlying external code which crashes the application approximately 95% of the time.
+            // This could be due to improper implementations or handling of resources in the Femyou (.NET) library used to read from and write to FMUs. Note that
+            // calling Dispose() while running a Modelica reference FMU (against which the Femyou library was checked), this issue doesn't occur. Our FMUs are
+            // generated as standard FMUs by OpenModelica.
+            fmuInstance.Dispose();
+            model.Dispose();
         }
 
         private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs)
@@ -563,7 +563,7 @@ namespace Logic.Mapek
             {
                 foreach (var propertyName in propertyCacheCopy.Properties.Keys)
                 {
-                    if (propertyName.EndsWith(fmuOutput.Key))
+                    if (propertyName.EndsWith($"#{fmuOutput.Key}"))
                     {
                         var valueHandler = _factory.GetValueHandlerImplementation(propertyCacheCopy.Properties[propertyName].OwlType);
                         var value = valueHandler.GetValueFromSimulationParameter(fmuInstance, fmuOutput.Value);

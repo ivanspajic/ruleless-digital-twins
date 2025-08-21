@@ -32,7 +32,7 @@ namespace SmartNode
             // Get an instance of the MAPE-K manager.
             var mapekManager = host.Services.GetRequiredService<IMapekManager>();
 
-            var modelFile = "inferred-model-2.ttl";
+            var modelFile = "inferred-model-1.ttl";
 
             //// For Windows:
             //// Get executing assembly path.

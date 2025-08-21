@@ -7,7 +7,7 @@
 @base <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#> .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1> rdf:type owl:Ontology ;
-                                                                     owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation> .
+                                                                     owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins> .
 
 #################################################################
 #    Annotation properties
@@ -32,37 +32,37 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit
 :AirConditioningUnit rdf:type owl:NamedIndividual ,
                               <http://www.w3.org/ns/sosa/Actuator> ;
-                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyConsumptionIncrease ,
+                     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :EnergyConsumptionIncrease ,
                                                                                                   :RoomTemperatureDecrease ,
                                                                                                   :RoomTemperatureIncrease .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnitStateGenerator
 :AirConditioningUnitStateGenerator rdf:type owl:NamedIndividual ,
-                                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationValueGenerator> ;
+                                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationValueGenerator> ;
                                    <http://www.w3.org/ns/ssn/hasInput> :AirConditioningUnit ;
-                                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "exampleACUnitStateGenerator.fmu"^^xsd:anyURI .
+                                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasModel> "exampleACUnitStateGenerator.fmu"^^xsd:anyURI .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier
 :Dehumidifier rdf:type owl:NamedIndividual ,
                        <http://www.w3.org/ns/sosa/Actuator> ;
-              <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enacts> :EnergyConsumptionIncrease ,
+              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :EnergyConsumptionIncrease ,
                                                                                            :RoomHumidityDecrease .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DehumidifierStateGenerator
 :DehumidifierStateGenerator rdf:type owl:NamedIndividual ,
-                                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationValueGenerator> ;
+                                     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationValueGenerator> ;
                             <http://www.w3.org/ns/ssn/hasInput> :Dehumidifier ;
-                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "exampleDehumifierStateGenerator.fmu"^^xsd:anyURI .
+                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasModel> "exampleDehumifierStateGenerator.fmu"^^xsd:anyURI .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption
 :EnergyConsumption rdf:type owl:NamedIndividual ,
                             <http://www.w3.org/ns/sosa/ObservableProperty> ,
                             [ rdf:type owl:Restriction ;
-                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
                               owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                               owl:onDataRange xsd:double
                             ] .
@@ -70,15 +70,15 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionDecrease
 :EnergyConsumptionDecrease rdf:type owl:NamedIndividual ,
-                                    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChange> ;
-                           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
+                                    <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> ;
+                           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease> ;
                            <http://www.w3.org/ns/ssn/forProperty> :EnergyConsumption .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionIncrease
 :EnergyConsumptionIncrease rdf:type owl:NamedIndividual ,
-                                    <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> ;
-                           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
+                                    <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> ;
+                           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease> ;
                            <http://www.w3.org/ns/ssn/forProperty> :EnergyConsumption .
 
 
@@ -93,7 +93,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 :EnergyConsumptionMeterMeasuredEnergyConsumption rdf:type owl:NamedIndividual ,
                                                           <http://www.w3.org/ns/ssn/Output> ,
                                                           [ rdf:type owl:Restriction ;
-                                                            owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                                                            owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
                                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                             owl:onDataRange xsd:double
                                                           ] .
@@ -117,7 +117,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                          <http://www.w3.org/ns/ssn/Output> ,
                                          <http://www.w3.org/ns/ssn/Property> ,
                                          [ rdf:type owl:Restriction ;
-                                           owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                                           owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
                                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                            owl:onDataRange xsd:double
                                          ] .
@@ -131,9 +131,9 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition1
 :OptimalCondition1 rdf:type owl:NamedIndividual ,
-                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
+                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> ,
                             [ rdf:type owl:Restriction ;
-                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValueConstraint> ;
                               owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                               owl:onDataRange [ rdf:type rdfs:Datatype ;
                                                 owl:onDatatype xsd:double ;
@@ -145,14 +145,14 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                               ]
                             ] ;
                    <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
-                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds> "3600"^^xsd:int .
+                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> "3600"^^xsd:int .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition2
 :OptimalCondition2 rdf:type owl:NamedIndividual ,
-                            <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
+                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> ,
                             [ rdf:type owl:Restriction ;
-                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValueConstraint> ;
                               owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                               owl:onDataRange [ rdf:type rdfs:Datatype ;
                                                 owl:onDatatype xsd:double ;
@@ -164,14 +164,14 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                               ]
                             ] ;
                    <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
-                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds> "3600"^^xsd:int .
+                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> "3600"^^xsd:int .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomHumidity
 :RoomHumidity rdf:type owl:NamedIndividual ,
                        <http://www.w3.org/ns/sosa/ObservableProperty> ,
                        [ rdf:type owl:Restriction ;
-                         owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                         owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
                          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                          owl:onDataRange xsd:double
                        ] .
@@ -179,15 +179,15 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomHumidityDecrease
 :RoomHumidityDecrease rdf:type owl:NamedIndividual ,
-                               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> ;
-                      <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
+                               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> ;
+                      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease> ;
                       <http://www.w3.org/ns/ssn/forProperty> :RoomHumidity .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomM370
 :RoomM370 rdf:type owl:NamedIndividual ,
                    <http://www.w3.org/ns/sosa/Platform> ;
-          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor> :EnergyConsumptionDecrease ,
+          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor> :EnergyConsumptionDecrease ,
                                                                                              :RoomHumidityDecrease ;
           <http://www.w3.org/ns/sosa/hosts> :AirConditioningUnit ,
                                             :Dehumidifier ,
@@ -197,15 +197,15 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                             :TemperatureSensor2 ;
           <http://www.w3.org/ns/ssn/implements> :OptimalCondition1 ,
                                                 :OptimalCondition2 ;
-          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "roomM370.fmu"^^xsd:anyURI ;
-          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasSimulationTickSizeInSeconds> "900"^^xsd:int .
+          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasModel> "roomM370.fmu"^^xsd:anyURI ;
+          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationTickSizeInSeconds> "900"^^xsd:int .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature
 :RoomTemperature rdf:type owl:NamedIndividual ,
                           <http://www.w3.org/ns/sosa/ObservableProperty> ,
                           [ rdf:type owl:Restriction ;
-                            owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                            owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                             owl:onDataRange xsd:double
                           ] .
@@ -213,15 +213,15 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperatureDecrease
 :RoomTemperatureDecrease rdf:type owl:NamedIndividual ,
-                                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> ;
-                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> ;
+                         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease> ;
                          <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperatureIncrease
 :RoomTemperatureIncrease rdf:type owl:NamedIndividual ,
-                                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByActuation> ;
-                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> ;
+                         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease> ;
                          <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
@@ -237,7 +237,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                                 <http://www.w3.org/ns/ssn/Output> ,
                                                 <http://www.w3.org/ns/ssn/Property> ,
                                                 [ rdf:type owl:Restriction ;
-                                                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                                                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
                                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                   owl:onDataRange xsd:double
                                                 ] .
@@ -261,7 +261,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                                 <http://www.w3.org/ns/ssn/Output> ,
                                                 <http://www.w3.org/ns/ssn/Property> ,
                                                 [ rdf:type owl:Restriction ;
-                                                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                                                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
                                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                   owl:onDataRange xsd:double
                                                 ] .

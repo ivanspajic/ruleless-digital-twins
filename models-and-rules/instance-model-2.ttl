@@ -7,18 +7,18 @@
 @base <http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/> .
 
 <http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2> rdf:type owl:Ontology ;
-                                                                    owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation> .
+                                                                    owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins> .
 
 #################################################################
 #    Annotation properties
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasLowerLimitValue
-<http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasLowerLimitValue> rdf:type owl:AnnotationProperty .
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasLowerLimitValue
+<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasLowerLimitValue> rdf:type owl:AnnotationProperty .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasUpperLimitValue
-<http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasUpperLimitValue> rdf:type owl:AnnotationProperty .
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasUpperLimitValue
+<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasUpperLimitValue> rdf:type owl:AnnotationProperty .
 
 
 ###  http://www.w3.org/2002/07/owl#qualifiedCardinality
@@ -32,16 +32,16 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/AustevollSite
 :AustevollSite rdf:type owl:NamedIndividual ,
                         <http://www.w3.org/ns/sosa/Platform> ;
-               <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/optimizesFor> :CompressionRatioDecreaseValueDecrease ;
+               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor> :CompressionRatioDecreaseValueDecrease ;
                <http://www.w3.org/ns/sosa/hosts> :CustomPieceSoftSensor ,
                                                  :TemperatureSensor1 .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/BucketSize
 :BucketSize rdf:type owl:NamedIndividual ,
-                     <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurableParameter> ,
+                     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter> ,
                      [ rdf:type owl:Restriction ;
-                       owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                       owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                        owl:onDataRange xsd:int
                      ] .
@@ -49,9 +49,9 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/BucketSizeValueGenerator
 :BucketSizeValueGenerator rdf:type owl:NamedIndividual ,
-                                   <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationValueGenerator> ;
+                                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationValueGenerator> ;
                           <http://www.w3.org/ns/ssn/hasInput> :BucketSize ;
-                          <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "exampleBucketSizeValueGenerator.fmu"^^xsd:anyURI .
+                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasModel> "exampleBucketSizeValueGenerator.fmu"^^xsd:anyURI .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressedTimeSeries
@@ -59,7 +59,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                <http://www.w3.org/ns/ssn/Input> ,
                                <http://www.w3.org/ns/ssn/Output> ,
                                [ rdf:type owl:Restriction ;
-                                 owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                                 owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
                                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                  owl:onDataRange xsd:base64Binary
                                ] .
@@ -70,7 +70,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                            <http://www.w3.org/ns/sosa/ObservableProperty> ,
                            <http://www.w3.org/ns/ssn/Output> ,
                            [ rdf:type owl:Restriction ;
-                             owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                             owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                              owl:onDataRange xsd:double
                            ] .
@@ -82,25 +82,25 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                            <http://www.w3.org/ns/ssn/hasInput> :BucketSize ,
                                                                :CompressedTimeSeries ;
                            <http://www.w3.org/ns/ssn/hasOutput> :CompressionRatio ;
-                           <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "compressionRatio.fmu"^^xsd:anyURI .
+                           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasModel> "compressionRatio.fmu"^^xsd:anyURI .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioDecreaseValueDecrease
 :CompressionRatioDecreaseValueDecrease rdf:type owl:NamedIndividual ,
-                                                <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration> ;
-                                       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
-                                       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/alteredBy> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueDecrease> ;
-                                       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy> :BucketSize ,
+                                                <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration> ;
+                                       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease> ;
+                                       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/alteredBy> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease> ;
+                                       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enactedBy> :BucketSize ,
                                                                                                                        :Epsilon ;
                                        <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioIncreaseValueIncrease
 :CompressionRatioIncreaseValueIncrease rdf:type owl:NamedIndividual ,
-                                                <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/PropertyChangeByReconfiguration> ;
-                                       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
-                                       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/alteredBy> <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ValueIncrease> ;
-                                       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/enactedBy> :BucketSize ,
+                                                <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration> ;
+                                       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease> ;
+                                       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/alteredBy> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease> ;
+                                       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enactedBy> :BucketSize ,
                                                                                                                        :Epsilon ;
                                        <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio .
 
@@ -112,7 +112,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                                  :Epsilon ,
                                                  :TemperatureSensor1MeasuredTemperature ;
              <http://www.w3.org/ns/ssn/hasOutput> :CompressedTimeSeries ;
-             <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "customPiece.fmu"^^xsd:anyURI .
+             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasModel> "customPiece.fmu"^^xsd:anyURI .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor
@@ -124,28 +124,28 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/Epsilon
 :Epsilon rdf:type owl:NamedIndividual ,
-                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ConfigurableParameter> ,
+                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter> ,
                   [ rdf:type owl:Restriction ;
-                    owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                    owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
                     owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                     owl:onDataRange xsd:double
                   ] ;
-         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasLowerLimitValue> "1.0"^^xsd:double ;
-         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasUpperLimitValue> "10.0"^^xsd:double .
+         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasLowerLimitValue> "1.0"^^xsd:double ;
+         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasUpperLimitValue> "10.0"^^xsd:double .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/EpsilonValueGenerator
 :EpsilonValueGenerator rdf:type owl:NamedIndividual ,
-                                <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ReconfigurationValueGenerator> ;
+                                <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationValueGenerator> ;
                        <http://www.w3.org/ns/ssn/hasInput> :Epsilon ;
-                       <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasModel> "exampleEpsilonValueGenerator.fmu"^^xsd:anyURI .
+                       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasModel> "exampleEpsilonValueGenerator.fmu"^^xsd:anyURI .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/OptimalCompressionRatio
 :OptimalCompressionRatio rdf:type owl:NamedIndividual ,
-                                  <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/OptimalCondition> ,
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> ,
                                   [ rdf:type owl:Restriction ;
-                                    owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValueConstraint> ;
+                                    owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValueConstraint> ;
                                     owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                     owl:onDataRange [ rdf:type rdfs:Datatype ;
                                                       owl:onDatatype xsd:double ;
@@ -155,7 +155,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                                     ]
                                   ] ;
                          <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio ;
-                         <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/reachedInMaximumSeconds> "3600"^^xsd:int .
+                         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> "3600"^^xsd:int .
 
 
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1
@@ -169,7 +169,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                                 <http://www.w3.org/ns/ssn/Input> ,
                                                 <http://www.w3.org/ns/ssn/Output> ,
                                                 [ rdf:type owl:Restriction ;
-                                                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/hasValue> ;
+                                                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
                                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                   owl:onDataRange xsd:double
                                                 ] .

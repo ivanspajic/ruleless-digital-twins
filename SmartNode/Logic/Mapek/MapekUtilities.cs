@@ -7,7 +7,7 @@ namespace Logic.Mapek
     internal static class MapekUtilities
     {
         public const string DtPrefix = "meta";
-        public const string DtUri = "http://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/";
+        public const string DtUri = "http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/";
         public const string SosaPrefix = "sosa";
         public const string SosaUri = "http://www.w3.org/ns/sosa/";
         public const string SsnPrefix = "ssn";

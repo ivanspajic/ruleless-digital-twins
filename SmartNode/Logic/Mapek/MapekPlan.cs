@@ -12,6 +12,10 @@ namespace Logic.Mapek
 {
     internal class MapekPlan : IMapekPlan
     {
+	public static Dictionary<string, IModel> fmuDict = new Dictionary<string, IModel>();
+	public static Dictionary<string, IInstance> iDict = new Dictionary<string, IInstance>();
+	private static int iCount = 0;
+
         private readonly ILogger<MapekPlan> _logger;
         private readonly IFactory _factory;
 
@@ -363,7 +367,7 @@ namespace Logic.Mapek
                 {
                     // Comment this back in for FMU testing. The Femyou library can seemingly not dispose of resources from FMUs other than Modelica reference ones.
                     // All other logic of writing inputs and reading outputs works.
-                    //ExecuteActuationActionFmu(fmuFilePath, simulationConfiguration, instanceModel, propertyCacheCopy);
+                    ExecuteActuationActionFmu(fmuFilePath, simulationConfiguration, instanceModel, propertyCacheCopy);
                 }
 
                 if (simulationConfiguration.PostTickActions.Any())
@@ -495,13 +499,28 @@ namespace Logic.Mapek
 
         private void ExecuteActuationActionFmu(string fmuFilePath, SimulationConfiguration simulationConfiguration, IGraph instanceModel, PropertyCache propertyCacheCopy)
         {
-            var model = Model.Load(fmuFilePath);
+            _logger.LogInformation($"Simulation {simulationConfiguration} ({simulationConfiguration.SimulationTicks.Count()} ticks)");
+            IModel model = null;
+            if (!(fmuDict.TryGetValue(fmuFilePath, out model))) {
+               _logger.LogInformation("Load Model");
+               model = Model.Load(fmuFilePath);
+               fmuDict.Add(fmuFilePath, model);
+            }
 
             // This instantiation fails frequently due to a "protected memory" exception(even when no other simulations have been run beforehand). Because it's thrown from
             // external code, the exception can't be caught for retries. This only works consistently with the Modelica reference FMUs.
-            var fmuInstance = model.CreateCoSimulationInstance("demo");
+            IInstance fmuInstance = null;
+            if (!(iDict.TryGetValue("demo"+iCount, out fmuInstance))) {
+               _logger.LogInformation($"Create instance {iCount}.");
+               fmuInstance = model.CreateCoSimulationInstance("demo"+iCount);
+               iDict.Add("demo"+iCount, fmuInstance);
 
-            fmuInstance.StartTime(0);
+               _logger.LogInformation("Setting time");
+               fmuInstance.StartTime(0);
+
+            }
+            // FIXME: we're currently using the cached instance without resetting time. We can't reliably get fresh instances.
+            // iCount++;
 
             // Run the simulation by executing ActuationActions in their respective simulation intervals.
             foreach (var simulationTick in simulationConfiguration.SimulationTicks)
@@ -515,7 +534,6 @@ namespace Logic.Mapek
                 {
                     // Shave off the long name URIs from the instance model.
                     var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
-
                     fmuActuationInputs.Add((simpleObservablePropertyName, observableProperty.OwlType, observableProperty.Value));
                 }
 
@@ -524,13 +542,14 @@ namespace Logic.Mapek
                 {
                     // Shave off the long name URIs from the instance model.
                     var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.Actuator.Name);
-
                     fmuActuationInputs.Add((simpleActuatorName + "State", "int", actuationAction.NewStateValue));
                 }
 
+                _logger.LogInformation($"Parameters: {string.Join(", ",fmuActuationInputs.Select(i => i.ToString()))}");
                 AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
 
                 // The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
+                _logger.LogInformation("Tick");
                 fmuInstance.AdvanceTime(simulationTick.TickDurationSeconds);
 
                 AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
@@ -540,8 +559,10 @@ namespace Logic.Mapek
             // This could be due to improper implementations or handling of resources in the Femyou (.NET) library used to read from and write to FMUs. Note that
             // calling Dispose() while running a Modelica reference FMU (against which the Femyou library was checked), this issue doesn't occur. Our FMUs are
             // generated as standard FMUs by OpenModelica.
-            fmuInstance.Dispose();
-            model.Dispose();
+            // _logger.LogInformation("Dispose...");
+            // fmuInstance.Dispose();
+            // _logger.LogInformation("...done");
+            // model.Dispose();
         }
 
         private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs)
@@ -567,6 +588,7 @@ namespace Logic.Mapek
                         var valueHandler = _factory.GetValueHandlerImplementation(propertyCacheCopy.Properties[propertyName].OwlType);
                         var value = valueHandler.GetValueFromSimulationParameter(fmuInstance, fmuOutput.Value);
 
+                        _logger.LogInformation($"New value for {propertyName}: {value}");
                         propertyCacheCopy.Properties[propertyName].Value = value;
                     }
                 }

@@ -39,7 +39,7 @@ latest: Pulling from volkers/smartnode
 % docker run --platform linux/amd64 -v `pwd`/models-and-rules:/app/models volkers/smartnode /app/models/inferred-model-1.ttl
 ```
 
-### Running the Control Loop (SmartNode)
+## Running the Control Loop (SmartNode)
 The codebase is a .NET solution consisting of 4 projects: `Logic` (MAPE-K and models), `SensorActuatorImplementations` (for user-provided sensor/actuator implementations), `SmartNode` (startup project), and `TestProject` (unit tests). Users may choose between running the solution natively or containerized. The control loop takes a filepath representing the (inferred) instance model as an execution argument, so there are argument configurations for both kinds of executions.
 
 The Logic project provides interfaces in the `Logic.DeviceInterfaces` directory for users to implement when providing their own custom connections to sensors and actuators. It also provides the `IValueHandler` interface for user-provided implementations of logic handling various operations with specific OWL types. The solution contains the `DoubleValueHandler`, `IntValueHandler`, and `TimespanValueHandler` as example implementations in the `SensorActuatorImplementations` project. These are registered in the `Factory` in the `SmartNode` project, where the user is expected to register other custom implementations as well.

@@ -37,5 +37,5 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 COPY --from=build --chown=$APP_UID /src /src
 USER $APP_UID
-RUN cd /src/SensorActuatorImplementations/FMUs/Source && omc doit.mos && cp roomM370.fmu /app
+RUN cd /src/SensorActuatorImplementations/FMUs/Source && omc doit.mos && cp roomM370.fmu /app && mkdir /app/models
 ENTRYPOINT ["dotnet", "SmartNode.dll"]

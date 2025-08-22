@@ -9,7 +9,7 @@ If you are using multiple `.rules` files for inferencing, then you must make sur
 
 ## Docker-based example
 
-The Dockerfile builds and runs the example inside the container. Note that `arm64` is currently not supported by one of the libraries that we depend on.
+The Dockerfile builds and runs the example inside the container. Note that `arm64` (and hence e.g. Apple Silicon) is currently not supported by one of the libraries that we depend on; see below for a workaround.
 We use OpenModelica inside the container to compile the example FMU(s) into matching binaries.
 
 ```
@@ -20,4 +20,14 @@ We use OpenModelica inside the container to compile the example FMU(s) into matc
 info: Logic.Mapek.MapekManager[0]
       Starting the MAPE-K loop.
 ...
+```
+
+### Run the pre-built Dockerimage from Docker Hub via emulation:
+
+```
+% docker pull volkers/smartnode
+Using default tag: latest
+latest: Pulling from volkers/smartnode
+...
+% docker run --platform linux/amd64 -v `pwd`/models-and-rules:/app/models volkers/smartnode /app/models/inferred-model-1.ttl
 ```

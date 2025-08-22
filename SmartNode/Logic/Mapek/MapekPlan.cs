@@ -363,7 +363,7 @@ namespace Logic.Mapek
                 {
                     // Comment this back in for FMU testing. The Femyou library can seemingly not dispose of resources from FMUs other than Modelica reference ones.
                     // All other logic of writing inputs and reading outputs works.
-                    ExecuteActuationActionFmu(fmuFilePath, simulationConfiguration, instanceModel, propertyCacheCopy);
+                    //ExecuteActuationActionFmu(fmuFilePath, simulationConfiguration, instanceModel, propertyCacheCopy);
                 }
 
                 if (simulationConfiguration.PostTickActions.Any())
@@ -496,7 +496,6 @@ namespace Logic.Mapek
         private void ExecuteActuationActionFmu(string fmuFilePath, SimulationConfiguration simulationConfiguration, IGraph instanceModel, PropertyCache propertyCacheCopy)
         {
             var model = Model.Load(fmuFilePath);
-            //var model = Model.Load("../../../../SensorActuatorImplementations/FMUs/roomM370.fmu");
 
             // This instantiation fails frequently due to a "protected memory" exception(even when no other simulations have been run beforehand). Because it's thrown from
             // external code, the exception can't be caught for retries. This only works consistently with the Modelica reference FMUs.

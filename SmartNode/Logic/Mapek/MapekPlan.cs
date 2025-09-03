@@ -354,8 +354,12 @@ namespace Logic.Mapek
             // Retrieve the host platform FMU for ActuationAction simulations.
             var fmuFilePath = GetHostPlatformFmu(instanceModel, simulationConfigurations.First());
 
+            int i = 0;
             foreach (var simulationConfiguration in simulationConfigurations)
             {
+                i++;
+                _logger.LogInformation("Running simulation #{run}", i);
+
                 // Make a deep copy of the property cache for the current simulation configuration.
                 var propertyCacheCopy = GetPropertyCacheCopy(propertyCache);
 

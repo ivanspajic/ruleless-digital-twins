@@ -33,11 +33,10 @@ namespace Logic.Mapek
             _mapekExecute = new MapekExecute(serviceProvider);
         }
 
-        public void StartLoop(string instanceModelFilePath)
+        public void StartLoop(string instanceModelFilePath, int maxRound = -1)
         {
             _isLoopActive = true;
-
-            RunMapekLoop(instanceModelFilePath);
+            RunMapekLoop(instanceModelFilePath, maxRound);
         }
 
         public void StopLoop()
@@ -45,12 +44,15 @@ namespace Logic.Mapek
             _isLoopActive = false;
         }
 
-        private void RunMapekLoop(string instanceModelFilePath)
+        private void RunMapekLoop(string instanceModelFilePath, int maxRound = -1)
         {
-            _logger.LogInformation("Starting the MAPE-K loop.");
+            _logger.LogInformation("Starting the MAPE-K loop. (maxRounds= {maxRound})", maxRound);
 
             while (_isLoopActive)
             {
+                if (maxRound > -1) {
+                    _logger.LogInformation("MAPE-K rounds left: {maxRound})", maxRound);
+                }
                 // Load the instance model into a graph object. Doing this inside the loop allows for dynamic model updates at
                 // runtime.
                 var instanceModel = Initialize(instanceModelFilePath);
@@ -70,6 +72,16 @@ namespace Logic.Mapek
                 var optimalConfiguration = _mapekPlan.Plan(optimalConditionsAndActions.Item1, optimalConditionsAndActions.Item2, propertyCache, instanceModel, ActuationSimulationGranularity);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
                 _mapekExecute.Execute(optimalConfiguration, propertyCache);
+
+                if (maxRound > 0)
+                {
+                    maxRound--;
+                }
+                else if (maxRound == 0)
+                {
+                    _isLoopActive = false;
+                    break; // We can sleep when we're dead.
+                }
 
                 Thread.Sleep(SleepyTimeMilliseconds);
             }

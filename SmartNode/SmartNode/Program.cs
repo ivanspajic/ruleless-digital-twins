@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Logic.FactoryInterface;
+using System.CommandLine;
 using System.Reflection;
 
 namespace SmartNode
@@ -11,12 +12,39 @@ namespace SmartNode
     {
         static void Main(string[] args)
         {
+            // Command line parsind:
+            RootCommand rootCommand = new();
+            Argument<FileInfo> fileNameArg = new("file")
+            {
+                Description = "RDF instance model."
+            };
+            Option<int> maxRoundOption = new("--round", "-r")
+            {
+                Description = "Maximum number of rounds for MAPE-K loop.",
+                DefaultValueFactory = parseResult => 4,
+            };
+            rootCommand.Add(maxRoundOption);
+            rootCommand.Add(fileNameArg);
+            ParseResult parseResult = rootCommand.Parse(args);
+            String modelFile;
+            int maxRound;
+            if (parseResult.Errors.Count == 0 && parseResult.GetValue(fileNameArg) is FileInfo parsedFile)
+            {
+                modelFile = parsedFile.FullName;
+                maxRound = parseResult.GetValue(maxRoundOption);
+            }
+            else
+            {
+                throw new ArgumentException(parseResult.Errors[0].Message);
+            }
+
             var builder = Host.CreateApplicationBuilder(args);
 
             // Register services here.
             builder.Services.AddLogging(loggingBuilder =>
             {
-                loggingBuilder.AddConsole();
+                loggingBuilder.AddConsole(options =>
+                { options.TimestampFormat = "HH:mm:ss "; });
             });
             builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceprovider =>
             {
@@ -32,8 +60,6 @@ namespace SmartNode
             // Get an instance of the MAPE-K manager.
             var mapekManager = host.Services.GetRequiredService<IMapekManager>();
 
-            var modelFile = args[^1];
-
             // For native:
             // Get executing assembly path.
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -42,13 +68,10 @@ namespace SmartNode
             // Make it system-agnostic.
             modelFilePath = Path.GetFullPath(modelFile);
 
-            // For Docker:
-            //var modelFilePath = modelFile;
-
             // Start the loop.
             try
             {
-                mapekManager.StartLoop(modelFilePath);
+                mapekManager.StartLoop(modelFilePath, maxRound);
             }
             catch (Exception exception)
             {
@@ -57,7 +80,8 @@ namespace SmartNode
                 throw;
             }
 
-            host.Run();
+            // XXX review
+            // host.Run();
         }
     }
 }

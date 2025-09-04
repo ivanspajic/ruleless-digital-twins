@@ -5,6 +5,7 @@ using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Text;
 using VDS.RDF;
 
@@ -708,6 +709,13 @@ namespace Logic.Mapek
             var simulationConfigurationOptimizedPropertyCount = new Dictionary<SimulationConfiguration, int>(new SimulationConfigurationEqualityComparer());
             var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(instanceModel, propertyCache);
 
+            _logger.LogInformation("Ranking simulation results...");
+
+            // TODO: There seems to be a bit of combinatorial blowup-here,
+            //   with two nested loops over simulation configurations (`Where` and `All),
+            //   and an outer `foreach`.
+            // Rewrite into a stream of `f(SimulationConfiguration x propertyChanges)`,
+            //   and then use another pass to sort/pick best result.
             foreach (var propertyChangeToOptimizeFor in propertyChangesToOptimizeFor)
             {
                 var valueHandler = _factory.GetValueHandlerImplementation(propertyChangeToOptimizeFor.Property.OwlType);
@@ -718,7 +726,7 @@ namespace Logic.Mapek
 
                     return simulationConfigurations.All(innerSimulationConfiguration =>
                     {
-                        var targetProperty = GetPropertyFromPropertyCacheByName(innerSimulationConfiguration.ResultingPropertyCache, propertyChangeToOptimizeFor.Property.Name);                                                
+                        var targetProperty = GetPropertyFromPropertyCacheByName(innerSimulationConfiguration.ResultingPropertyCache, propertyChangeToOptimizeFor.Property.Name);
 
                         if (propertyChangeToOptimizeFor.OptimizeFor == Effect.ValueIncrease)
                         {
@@ -733,11 +741,7 @@ namespace Logic.Mapek
 
                 foreach (var simulationConfigurationWithOptimizedProperty in simulationConfigurationsWithOptimizedProperty)
                 {
-                    if (!simulationConfigurationOptimizedPropertyCount.ContainsKey(simulationConfigurationWithOptimizedProperty))
-                    {
-                        simulationConfigurationOptimizedPropertyCount.Add(simulationConfigurationWithOptimizedProperty, 0);
-                    }
-
+                    simulationConfigurationOptimizedPropertyCount.TryAdd(simulationConfigurationWithOptimizedProperty, 0);
                     simulationConfigurationOptimizedPropertyCount[simulationConfigurationWithOptimizedProperty]++;
                 }
             }
@@ -783,19 +787,10 @@ namespace Logic.Mapek
 
                 var propertyFound = propertyCache.Properties.TryGetValue(propertyName, out property!);
 
-                // Check where in the property cache the Property is.
+                // Check where in the property cache the Property is. Shouldn't really fail.
                 if (!propertyFound)
                 {
-                    var configurableParameterFound = propertyCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? configurableParameter);
-
-                    if (!configurableParameterFound)
-                    {
-                        throw new Exception($"Property {property} was not found in the Property cache.");
-                    }
-                    else
-                    {
-                        property = configurableParameter!;
-                    }
+                    property = propertyCache.ConfigurableParameters[propertyName];
                 }
 
                 if (!Enum.TryParse(effectName, out Effect effect))
@@ -803,6 +798,8 @@ namespace Logic.Mapek
                     throw new Exception($"Enum value {effectName} is not supported.");
                 }
 
+                // TODO: Review, fishy constructing PropertyChange with `null`, should probably be non-nullable?
+                Debug.Assert(property != null, $"Didn't find {propertyName}.");
                 var propertyChange = new PropertyChange
                 {
                     Name = propertyChangeName,
@@ -818,31 +815,29 @@ namespace Logic.Mapek
 
         private void LogOptimalSimulationConfiguration(SimulationConfiguration optimalSimulationConfiguration)
         {
-            _logger.LogInformation("The chosen optimal configuration is:");
-
-            _logger.LogInformation("Actuation actions:");
+            var logMsg = "Chosen optimal configuration, Actuation actions:\n";
 
             // Convert to a list to use indexing.
             var simulationTickList = optimalSimulationConfiguration.SimulationTicks.ToList();
 
             for (var i = 0; i < simulationTickList.Count; i++)
             {
-                _logger.LogInformation("Interval {index}:", i + 1);
+                logMsg += $"Interval {i + 1}:\n";
 
                 foreach (var action in simulationTickList[i].ActionsToExecute)
                 {
-                    _logger.LogInformation("Actuator: {actuator}", action.Actuator.Name);
-                    _logger.LogInformation("Actuator state: {actuatorState}", action.NewStateValue.ToString());
+                    logMsg += $"Actuator: {action.Actuator.Name}, Actuator state: {action.NewStateValue.ToString()}\n";
                 }
             }
 
-            _logger.LogInformation("Post-tick actions:");
+            logMsg += "Post-tick actions:\n";
 
             foreach (var postTickAction in optimalSimulationConfiguration.PostTickActions)
             {
-                _logger.LogInformation("Configurable parameter: {configurableParameter}", postTickAction.ConfigurableParameter.Name);
-                _logger.LogInformation("New Value: {value}", postTickAction.NewParameterValue.ToString());
+                logMsg += $"Configurable parameter: {postTickAction.ConfigurableParameter.Name}; ";
+                logMsg += $"New Value: {postTickAction.NewParameterValue.ToString()}\n";
             }
+            _logger.LogInformation(logMsg);
         }
     }
 }

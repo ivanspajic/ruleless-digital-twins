@@ -88,12 +88,14 @@ namespace Logic.Mapek
 
         public static SparqlResultSet ExecuteQuery<T>(this IGraph instanceModel, SparqlParameterizedString query, ILogger<T> logger)
         {
-            logger.LogInformation("Executing query: {query}", query.CommandText);
 
             var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
+            logger.LogInformation("Executed query: {query} ({numResults})", query.CommandText, queryResult.Results.Count);
 
-            var resultString = string.Join("\n", queryResult.Results.Select(r => r.ToString()));
-            logger.LogInformation("Query result: {resultString}", resultString);
+            if (!queryResult.IsEmpty) {
+                var resultString = string.Join("\n", queryResult.Results.Select(r => r.ToString()));
+                logger.LogInformation("Query result: {resultString}", resultString);
+            }
 
             return queryResult;
         }

@@ -77,7 +77,7 @@ namespace Logic.Mapek
                 {
                     maxRound--;
                 }
-                else if (maxRound == 0)
+                if (maxRound == 0)
                 {
                     _isLoopActive = false;
                     break; // We can sleep when we're dead.

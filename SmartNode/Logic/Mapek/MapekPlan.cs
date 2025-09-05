@@ -694,41 +694,20 @@ namespace Logic.Mapek
             //   and an outer `foreach`.
             // Rewrite into a stream of `f(SimulationConfiguration x propertyChanges)`,
             //   and then use another pass to sort/pick best result.
-            foreach (var propertyChangeToOptimizeFor in propertyChangesToOptimizeFor)
-            {
-                var valueHandler = _factory.GetValueHandlerImplementation(propertyChangeToOptimizeFor.Property.OwlType);
 
-                var simulationConfigurationsWithOptimizedProperty = simulationConfigurations.Where(simulationConfiguration =>
-                {
-                    var comparingProperty = GetPropertyFromPropertyCacheByName(simulationConfiguration.ResultingPropertyCache, propertyChangeToOptimizeFor.Property.Name);
-
-                    return simulationConfigurations.All(innerSimulationConfiguration =>
-                    {
-                        var targetProperty = GetPropertyFromPropertyCacheByName(innerSimulationConfiguration.ResultingPropertyCache, propertyChangeToOptimizeFor.Property.Name);
-
-                        if (propertyChangeToOptimizeFor.OptimizeFor == Effect.ValueIncrease)
-                        {
+            IEnumerable<int> simTuple = simulationConfigurations.Select(sc => propertyChangesToOptimizeFor.Select(p => {
+                var comparingProperty = GetPropertyFromPropertyCacheByName(sc.ResultingPropertyCache, p.Property.Name);
+                var targetProperty = GetPropertyFromPropertyCacheByName(sc.ResultingPropertyCache, p.Property.Name);
+                        var valueHandler = _factory.GetValueHandlerImplementation(p.Property.OwlType);
+                        if (p.OptimizeFor == Effect.ValueIncrease) {
                             return valueHandler.IsGreaterThanOrEqualTo(comparingProperty.Value, targetProperty.Value);
-                        }
-                        else
-                        {
+                        } else {
                             return valueHandler.IsLessThanOrEqualTo(comparingProperty.Value, targetProperty.Value);
                         }
-                    });
-                });
-
-                foreach (var simulationConfigurationWithOptimizedProperty in simulationConfigurationsWithOptimizedProperty)
-                {
-                    simulationConfigurationOptimizedPropertyCount.TryAdd(simulationConfigurationWithOptimizedProperty, 0);
-                    simulationConfigurationOptimizedPropertyCount[simulationConfigurationWithOptimizedProperty]++;
-                }
-            }
-
-            var maximumOptimizedProperties = simulationConfigurationOptimizedPropertyCount.Max(keyValuePair => keyValuePair.Value);
-            var simulationConfigurationsWithThatManyOptimizedProperties = simulationConfigurationOptimizedPropertyCount.Where(keyValuePair => keyValuePair.Value == maximumOptimizedProperties)
-                .Select(keyValuePair => keyValuePair.Key);
-
-            return simulationConfigurationsWithThatManyOptimizedProperties;
+            }).Sum(s => s ? 1 : 0));
+            // TODO: fuse into the above.
+            var zipped = simulationConfigurations.Zip(simTuple).OrderBy(kv => kv.Item2);
+            return zipped.Select(kv => kv.Item1);
         }
 
         private Property GetPropertyFromPropertyCacheByName(PropertyCache propertyCache, string propertyName)

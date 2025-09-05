@@ -139,5 +139,10 @@ namespace SensorActuatorImplementations.ValueHandlers
 
             return possibleValues;
         }
+
+        public int IncreaseComp(object comparingValue, object targetValue)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

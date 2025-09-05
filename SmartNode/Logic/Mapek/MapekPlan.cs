@@ -3,6 +3,7 @@ using Logic.FactoryInterface;
 using Logic.Mapek.EqualityComparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
+using Logic.ValueHandlerInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
@@ -680,12 +681,39 @@ namespace Logic.Mapek
             return passingSimulationConfigurations;
         }
 
+        class ConfigComparer : IComparer<SimulationConfiguration>
+        {
+            public ConfigComparer(MapekPlan mapekPlan, IEnumerable<(PropertyChange First, IValueHandler Second)> enumerable)
+            {
+                That = mapekPlan;
+                Enumerable = enumerable;
+            }
+
+            public MapekPlan That { get; }
+            public IEnumerable<(PropertyChange First, IValueHandler Second)> Enumerable { get; }
+
+            public int Compare(SimulationConfiguration? x, SimulationConfiguration? y)
+            {
+                var scores = Enumerable.Select(ep => {
+                    var p = ep.Item1;
+                    var valueHandler = ep.Item2;
+                    var comparingProperty = That.GetPropertyFromPropertyCacheByName(x.ResultingPropertyCache, p.Property.Name);
+                    var targetProperty = That.GetPropertyFromPropertyCacheByName(y.ResultingPropertyCache, p.Property.Name);
+                    if (p.OptimizeFor == Effect.ValueIncrease) {
+                         return valueHandler.IncreaseComp(comparingProperty.Value, targetProperty.Value);
+                    } else {
+                        return -1 * valueHandler.IncreaseComp(comparingProperty.Value, targetProperty.Value);
+                    }
+                }).Sum(s => s);
+                return scores;
+            }
+        }
         private IEnumerable<SimulationConfiguration> GetSimulationConfigurationsWithMostOptimizedProperties(IEnumerable<SimulationConfiguration> simulationConfigurations,
             IGraph instanceModel,
             PropertyCache propertyCache)
         {
-            var simulationConfigurationOptimizedPropertyCount = new Dictionary<SimulationConfiguration, int>(new SimulationConfigurationEqualityComparer());
             var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(instanceModel, propertyCache);
+            var valueHandlers = propertyChangesToOptimizeFor.Select(p => _factory.GetValueHandlerImplementation(p.Property.OwlType));
 
             _logger.LogInformation("Ranking simulation results...");
 
@@ -694,20 +722,9 @@ namespace Logic.Mapek
             //   and an outer `foreach`.
             // Rewrite into a stream of `f(SimulationConfiguration x propertyChanges)`,
             //   and then use another pass to sort/pick best result.
-
-            IEnumerable<int> simTuple = simulationConfigurations.Select(sc => propertyChangesToOptimizeFor.Select(p => {
-                var comparingProperty = GetPropertyFromPropertyCacheByName(sc.ResultingPropertyCache, p.Property.Name);
-                var targetProperty = GetPropertyFromPropertyCacheByName(sc.ResultingPropertyCache, p.Property.Name);
-                        var valueHandler = _factory.GetValueHandlerImplementation(p.Property.OwlType);
-                        if (p.OptimizeFor == Effect.ValueIncrease) {
-                            return valueHandler.IsGreaterThanOrEqualTo(comparingProperty.Value, targetProperty.Value);
-                        } else {
-                            return valueHandler.IsLessThanOrEqualTo(comparingProperty.Value, targetProperty.Value);
-                        }
-            }).Sum(s => s ? 1 : 0));
-            // TODO: fuse into the above.
-            var zipped = simulationConfigurations.Zip(simTuple).OrderByDescending(kv => kv.Item2);
-            return zipped.Select(kv => kv.Item1);
+            
+            var comp = new ConfigComparer(this, propertyChangesToOptimizeFor.Zip(valueHandlers));
+            return simulationConfigurations.OrderByDescending(s => s, comp);
         }
 
         private Property GetPropertyFromPropertyCacheByName(PropertyCache propertyCache, string propertyName)

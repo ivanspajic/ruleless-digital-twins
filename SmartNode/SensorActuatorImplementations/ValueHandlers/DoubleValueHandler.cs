@@ -143,6 +143,25 @@ namespace SensorActuatorImplementations.ValueHandlers
             }
         }
 
+        public int IncreaseComp(object comparingValue, object targetValue)
+        {
+            if (comparingValue is not double)
+            {
+                comparingValue = double.Parse(comparingValue.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            if (targetValue is not double)
+            {
+                targetValue = double.Parse(targetValue.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            if ((double)comparingValue > (double)targetValue)
+                { return 1; }
+            else if ((double)comparingValue < (double)targetValue) { return -1;}
+            else { return 0;};
+
+        }
+
         public bool IsGreaterThanOrEqualTo(object comparingValue, object targetValue)
         {
             if (comparingValue is not double)

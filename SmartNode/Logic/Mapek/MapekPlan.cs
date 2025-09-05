@@ -706,7 +706,7 @@ namespace Logic.Mapek
                         }
             }).Sum(s => s ? 1 : 0));
             // TODO: fuse into the above.
-            var zipped = simulationConfigurations.Zip(simTuple).OrderBy(kv => kv.Item2);
+            var zipped = simulationConfigurations.Zip(simTuple).OrderByDescending(kv => kv.Item2);
             return zipped.Select(kv => kv.Item1);
         }
 

@@ -170,7 +170,7 @@ namespace TestProject
             {
                 new ActuationAction
                 {
-                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnithttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction",
+                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnithttp://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction",
                     Actuator = new Actuator
                     {
                         Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit"
@@ -179,7 +179,7 @@ namespace TestProject
                 },
                 new ActuationAction
                 {
-                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnithttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction",
+                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnithttp://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction",
                     Actuator = new Actuator
                     {
                         Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit"
@@ -188,7 +188,7 @@ namespace TestProject
                 },
                 new ActuationAction
                 {
-                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnithttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction",
+                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnithttp://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction",
                     Actuator = new Actuator
                     {
                         Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit"
@@ -197,7 +197,7 @@ namespace TestProject
                 },
                 new ActuationAction
                 {
-                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifierhttp://www.semanticweb.org/ivans/ontologies/2025/dt-code-generation/ActuationAction",
+                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifierhttp://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction",
                     Actuator = new Actuator
                     {
                         Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
@@ -206,6 +206,9 @@ namespace TestProject
                 },
             };
             var expectedOptimalConditionActionTuple = new Tuple<IEnumerable<OptimalCondition>, IEnumerable<Logic.Models.OntologicalModels.Action>>(expectedOptimalConditions, expectedActions);
+
+            var optimalConditionEqualityComparer = new OptimalConditionEqualityComparer();
+            var actionEqualityComparer = new ActionEqualityComparer();
 
             // Act
             var actualOptimalConditionActionTuple = mapekAnalyze.Analyze(instanceModel, propertyCacheMock, simulationGranularity);
@@ -218,13 +221,13 @@ namespace TestProject
             // Check that the OptimalConditions are equal to those expected.
             foreach (var optimalCondition in expectedOptimalConditionActionTuple.Item1)
             {
-                Assert.Contains(optimalCondition, actualOptimalConditionActionTuple.Item1, new OptimalConditionEqualityComparer());
+                Assert.Contains(optimalCondition, actualOptimalConditionActionTuple.Item1, optimalConditionEqualityComparer);
             }
 
             // Check that the Actions are equal to those expected.
             foreach (var action in expectedOptimalConditionActionTuple.Item2)
             {
-                Assert.Contains(action, actualOptimalConditionActionTuple.Item2, new ActionEqualityComparer());
+                Assert.Contains(action, actualOptimalConditionActionTuple.Item2, actionEqualityComparer);
             }
         }
     }

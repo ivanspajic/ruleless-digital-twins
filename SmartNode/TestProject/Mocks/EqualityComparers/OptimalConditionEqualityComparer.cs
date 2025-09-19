@@ -9,7 +9,7 @@ namespace TestProject.Mocks.EqualityComparers
 
         public bool Equals(OptimalCondition? x, OptimalCondition? y)
         {
-            if (x.ConstraintValueType.Equals(y.ConstraintValueType) &&
+            if (x!.ConstraintValueType.Equals(y!.ConstraintValueType) &&
                 x.ReachedInMaximumSeconds == y.ReachedInMaximumSeconds &&
                 x.Name.Equals(y.Name) &&
                 x.Property.Equals(y.Property))

@@ -84,8 +84,15 @@ namespace SmartNode
                 {
                     ActuatorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit"
                 }
+            },
+            {
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier", new ExampleActuator()
+                {
+                    ActuatorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                }
             }
         };
+
 
         // The keys represent the OWL (RDF/XSD) types supported by Protege, and the values are user implementations.
         private readonly Dictionary<string, IValueHandler> _valueHandlers = new()

@@ -649,7 +649,6 @@ namespace Logic.Mapek
             _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationConfigurationsWithMostOptimizedProperties.Count());
 
             // At this point, arbitrarily return the first one regardless of the number of simulation configurations remaining.
-            return simulationConfigurationsWithMostOptimizedProperties.ToList()[1];
             return simulationConfigurationsWithMostOptimizedProperties.First();
         }
 

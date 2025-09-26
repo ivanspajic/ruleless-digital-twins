@@ -23,7 +23,7 @@ We use OpenModelica inside the container to compile the example FMU(s) into matc
 % docker build -t smartnode -f SmartNode/SmartNode/Dockerfile SmartNode
 ...
 => => unpacking to docker.io/library/smartnode:latest
-% docker run -v `pwd`/models-and-rules:/app/models smartnode /app/models/inferred-model-1.ttl
+% docker run --rm -v `pwd`/models-and-rules:/app/models smartnode /app/models/inferred-model-1.ttl
 info: Logic.Mapek.MapekManager[0]
       Starting the MAPE-K loop.
 ...
@@ -36,7 +36,7 @@ info: Logic.Mapek.MapekManager[0]
 Using default tag: latest
 latest: Pulling from volkers/smartnode
 ...
-% docker run --platform linux/amd64 -v `pwd`/models-and-rules:/app/models volkers/smartnode /app/models/inferred-model-1.ttl
+% docker run --rm --platform linux/amd64 -v `pwd`/models-and-rules:/app/models volkers/smartnode /app/models/inferred-model-1.ttl
 ```
 
 ## Running the Control Loop (SmartNode)

@@ -1,0 +1,24 @@
+{
+// See https://go.microsoft.com/fwlink/?LinkId=733558
+// for the documentation about the tasks.json format
+"version": "2.0.0",
+"tasks": [
+    {
+        "label": "Run OMC",
+        "type": "shell",
+        "command": "cd SmartNode/SensorActuatorImplementations/FMUs/Source && omc doit.mos && cp roomM370.fmu ..",
+        "problemMatcher": [],
+        "group": "build"
+    },
+    {
+        "type": "dotnet",
+        "task": "build",
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        },
+        "problemMatcher": [],
+        "label": "dotnet: build"
+    }
+]
+}

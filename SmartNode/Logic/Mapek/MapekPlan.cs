@@ -3,6 +3,7 @@ using Logic.FactoryInterface;
 using Logic.Mapek.EqualityComparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
+using Logic.ValueHandlerInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
@@ -703,12 +704,39 @@ namespace Logic.Mapek
             return passingSimulationConfigurations;
         }
 
+        class ConfigComparer : IComparer<SimulationConfiguration>
+        {
+            public ConfigComparer(MapekPlan mapekPlan, IEnumerable<(PropertyChange First, IValueHandler Second)> enumerable)
+            {
+                That = mapekPlan;
+                Enumerable = enumerable;
+            }
+
+            public MapekPlan That { get; }
+            public IEnumerable<(PropertyChange First, IValueHandler Second)> Enumerable { get; }
+
+            public int Compare(SimulationConfiguration? x, SimulationConfiguration? y)
+            {
+                var scores = Enumerable.Select(ep => {
+                    var p = ep.Item1;
+                    var valueHandler = ep.Item2;
+                    var comparingProperty = That.GetPropertyFromPropertyCacheByName(x.ResultingPropertyCache, p.Property.Name);
+                    var targetProperty = That.GetPropertyFromPropertyCacheByName(y.ResultingPropertyCache, p.Property.Name);
+                    if (p.OptimizeFor == Effect.ValueIncrease) {
+                         return valueHandler.IncreaseComp(comparingProperty.Value, targetProperty.Value);
+                    } else {
+                        return -1 * valueHandler.IncreaseComp(comparingProperty.Value, targetProperty.Value);
+                    }
+                }).Sum(s => s);
+                return scores;
+            }
+        }
         private IEnumerable<SimulationConfiguration> GetSimulationConfigurationsWithMostOptimizedProperties(IEnumerable<SimulationConfiguration> simulationConfigurations,
             IGraph instanceModel,
             PropertyCache propertyCache)
         {
-            var simulationConfigurationOptimizedPropertyCount = new Dictionary<SimulationConfiguration, int>(new SimulationConfigurationEqualityComparer());
             var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(instanceModel, propertyCache);
+            var valueHandlers = propertyChangesToOptimizeFor.Select(p => _factory.GetValueHandlerImplementation(p.Property.OwlType));
 
             _logger.LogInformation("Ranking simulation results...");
 
@@ -717,41 +745,9 @@ namespace Logic.Mapek
             //   and an outer `foreach`.
             // Rewrite into a stream of `f(SimulationConfiguration x propertyChanges)`,
             //   and then use another pass to sort/pick best result.
-            foreach (var propertyChangeToOptimizeFor in propertyChangesToOptimizeFor)
-            {
-                var valueHandler = _factory.GetValueHandlerImplementation(propertyChangeToOptimizeFor.Property.OwlType);
-
-                var simulationConfigurationsWithOptimizedProperty = simulationConfigurations.Where(simulationConfiguration =>
-                {
-                    var comparingProperty = GetPropertyFromPropertyCacheByName(simulationConfiguration.ResultingPropertyCache, propertyChangeToOptimizeFor.Property.Name);
-
-                    return simulationConfigurations.All(innerSimulationConfiguration =>
-                    {
-                        var targetProperty = GetPropertyFromPropertyCacheByName(innerSimulationConfiguration.ResultingPropertyCache, propertyChangeToOptimizeFor.Property.Name);
-
-                        if (propertyChangeToOptimizeFor.OptimizeFor == Effect.ValueIncrease)
-                        {
-                            return valueHandler.IsGreaterThanOrEqualTo(comparingProperty.Value, targetProperty.Value);
-                        }
-                        else
-                        {
-                            return valueHandler.IsLessThanOrEqualTo(comparingProperty.Value, targetProperty.Value);
-                        }
-                    });
-                });
-
-                foreach (var simulationConfigurationWithOptimizedProperty in simulationConfigurationsWithOptimizedProperty)
-                {
-                    simulationConfigurationOptimizedPropertyCount.TryAdd(simulationConfigurationWithOptimizedProperty, 0);
-                    simulationConfigurationOptimizedPropertyCount[simulationConfigurationWithOptimizedProperty]++;
-                }
-            }
-
-            var maximumOptimizedProperties = simulationConfigurationOptimizedPropertyCount.Max(keyValuePair => keyValuePair.Value);
-            var simulationConfigurationsWithThatManyOptimizedProperties = simulationConfigurationOptimizedPropertyCount.Where(keyValuePair => keyValuePair.Value == maximumOptimizedProperties)
-                .Select(keyValuePair => keyValuePair.Key);
-
-            return simulationConfigurationsWithThatManyOptimizedProperties;
+            
+            var comp = new ConfigComparer(this, propertyChangesToOptimizeFor.Zip(valueHandlers));
+            return simulationConfigurations.OrderByDescending(s => s, comp);
         }
 
         private Property GetPropertyFromPropertyCacheByName(PropertyCache propertyCache, string propertyName)

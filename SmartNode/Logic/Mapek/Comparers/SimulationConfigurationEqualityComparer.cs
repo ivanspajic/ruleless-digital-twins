@@ -1,7 +1,7 @@
 ﻿using Logic.Models.MapekModels;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Logic.Mapek.EqualityComparers
+namespace Logic.Mapek.Comparers
 {
     internal class SimulationConfigurationEqualityComparer : IEqualityComparer<SimulationConfiguration>
     {

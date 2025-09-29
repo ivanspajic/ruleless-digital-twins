@@ -1,7 +1,7 @@
 ﻿using Logic.Models.OntologicalModels;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Logic.Mapek.EqualityComparers
+namespace Logic.Mapek.Comparers
 {
     internal class ActionEqualityComparer : IEqualityComparer<Models.OntologicalModels.Action>
     {

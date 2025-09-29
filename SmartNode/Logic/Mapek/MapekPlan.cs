@@ -1,7 +1,6 @@
 ﻿using Femyou;
 using Logic.FactoryInterface;
 using Logic.Mapek.Comparers;
-using Logic.Mapek.EqualityComparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;

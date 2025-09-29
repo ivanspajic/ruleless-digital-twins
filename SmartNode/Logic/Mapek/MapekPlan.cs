@@ -1,12 +1,14 @@
 ﻿using Femyou;
 using Logic.FactoryInterface;
-using Logic.Mapek.EqualityComparers;
+using Logic.Mapek.Comparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
+using Logic.ValueHandlerInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Text;
+using VDS.Common.Collections.Enumerations;
 using VDS.RDF;
 
 namespace Logic.Mapek
@@ -30,6 +32,7 @@ namespace Logic.Mapek
             IEnumerable<Models.OntologicalModels.Action> actions,
             PropertyCache propertyCache,
             IGraph instanceModel,
+            string fmuDirectory,
             int actuationSimulationGranularity)
         {
             _logger.LogInformation("Starting the Plan phase.");
@@ -66,7 +69,7 @@ namespace Logic.Mapek
             _logger.LogInformation("Generated a total of {total} simulation configurations.", simulationConfigurations.Count());
 
             // Execute the simulations and obtain their results.
-            Simulate(simulationConfigurations, instanceModel, propertyCache);
+            Simulate(simulationConfigurations, instanceModel, propertyCache, fmuDirectory);
 
             // Find the optimal simulation configuration.
             var optimalConfiguration = GetOptimalConfiguration(instanceModel, propertyCache, optimalConditions, simulationConfigurations);
@@ -354,16 +357,15 @@ namespace Logic.Mapek
             return combinations;
         }
 
-        private void Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations, IGraph instanceModel, PropertyCache propertyCache)
+        private void Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations, IGraph instanceModel, PropertyCache propertyCache, string fmuDirectory)
         {
             // Retrieve the host platform FMU for ActuationAction simulations.
-            var fmuFilePath = GetHostPlatformFmu(instanceModel, simulationConfigurations.First());
+            var fmuFilePath = GetHostPlatformFmu(instanceModel, simulationConfigurations.First(), fmuDirectory);
 
             int i = 0;
             foreach (var simulationConfiguration in simulationConfigurations)
             {
-                i++;
-                _logger.LogInformation("Running simulation #{run}", i);
+                _logger.LogInformation("Running simulation #{run}", i++);
 
                 // Make a deep copy of the property cache for the current simulation configuration.
                 var propertyCacheCopy = GetPropertyCacheCopy(propertyCache);
@@ -385,7 +387,7 @@ namespace Logic.Mapek
             }
         }
 
-        private string GetHostPlatformFmu(IGraph instanceModel, SimulationConfiguration simulationConfiguration)
+        private string GetHostPlatformFmu(IGraph instanceModel, SimulationConfiguration simulationConfiguration, string fmuDirectory)
         {
             if (!simulationConfiguration.SimulationTicks.Any())
             {
@@ -424,7 +426,9 @@ namespace Logic.Mapek
 
             // There can theoretically be multiple Platforms hosting the same Actuator, but we limit ourselves to expect a single Platform
             // per instance model. There should therefore be only one result.
-            return queryResult.Results[0]["fmuFilePath"].ToString().Split('^')[0];
+            var fmu = queryResult.Results[0]["fmuFilePath"].ToString().Split('^')[0];
+
+            return Path.Combine(fmuDirectory, fmu);
         }
 
         private PropertyCache GetPropertyCacheCopy(PropertyCache originalPropertyCache)
@@ -705,61 +709,16 @@ namespace Logic.Mapek
             IGraph instanceModel,
             PropertyCache propertyCache)
         {
-            var simulationConfigurationOptimizedPropertyCount = new Dictionary<SimulationConfiguration, int>(new SimulationConfigurationEqualityComparer());
             var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(instanceModel, propertyCache);
+            var valueHandlers = propertyChangesToOptimizeFor.Select(p => _factory.GetValueHandlerImplementation(p.Property.OwlType));
 
-            _logger.LogInformation("Ranking simulation results...");
+            _logger.LogInformation("Ordering and filtering simulation results...");
+            
+            var simulationConfigurationComparer = new SimulationConfigurationComparer(propertyChangesToOptimizeFor.Zip(valueHandlers));
 
-            // TODO: There seems to be a bit of combinatorial blowup-here,
-            //   with two nested loops over simulation configurations (`Where` and `All),
-            //   and an outer `foreach`.
-            // Rewrite into a stream of `f(SimulationConfiguration x propertyChanges)`,
-            //   and then use another pass to sort/pick best result.
-            foreach (var propertyChangeToOptimizeFor in propertyChangesToOptimizeFor)
-            {
-                var valueHandler = _factory.GetValueHandlerImplementation(propertyChangeToOptimizeFor.Property.OwlType);
-
-                var simulationConfigurationsWithOptimizedProperty = simulationConfigurations.Where(simulationConfiguration =>
-                {
-                    var comparingProperty = GetPropertyFromPropertyCacheByName(simulationConfiguration.ResultingPropertyCache, propertyChangeToOptimizeFor.Property.Name);
-
-                    return simulationConfigurations.All(innerSimulationConfiguration =>
-                    {
-                        var targetProperty = GetPropertyFromPropertyCacheByName(innerSimulationConfiguration.ResultingPropertyCache, propertyChangeToOptimizeFor.Property.Name);
-
-                        if (propertyChangeToOptimizeFor.OptimizeFor == Effect.ValueIncrease)
-                        {
-                            return valueHandler.IsGreaterThanOrEqualTo(comparingProperty.Value, targetProperty.Value);
-                        }
-                        else
-                        {
-                            return valueHandler.IsLessThanOrEqualTo(comparingProperty.Value, targetProperty.Value);
-                        }
-                    });
-                });
-
-                foreach (var simulationConfigurationWithOptimizedProperty in simulationConfigurationsWithOptimizedProperty)
-                {
-                    simulationConfigurationOptimizedPropertyCount.TryAdd(simulationConfigurationWithOptimizedProperty, 0);
-                    simulationConfigurationOptimizedPropertyCount[simulationConfigurationWithOptimizedProperty]++;
-                }
-            }
-
-            var maximumOptimizedProperties = simulationConfigurationOptimizedPropertyCount.Max(keyValuePair => keyValuePair.Value);
-            var simulationConfigurationsWithThatManyOptimizedProperties = simulationConfigurationOptimizedPropertyCount.Where(keyValuePair => keyValuePair.Value == maximumOptimizedProperties)
-                .Select(keyValuePair => keyValuePair.Key);
-
-            return simulationConfigurationsWithThatManyOptimizedProperties;
-        }
-
-        private Property GetPropertyFromPropertyCacheByName(PropertyCache propertyCache, string propertyName)
-        {
-            if (!propertyCache.Properties.TryGetValue(propertyName, out Property? property))
-            {
-                property = propertyCache.ConfigurableParameters[propertyName];
-            }
-
-            return property;
+            // Return the simulation configurations with the maximum score.
+            return simulationConfigurations.OrderByDescending(s => s, simulationConfigurationComparer)
+                .Where(s => simulationConfigurationComparer.Compare(s, simulationConfigurations.First()) > -1);
         }
 
         private IEnumerable<PropertyChange> GetPropertyChangesToOptimizeFor(IGraph instanceModel, PropertyCache propertyCache)

@@ -33,10 +33,10 @@ namespace Logic.Mapek
             _mapekExecute = new MapekExecute(serviceProvider);
         }
 
-        public void StartLoop(string instanceModelFilePath, int maxRound = -1)
+        public void StartLoop(string instanceModelFilePath, string fmuDirectory, int maxRound = -1)
         {
             _isLoopActive = true;
-            RunMapekLoop(instanceModelFilePath, maxRound);
+            RunMapekLoop(instanceModelFilePath, fmuDirectory, maxRound);
         }
 
         public void StopLoop()
@@ -44,7 +44,7 @@ namespace Logic.Mapek
             _isLoopActive = false;
         }
 
-        private void RunMapekLoop(string instanceModelFilePath, int maxRound = -1)
+        private void RunMapekLoop(string instanceModelFilePath, string fmuDirectory, int maxRound = -1)
         {
             _logger.LogInformation("Starting the MAPE-K loop. (maxRounds= {maxRound})", maxRound);
 
@@ -69,7 +69,7 @@ namespace Logic.Mapek
                 // them with all OptimalConditions.
                 var optimalConditionsAndActions = _mapekAnalyze.Analyze(instanceModel, propertyCache, ConfigurableParameterGranularity);
                 // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
-                var optimalConfiguration = _mapekPlan.Plan(optimalConditionsAndActions.Item1, optimalConditionsAndActions.Item2, propertyCache, instanceModel, ActuationSimulationGranularity);
+                var optimalConfiguration = _mapekPlan.Plan(optimalConditionsAndActions.Item1, optimalConditionsAndActions.Item2, propertyCache, instanceModel, fmuDirectory, ActuationSimulationGranularity);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
                 _mapekExecute.Execute(optimalConfiguration, propertyCache);
 

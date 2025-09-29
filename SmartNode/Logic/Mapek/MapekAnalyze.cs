@@ -1,5 +1,5 @@
 ﻿using Logic.FactoryInterface;
-using Logic.Mapek.EqualityComparers;
+using Logic.Mapek.Comparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.DependencyInjection;

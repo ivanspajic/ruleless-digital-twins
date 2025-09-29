@@ -10,6 +10,7 @@ namespace Logic.Mapek
             IEnumerable<Models.OntologicalModels.Action> actions,
             PropertyCache propertyCache,
             IGraph instanceModel,
+            string fmuDirectory,
             int actuationSimulationGranularity);
     }
 }

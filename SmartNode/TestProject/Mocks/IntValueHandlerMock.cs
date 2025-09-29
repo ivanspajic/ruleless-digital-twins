@@ -60,6 +60,11 @@ namespace TestProject.Mocks
             throw new NotImplementedException();
         }
 
+        public int IncreaseComp(object comparingValue, object targetValue)
+        {
+            throw new NotImplementedException();
+        }
+
         public bool IsGreaterThanOrEqualTo(object comparingValue, object targetValue)
         {
             throw new NotImplementedException();

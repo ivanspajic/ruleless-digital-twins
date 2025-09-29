@@ -1,5 +1,6 @@
 ﻿using Femyou;
 using Logic.FactoryInterface;
+using Logic.Mapek.Comparers;
 using Logic.Mapek.EqualityComparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Text;
+using VDS.Common.Collections.Enumerations;
 using VDS.RDF;
 
 namespace Logic.Mapek
@@ -704,33 +706,6 @@ namespace Logic.Mapek
             return passingSimulationConfigurations;
         }
 
-        class ConfigComparer : IComparer<SimulationConfiguration>
-        {
-            public ConfigComparer(MapekPlan mapekPlan, IEnumerable<(PropertyChange First, IValueHandler Second)> enumerable)
-            {
-                That = mapekPlan;
-                Enumerable = enumerable;
-            }
-
-            public MapekPlan That { get; }
-            public IEnumerable<(PropertyChange First, IValueHandler Second)> Enumerable { get; }
-
-            public int Compare(SimulationConfiguration? x, SimulationConfiguration? y)
-            {
-                var scores = Enumerable.Select(ep => {
-                    var p = ep.Item1;
-                    var valueHandler = ep.Item2;
-                    var comparingProperty = That.GetPropertyFromPropertyCacheByName(x.ResultingPropertyCache, p.Property.Name);
-                    var targetProperty = That.GetPropertyFromPropertyCacheByName(y.ResultingPropertyCache, p.Property.Name);
-                    if (p.OptimizeFor == Effect.ValueIncrease) {
-                         return valueHandler.IncreaseComp(comparingProperty.Value, targetProperty.Value);
-                    } else {
-                        return -1 * valueHandler.IncreaseComp(comparingProperty.Value, targetProperty.Value);
-                    }
-                }).Sum(s => s);
-                return scores;
-            }
-        }
         private IEnumerable<SimulationConfiguration> GetSimulationConfigurationsWithMostOptimizedProperties(IEnumerable<SimulationConfiguration> simulationConfigurations,
             IGraph instanceModel,
             PropertyCache propertyCache)
@@ -738,26 +713,13 @@ namespace Logic.Mapek
             var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(instanceModel, propertyCache);
             var valueHandlers = propertyChangesToOptimizeFor.Select(p => _factory.GetValueHandlerImplementation(p.Property.OwlType));
 
-            _logger.LogInformation("Ranking simulation results...");
-
-            // TODO: There seems to be a bit of combinatorial blowup-here,
-            //   with two nested loops over simulation configurations (`Where` and `All),
-            //   and an outer `foreach`.
-            // Rewrite into a stream of `f(SimulationConfiguration x propertyChanges)`,
-            //   and then use another pass to sort/pick best result.
+            _logger.LogInformation("Ordering and filtering simulation results...");
             
-            var comp = new ConfigComparer(this, propertyChangesToOptimizeFor.Zip(valueHandlers));
-            return simulationConfigurations.OrderByDescending(s => s, comp);
-        }
+            var simulationConfigurationComparer = new SimulationConfigurationComparer(propertyChangesToOptimizeFor.Zip(valueHandlers));
 
-        private Property GetPropertyFromPropertyCacheByName(PropertyCache propertyCache, string propertyName)
-        {
-            if (!propertyCache.Properties.TryGetValue(propertyName, out Property? property))
-            {
-                property = propertyCache.ConfigurableParameters[propertyName];
-            }
-
-            return property;
+            // Return the simulation configurations with the maximum score.
+            return simulationConfigurations.OrderByDescending(s => s, simulationConfigurationComparer)
+                .Where(s => simulationConfigurationComparer.Compare(s, simulationConfigurations.First()) > -1);
         }
 
         private IEnumerable<PropertyChange> GetPropertyChangesToOptimizeFor(IGraph instanceModel, PropertyCache propertyCache)

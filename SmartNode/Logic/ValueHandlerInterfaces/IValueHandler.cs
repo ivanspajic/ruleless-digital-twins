@@ -17,6 +17,7 @@ namespace Logic.ValueHandlerInterfaces
         public object GetInitialValueForConfigurableParameter(string configurableParameter);
 
         public int IncreaseComp(object comparingValue, object targetValue);
+
         public bool IsGreaterThanOrEqualTo(object comparingValue, object targetValue);
 
         public bool IsLessThanOrEqualTo(object comparingValue, object targetValue);

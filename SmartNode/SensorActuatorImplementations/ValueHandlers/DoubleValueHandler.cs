@@ -156,10 +156,17 @@ namespace SensorActuatorImplementations.ValueHandlers
             }
 
             if ((double)comparingValue > (double)targetValue)
-                { return 1; }
-            else if ((double)comparingValue < (double)targetValue) { return -1;}
-            else { return 0;};
-
+            {
+                return 1;
+            }
+            else if ((double)comparingValue < (double)targetValue)
+            {
+                return -1;
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         public bool IsGreaterThanOrEqualTo(object comparingValue, object targetValue)

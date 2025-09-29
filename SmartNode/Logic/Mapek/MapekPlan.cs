@@ -15,9 +15,10 @@ namespace Logic.Mapek
 {
     internal class MapekPlan : IMapekPlan
     {
-	public static Dictionary<string, IModel> fmuDict = new Dictionary<string, IModel>();
-	public static Dictionary<string, IInstance> iDict = new Dictionary<string, IInstance>();
-	private static int iCount = 0;
+        // Required as fields to preserve caching throughout multiple MAPE-K look cycles.
+	    public static Dictionary<string, IModel> _fmuDict = new Dictionary<string, IModel>();
+	    public static Dictionary<string, IInstance> _iDict = new Dictionary<string, IInstance>();
+	    private static int _iCount = 0;
 
         private readonly ILogger<MapekPlan> _logger;
         private readonly IFactory _factory;
@@ -510,19 +511,19 @@ namespace Logic.Mapek
         {
             _logger.LogInformation($"Simulation {simulationConfiguration} ({simulationConfiguration.SimulationTicks.Count()} ticks)");
             IModel model = null;
-            if (!(fmuDict.TryGetValue(fmuFilePath, out model))) {
+            if (!(_fmuDict.TryGetValue(fmuFilePath, out model))) {
                _logger.LogInformation("Load Model");
                model = Model.Load(fmuFilePath);
-               fmuDict.Add(fmuFilePath, model);
+               _fmuDict.Add(fmuFilePath, model);
             }
 
             // This instantiation fails frequently due to a "protected memory" exception(even when no other simulations have been run beforehand). Because it's thrown from
             // external code, the exception can't be caught for retries. This only works consistently with the Modelica reference FMUs.
             IInstance fmuInstance = null;
-            if (!(iDict.TryGetValue("demo"+iCount, out fmuInstance))) {
-               _logger.LogInformation($"Create instance {iCount}.");
-               fmuInstance = model.CreateCoSimulationInstance("demo"+iCount);
-               iDict.Add("demo"+iCount, fmuInstance);
+            if (!(_iDict.TryGetValue("demo"+_iCount, out fmuInstance))) {
+               _logger.LogInformation($"Create instance {_iCount}.");
+               fmuInstance = model.CreateCoSimulationInstance("demo"+_iCount);
+               _iDict.Add("demo"+_iCount, fmuInstance);
 
                _logger.LogInformation("Setting time");
                fmuInstance.StartTime(0);

@@ -33,6 +33,10 @@ namespace Logic.Mapek
             {
                 ExecuteReconfigurationAction(reconfigurationAction, propertyCache);
             }
+
+            LogExpectedPropertyValues(optimalConfiguration);
+
+            Console.Read();
         }
 
         private void ExecuteActuationAction(ActuationAction actuationAction, double durationSeconds)
@@ -55,6 +59,23 @@ namespace Logic.Mapek
                 reconfigurationAction.NewParameterValue);
 
             propertyCache.ConfigurableParameters[reconfigurationAction.ConfigurableParameter.Name].Value = reconfigurationAction.NewParameterValue;
+        }
+
+        private void LogExpectedPropertyValues(SimulationConfiguration simulationConfiguration)
+        {
+            _logger.LogInformation("Expected Property values:");
+
+            foreach (var propertyKeyValue in simulationConfiguration.ResultingPropertyCache.Properties)
+            {
+                _logger.LogInformation("{propertyName}: {propertyValue}", propertyKeyValue.Key, propertyKeyValue.Value.Value.ToString());
+            }
+
+            foreach (var configurableParameterKeyValue in simulationConfiguration.ResultingPropertyCache.ConfigurableParameters)
+            {
+                _logger.LogInformation("{configurableParameterName}: {configurableParameterValue}",
+                    configurableParameterKeyValue.Key,
+                    configurableParameterKeyValue.Value.Value.ToString());
+            }
         }
     }
 }

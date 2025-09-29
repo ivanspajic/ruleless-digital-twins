@@ -12,30 +12,39 @@ namespace SmartNode
     {
         static void Main(string[] args)
         {
-            // Command line parsind:
+            // Parse the command line arguments.
             RootCommand rootCommand = new();
+
             Argument<FileInfo> fileNameArg = new("file")
             {
-                Description = "RDF instance model."
+                Description = "RDF instance model"
             };
+            Argument<string> fmuDirectoryFilepathArgument = new("fmuDirectory")
+            {
+                Description = "Directory containing FMUs."
+            };
+
             Option<int> maxRoundOption = new("--round", "-r")
             {
                 Description = "Maximum number of rounds for MAPE-K loop.",
                 DefaultValueFactory = parseResult => 4,
             };
+
             rootCommand.Add(maxRoundOption);
             rootCommand.Add(fileNameArg);
+            rootCommand.Add(fmuDirectoryFilepathArgument);
+
             ParseResult parseResult = rootCommand.Parse(args);
-            String modelFile;
-            int maxRound;
-            if (parseResult.Errors.Count == 0 && parseResult.GetValue(fileNameArg) is FileInfo parsedFile)
+
+            var maxRound = parseResult.GetValue(maxRoundOption);
+            var modelFile = parseResult.GetValue(fileNameArg);
+            var fmuDirectory = parseResult.GetValue(fmuDirectoryFilepathArgument);
+
+            if (parseResult.Errors.Count != 0 ||
+                modelFile is not FileInfo parsedFile ||
+                string.IsNullOrEmpty(fmuDirectory))
             {
-                modelFile = parsedFile.FullName;
-                maxRound = parseResult.GetValue(maxRoundOption);
-            }
-            else
-            {
-                throw new ArgumentException(parseResult.Errors[0].Message);
+                throw new ArgumentException(parseResult.Errors[0].Message); // Are there always errors here?
             }
 
             var builder = Host.CreateApplicationBuilder(args);
@@ -43,8 +52,7 @@ namespace SmartNode
             // Register services here.
             builder.Services.AddLogging(loggingBuilder =>
             {
-                loggingBuilder.AddConsole(options =>
-                { options.TimestampFormat = "HH:mm:ss "; });
+                loggingBuilder.AddConsole(options => options.TimestampFormat = "HH:mm:ss ");
             });
             builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceprovider =>
             {
@@ -60,18 +68,20 @@ namespace SmartNode
             // Get an instance of the MAPE-K manager.
             var mapekManager = host.Services.GetRequiredService<IMapekManager>();
 
+            // TODO: i have a hunch this is making it work for docker without other filepaths specified. theoretically, we shouldn't need it
             // For native:
             // Get executing assembly path.
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             // Combine it with the relative path of the inferred model file.
-            var modelFilePath = Path.Combine(executingAssemblyPath!, modelFile);
+            var modelFilePath = Path.Combine(executingAssemblyPath!, modelFile.FullName);
+
             // Make it system-agnostic.
-            modelFilePath = Path.GetFullPath(modelFile);
+            modelFilePath = Path.GetFullPath(modelFile.FullName);
 
             // Start the loop.
             try
             {
-                mapekManager.StartLoop(modelFilePath, maxRound);
+                mapekManager.StartLoop(modelFilePath, fmuDirectory, maxRound);
             }
             catch (Exception exception)
             {

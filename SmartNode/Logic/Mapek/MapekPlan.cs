@@ -30,6 +30,7 @@ namespace Logic.Mapek
             IEnumerable<Models.OntologicalModels.Action> actions,
             PropertyCache propertyCache,
             IGraph instanceModel,
+            string fmuDirectory,
             int actuationSimulationGranularity)
         {
             _logger.LogInformation("Starting the Plan phase.");
@@ -66,7 +67,7 @@ namespace Logic.Mapek
             _logger.LogInformation("Generated a total of {total} simulation configurations.", simulationConfigurations.Count());
 
             // Execute the simulations and obtain their results.
-            Simulate(simulationConfigurations, instanceModel, propertyCache);
+            Simulate(simulationConfigurations, instanceModel, propertyCache, fmuDirectory);
 
             // Find the optimal simulation configuration.
             var optimalConfiguration = GetOptimalConfiguration(instanceModel, propertyCache, optimalConditions, simulationConfigurations);
@@ -354,16 +355,15 @@ namespace Logic.Mapek
             return combinations;
         }
 
-        private void Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations, IGraph instanceModel, PropertyCache propertyCache)
+        private void Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations, IGraph instanceModel, PropertyCache propertyCache, string fmuDirectory)
         {
             // Retrieve the host platform FMU for ActuationAction simulations.
-            var fmuFilePath = GetHostPlatformFmu(instanceModel, simulationConfigurations.First());
+            var fmuFilePath = GetHostPlatformFmu(instanceModel, simulationConfigurations.First(), fmuDirectory);
 
             int i = 0;
             foreach (var simulationConfiguration in simulationConfigurations)
             {
-                i++;
-                _logger.LogInformation("Running simulation #{run}", i);
+                _logger.LogInformation("Running simulation #{run}", i++);
 
                 // Make a deep copy of the property cache for the current simulation configuration.
                 var propertyCacheCopy = GetPropertyCacheCopy(propertyCache);
@@ -385,7 +385,7 @@ namespace Logic.Mapek
             }
         }
 
-        private string GetHostPlatformFmu(IGraph instanceModel, SimulationConfiguration simulationConfiguration)
+        private string GetHostPlatformFmu(IGraph instanceModel, SimulationConfiguration simulationConfiguration, string fmuDirectory)
         {
             if (!simulationConfiguration.SimulationTicks.Any())
             {
@@ -424,7 +424,9 @@ namespace Logic.Mapek
 
             // There can theoretically be multiple Platforms hosting the same Actuator, but we limit ourselves to expect a single Platform
             // per instance model. There should therefore be only one result.
-            return queryResult.Results[0]["fmuFilePath"].ToString().Split('^')[0];
+            var fmu = queryResult.Results[0]["fmuFilePath"].ToString().Split('^')[0];
+
+            return Path.Combine(fmuDirectory, fmu);
         }
 
         private PropertyCache GetPropertyCacheCopy(PropertyCache originalPropertyCache)

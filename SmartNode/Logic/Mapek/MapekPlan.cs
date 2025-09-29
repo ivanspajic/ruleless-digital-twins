@@ -1,12 +1,14 @@
 ﻿using Femyou;
 using Logic.FactoryInterface;
-using Logic.Mapek.EqualityComparers;
+using Logic.Mapek.Comparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
+using Logic.ValueHandlerInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Text;
+using VDS.Common.Collections.Enumerations;
 using VDS.RDF;
 
 namespace Logic.Mapek
@@ -707,61 +709,16 @@ namespace Logic.Mapek
             IGraph instanceModel,
             PropertyCache propertyCache)
         {
-            var simulationConfigurationOptimizedPropertyCount = new Dictionary<SimulationConfiguration, int>(new SimulationConfigurationEqualityComparer());
             var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(instanceModel, propertyCache);
+            var valueHandlers = propertyChangesToOptimizeFor.Select(p => _factory.GetValueHandlerImplementation(p.Property.OwlType));
 
-            _logger.LogInformation("Ranking simulation results...");
+            _logger.LogInformation("Ordering and filtering simulation results...");
+            
+            var simulationConfigurationComparer = new SimulationConfigurationComparer(propertyChangesToOptimizeFor.Zip(valueHandlers));
 
-            // TODO: There seems to be a bit of combinatorial blowup-here,
-            //   with two nested loops over simulation configurations (`Where` and `All),
-            //   and an outer `foreach`.
-            // Rewrite into a stream of `f(SimulationConfiguration x propertyChanges)`,
-            //   and then use another pass to sort/pick best result.
-            foreach (var propertyChangeToOptimizeFor in propertyChangesToOptimizeFor)
-            {
-                var valueHandler = _factory.GetValueHandlerImplementation(propertyChangeToOptimizeFor.Property.OwlType);
-
-                var simulationConfigurationsWithOptimizedProperty = simulationConfigurations.Where(simulationConfiguration =>
-                {
-                    var comparingProperty = GetPropertyFromPropertyCacheByName(simulationConfiguration.ResultingPropertyCache, propertyChangeToOptimizeFor.Property.Name);
-
-                    return simulationConfigurations.All(innerSimulationConfiguration =>
-                    {
-                        var targetProperty = GetPropertyFromPropertyCacheByName(innerSimulationConfiguration.ResultingPropertyCache, propertyChangeToOptimizeFor.Property.Name);
-
-                        if (propertyChangeToOptimizeFor.OptimizeFor == Effect.ValueIncrease)
-                        {
-                            return valueHandler.IsGreaterThanOrEqualTo(comparingProperty.Value, targetProperty.Value);
-                        }
-                        else
-                        {
-                            return valueHandler.IsLessThanOrEqualTo(comparingProperty.Value, targetProperty.Value);
-                        }
-                    });
-                });
-
-                foreach (var simulationConfigurationWithOptimizedProperty in simulationConfigurationsWithOptimizedProperty)
-                {
-                    simulationConfigurationOptimizedPropertyCount.TryAdd(simulationConfigurationWithOptimizedProperty, 0);
-                    simulationConfigurationOptimizedPropertyCount[simulationConfigurationWithOptimizedProperty]++;
-                }
-            }
-
-            var maximumOptimizedProperties = simulationConfigurationOptimizedPropertyCount.Max(keyValuePair => keyValuePair.Value);
-            var simulationConfigurationsWithThatManyOptimizedProperties = simulationConfigurationOptimizedPropertyCount.Where(keyValuePair => keyValuePair.Value == maximumOptimizedProperties)
-                .Select(keyValuePair => keyValuePair.Key);
-
-            return simulationConfigurationsWithThatManyOptimizedProperties;
-        }
-
-        private Property GetPropertyFromPropertyCacheByName(PropertyCache propertyCache, string propertyName)
-        {
-            if (!propertyCache.Properties.TryGetValue(propertyName, out Property? property))
-            {
-                property = propertyCache.ConfigurableParameters[propertyName];
-            }
-
-            return property;
+            // Return the simulation configurations with the maximum score.
+            return simulationConfigurations.OrderByDescending(s => s, simulationConfigurationComparer)
+                .Where(s => simulationConfigurationComparer.Compare(s, simulationConfigurations.First()) > -1);
         }
 
         private IEnumerable<PropertyChange> GetPropertyChangesToOptimizeFor(IGraph instanceModel, PropertyCache propertyCache)

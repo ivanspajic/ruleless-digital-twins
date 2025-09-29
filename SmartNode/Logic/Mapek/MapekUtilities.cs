@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
+using Microsoft.Extensions.Logging;
 using VDS.RDF;
 using VDS.RDF.Query;
 
@@ -98,6 +100,16 @@ namespace Logic.Mapek
             }
 
             return queryResult;
+        }
+
+        public static Property GetPropertyFromPropertyCacheByName(PropertyCache propertyCache, string propertyName)
+        {
+            if (!propertyCache.Properties.TryGetValue(propertyName, out Property? property))
+            {
+                property = propertyCache.ConfigurableParameters[propertyName];
+            }
+
+            return property;
         }
 
         private static string GetPropertyValueType<T>(SparqlParameterizedString query, ILogger<T> logger, IGraph instanceModel, string parameterName, INode propertyNode)

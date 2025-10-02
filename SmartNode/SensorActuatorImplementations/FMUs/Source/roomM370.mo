@@ -51,9 +51,9 @@ algorithm
 end GetEnergyConsumptionRate;
 
 equation
-  der(RoomTemperature) = (GetRoomTemperatureLimit(0) - RoomTemperature) / slowdownValue;
-  der(RoomHumidity) = (GetRoomHumidityLimit(0) - RoomHumidity) / slowdownValue;
-  der(EnergyConsumption) = GetEnergyConsumptionRate(2, 0);
+  der(RoomTemperature) = (GetRoomTemperatureLimit(AirConditioningUnitState) - RoomTemperature) / slowdownValue;
+  der(RoomHumidity) = (GetRoomHumidityLimit(DehumidifierState) - RoomHumidity) / slowdownValue;
+  der(EnergyConsumption) = GetEnergyConsumptionRate(AirConditioningUnitState, DehumidifierState);
   
 annotation(
     experiment(StartTime = 0, StopTime = 8000, Tolerance = 1e-06, Interval = 1));

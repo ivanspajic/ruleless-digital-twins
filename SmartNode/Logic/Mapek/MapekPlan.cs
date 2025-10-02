@@ -3,12 +3,10 @@ using Logic.FactoryInterface;
 using Logic.Mapek.Comparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
-using Logic.ValueHandlerInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Text;
-using VDS.Common.Collections.Enumerations;
 using VDS.RDF;
 
 namespace Logic.Mapek
@@ -598,7 +596,7 @@ namespace Logic.Mapek
                         var valueHandler = _factory.GetValueHandlerImplementation(propertyCacheCopy.Properties[propertyName].OwlType);
                         var value = valueHandler.GetValueFromSimulationParameter(fmuInstance, fmuOutput.Value);
 
-                        _logger.LogInformation($"New value for {propertyName}: {value}");
+                        _logger.LogInformation("New value for {propertyName}: {value}", propertyName, value);
                         propertyCacheCopy.Properties[propertyName].Value = value;
                     }
                 }

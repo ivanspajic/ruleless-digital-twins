@@ -1,11 +1,16 @@
 model roomM370
   input Integer AirConditioningUnitState(start = 0);
-  input Integer DehumidifierState(start = 0);
-  Real RoomTemperature(start = 20.4);
-  Real RoomHumidity(start = 20.0);
-  Real EnergyConsumption(start = 0);
+  input Integer DehumidifierState(start = 0);  
+  Real RoomTemperature;
+  Real RoomHumidity;
+  Real EnergyConsumption;
   constant Integer slowdownValue = 1000;
   
+  // Used for testing with CLI tools since they complain they can't initialize with non input/parameter variables.
+  input Real RoomTemperatureInitial(start = 20.0);
+  input Real RoomHumidityInitial(start = 20.0);
+  input Real EnergyConsumptionInitial(start = 0);
+ 
 function GetRoomTemperatureLimit
   input Integer AirConditioningUnitState;
   output Integer RoomTemperatureLimit;
@@ -50,7 +55,12 @@ algorithm
   end if;
 end GetEnergyConsumptionRate;
 
-equation
+initial equation
+  // Used for testing with CLI tools since they complain they can't initialize with non input/parameter variables.
+  RoomTemperature = RoomTemperatureInitial;
+  RoomHumidity = RoomHumidityInitial;
+  EnergyConsumption = EnergyConsumptionInitial;
+equation  
   der(RoomTemperature) = (GetRoomTemperatureLimit(AirConditioningUnitState) - RoomTemperature) / slowdownValue;
   der(RoomHumidity) = (GetRoomHumidityLimit(DehumidifierState) - RoomHumidity) / slowdownValue;
   der(EnergyConsumption) = GetEnergyConsumptionRate(AirConditioningUnitState, DehumidifierState);

@@ -36,8 +36,6 @@ namespace Logic.Mapek
         {
             _logger.LogInformation("Starting the Plan phase.");
 
-            var plannedActions = new List<Models.OntologicalModels.Action>();
-
             // The two Action types should be split to facilitate simulations. ActuationActions may be de/activated at any point during
             // the available time to restore an OptimalCondition. On the other hand, ReconfigurationActions can't necessarily be dependent
             // on a time factor since the underlying soft Sensor algorithms may take long to run. However, they will nonetheless be included

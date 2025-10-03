@@ -26,6 +26,7 @@ namespace SensorActuatorImplementations.ValueHandlers
         {
             { "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit", new List<object>
                 {
+                    0,
                     1,
                     2,
                     3
@@ -33,6 +34,7 @@ namespace SensorActuatorImplementations.ValueHandlers
             },
             { "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier", new List<object>
                 {
+                    0,
                     1
                 }
             }

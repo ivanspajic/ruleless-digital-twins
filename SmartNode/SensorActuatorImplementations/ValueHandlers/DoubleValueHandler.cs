@@ -268,10 +268,13 @@ namespace SensorActuatorImplementations.ValueHandlers
             var minimumValue = 0.0;
             var maximumValue = 12.0;
 
-            var possibleValues = new List<object>();
+            var possibleValues = new List<object>
+            {
+                currentValueDouble
+            };
 
             var valueRange = maximumValue - minimumValue;
-            var intervalSize = valueRange / rangeGranularity;
+            var intervalSize = valueRange / (rangeGranularity - 1);
 
             for (var i = minimumValue; i < maximumValue; i += intervalSize)
             {

@@ -107,23 +107,7 @@ namespace Logic.Mapek
             }
 
             // Get the Cartesian product of ActuationActions that don't share Actuators.
-            var actuationActionByActuatorCartesianProducts = GetNaryCartesianProducts(actuatorActuationsByActuator);
-            var actionByActuatorCartesianProducts = actuationActionByActuatorCartesianProducts.Select(actuationActionByActuatorCartesianProduct =>
-                actuationActionByActuatorCartesianProduct.Select(actuationAction =>
-                    actuationAction as Models.OntologicalModels.Action));
-
-            // Get all possible combinations for each ActuationAction by Actuator Cartesian product.
-            foreach (var actionByActuatorCartesianProduct in actionByActuatorCartesianProducts)
-            {
-                var actionCombinations = GetActionCombinations(actionByActuatorCartesianProduct);
-
-                actuationActionCombinations.UnionWith(actionCombinations);
-            }
-
-            // Perform a conversion to the ActuationAction type for easier handling.
-            return actuationActionCombinations.Select(actuationActionCombination =>
-                actuationActionCombination.Select(actuationAction =>
-                    actuationAction as ActuationAction))!;
+            return GetNaryCartesianProducts(actuatorActuationsByActuator);
         }
 
         private IEnumerable<IEnumerable<ReconfigurationAction>> GetReconfigurationActionCombinations(IEnumerable<ReconfigurationAction> reconfigurationActions)
@@ -157,75 +141,7 @@ namespace Logic.Mapek
             }
 
             // Get the Cartesian product of ReconfigurationActions that don't share ConfigurableParameters.
-            var reconfigurationActionByConfigurableParameterCartesianProducts = GetNaryCartesianProducts(reconfigurationActionsByConfigurableParameter);
-            var actionByConfigurableParameterCartesianProducts = reconfigurationActionByConfigurableParameterCartesianProducts.Select(reconfigurationActionByConfigurableParameterCartesianProduct =>
-                reconfigurationActionByConfigurableParameterCartesianProduct.Select(reconfigurationAction =>
-                    reconfigurationAction as Models.OntologicalModels.Action));
-
-            // Get all possible combinations for each ReconfigurationAction by ConfigurableParameter Cartesian product.
-            foreach (var actionByConfigurableParameterCartesianProduct in actionByConfigurableParameterCartesianProducts)
-            {
-                var actionCombinations = GetActionCombinations(actionByConfigurableParameterCartesianProduct);
-
-                reconfigurationActionCombinations.UnionWith(actionCombinations);
-            }
-
-            // Perform a conversion to the ReconfigurationAction type for easier handling.
-            return reconfigurationActionCombinations.Select(reconfigurationActionCombination =>
-                reconfigurationActionCombination.Select(reconfigurationAction =>
-                    reconfigurationAction as ReconfigurationAction))!;
-        }
-
-        private HashSet<HashSet<Models.OntologicalModels.Action>> GetActionCombinations(IEnumerable<Models.OntologicalModels.Action> actions)
-        {
-            // This method creates combinations Actions to simulate in tandem. Since there are no possibilities of encountering contradicting
-            // Actions for the same property (due to validations disallowing contradicting OptimalCondition constraints), there will also be
-            // no Actions with contradicting Effects.
-
-            // Ensure that the set of sets has unique elements with the equality comparer.
-            var actionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(new SetEqualityComparer<Models.OntologicalModels.Action>());
-
-            foreach (var action in actions)
-            {
-                // Pick the current Action out of the collection.
-                var remainingActions = actions.Where(innerAction => innerAction != action);
-
-                if (!remainingActions.Any())
-                {
-                    // If there are no remaining Actions in the collection, we have to create the set of Actions with the current Action and add it
-                    // to the set of combinations. Additionally, to allow for empty simulations with no Actions, we also have to add the empty set.
-                    var zeroActionSet = new HashSet<Models.OntologicalModels.Action>();
-                    var singleActionSet = new HashSet<Models.OntologicalModels.Action>
-                    {
-                        action
-                    };
-
-                    actionCombinations.Add(zeroActionSet);
-                    actionCombinations.Add(singleActionSet);
-                }
-                else
-                {
-                    // In case of more remaining Actions, we call this method again with the remaining Action
-                    // collection and add the results to the set of combinations.
-                    var remainingActionCombinations = GetActionCombinations(remainingActions);
-                    actionCombinations.UnionWith(remainingActionCombinations);
-
-                    // For each Action combination from the collection of remaining Actions, create a new
-                    // set and add the current Action to it to make a new combination before adding it to the
-                    // set of combinations.
-                    foreach (var remainingActionCombination in remainingActionCombinations)
-                    {
-                        var multipleActionSet = new HashSet<Models.OntologicalModels.Action>();
-
-                        multipleActionSet.UnionWith(remainingActionCombination);
-                        multipleActionSet.Add(action);
-
-                        actionCombinations.Add(multipleActionSet);
-                    }
-                }
-            }
-
-            return actionCombinations;
+            return GetNaryCartesianProducts(reconfigurationActionsByConfigurableParameter);
         }
 
         private IEnumerable<SimulationConfiguration> GetSimulationConfigurationsFromActionCombinations(IEnumerable<IEnumerable<ActuationAction>> actuationActionCombinations,

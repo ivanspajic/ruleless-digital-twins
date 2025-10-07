@@ -3,12 +3,10 @@ using Logic.FactoryInterface;
 using Logic.Mapek.Comparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
-using Logic.ValueHandlerInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Text;
-using VDS.Common.Collections.Enumerations;
 using VDS.RDF;
 
 namespace Logic.Mapek
@@ -37,8 +35,6 @@ namespace Logic.Mapek
             int actuationSimulationGranularity)
         {
             _logger.LogInformation("Starting the Plan phase.");
-
-            var plannedActions = new List<Models.OntologicalModels.Action>();
 
             // The two Action types should be split to facilitate simulations. ActuationActions may be de/activated at any point during
             // the available time to restore an OptimalCondition. On the other hand, ReconfigurationActions can't necessarily be dependent
@@ -111,23 +107,7 @@ namespace Logic.Mapek
             }
 
             // Get the Cartesian product of ActuationActions that don't share Actuators.
-            var actuationActionByActuatorCartesianProducts = GetNaryCartesianProducts(actuatorActuationsByActuator);
-            var actionByActuatorCartesianProducts = actuationActionByActuatorCartesianProducts.Select(actuationActionByActuatorCartesianProduct =>
-                actuationActionByActuatorCartesianProduct.Select(actuationAction =>
-                    actuationAction as Models.OntologicalModels.Action));
-
-            // Get all possible combinations for each ActuationAction by Actuator Cartesian product.
-            foreach (var actionByActuatorCartesianProduct in actionByActuatorCartesianProducts)
-            {
-                var actionCombinations = GetActionCombinations(actionByActuatorCartesianProduct);
-
-                actuationActionCombinations.UnionWith(actionCombinations);
-            }
-
-            // Perform a conversion to the ActuationAction type for easier handling.
-            return actuationActionCombinations.Select(actuationActionCombination =>
-                actuationActionCombination.Select(actuationAction =>
-                    actuationAction as ActuationAction))!;
+            return GetNaryCartesianProducts(actuatorActuationsByActuator);
         }
 
         private IEnumerable<IEnumerable<ReconfigurationAction>> GetReconfigurationActionCombinations(IEnumerable<ReconfigurationAction> reconfigurationActions)
@@ -161,75 +141,7 @@ namespace Logic.Mapek
             }
 
             // Get the Cartesian product of ReconfigurationActions that don't share ConfigurableParameters.
-            var reconfigurationActionByConfigurableParameterCartesianProducts = GetNaryCartesianProducts(reconfigurationActionsByConfigurableParameter);
-            var actionByConfigurableParameterCartesianProducts = reconfigurationActionByConfigurableParameterCartesianProducts.Select(reconfigurationActionByConfigurableParameterCartesianProduct =>
-                reconfigurationActionByConfigurableParameterCartesianProduct.Select(reconfigurationAction =>
-                    reconfigurationAction as Models.OntologicalModels.Action));
-
-            // Get all possible combinations for each ReconfigurationAction by ConfigurableParameter Cartesian product.
-            foreach (var actionByConfigurableParameterCartesianProduct in actionByConfigurableParameterCartesianProducts)
-            {
-                var actionCombinations = GetActionCombinations(actionByConfigurableParameterCartesianProduct);
-
-                reconfigurationActionCombinations.UnionWith(actionCombinations);
-            }
-
-            // Perform a conversion to the ReconfigurationAction type for easier handling.
-            return reconfigurationActionCombinations.Select(reconfigurationActionCombination =>
-                reconfigurationActionCombination.Select(reconfigurationAction =>
-                    reconfigurationAction as ReconfigurationAction))!;
-        }
-
-        private HashSet<HashSet<Models.OntologicalModels.Action>> GetActionCombinations(IEnumerable<Models.OntologicalModels.Action> actions)
-        {
-            // This method creates combinations Actions to simulate in tandem. Since there are no possibilities of encountering contradicting
-            // Actions for the same property (due to validations disallowing contradicting OptimalCondition constraints), there will also be
-            // no Actions with contradicting Effects.
-
-            // Ensure that the set of sets has unique elements with the equality comparer.
-            var actionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(new SetEqualityComparer<Models.OntologicalModels.Action>());
-
-            foreach (var action in actions)
-            {
-                // Pick the current Action out of the collection.
-                var remainingActions = actions.Where(innerAction => innerAction != action);
-
-                if (!remainingActions.Any())
-                {
-                    // If there are no remaining Actions in the collection, we have to create the set of Actions with the current Action and add it
-                    // to the set of combinations. Additionally, to allow for empty simulations with no Actions, we also have to add the empty set.
-                    var zeroActionSet = new HashSet<Models.OntologicalModels.Action>();
-                    var singleActionSet = new HashSet<Models.OntologicalModels.Action>
-                    {
-                        action
-                    };
-
-                    actionCombinations.Add(zeroActionSet);
-                    actionCombinations.Add(singleActionSet);
-                }
-                else
-                {
-                    // In case of more remaining Actions, we call this method again with the remaining Action
-                    // collection and add the results to the set of combinations.
-                    var remainingActionCombinations = GetActionCombinations(remainingActions);
-                    actionCombinations.UnionWith(remainingActionCombinations);
-
-                    // For each Action combination from the collection of remaining Actions, create a new
-                    // set and add the current Action to it to make a new combination before adding it to the
-                    // set of combinations.
-                    foreach (var remainingActionCombination in remainingActionCombinations)
-                    {
-                        var multipleActionSet = new HashSet<Models.OntologicalModels.Action>();
-
-                        multipleActionSet.UnionWith(remainingActionCombination);
-                        multipleActionSet.Add(action);
-
-                        actionCombinations.Add(multipleActionSet);
-                    }
-                }
-            }
-
-            return actionCombinations;
+            return GetNaryCartesianProducts(reconfigurationActionsByConfigurableParameter);
         }
 
         private IEnumerable<SimulationConfiguration> GetSimulationConfigurationsFromActionCombinations(IEnumerable<IEnumerable<ActuationAction>> actuationActionCombinations,
@@ -512,22 +424,21 @@ namespace Logic.Mapek
             _logger.LogInformation($"Simulation {simulationConfiguration} ({simulationConfiguration.SimulationTicks.Count()} ticks)");
             IModel model = null;
             if (!(_fmuDict.TryGetValue(fmuFilePath, out model))) {
-               _logger.LogInformation("Load Model");
-               model = Model.Load(fmuFilePath);
-               _fmuDict.Add(fmuFilePath, model);
+                _logger.LogInformation("Load Model");
+                model = Model.Load(fmuFilePath);
+                _fmuDict.Add(fmuFilePath, model);
             }
 
             // This instantiation fails frequently due to a "protected memory" exception(even when no other simulations have been run beforehand). Because it's thrown from
             // external code, the exception can't be caught for retries. This only works consistently with the Modelica reference FMUs.
             IInstance fmuInstance = null;
             if (!(_iDict.TryGetValue("demo"+_iCount, out fmuInstance))) {
-               _logger.LogInformation($"Create instance {_iCount}.");
-               fmuInstance = model.CreateCoSimulationInstance("demo"+_iCount);
-               _iDict.Add("demo"+_iCount, fmuInstance);
+                _logger.LogInformation($"Create instance {_iCount}.");
+                fmuInstance = model.CreateCoSimulationInstance("demo" + _iCount);
+                _iDict.Add("demo"+_iCount, fmuInstance);
 
-               _logger.LogInformation("Setting time");
-               fmuInstance.StartTime(0);
-
+                _logger.LogInformation("Setting time");
+                fmuInstance.StartTime(0);
             }
             // FIXME: we're currently using the cached instance without resetting time. We can't reliably get fresh instances.
             // iCount++;
@@ -555,7 +466,7 @@ namespace Logic.Mapek
                     fmuActuationInputs.Add((simpleActuatorName + "State", "int", actuationAction.NewStateValue));
                 }
 
-                _logger.LogInformation($"Parameters: {string.Join(", ",fmuActuationInputs.Select(i => i.ToString()))}");
+                _logger.LogInformation($"Parameters: {string.Join(", ", fmuActuationInputs.Select(i => i.ToString()))}");
                 AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
 
                 // The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
@@ -598,7 +509,7 @@ namespace Logic.Mapek
                         var valueHandler = _factory.GetValueHandlerImplementation(propertyCacheCopy.Properties[propertyName].OwlType);
                         var value = valueHandler.GetValueFromSimulationParameter(fmuInstance, fmuOutput.Value);
 
-                        _logger.LogInformation($"New value for {propertyName}: {value}");
+                        _logger.LogInformation("New value for {propertyName}: {value}", propertyName, value);
                         propertyCacheCopy.Properties[propertyName].Value = value;
                     }
                 }

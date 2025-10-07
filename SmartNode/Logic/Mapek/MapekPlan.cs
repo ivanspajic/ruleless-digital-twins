@@ -423,19 +423,19 @@ namespace Logic.Mapek
         {
             _logger.LogInformation($"Simulation {simulationConfiguration} ({simulationConfiguration.SimulationTicks.Count()} ticks)");
             IModel model = null;
-            if (!(_fmuDict.TryGetValue(fmuFilePath, out model))) {
+            if (!_fmuDict.TryGetValue(fmuFilePath, out model)) {
                 _logger.LogInformation("Load Model");
                 model = Model.Load(fmuFilePath);
                 _fmuDict.Add(fmuFilePath, model);
             }
-
+            Debug.Assert(model != null, "Model is null after loading.");
             // This instantiation fails frequently due to a "protected memory" exception(even when no other simulations have been run beforehand). Because it's thrown from
             // external code, the exception can't be caught for retries. This only works consistently with the Modelica reference FMUs.
             IInstance fmuInstance = null;
             if (!(_iDict.TryGetValue("demo"+_iCount, out fmuInstance))) {
                 _logger.LogInformation($"Create instance {_iCount}.");
-                fmuInstance = model.CreateCoSimulationInstance("demo" + _iCount);
-                _iDict.Add("demo"+_iCount, fmuInstance);
+                fmuInstance = model.CreateCoSimulationInstance("demo" + _iCount++);
+                //_iDict.Add("demo"+_iCount, fmuInstance);
 
                 _logger.LogInformation("Setting time");
                 fmuInstance.StartTime(0);

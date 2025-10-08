@@ -274,6 +274,8 @@ namespace Logic.Mapek
         {
             // Retrieve the host platform FMU for ActuationAction simulations.
             var fmuFilePath = GetHostPlatformFmu(instanceModel, simulationConfigurations.First(), fmuDirectory);
+            // Retrieve the simulation fidelity for the host platform FMU.
+            var simulationFidelitySeconds = GetSimulationFidelitySeconds(instanceModel, fmuFilePath);
 
             int i = 0;
             foreach (var simulationConfiguration in simulationConfigurations)
@@ -287,7 +289,7 @@ namespace Logic.Mapek
                 {
                     // Comment this back in for FMU testing. The Femyou library can seemingly not dispose of resources from FMUs other than Modelica reference ones.
                     // All other logic of writing inputs and reading outputs works.
-                    ExecuteActuationActionFmu(fmuFilePath, simulationConfiguration, instanceModel, propertyCacheCopy);
+                    ExecuteActuationActionFmu(fmuFilePath, simulationConfiguration, instanceModel, propertyCacheCopy, simulationFidelitySeconds);
                 }
 
                 if (simulationConfiguration.PostTickActions.Any())
@@ -342,6 +344,28 @@ namespace Logic.Mapek
             var fmu = queryResult.Results[0]["fmuFilePath"].ToString().Split('^')[0];
 
             return Path.Combine(fmuDirectory, fmu);
+        }
+
+        private int GetSimulationFidelitySeconds(IGraph instanceModel, string fmuFilePath)
+        {
+            var query = MapekUtilities.GetParameterizedStringQuery();
+
+            query.CommandText = @"SELECT ?simulationFidelitySeconds WHERE {
+                ?platform rdf:type sosa:Platform .
+                ?platform meta:hasModel @fmuFilePath .
+                ?platform meta:hasSimulationFidelitySeconds ?simulationFidelitySeconds . }";
+
+            query.SetLiteral("fmuFilePath", fmuFilePath, false);
+
+            var queryResult = instanceModel.ExecuteQuery(query, _logger);
+
+            if (queryResult.IsEmpty)
+            {
+                throw new Exception("The Platform has a missing simulation fidelity value.");
+            }
+
+            // We limit ourselves to having only one simulation fidelity value, since we're currently using one FMU per instance model.
+            return int.Parse(queryResult.Results[0]["simulationFidelitySeconds"].ToString());
         }
 
         private PropertyCache GetPropertyCacheCopy(PropertyCache originalPropertyCache)
@@ -419,7 +443,11 @@ namespace Logic.Mapek
             return maximumSimulationTime;
         }
 
-        private void ExecuteActuationActionFmu(string fmuFilePath, SimulationConfiguration simulationConfiguration, IGraph instanceModel, PropertyCache propertyCacheCopy)
+        private void ExecuteActuationActionFmu(string fmuFilePath,
+            SimulationConfiguration simulationConfiguration,
+            IGraph instanceModel,
+            PropertyCache propertyCacheCopy,
+            int simulationFidelitySeconds)
         {
             _logger.LogInformation($"Simulation {simulationConfiguration} ({simulationConfiguration.SimulationTicks.Count()} ticks)");
             IModel model = null;
@@ -442,6 +470,8 @@ namespace Logic.Mapek
             }
             // FIXME: we're currently using the cached instance without resetting time. We can't reliably get fresh instances.
             // iCount++;
+
+
 
             // Run the simulation by executing ActuationActions in their respective simulation intervals.
             foreach (var simulationTick in simulationConfiguration.SimulationTicks)
@@ -469,8 +499,8 @@ namespace Logic.Mapek
                 _logger.LogInformation($"Parameters: {string.Join(", ", fmuActuationInputs.Select(i => i.ToString()))}");
                 AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
 
-                // The time in seconds isn't translated properly which means that the results come out differently from the FMUs.
                 _logger.LogInformation("Tick");
+
                 fmuInstance.AdvanceTime(simulationTick.TickDurationSeconds);
 
                 AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);

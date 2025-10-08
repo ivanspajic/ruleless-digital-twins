@@ -21,6 +21,14 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Object Properties
 #################################################################
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#hasSimulationModel
+:hasSimulationModel rdf:type owl:ObjectProperty ;
+                    rdfs:domain <http://www.w3.org/ns/sosa/Platform> ;
+                    rdfs:range <http://www.w3.org/ns/sosa/Procedure> ;
+                    rdfs:comment "Represents a model used for simulations of the corresponding Platform."@en ;
+                    rdfs:label "hasSimulationModel"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith
 :affectsPropertyWith rdf:type owl:ObjectProperty ;
                      rdfs:range :Effect ;
@@ -113,17 +121,12 @@ xsd:duration rdf:type rdfs:Datatype .
                rdfs:label "hasIdentifier"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasModel
-:hasModel rdf:type owl:DatatypeProperty ;
-          rdfs:range xsd:anyURI ;
-          rdfs:comment "Refers to a model, such as a functional mock-up unit (FMU), used by a thing."@en ;
-          rdfs:label "hasModel"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationTickSizeInSeconds
-:hasSimulationTickSizeInSeconds rdf:type owl:DatatypeProperty ;
-                                rdfs:comment "Represents size of corresponding simulation intervals in minutes."@en ;
-                                rdfs:label "hasSimulationTickSizeInSeconds"@en .
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds
+:hasSimulationFidelitySeconds rdf:type owl:DatatypeProperty ;
+                              rdfs:domain :FmuModel ;
+                              rdfs:range xsd:int ;
+                              rdfs:comment "Represents the fidelity of the simulation models (FMUs) with respect to the equations they contain."@en ;
+                              rdfs:label "hasSimulationFidelitySeconds"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasTimeLimit
@@ -131,6 +134,14 @@ xsd:duration rdf:type rdfs:Datatype .
               rdfs:range xsd:duration ;
               rdfs:comment "Represents a time limit on the duration of the Strategy."@en ;
               rdfs:label "hasTimeLimit"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI
+:hasURI rdf:type owl:DatatypeProperty ;
+        rdfs:domain :FmuModel ;
+        rdfs:range xsd:anyURI ;
+        rdfs:comment "Refers to an FMUs URI."@en ;
+        rdfs:label "hasURI"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue
@@ -164,6 +175,18 @@ xsd:duration rdf:type rdfs:Datatype .
 #################################################################
 #    Classes
 #################################################################
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#FmuModel
+:FmuModel rdf:type owl:Class ;
+          rdfs:subClassOf <http://www.w3.org/ns/sosa/Procedure> ,
+                          [ rdf:type owl:Restriction ;
+                            owl:onProperty :hasSimulationFidelitySeconds ;
+                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                            owl:onDataRange xsd:int
+                          ] ;
+          rdfs:comment "Represents a simulation model in the form of a Functional Mock-up Unit (FMU)."@en ;
+          rdfs:label "FmuModel"@en .
+
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action
 :Action rdf:type owl:Class ;
@@ -352,20 +375,15 @@ xsd:duration rdf:type rdfs:Datatype .
                                                        owl:onClass :OptimalCondition
                                                      ] ,
                                                      [ rdf:type owl:Restriction ;
-                                                       owl:onProperty :hasSimulationTickSizeInSeconds ;
+                                                       owl:onProperty :hasSimulationModel ;
                                                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                       owl:onDataRange xsd:int
-                                                     ] ,
-                                                     [ rdf:type owl:Restriction ;
-                                                       owl:onProperty :hasModel ;
-                                                       owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                       owl:onDataRange xsd:anyURI
+                                                       owl:onClass <http://www.w3.org/ns/sosa/Procedure>
                                                      ] .
 
 
 ###  http://www.w3.org/ns/sosa/Procedure
 <http://www.w3.org/ns/sosa/Procedure> rdfs:subClassOf [ rdf:type owl:Restriction ;
-                                                        owl:onProperty :hasModel ;
+                                                        owl:onProperty :hasURI ;
                                                         owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                         owl:onDataRange xsd:anyURI
                                                       ] .

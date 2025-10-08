@@ -7,8 +7,8 @@ model roomM370
   constant Integer slowdownValue = 1000;
   
   // Used for testing with CLI tools since they complain they can't initialize with non input/parameter variables.
-  input Real RoomTemperatureInitial(start = 20.0);
-  input Real RoomHumidityInitial(start = 20.0);
+  input Real RoomTemperatureInitial(start = 20);
+  input Real RoomHumidityInitial(start = 20);
   input Real EnergyConsumptionInitial(start = 0);
  
 function GetRoomTemperatureLimit
@@ -66,5 +66,5 @@ equation
   der(EnergyConsumption) = GetEnergyConsumptionRate(AirConditioningUnitState, DehumidifierState);
   
 annotation(
-    experiment(StartTime = 0, StopTime = 8000, Tolerance = 1e-06, Interval = 1));
+    experiment(StartTime = 0, StopTime = 8000, Tolerance = 1e-06, Interval = 900));
 end roomM370;

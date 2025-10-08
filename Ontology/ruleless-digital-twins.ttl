@@ -21,14 +21,6 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Object Properties
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#hasSimulationModel
-:hasSimulationModel rdf:type owl:ObjectProperty ;
-                    rdfs:domain <http://www.w3.org/ns/sosa/Platform> ;
-                    rdfs:range <http://www.w3.org/ns/sosa/Procedure> ;
-                    rdfs:comment "Represents a model used for simulations of the corresponding Platform."@en ;
-                    rdfs:label "hasSimulationModel"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith
 :affectsPropertyWith rdf:type owl:ObjectProperty ;
                      rdfs:range :Effect ;
@@ -58,12 +50,39 @@ xsd:duration rdf:type rdfs:Datatype .
         rdfs:label "enacts"@en .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActionValueGenerator
+:hasActionValueGenerator rdf:type owl:ObjectProperty ;
+                         rdfs:range :ActionValueGenerator .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuationValueGenerator
+:hasActuationValueGenerator rdf:type owl:ObjectProperty ;
+                            rdfs:subPropertyOf :hasActionValueGenerator ;
+                            rdfs:domain <http://www.w3.org/ns/sosa/Actuator> ;
+                            rdfs:range :ActuationValueGenerator .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator
 :hasActuator rdf:type owl:ObjectProperty ;
              rdfs:domain :ActuationAction ;
              rdfs:range <http://www.w3.org/ns/sosa/Actuator> ;
              rdfs:comment "The relation between an ActuationExecution and an Actuator it uses."@en ;
              rdfs:label "hasActuator"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasReconfigurationValueGenerator
+:hasReconfigurationValueGenerator rdf:type owl:ObjectProperty ;
+                                  rdfs:subPropertyOf :hasActionValueGenerator ;
+                                  rdfs:domain :ConfigurableParameter ;
+                                  rdfs:range :ReconfigurationValueGenerator .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel
+:hasSimulationModel rdf:type owl:ObjectProperty ;
+                    rdfs:domain <http://www.w3.org/ns/sosa/Platform> ;
+                    rdfs:range <http://www.w3.org/ns/sosa/Procedure> ;
+                    rdfs:comment "Represents a model used for simulations of the corresponding Platform."@en ;
+                    rdfs:label "hasSimulationModel"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/isInputOf
@@ -176,18 +195,6 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Classes
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#FmuModel
-:FmuModel rdf:type owl:Class ;
-          rdfs:subClassOf <http://www.w3.org/ns/sosa/Procedure> ,
-                          [ rdf:type owl:Restriction ;
-                            owl:onProperty :hasSimulationFidelitySeconds ;
-                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                            owl:onDataRange xsd:int
-                          ] ;
-          rdfs:comment "Represents a simulation model in the form of a Functional Mock-up Unit (FMU)."@en ;
-          rdfs:label "FmuModel"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action
 :Action rdf:type owl:Class ;
         rdfs:comment "Represents a single system Action."@en ;
@@ -254,6 +261,23 @@ xsd:duration rdf:type rdfs:Datatype .
 :Effect rdf:type owl:Class ;
         rdfs:comment "The type of effect on the value of a property."@en ;
         rdfs:label "Effect"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel
+:FmuModel rdf:type owl:Class ;
+          rdfs:subClassOf <http://www.w3.org/ns/sosa/Procedure> ,
+                          [ rdf:type owl:Restriction ;
+                            owl:onProperty :hasSimulationFidelitySeconds ;
+                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                            owl:onDataRange xsd:int
+                          ] ,
+                          [ rdf:type owl:Restriction ;
+                            owl:onProperty :hasURI ;
+                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                            owl:onDataRange xsd:anyURI
+                          ] ;
+          rdfs:comment "Represents a simulation model in the form of a Functional Mock-up Unit (FMU)."@en ;
+          rdfs:label "FmuModel"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition
@@ -379,14 +403,6 @@ xsd:duration rdf:type rdfs:Datatype .
                                                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                        owl:onClass <http://www.w3.org/ns/sosa/Procedure>
                                                      ] .
-
-
-###  http://www.w3.org/ns/sosa/Procedure
-<http://www.w3.org/ns/sosa/Procedure> rdfs:subClassOf [ rdf:type owl:Restriction ;
-                                                        owl:onProperty :hasURI ;
-                                                        owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                        owl:onDataRange xsd:anyURI
-                                                      ] .
 
 
 #################################################################

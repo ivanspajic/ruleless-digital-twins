@@ -16,7 +16,6 @@ namespace Logic.Mapek
         // Required as fields to preserve caching throughout multiple MAPE-K look cycles.
 	    public static Dictionary<string, IModel> _fmuDict = new Dictionary<string, IModel>();
 	    public static Dictionary<string, IInstance> _iDict = new Dictionary<string, IInstance>();
-	    private static int _iCount = 0;
 
         private readonly ILogger<MapekPlan> _logger;
         private readonly IFactory _factory;
@@ -429,28 +428,30 @@ namespace Logic.Mapek
             int simulationFidelitySeconds)
         {
             _logger.LogInformation($"Simulation {simulationConfiguration} ({simulationConfiguration.SimulationTicks.Count()} ticks)");
-            IModel model = null;
-            if (!_fmuDict.TryGetValue(fmuFilePath, out model)) {
-                _logger.LogInformation("Load Model");
+            if (!_fmuDict.TryGetValue(fmuFilePath, out IModel? model))
+            {
+                _logger.LogDebug("Loading Model {filePath}", fmuFilePath);
                 model = Model.Load(fmuFilePath);
                 _fmuDict.Add(fmuFilePath, model);
             }
             Debug.Assert(model != null, "Model is null after loading.");
             // This instantiation fails frequently due to a "protected memory" exception(even when no other simulations have been run beforehand). Because it's thrown from
             // external code, the exception can't be caught for retries. This only works consistently with the Modelica reference FMUs.
-            IInstance fmuInstance = null;
-            if (!(_iDict.TryGetValue("demo"+_iCount, out fmuInstance))) {
-                _logger.LogInformation($"Create instance {_iCount++}.");
-                fmuInstance = model.CreateCoSimulationInstance("demo" + _iCount++);
-                //_iDict.Add("demo"+_iCount, fmuInstance);
+            // XXX: Use proper name once we have multiple FMUs.
+            var instanceName = "demo";
+            if (!(_iDict.TryGetValue(instanceName, out IInstance? fmuInstance))) {
+                _logger.LogDebug("Creating instance.");
+                fmuInstance = model.CreateCoSimulationInstance(instanceName);
+                _iDict.Add(instanceName, fmuInstance);
 
-                _logger.LogInformation("Setting time");
+                _logger.LogDebug("Setting time");
+                fmuInstance.StartTime(0);
+            } else {
+                _logger.LogDebug("Resetting.");
+                fmuInstance.Reset();
                 fmuInstance.StartTime(0);
             }
-            // FIXME: we're currently using the cached instance without resetting time. We can't reliably get fresh instances.
-            // iCount++;
-
-
+            Debug.Assert(fmuInstance != null, "Instance is null after creation.");
 
             // Run the simulation by executing ActuationActions in their respective simulation intervals.
             foreach (var simulationTick in simulationConfiguration.SimulationTicks)
@@ -499,9 +500,9 @@ namespace Logic.Mapek
             // This could be due to improper implementations or handling of resources in the Femyou (.NET) library used to read from and write to FMUs. Note that
             // calling Dispose() while running a Modelica reference FMU (against which the Femyou library was checked), this issue doesn't occur. Our FMUs are
             // generated as standard FMUs by OpenModelica.
-            // _logger.LogInformation("Dispose...");
-            // fmuInstance.Dispose();
-            // _logger.LogInformation("...done");
+            _logger.LogInformation("Dispose...");
+            //fmuInstance.Dispose();
+            _logger.LogInformation("...done");
             // model.Dispose();
         }
 

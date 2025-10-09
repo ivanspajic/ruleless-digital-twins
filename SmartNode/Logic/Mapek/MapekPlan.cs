@@ -495,15 +495,6 @@ namespace Logic.Mapek
 
                 AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
             }
-
-            // Calling Dispose() on the instance creates a problem in the underlying external code which crashes the application approximately 95% of the time.
-            // This could be due to improper implementations or handling of resources in the Femyou (.NET) library used to read from and write to FMUs. Note that
-            // calling Dispose() while running a Modelica reference FMU (against which the Femyou library was checked), this issue doesn't occur. Our FMUs are
-            // generated as standard FMUs by OpenModelica.
-            _logger.LogInformation("Dispose...");
-            //fmuInstance.Dispose();
-            _logger.LogInformation("...done");
-            // model.Dispose();
         }
 
         private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs)

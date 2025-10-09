@@ -275,6 +275,7 @@ namespace Logic.Mapek
             var fmuModel = GetHostPlatformFmuModel(instanceModel, simulationConfigurations.First(), fmuDirectory);
 
             int i = 0;
+            // TODO: Parallelize simulations (#13).
             foreach (var simulationConfiguration in simulationConfigurations)
             {
                 _logger.LogInformation("Running simulation #{run}", i++);
@@ -284,8 +285,6 @@ namespace Logic.Mapek
 
                 if (simulationConfiguration.SimulationTicks.Any())
                 {
-                    // Comment this back in for FMU testing. The Femyou library can seemingly not dispose of resources from FMUs other than Modelica reference ones.
-                    // All other logic of writing inputs and reading outputs works.
                     ExecuteActuationActionFmu(fmuModel.FilePath, simulationConfiguration, instanceModel, propertyCacheCopy, fmuModel.SimulationFidelitySeconds);
                 }
 
@@ -435,11 +434,9 @@ namespace Logic.Mapek
                 _fmuDict.Add(fmuFilePath, model);
             }
             Debug.Assert(model != null, "Model is null after loading.");
-            // This instantiation fails frequently due to a "protected memory" exception(even when no other simulations have been run beforehand). Because it's thrown from
-            // external code, the exception can't be caught for retries. This only works consistently with the Modelica reference FMUs.
-            // XXX: Use proper name once we have multiple FMUs.
-            var instanceName = "demo";
-            if (!(_iDict.TryGetValue(instanceName, out IInstance? fmuInstance))) {
+            // We're only using one instance per FMU, so we can just use the path as name.
+            var instanceName = fmuFilePath;
+            if (!_iDict.TryGetValue(instanceName, out IInstance? fmuInstance)) {
                 _logger.LogDebug("Creating instance.");
                 fmuInstance = model.CreateCoSimulationInstance(instanceName);
                 _iDict.Add(instanceName, fmuInstance);

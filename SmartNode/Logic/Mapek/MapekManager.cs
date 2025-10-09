@@ -83,7 +83,7 @@ namespace Logic.Mapek
                     break; // We can sleep when we're dead.
                 }
 
-                Thread.Sleep(SleepyTimeMilliseconds);
+                // Thread.Sleep(SleepyTimeMilliseconds);
             }
         }
 

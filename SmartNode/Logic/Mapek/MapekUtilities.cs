@@ -41,11 +41,27 @@ namespace Logic.Mapek
             var query = GetParameterizedStringQuery();
 
             query.CommandText = @"SELECT ?valueType WHERE {
-                @property rdf:type ?bNode .
-                ?bNode owl:onProperty meta:hasValue .
-                ?bNode owl:onDataRange ?valueType . }";
+                @property rdf:type ?bNode1 .
+                ?bNode1 owl:onProperty meta:hasValue .
+                ?bNode1 owl:onDataRange ?valueType .
+                FILTER NOT EXISTS { ?valueType owl:onDatatype ?bNode2 } }";
 
             var propertyType = GetPropertyValueType(query, logger, instanceModel, "property", propertyNode);
+
+            if (!string.IsNullOrEmpty(propertyType))
+            {
+                return propertyType;
+            }
+
+            query = GetParameterizedStringQuery();
+
+            query.CommandText = @"SELECT ?valueType WHERE {
+                @property rdf:type ?bNode1 .
+                ?bNode1 owl:onProperty meta:hasValue .
+                ?bNode1 owl:onDataRange ?bNode2 .
+                ?bNode2 owl:onDatatype ?valueType . }";
+
+            propertyType = GetPropertyValueType(query, logger, instanceModel, "property", propertyNode);
 
             if (!string.IsNullOrEmpty(propertyType))
             {

@@ -272,10 +272,8 @@ namespace Logic.Mapek
 
         private void Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations, IGraph instanceModel, PropertyCache propertyCache, string fmuDirectory)
         {
-            // Retrieve the host platform FMU for ActuationAction simulations.
-            var fmuFilePath = GetHostPlatformFmu(instanceModel, simulationConfigurations.First(), fmuDirectory);
-            // Retrieve the simulation fidelity for the host platform FMU.
-            var simulationFidelitySeconds = GetSimulationFidelitySeconds(instanceModel, fmuFilePath);
+            // Retrieve the host platform FMU and its simulation fidelity for ActuationAction simulations.
+            var fmuModel = GetHostPlatformFmuModel(instanceModel, simulationConfigurations.First(), fmuDirectory);
 
             int i = 0;
             foreach (var simulationConfiguration in simulationConfigurations)
@@ -289,7 +287,7 @@ namespace Logic.Mapek
                 {
                     // Comment this back in for FMU testing. The Femyou library can seemingly not dispose of resources from FMUs other than Modelica reference ones.
                     // All other logic of writing inputs and reading outputs works.
-                    ExecuteActuationActionFmu(fmuFilePath, simulationConfiguration, instanceModel, propertyCacheCopy, simulationFidelitySeconds);
+                    ExecuteActuationActionFmu(fmuModel.FilePath, simulationConfiguration, instanceModel, propertyCacheCopy, fmuModel.SimulationFidelitySeconds);
                 }
 
                 if (simulationConfiguration.PostTickActions.Any())
@@ -302,13 +300,8 @@ namespace Logic.Mapek
             }
         }
 
-        private string GetHostPlatformFmu(IGraph instanceModel, SimulationConfiguration simulationConfiguration, string fmuDirectory)
+        private FmuModel GetHostPlatformFmuModel(IGraph instanceModel, SimulationConfiguration simulationConfiguration, string fmuDirectory)
         {
-            if (!simulationConfiguration.SimulationTicks.Any())
-            {
-                return string.Empty;
-            }
-
             // Retrieve all Actuators to be used in the simulations and ensure that they belong to the same host Platform such that the Platform's
             // FMU will contain all of their relevant input/output variables.
             var actuatorNames = new HashSet<string>();
@@ -332,40 +325,26 @@ namespace Logic.Mapek
 
             var clause = clauseBuilder.ToString();
 
-            query.CommandText = @"SELECT ?fmuFilePath WHERE {
+            query.CommandText = @"SELECT ?fmuModel ?fmuFilePath ?simulationFidelitySeconds WHERE {
                 ?platform rdf:type sosa:Platform . " +
                 clause +
-                "?platform meta:hasModel ?fmuFilePath . }";
+                @"?platform meta:hasSimulationModel ?fmuModel .
+                ?fmuModel rdf:type meta:FmuModel .
+                ?fmuModel meta:hasURI ?fmuFilePath .
+                ?fmuModel meta:hasSimulationFidelitySeconds ?simulationFidelitySeconds . }";
 
             var queryResult = instanceModel.ExecuteQuery(query, _logger);
 
             // There can theoretically be multiple Platforms hosting the same Actuator, but we limit ourselves to expect a single Platform
             // per instance model. There should therefore be only one result.
-            var fmu = queryResult.Results[0]["fmuFilePath"].ToString().Split('^')[0];
+            var fmuModel = queryResult.Results[0];
 
-            return Path.Combine(fmuDirectory, fmu);
-        }
-
-        private int GetSimulationFidelitySeconds(IGraph instanceModel, string fmuFilePath)
-        {
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            query.CommandText = @"SELECT ?simulationFidelitySeconds WHERE {
-                ?platform rdf:type sosa:Platform .
-                ?platform meta:hasModel @fmuFilePath .
-                ?platform meta:hasSimulationFidelitySeconds ?simulationFidelitySeconds . }";
-
-            query.SetLiteral("fmuFilePath", fmuFilePath, false);
-
-            var queryResult = instanceModel.ExecuteQuery(query, _logger);
-
-            if (queryResult.IsEmpty)
+            return new FmuModel
             {
-                throw new Exception("The Platform has a missing simulation fidelity value.");
-            }
-
-            // We limit ourselves to having only one simulation fidelity value, since we're currently using one FMU per instance model.
-            return int.Parse(queryResult.Results[0]["simulationFidelitySeconds"].ToString());
+                Name = fmuModel["fmuModel"].ToString(),
+                FilePath = Path.Combine(fmuDirectory, fmuModel["fmuFilePath"].ToString().Split('^')[0]),
+                SimulationFidelitySeconds = int.Parse(fmuModel["simulationFidelitySeconds"].ToString().Split('^')[0])
+            };
         }
 
         private PropertyCache GetPropertyCacheCopy(PropertyCache originalPropertyCache)
@@ -461,7 +440,7 @@ namespace Logic.Mapek
             // external code, the exception can't be caught for retries. This only works consistently with the Modelica reference FMUs.
             IInstance fmuInstance = null;
             if (!(_iDict.TryGetValue("demo"+_iCount, out fmuInstance))) {
-                _logger.LogInformation($"Create instance {_iCount}.");
+                _logger.LogInformation($"Create instance {_iCount++}.");
                 fmuInstance = model.CreateCoSimulationInstance("demo" + _iCount++);
                 //_iDict.Add("demo"+_iCount, fmuInstance);
 
@@ -500,8 +479,18 @@ namespace Logic.Mapek
                 AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
 
                 _logger.LogInformation("Tick");
+                // Keep simulation fidelity while advancing an appropriate amount of time.
+                var maximumSteps = simulationTick.TickDurationSeconds / simulationFidelitySeconds;
+                var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
+                var difference = maximumSteps - maximumStepsRoundedDown;
 
-                fmuInstance.AdvanceTime(simulationTick.TickDurationSeconds);
+                for (var i = 0; i < maximumStepsRoundedDown; i++)
+                {
+                    fmuInstance.AdvanceTime(simulationFidelitySeconds);
+                }
+
+                // Advance the remainder of time to stay true to the simulation interval duration.
+                fmuInstance.AdvanceTime(difference);
 
                 AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
             }

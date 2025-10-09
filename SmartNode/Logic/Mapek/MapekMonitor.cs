@@ -194,10 +194,8 @@ namespace Logic.Mapek
             // Get all ObservableProperties.
             query.CommandText = @"SELECT DISTINCT ?observableProperty ?valueType WHERE {
                 ?sensor rdf:type sosa:Sensor .
-                ?sensor sosa:observes ?observableProperty .
-                ?observableProperty rdf:type ?bNode .
-                ?bNode owl:onProperty meta:hasValue .
-                ?bNode owl:onDataRange ?valueType . }";
+                ?sensor sosa:observes ?observableProperty . 
+                ?observableProperty rdf:type sosa:ObservableProperty . }";
 
             var queryResult = instanceModel.ExecuteQuery(query, _logger);
 
@@ -205,12 +203,11 @@ namespace Logic.Mapek
             {
                 var observablePropertyNode = result["observableProperty"];
                 var observablePropertyName = observablePropertyNode.ToString();
-                var valueType = result["valueType"].ToString();
-                valueType = valueType.Split('#')[1];
-
-                var innerQuery = MapekUtilities.GetParameterizedStringQuery();
+                var valueType = MapekUtilities.GetPropertyType(_logger, instanceModel, observablePropertyNode);
 
                 // Get all measured Properties that are results of observing ObservableProperties.
+                var innerQuery = MapekUtilities.GetParameterizedStringQuery();
+
                 innerQuery.CommandText = @"SELECT ?outputProperty WHERE {
                     ?sensor sosa:observes @observableProperty .
                     ?sensor ssn:implements ?procedure .

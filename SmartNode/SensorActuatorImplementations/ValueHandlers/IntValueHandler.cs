@@ -37,6 +37,18 @@ namespace SensorActuatorImplementations.ValueHandlers
                     0,
                     1
                 }
+            },
+            { "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan", new List<object>
+                {
+                    0,
+                    1
+                }
+            },
+            { "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater", new List<object>
+                {
+                    0,
+                    1
+                }
             }
         };
 

@@ -165,7 +165,7 @@ namespace Logic.Mapek
 
             // Get all ActuationActions and their Actuators that cause PropertyChanges equal to those that the system
             // wishes to optimize for.
-            actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuator WHERE {
+            actuationQuery.CommandText = @"SELECT ?actuationAction ?actuator WHERE {
                 ?actuationAction rdf:type meta:ActuationAction .
                 ?actuationAction meta:hasActuator ?actuator .
                 ?actuator rdf:type sosa:Actuator .
@@ -185,7 +185,7 @@ namespace Logic.Mapek
 
             // Get all ReconfigurationActions, their ConfigurableParameters, and their Effects that cause PropertyChanges equal to those that the
             // system wishes to optimize for.
-            reconfigurationQuery.CommandText = @"SELECT DISTINCT ?reconfigurationAction ?configurableParameter ?effect WHERE {
+            reconfigurationQuery.CommandText = @"SELECT ?reconfigurationAction ?configurableParameter ?effect WHERE {
                 ?reconfigurationAction rdf:type meta:ReconfigurationAction .
                 ?reconfigurationAction ssn:forProperty ?configurableParameter .
                 ?configurableParameter meta:enacts ?propertyChange .
@@ -679,7 +679,7 @@ namespace Logic.Mapek
                     var actuationQuery = MapekUtilities.GetParameterizedStringQuery();
 
                     // Get all ActuationActions, ActuatorStates, and Actuators that match as relevant Actions given the appropriate filter.
-                    actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuator WHERE {
+                    actuationQuery.CommandText = @"SELECT ?actuationAction ?actuator WHERE {
                         ?actuationAction rdf:type meta:ActuationAction.
                         ?actuationAction meta:hasActuator ?actuator .
                         ?actuator meta:enacts ?propertyChange .
@@ -706,7 +706,7 @@ namespace Logic.Mapek
                     var reconfigurationQuery = MapekUtilities.GetParameterizedStringQuery();
 
                     // Get all ReconfigurationActions and ConfigurableParameters that match as relevant Actions given the appropriate filter.
-                    reconfigurationQuery.CommandText = @"SELECT DISTINCT ?reconfigurationAction ?configurableParameter WHERE {
+                    reconfigurationQuery.CommandText = @"SELECT ?reconfigurationAction ?configurableParameter WHERE {
                         ?reconfigurationAction rdf:type meta:ReconfigurationAction .
                         ?reconfigurationAction ssn:forProperty ?configurableParameter .
                         ?configurableParameter meta:enacts ?propertyChange .

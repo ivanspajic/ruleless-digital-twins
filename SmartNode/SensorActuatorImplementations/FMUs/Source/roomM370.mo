@@ -66,5 +66,5 @@ equation
   der(EnergyConsumption) = GetEnergyConsumptionRate(AirConditioningUnitState, DehumidifierState);
   
 annotation(
-    experiment(StartTime = 0, StopTime = 8000, Tolerance = 1e-06, Interval = 900));
+    experiment(StartTime = 0, StopTime = 8000, Tolerance = 1e-06, Interval = 1));
 end roomM370;

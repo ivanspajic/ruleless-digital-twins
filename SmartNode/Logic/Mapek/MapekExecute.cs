@@ -35,8 +35,6 @@ namespace Logic.Mapek
             }
 
             LogExpectedPropertyValues(optimalConfiguration);
-
-            Console.Read();
         }
 
         private void ExecuteActuationAction(ActuationAction actuationAction, double durationSeconds)

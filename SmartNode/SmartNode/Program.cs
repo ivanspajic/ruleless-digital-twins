@@ -6,12 +6,9 @@ using Logic.FactoryInterface;
 using System.CommandLine;
 using System.Reflection;
 
-namespace SmartNode
-{
-    internal class Program
-    {
-        static void Main(string[] args)
-        {
+namespace SmartNode {
+    internal class Program {
+        static void Main(string[] args) {
             // Parse the command line arguments.
             RootCommand rootCommand = new();
 
@@ -42,20 +39,17 @@ namespace SmartNode
 
             if (parseResult.Errors.Count != 0 ||
                 modelFile is not FileInfo parsedFile ||
-                string.IsNullOrEmpty(fmuDirectory))
-            {
+                string.IsNullOrEmpty(fmuDirectory)) {
                 throw new ArgumentException(parseResult.Errors[0].Message); // Are there always errors here?
             }
 
             var builder = Host.CreateApplicationBuilder(args);
 
             // Register services here.
-            builder.Services.AddLogging(loggingBuilder =>
-            {
+            builder.Services.AddLogging(loggingBuilder => {
                 loggingBuilder.AddConsole(options => options.TimestampFormat = "HH:mm:ss ");
             });
-            builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceprovider =>
-            {
+            builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceprovider =>{
                 return new MapekManager(serviceprovider);
             });
             // Register a factory to allow for dynamic constructor argument passing through DI.
@@ -79,19 +73,17 @@ namespace SmartNode
             modelFilePath = Path.GetFullPath(modelFile.FullName);
 
             // Start the loop.
-            try
-            {
+            try {
                 mapekManager.StartLoop(modelFilePath, fmuDirectory, maxRound);
             }
-            catch (Exception exception)
-            {
+            catch (Exception exception) {
                 logger.LogCritical(exception, "Exception");
-
                 throw;
             }
 
             // XXX review
             // host.Run();
+            logger.LogInformation("MAPE-K ended.");
         }
     }
 }

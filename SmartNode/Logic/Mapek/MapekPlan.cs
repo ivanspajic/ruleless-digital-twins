@@ -526,7 +526,7 @@ namespace Logic.Mapek
 
         private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
         {
-            var numberOfSatisfiedOptimalConditions = 0;
+            var numberOfSatisfiedOptimalConditions = optimalConditions.Count();
 
             foreach (var optimalCondition in optimalConditions)
             {
@@ -553,7 +553,7 @@ namespace Logic.Mapek
 
                     if (unsatisfiedConstraints.Any())
                     {
-                        numberOfSatisfiedOptimalConditions++;
+                        numberOfSatisfiedOptimalConditions--;
 
                         break;
                     }

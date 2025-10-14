@@ -3,7 +3,7 @@ using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 
-namespace SensorActuatorImplementations.ValueHandlers
+namespace Implementations.ValueHandlers
 {
     public class TimespanValueHandler : IValueHandler
     {

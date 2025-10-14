@@ -1,6 +1,6 @@
 ﻿using Logic.DeviceInterfaces;
 
-namespace SensorActuatorImplementations.Actuators
+namespace Implementations.Actuators
 {
     public class ExampleActuator : IActuatorDevice
     {

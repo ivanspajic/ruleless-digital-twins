@@ -27,13 +27,21 @@ namespace SmartNode {
                 DefaultValueFactory = parseResult => 4,
             };
 
+            Option<bool> simulateTwinningTargetOption = new("--simulate", "-s")
+            {
+                DefaultValueFactory = parseResult => false,
+                Description = "Simulate the twinning target."
+            };
+
             rootCommand.Add(maxRoundOption);
+            rootCommand.Add(simulateTwinningTargetOption);
             rootCommand.Add(fileNameArg);
             rootCommand.Add(fmuDirectoryFilepathArgument);
 
             ParseResult parseResult = rootCommand.Parse(args);
 
             var maxRound = parseResult.GetValue(maxRoundOption);
+            var simulateTwinningTarget = parseResult.GetValue(simulateTwinningTargetOption);
             var modelFile = parseResult.GetValue(fileNameArg);
             var fmuDirectory = parseResult.GetValue(fmuDirectoryFilepathArgument);
 
@@ -53,7 +61,7 @@ namespace SmartNode {
                 return new MapekManager(serviceprovider);
             });
             // Register a factory to allow for dynamic constructor argument passing through DI.
-            builder.Services.AddSingleton<IFactory, Factory>();
+            builder.Services.AddSingleton<IFactory, Factory>(serviceProvider => new Factory(simulateTwinningTarget));
 
             using var host = builder.Build();
 

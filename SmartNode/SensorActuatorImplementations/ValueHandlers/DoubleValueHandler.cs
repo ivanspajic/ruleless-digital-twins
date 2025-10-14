@@ -4,7 +4,7 @@ using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 using System.Globalization;
 
-namespace SensorActuatorImplementations.ValueHandlers
+namespace Implementations.ValueHandlers
 {
     public class DoubleValueHandler : IValueHandler
     {

@@ -17,15 +17,25 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public void Execute(SimulationConfiguration optimalConfiguration, PropertyCache propertyCache)
+        public void Execute(SimulationConfiguration optimalConfiguration, PropertyCache propertyCache, bool useSimulatedTwinningTarget)
         {
             _logger.LogInformation("Starting the Execute phase.");
+
+            if (optimalConfiguration == null)
+            {
+                return;
+            }
 
             foreach (var simulationTick in optimalConfiguration.SimulationTicks)
             {
                 foreach (var actuationAction in simulationTick.ActionsToExecute)
                 {
                     ExecuteActuationAction(actuationAction, simulationTick.TickDurationSeconds);
+                }
+
+                if (!useSimulatedTwinningTarget)
+                {
+                    Thread.Sleep(simulationTick.TickDurationSeconds);
                 }
             }
 
@@ -47,7 +57,7 @@ namespace Logic.Mapek
             var actuator = _factory.GetActuatorDeviceImplementation(actuationAction.Actuator.Name);
 
             // This cannot be a blocking call to ensure that multiple Actuators in an interval get executed for the same duration.
-            actuator.Actuate(actuationAction.NewStateValue, durationSeconds);
+            actuator.Actuate(actuationAction.NewStateValue);
         }
 
         private void ExecuteReconfigurationAction(ReconfigurationAction reconfigurationAction, PropertyCache propertyCache)

@@ -8,7 +8,7 @@ namespace Logic.Models.OntologicalModels
 
         public required IEnumerable<ConstraintExpression> Constraints { get; init; }
 
-        public IEnumerable<AtomicConstraintExpression> UnsatisfiedAtomicConstraints { get; set; }
+        public required IEnumerable<AtomicConstraintExpression> UnsatisfiedAtomicConstraints { get; set; }
 
         public int ReachedInMaximumSeconds { get; init; }
 

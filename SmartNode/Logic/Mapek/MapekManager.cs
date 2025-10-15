@@ -22,15 +22,19 @@ namespace Logic.Mapek
         private readonly IMapekPlan _mapekPlan;
         private readonly IMapekExecute _mapekExecute;
 
+        private bool _simulateTwinningTarget = false;
+
         private bool _isLoopActive = false;
 
-        public MapekManager(IServiceProvider serviceProvider)
+        public MapekManager(IServiceProvider serviceProvider, bool simulateTwinningTarget)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekManager>>();
             _mapekMonitor = new MapekMonitor(serviceProvider);
             _mapekAnalyze = new MapekAnalyze(serviceProvider);
             _mapekPlan = new MapekPlan(serviceProvider);
             _mapekExecute = new MapekExecute(serviceProvider);
+
+            _simulateTwinningTarget = simulateTwinningTarget;
         }
 
         public void StartLoop(string instanceModelFilePath, string fmuDirectory, int maxRound = -1)
@@ -71,7 +75,7 @@ namespace Logic.Mapek
                 // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
                 var optimalConfiguration = _mapekPlan.Plan(optimalConditionsAndActions.Item1, optimalConditionsAndActions.Item2, propertyCache, instanceModel, fmuDirectory, ActuationSimulationGranularity);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
-                _mapekExecute.Execute(optimalConfiguration, propertyCache);
+                _mapekExecute.Execute(optimalConfiguration, propertyCache, _simulateTwinningTarget);
 
                 if (maxRound > 0)
                 {

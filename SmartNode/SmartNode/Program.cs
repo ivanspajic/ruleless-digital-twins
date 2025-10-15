@@ -58,7 +58,7 @@ namespace SmartNode {
                 loggingBuilder.AddConsole(options => options.TimestampFormat = "HH:mm:ss ");
             });
             builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceprovider =>{
-                return new MapekManager(serviceprovider);
+                return new MapekManager(serviceprovider, simulateTwinningTarget);
             });
             // Register a factory to allow for dynamic constructor argument passing through DI.
             builder.Services.AddSingleton<IFactory, Factory>(serviceProvider => new Factory(simulateTwinningTarget));

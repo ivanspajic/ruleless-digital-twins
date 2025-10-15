@@ -13,9 +13,9 @@ namespace Logic.Mapek
 {
     internal class MapekPlan : IMapekPlan
     {
-        // Required as fields to preserve caching throughout multiple MAPE-K look cycles.
-	    public static Dictionary<string, IModel> _fmuDict = new Dictionary<string, IModel>();
-	    public static Dictionary<string, IInstance> _iDict = new Dictionary<string, IInstance>();
+        // Required as fields to preserve caching throughout multiple MAPE-K loop cycles.
+	    public static Dictionary<string, IModel> _fmuDict = [];
+	    public static Dictionary<string, IInstance> _iDict = [];
 
         private readonly ILogger<MapekPlan> _logger;
         private readonly IFactory _factory;
@@ -70,12 +70,15 @@ namespace Logic.Mapek
             // Find the optimal simulation configuration.
             var optimalConfiguration = GetOptimalConfiguration(instanceModel, propertyCache, optimalConditions, simulationConfigurations);
 
-            LogOptimalSimulationConfiguration(optimalConfiguration);
+            if (optimalConfiguration != null)
+            {
+                LogOptimalSimulationConfiguration(optimalConfiguration);
+            }
 
-            return optimalConfiguration;
+            return optimalConfiguration!;
         }
 
-        private IEnumerable<IEnumerable<ActuationAction>> GetActuationActionCombinations(IEnumerable<ActuationAction> actuationActions)
+        private HashSet<HashSet<ActuationAction>> GetActuationActionCombinations(IEnumerable<ActuationAction> actuationActions)
         {
             var actuationActionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(new ActionSetEqualityComparer());
 
@@ -109,7 +112,7 @@ namespace Logic.Mapek
             return GetNaryCartesianProducts(actuatorActuationsByActuator);
         }
 
-        private IEnumerable<IEnumerable<ReconfigurationAction>> GetReconfigurationActionCombinations(IEnumerable<ReconfigurationAction> reconfigurationActions)
+        private HashSet<HashSet<ReconfigurationAction>> GetReconfigurationActionCombinations(IEnumerable<ReconfigurationAction> reconfigurationActions)
         {
             var reconfigurationActionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(new ActionSetEqualityComparer());
 
@@ -118,7 +121,8 @@ namespace Logic.Mapek
 
             foreach (var reconfigurationAction in reconfigurationActions)
             {
-                if (reconfigurationActionsByConfigurableParameterMap.TryGetValue(reconfigurationAction.ConfigurableParameter.Name, out List<ReconfigurationAction> reconfigurationActionsInMap))
+                if (reconfigurationActionsByConfigurableParameterMap.TryGetValue(reconfigurationAction.ConfigurableParameter.Name,
+                    out List<ReconfigurationAction>? reconfigurationActionsInMap))
                 {
                     reconfigurationActionsInMap.Add(reconfigurationAction);
                 }
@@ -143,7 +147,7 @@ namespace Logic.Mapek
             return GetNaryCartesianProducts(reconfigurationActionsByConfigurableParameter);
         }
 
-        private IEnumerable<SimulationConfiguration> GetSimulationConfigurationsFromActionCombinations(IEnumerable<IEnumerable<ActuationAction>> actuationActionCombinations,
+        private List<SimulationConfiguration> GetSimulationConfigurationsFromActionCombinations(IEnumerable<IEnumerable<ActuationAction>> actuationActionCombinations,
             IEnumerable<IEnumerable<ReconfigurationAction>> reconfigurationActionCombinations,
             IEnumerable<OptimalCondition> optimalConditions,
             int simulationGranularity)
@@ -169,7 +173,7 @@ namespace Logic.Mapek
 
                         var simulationTick = new SimulationTick
                         {
-                            ActionsToExecute = actuationActionCombination,
+                            ActionsToExecute = actuationActionCombination.ToList(),
                             TickIndex = i,
                             TickDurationSeconds = timeInterval
                         };
@@ -193,7 +197,7 @@ namespace Logic.Mapek
                         {
                             simulationConfiguration = new SimulationConfiguration
                             {
-                                SimulationTicks = simulationTickCombination.Reverse(), // Must be reversed due to how the combinations are constructed.
+                                SimulationTicks = simulationTickCombination.Reverse().ToList(), // Must be reversed due to how the combinations are constructed.
                                 PostTickActions = reconfigurationActionCombination
                             };
                         }
@@ -202,7 +206,7 @@ namespace Logic.Mapek
                     {
                         simulationConfiguration = new SimulationConfiguration
                         {
-                            SimulationTicks = simulationTickCombination.Reverse(), // Must be reversed due to how the combinations are constructed.
+                            SimulationTicks = simulationTickCombination.Reverse().ToList(), // Must be reversed due to how the combinations are constructed.
                             PostTickActions = []
                         };
                     }
@@ -274,6 +278,10 @@ namespace Logic.Mapek
             // Retrieve the host platform FMU and its simulation fidelity for ActuationAction simulations.
             var fmuModel = GetHostPlatformFmuModel(instanceModel, simulationConfigurations.First(), fmuDirectory);
 
+            // Measure simulation time.
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             int i = 0;
             // TODO: Parallelize simulations (#13).
             foreach (var simulationConfiguration in simulationConfigurations)
@@ -296,6 +304,9 @@ namespace Logic.Mapek
                 // Assign the final Property values to the results of the simulation configuration.
                 simulationConfiguration.ResultingPropertyCache = propertyCacheCopy;
             }
+
+            stopwatch.Stop();
+            _logger.LogInformation("Total simulation time (minutes): {elapsedTime}", (double)stopwatch.ElapsedMilliseconds / 1000 / 60);
         }
 
         private FmuModel GetHostPlatformFmuModel(IGraph instanceModel, SimulationConfiguration simulationConfiguration, string fmuDirectory)
@@ -345,7 +356,7 @@ namespace Logic.Mapek
             };
         }
 
-        private PropertyCache GetPropertyCacheCopy(PropertyCache originalPropertyCache)
+        private static PropertyCache GetPropertyCacheCopy(PropertyCache originalPropertyCache)
         {
             var propertyCacheCopy = new PropertyCache
             {
@@ -405,7 +416,7 @@ namespace Logic.Mapek
             return observableProperties;
         }
 
-        private int GetMaximumSimulationTime(IEnumerable<OptimalCondition> optimalConditions)
+        private static int GetMaximumSimulationTime(IEnumerable<OptimalCondition> optimalConditions)
         {
             var maximumSimulationTime = int.MaxValue;
 
@@ -478,7 +489,7 @@ namespace Logic.Mapek
 
                 _logger.LogInformation("Tick");
                 // Keep simulation fidelity while advancing an appropriate amount of time.
-                var maximumSteps = simulationTick.TickDurationSeconds / simulationFidelitySeconds;
+                var maximumSteps = (double)simulationTick.TickDurationSeconds / simulationFidelitySeconds;
                 var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
                 var difference = maximumSteps - maximumStepsRoundedDown;
 
@@ -526,7 +537,7 @@ namespace Logic.Mapek
 
         private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
         {
-            var numberOfSatisfiedOptimalConditions = optimalConditions.Count();
+            var numberOfSatisfiedOptimalConditions = 0;
 
             foreach (var optimalCondition in optimalConditions)
             {
@@ -551,11 +562,9 @@ namespace Logic.Mapek
                 {
                     var unsatisfiedConstraints = valueHandler.GetUnsatisfiedConstraintsFromEvaluation(constraint, propertyValue);
 
-                    if (unsatisfiedConstraints.Any())
+                    if (!unsatisfiedConstraints.Any())
                     {
-                        numberOfSatisfiedOptimalConditions--;
-
-                        break;
+                        numberOfSatisfiedOptimalConditions++;
                     }
                 }
             }
@@ -574,6 +583,11 @@ namespace Logic.Mapek
             // 2. Filter for simulation configurations that have the highest number of the most optimized Properties.
             // 3. Pick the first one.
 
+            if (!simulationConfigurations.Any())
+            {
+                return null!;
+            }
+
             // Filter for simulation configurations that satisfy the most OptimalConditions.
             var simulationConfigurationsWithMostOptimalConditionsSatisfied = GetSimulationConfigurationsWithMostOptimalConditionsSatisfied(simulationConfigurations, optimalConditions);
 
@@ -585,7 +599,9 @@ namespace Logic.Mapek
             _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationConfigurationsWithMostOptimalConditionsSatisfied.Count());
 
             // Filter for simulation configurations that optimize the most targeted Properties.
-            var simulationConfigurationsWithMostOptimizedProperties = GetSimulationConfigurationsWithMostOptimizedProperties(simulationConfigurationsWithMostOptimalConditionsSatisfied, instanceModel, propertyCache);
+            var simulationConfigurationsWithMostOptimizedProperties = GetSimulationConfigurationsWithMostOptimizedProperties(simulationConfigurationsWithMostOptimalConditionsSatisfied,
+                instanceModel,
+                propertyCache);
 
             if (simulationConfigurationsWithMostOptimizedProperties.Count() == 1)
             {
@@ -598,7 +614,7 @@ namespace Logic.Mapek
             return simulationConfigurationsWithMostOptimizedProperties.First();
         }
 
-        private IEnumerable<SimulationConfiguration> GetSimulationConfigurationsWithMostOptimalConditionsSatisfied(IEnumerable<SimulationConfiguration> simulationConfigurations,
+        private List<SimulationConfiguration> GetSimulationConfigurationsWithMostOptimalConditionsSatisfied(IEnumerable<SimulationConfiguration> simulationConfigurations,
             IEnumerable<OptimalCondition> optimalConditions)
         {
             var passingSimulationConfigurations = new List<SimulationConfiguration>();
@@ -625,7 +641,7 @@ namespace Logic.Mapek
             return passingSimulationConfigurations;
         }
 
-        private IEnumerable<SimulationConfiguration> GetSimulationConfigurationsWithMostOptimizedProperties(IEnumerable<SimulationConfiguration> simulationConfigurations,
+        private List<SimulationConfiguration> GetSimulationConfigurationsWithMostOptimizedProperties(IEnumerable<SimulationConfiguration> simulationConfigurations,
             IGraph instanceModel,
             PropertyCache propertyCache)
         {
@@ -638,10 +654,11 @@ namespace Logic.Mapek
 
             // Return the simulation configurations with the maximum score.
             return simulationConfigurations.OrderByDescending(s => s, simulationConfigurationComparer)
-                .Where(s => simulationConfigurationComparer.Compare(s, simulationConfigurations.First()) > -1);
+                .Where(s => simulationConfigurationComparer.Compare(s, simulationConfigurations.First()) > -1)
+                .ToList();
         }
 
-        private IEnumerable<PropertyChange> GetPropertyChangesToOptimizeFor(IGraph instanceModel, PropertyCache propertyCache)
+        private List<PropertyChange> GetPropertyChangesToOptimizeFor(IGraph instanceModel, PropertyCache propertyCache)
         {
             var propertyChangesToOptimizeFor = new List<PropertyChange>();
 

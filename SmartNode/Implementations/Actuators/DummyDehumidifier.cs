@@ -24,7 +24,12 @@ namespace Implementations.Actuators
             // respective FMU. These states are simplifications adjusted for 900s of actuation.
             if (_actuatorState == 1)
             {
-                _dummyRoomM370.RoomHumidity -= 3;
+                _dummyRoomM370.RoomHumidity -= 10;
+            }
+            else
+            {
+                // Simply touch the property to activate the "humidifying" mechanism in the dummy environment.
+                _dummyRoomM370.RoomHumidity -= 0;
             }
         }
     }

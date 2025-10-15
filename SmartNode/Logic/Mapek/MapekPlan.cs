@@ -20,6 +20,8 @@ namespace Logic.Mapek
         private readonly ILogger<MapekPlan> _logger;
         private readonly IFactory _factory;
 
+        private const int MaximumSimulationTimeSeconds = 3_600;
+
         public MapekPlan(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekPlan>>();
@@ -156,7 +158,15 @@ namespace Logic.Mapek
 
             // Get the unsatisfied OptimalCondition with the lowest mitigation time to use it as the simulation's maximum time.
             var unsatisfiedOptimalConditions = optimalConditions.Where(optimalCondition => optimalCondition.UnsatisfiedAtomicConstraints.Any());
-            var maximumSimulationTime = GetMaximumSimulationTime(unsatisfiedOptimalConditions);
+            var maximumSimulationTime = 0;
+            if (unsatisfiedOptimalConditions.Count() != 0)
+            {
+                maximumSimulationTime = GetMaximumSimulationTime(unsatisfiedOptimalConditions);
+            }
+            else
+            {
+                maximumSimulationTime = MaximumSimulationTimeSeconds;
+            }
 
             if (actuationActionCombinations.Any())
             {

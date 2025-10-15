@@ -21,18 +21,25 @@ namespace Implementations.Actuators
             _actuatorState = (int)state;
 
             // The dummy Actuator doesn't represent the differential equations found in the
-            // respective FMU. These states are simplifications adjusted for 900s of actuation.
-            if (_actuatorState == 1)
+            // respective FMU. These states are simplifications adjusted for 900s of actuation.            
+            switch (_actuatorState)
             {
-                _dummyRoomM370.RoomTemperature += 3.5;
-            }
-            else if (_actuatorState == 2)
-            {
-                _dummyRoomM370.RoomTemperature += 6;
-            }
-            else if (_actuatorState == 3)
-            {
-                _dummyRoomM370.RoomTemperature += 8;
+                case 3:
+                    _dummyRoomM370.RoomTemperature += 17;
+                    break;
+
+                case 2:
+                    _dummyRoomM370.RoomTemperature += 11;
+                    break;
+
+                case 1:
+                    _dummyRoomM370.RoomTemperature += 6;
+                    break;
+
+                default:
+                    // Simply touch the property to activate the "cooling" mechanism in the dummy environment.
+                    _dummyRoomM370.RoomTemperature += 0;
+                    break;
             }
         }
     }

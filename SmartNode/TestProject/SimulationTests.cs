@@ -16,7 +16,7 @@ namespace TestProject
             // Arrange
             // Use a dummy-type to get a handle:
             var assembly = Assembly.GetAssembly(typeof(Implementations.ValueHandlers.DoubleValueHandler));            
-            Stream modelStream = assembly.GetManifestResourceStream("SensorActuatorImplementations.FMUs.roomM370.fmu");
+            Stream modelStream = assembly.GetManifestResourceStream("Implementations.FMUs.roomM370.fmu");
             Assert.NotNull(modelStream);
             var expectedValue = 1.0;
             var actualValue = 0.0;
@@ -46,7 +46,7 @@ namespace TestProject
             // Arrange
             // Use a dummy-type to get a handle:
             var assembly = Assembly.GetAssembly(typeof(Implementations.ValueHandlers.DoubleValueHandler));
-            Stream modelStream = assembly.GetManifestResourceStream("SensorActuatorImplementations.FMUs.roomM370.fmu");
+            Stream modelStream = assembly.GetManifestResourceStream("Implementations.FMUs.roomM370.fmu");
             Assert.NotNull(modelStream);
 
             var roomTemperatureInitialValue = 1.02;

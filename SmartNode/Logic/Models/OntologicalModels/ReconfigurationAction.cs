@@ -1,6 +1,6 @@
 ﻿namespace Logic.Models.OntologicalModels
 {
-    internal class ReconfigurationAction : Action
+    public class ReconfigurationAction : Action
     {
         public required ConfigurableParameter ConfigurableParameter { get; init; }
 

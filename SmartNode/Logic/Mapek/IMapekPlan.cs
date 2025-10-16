@@ -4,7 +4,7 @@ using VDS.RDF;
 
 namespace Logic.Mapek
 {
-    internal interface IMapekPlan
+    public interface IMapekPlan
     {
         public SimulationConfiguration Plan(IEnumerable<OptimalCondition> optimalConditions,
             IEnumerable<Models.OntologicalModels.Action> actions,

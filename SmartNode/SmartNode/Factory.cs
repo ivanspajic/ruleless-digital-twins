@@ -103,7 +103,7 @@ namespace SmartNode
         };
 
         // Keep an instance of the simulated TT.
-        private static DummyRoomM370 _dummyRoomM370 = new DummyRoomM370();
+        private static readonly DummyRoomM370 _dummyRoomM370 = new();
 
         public Factory(bool useDummyDevices)
         {

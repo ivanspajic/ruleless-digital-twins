@@ -2,7 +2,7 @@
 
 namespace Logic.Models.MapekModels
 {
-    internal class SimulationConfiguration
+    public class SimulationConfiguration
     {
         public required IEnumerable<SimulationTick> SimulationTicks { get; init; }
 

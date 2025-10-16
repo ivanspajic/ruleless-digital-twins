@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Logic.Models.MapekModels;
+using Logic.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
 using VDS.RDF;
@@ -16,7 +18,7 @@ namespace Logic.Mapek
         // Decides on the granularity of steps in increasing/decreasing ConfigurableParameter values.
         private const int ConfigurableParameterGranularity = 7;
 
-        private readonly ILogger<MapekManager> _logger;
+        private readonly ILogger<IMapekManager> _logger;
         private readonly IMapekMonitor _mapekMonitor;
         private readonly IMapekAnalyze _mapekAnalyze;
         private readonly IMapekPlan _mapekPlan;
@@ -28,11 +30,11 @@ namespace Logic.Mapek
 
         public MapekManager(IServiceProvider serviceProvider, bool simulateTwinningTarget)
         {
-            _logger = serviceProvider.GetRequiredService<ILogger<MapekManager>>();
-            _mapekMonitor = new MapekMonitor(serviceProvider);
-            _mapekAnalyze = new MapekAnalyze(serviceProvider);
-            _mapekPlan = new MapekPlan(serviceProvider);
-            _mapekExecute = new MapekExecute(serviceProvider);
+            _logger = serviceProvider.GetRequiredService<ILogger<IMapekManager>>();
+            _mapekMonitor = serviceProvider.GetRequiredService<IMapekMonitor>();
+            _mapekAnalyze = serviceProvider.GetRequiredService<IMapekAnalyze>();
+            _mapekPlan = serviceProvider.GetRequiredService<IMapekPlan>();
+            _mapekExecute = serviceProvider.GetRequiredService<IMapekExecute>();
 
             _simulateTwinningTarget = simulateTwinningTarget;
         }
@@ -76,6 +78,9 @@ namespace Logic.Mapek
                 var optimalConfiguration = _mapekPlan.Plan(optimalConditionsAndActions.Item1, optimalConditionsAndActions.Item2, propertyCache, instanceModel, fmuDirectory, ActuationSimulationGranularity);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
                 _mapekExecute.Execute(optimalConfiguration, propertyCache, _simulateTwinningTarget);
+
+                var mapekCycleState = new MapekCycleState(propertyCache.Properties, propertyCache.ConfigurableParameters, optimalConfiguration);
+                CsvUtils.WriteMapekCycleState(@"C:\dev\ruleless-digital-twins\test.csv", mapekCycleState);
 
                 if (maxRound > 0)
                 {

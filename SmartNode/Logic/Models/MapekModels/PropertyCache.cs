@@ -2,7 +2,7 @@
 
 namespace Logic.Models.MapekModels
 {
-    internal class PropertyCache
+    public class PropertyCache
     {
         public required IDictionary<string, Property> Properties { get; init; }
 

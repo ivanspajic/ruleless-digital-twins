@@ -57,11 +57,15 @@ namespace SmartNode {
             builder.Services.AddLogging(loggingBuilder => {
                 loggingBuilder.AddConsole(options => options.TimestampFormat = "HH:mm:ss ");
             });
+            // Register a factory to allow for dynamic constructor argument passing through DI.
+            builder.Services.AddSingleton<IFactory, Factory>(serviceProvider => new Factory(simulateTwinningTarget));
+            builder.Services.AddSingleton<IMapekMonitor, MapekMonitor>(serviceProvider => new MapekMonitor(serviceProvider));
+            builder.Services.AddSingleton<IMapekAnalyze, MapekAnalyze>(serviceProvider => new MapekAnalyze(serviceProvider));
+            builder.Services.AddSingleton<IMapekPlan, MapekPlan>(serviceProvider => new MapekPlan(serviceProvider));
+            builder.Services.AddSingleton<IMapekExecute, MapekExecute>(serviceProvider => new MapekExecute(serviceProvider));
             builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceprovider =>{
                 return new MapekManager(serviceprovider, simulateTwinningTarget);
             });
-            // Register a factory to allow for dynamic constructor argument passing through DI.
-            builder.Services.AddSingleton<IFactory, Factory>(serviceProvider => new Factory(simulateTwinningTarget));
 
             using var host = builder.Build();
 

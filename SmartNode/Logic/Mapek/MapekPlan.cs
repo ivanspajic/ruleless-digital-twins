@@ -11,7 +11,7 @@ using VDS.RDF;
 
 namespace Logic.Mapek
 {
-    internal class MapekPlan : IMapekPlan
+    public class MapekPlan : IMapekPlan
     {
         // Required as fields to preserve caching throughout multiple MAPE-K loop cycles.
 	    public static Dictionary<string, IModel> _fmuDict = [];

@@ -2,7 +2,7 @@
 
 namespace Logic.Models.MapekModels
 {
-    internal class SimulationTick
+    public class SimulationTick
     {
         public required int TickIndex { get; init; }
 

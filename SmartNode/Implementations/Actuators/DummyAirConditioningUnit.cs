@@ -25,15 +25,15 @@ namespace Implementations.Actuators
             switch (_actuatorState)
             {
                 case 3:
-                    _dummyRoomM370.RoomTemperature += 17;
+                    _dummyRoomM370.RoomTemperature += 15;
                     break;
 
                 case 2:
-                    _dummyRoomM370.RoomTemperature += 11;
+                    _dummyRoomM370.RoomTemperature += 10;
                     break;
 
                 case 1:
-                    _dummyRoomM370.RoomTemperature += 6;
+                    _dummyRoomM370.RoomTemperature += 5;
                     break;
 
                 default:

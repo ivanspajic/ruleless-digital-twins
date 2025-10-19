@@ -1,156 +1,128 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
+using Logic.Mapek;
 using Logic.Models.MapekModels;
-using Logic.Models.OntologicalModels;
 using System.Globalization;
 
 namespace Logic.Utilities
 {
     internal static class CsvUtils
     {
-        public static void WritePropertyStates(string filepath,
-            int roundNumber,
-            IDictionary<string, Property> properties,
-            IDictionary<string, ConfigurableParameter> configurableParameters)
+        public static void WritePropertyStatesToCsv(string directoryPath, int roundNumber, PropertyCache propertyCache)
         {
-            if (!File.Exists(filepath))
+            foreach (var propertyKeyValuePair in propertyCache.Properties)
             {
-                WriteNewPropertyStates(filepath, roundNumber, properties, configurableParameters);
+                var simpleName = MapekUtilities.GetSimpleName(propertyKeyValuePair.Key);
+                var filePath = Path.Combine(directoryPath, simpleName + ".csv");
+                CsvUtils.WritePropertyState(filePath, roundNumber, simpleName, propertyKeyValuePair.Value.Value);
             }
-            else
+
+            foreach (var configurableParameterKeyValuePair in propertyCache.ConfigurableParameters)
             {
-                WriteExistingPropertyStates(filepath, roundNumber, properties, configurableParameters);
+                var simpleName = MapekUtilities.GetSimpleName(configurableParameterKeyValuePair.Key);
+                var filePath = Path.Combine(directoryPath, simpleName + ".csv");
+                CsvUtils.WritePropertyState(filePath, roundNumber, simpleName, configurableParameterKeyValuePair.Value.Value);
             }
         }
 
-        public static void WriteActuatorStates(string filepath, int roundNumber, SimulationConfiguration simulationConfiguration)
+        public static void WriteActuatorStatesToCsv(string directoryPath, int roundNumber, SimulationConfiguration simulationConfiguration)
         {
-            if (!File.Exists(filepath))
-            {
-                WriteNewActuatorStates(filepath, roundNumber, simulationConfiguration);
-            }
-            else
-            {
-                WriteExistingActuatorStates(filepath, roundNumber, simulationConfiguration);
-            }
-        }
-
-        private static void WriteNewPropertyStates(string filepath,
-            int roundNumber,
-            IDictionary<string, Property> properties,
-            IDictionary<string, ConfigurableParameter> configurableParameters)
-        {
-            using var stream = File.Open(filepath, FileMode.Create);
-
-            var csvHelperConfiguration = new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                HasHeaderRecord = true,
-                Delimiter = ","
-            };
-
-            using var streamWriter = new StreamWriter(stream);
-            using var csvWriter = new CsvWriter(streamWriter, csvHelperConfiguration);
-
-            csvWriter.WriteField("Round");
-
-            foreach (var property in properties)
-            {
-                csvWriter.WriteField(property.Key);
-            }
-
-            foreach (var configurableParameter in configurableParameters)
-            {
-                csvWriter.WriteField(configurableParameter.Key);
-            }
-
-            csvWriter.NextRecord();
-
-            WritePropertyValues(csvWriter, roundNumber, properties, configurableParameters);
-        }
-
-        private static void WriteExistingPropertyStates(string filepath,
-            int roundNumber,
-            IDictionary<string, Property> properties,
-            IDictionary<string, ConfigurableParameter> configurableParameters)
-        {
-            using var stream = File.Open(filepath, FileMode.Append);
-
-            var csvHelperConfiguration = new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                HasHeaderRecord = true,
-                Delimiter = ","
-            };
-
-            using var streamWriter = new StreamWriter(stream);
-            using var csvWriter = new CsvWriter(streamWriter, csvHelperConfiguration);
-
-            WritePropertyValues(csvWriter, roundNumber, properties, configurableParameters);
-        }
-
-        private static void WritePropertyValues(CsvWriter csvWriter,
-            int roundNumber,
-            IDictionary<string, Property> properties,
-            IDictionary<string, ConfigurableParameter> configurableParameters)
-        {
-            csvWriter.WriteField(roundNumber);
-
-            foreach (var property in properties)
-            {
-                csvWriter.WriteField(property.Value.Value);
-            }
-
-            foreach (var configurableParameter in configurableParameters)
-            {
-                csvWriter.WriteField(configurableParameter.Value.Value);
-            }
-
-            csvWriter.NextRecord();
-        }
-
-        private static void WriteNewActuatorStates(string filepath, int roundNumber, SimulationConfiguration simulationConfiguration)
-        {
-            using var stream = File.Open(filepath, FileMode.Create);
-
-            var csvHelperConfiguration = new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                HasHeaderRecord = true,
-                Delimiter = ","
-            };
-
-            using var streamWriter = new StreamWriter(stream);
-            using var csvWriter = new CsvWriter(streamWriter, csvHelperConfiguration);
-
-            csvWriter.WriteField("Round");
+            var actuatorValues = new Dictionary<string, List<object>>();
 
             foreach (var simulationTick in simulationConfiguration.SimulationTicks)
             {
-                
+                foreach (var action in simulationTick.ActionsToExecute)
+                {
+                    var simpleName = MapekUtilities.GetSimpleName(action.Actuator.Name);
+
+                    if (actuatorValues.TryGetValue(simpleName, out List<object>? value))
+                    {
+                        value.Add(action.NewStateValue);
+                    }
+                    else
+                    {
+                        actuatorValues.Add(simpleName, new List<object>
+                        {
+                            action.NewStateValue
+                        });
+                    }
+                }
+            }
+
+            CsvWriter csvWriter;
+
+            foreach (var keyValuePair in actuatorValues)
+            {
+                var filePath = Path.Combine(directoryPath, keyValuePair.Key + ".csv");
+
+                if (!File.Exists(filePath))
+                {
+                    csvWriter = GetCsvWriterFromFileMode(filePath, FileMode.Create);
+
+                    csvWriter.WriteField("RoundNumber");
+                    
+                    foreach (var actuatorState in keyValuePair.Value)
+                    {
+                        csvWriter.WriteField("SimulationTick");
+                        csvWriter.WriteField(keyValuePair.Key);
+                    }
+                }
+                else
+                {
+                    csvWriter = GetCsvWriterFromFileMode(filePath, FileMode.Append);
+                }
+
+                csvWriter.NextRecord();
+
+                csvWriter.WriteField(roundNumber);
+
+                for (var i = 0; i < keyValuePair.Value.Count; i++)
+                {
+                    csvWriter.WriteField(i);
+                    csvWriter.WriteField(keyValuePair.Value[i]);
+                }
+
+                csvWriter.Flush();
+                csvWriter.Dispose();
+            }
+        }
+
+        private static void WritePropertyState(string filePath, int roundNumber, string propertyName, object propertyValue)
+        {
+            CsvWriter csvWriter;
+
+            if (!File.Exists(filePath))
+            {
+                csvWriter = GetCsvWriterFromFileMode(filePath, FileMode.Create);
+
+                csvWriter.WriteField("RoundNumber");
+                csvWriter.WriteField(propertyName);
+            }
+            else
+            {
+                csvWriter = GetCsvWriterFromFileMode(filePath, FileMode.Append);
             }
 
             csvWriter.NextRecord();
 
-            WriteActuatorValues(csvWriter, roundNumber, properties, configurableParameters);
+            csvWriter.WriteField(roundNumber);
+            csvWriter.WriteField(propertyValue);
+
+            csvWriter.Flush();
+            csvWriter.Dispose();
         }
 
-        private static void WriteExistingActuatorStates(string filepath, int roundNumber, SimulationConfiguration simulationConfiguration)
+        private static CsvWriter GetCsvWriterFromFileMode(string filePath, FileMode fileMode)
         {
-            using var stream = File.Open(filepath, FileMode.Append);
-
+            var stream = File.Open(filePath, fileMode);
+            var streamWriter = new StreamWriter(stream);
             var csvHelperConfiguration = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 HasHeaderRecord = true,
                 Delimiter = ","
             };
 
-            using var streamWriter = new StreamWriter(stream);
-            using var csvWriter = new CsvWriter(streamWriter, csvHelperConfiguration);
-
-            WriteActuatorValues(csvWriter, roundNumber, properties, configurableParameters);
-        }
-
-        private static void WriteActuatorValues(CsvWriter csvWriter, int roundNumber, SimulationConfiguration simulationConfiguration)
-        {
-
+            return new CsvWriter(streamWriter, csvHelperConfiguration);
         }
     }
 }

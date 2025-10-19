@@ -37,7 +37,7 @@
 
         private void AffectTemperatureWithWeather(double temperature)
         {
-            _roomTemperature = temperature - 5 + (_randomGenerator.NextDouble() * _randomGenerator.NextInt64(1, 5));
+            _roomTemperature = Math.Max(Math.Min(temperature - 6 + (_randomGenerator.NextDouble() * _randomGenerator.NextInt64(1, 5)), 30), 10);
         }
 
         private void AffectHumidityWithWeather(double humidity)

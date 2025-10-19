@@ -25,7 +25,6 @@ namespace Logic.Mapek
         private readonly IMapekExecute _mapekExecute;
 
         private bool _simulateTwinningTarget = false;
-
         private bool _isLoopActive = false;
 
         public MapekManager(IServiceProvider serviceProvider, bool simulateTwinningTarget)
@@ -54,6 +53,8 @@ namespace Logic.Mapek
         {
             _logger.LogInformation("Starting the MAPE-K loop. (maxRounds= {maxRound})", maxRound);
 
+            var currentRound = 0;
+
             while (_isLoopActive)
             {
                 if (maxRound > -1) {
@@ -75,12 +76,13 @@ namespace Logic.Mapek
                 // them with all OptimalConditions.
                 var optimalConditionsAndActions = _mapekAnalyze.Analyze(instanceModel, propertyCache, ConfigurableParameterGranularity);
                 // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
-                var optimalConfiguration = _mapekPlan.Plan(optimalConditionsAndActions.Item1, optimalConditionsAndActions.Item2, propertyCache, instanceModel, fmuDirectory, ActuationSimulationGranularity);
+                var optimalSimulationConfiguration = _mapekPlan.Plan(optimalConditionsAndActions.Item1, optimalConditionsAndActions.Item2, propertyCache, instanceModel, fmuDirectory, ActuationSimulationGranularity);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
-                _mapekExecute.Execute(optimalConfiguration, propertyCache, _simulateTwinningTarget);
+                _mapekExecute.Execute(optimalSimulationConfiguration, propertyCache, _simulateTwinningTarget);
 
-                var mapekCycleState = new MapekCycleState(propertyCache.Properties, propertyCache.ConfigurableParameters, optimalConfiguration);
-                CsvUtils.WriteMapekCycleState(@"C:\dev\ruleless-digital-twins\test.csv", mapekCycleState);
+                // Write MAPE-K state to CSV.
+                CsvUtils.WritePropertyStatesToCsv(@"C:\dev\ruleless-digital-twins\state-data", currentRound, propertyCache);
+                CsvUtils.WriteActuatorStatesToCsv(@"C:\dev\ruleless-digital-twins\state-data", currentRound, optimalSimulationConfiguration);
 
                 if (maxRound > 0)
                 {
@@ -91,6 +93,8 @@ namespace Logic.Mapek
                     _isLoopActive = false;
                     break; // We can sleep when we're dead.
                 }
+
+                currentRound++;
 
                 // Thread.Sleep(SleepyTimeMilliseconds);
             }

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
 using VDS.RDF;
 using VDS.RDF.Parsing;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 [assembly: InternalsVisibleTo("TestProject")]
 
@@ -24,24 +25,21 @@ namespace Logic.Mapek
         private readonly IMapekPlan _mapekPlan;
         private readonly IMapekExecute _mapekExecute;
 
-        private bool _simulateTwinningTarget = false;
         private bool _isLoopActive = false;
 
-        public MapekManager(IServiceProvider serviceProvider, bool simulateTwinningTarget)
+        public MapekManager(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<IMapekManager>>();
             _mapekMonitor = serviceProvider.GetRequiredService<IMapekMonitor>();
             _mapekAnalyze = serviceProvider.GetRequiredService<IMapekAnalyze>();
             _mapekPlan = serviceProvider.GetRequiredService<IMapekPlan>();
             _mapekExecute = serviceProvider.GetRequiredService<IMapekExecute>();
-
-            _simulateTwinningTarget = simulateTwinningTarget;
         }
 
-        public void StartLoop(string instanceModelFilePath, string fmuDirectory, int maxRound = -1)
+        public void StartLoop(string instanceModelFilePath, string fmuDirectory, string dataDirectory, int maxRound = -1, bool simulateTwinningTarget = false)
         {
             _isLoopActive = true;
-            RunMapekLoop(instanceModelFilePath, fmuDirectory, maxRound);
+            RunMapekLoop(instanceModelFilePath, fmuDirectory, dataDirectory, maxRound, simulateTwinningTarget);
         }
 
         public void StopLoop()
@@ -49,7 +47,7 @@ namespace Logic.Mapek
             _isLoopActive = false;
         }
 
-        private void RunMapekLoop(string instanceModelFilePath, string fmuDirectory, int maxRound = -1)
+        private void RunMapekLoop(string instanceModelFilePath, string fmuDirectory, string dataDirectory, int maxRound = -1, bool simulateTwinningTarget = false)
         {
             _logger.LogInformation("Starting the MAPE-K loop. (maxRounds= {maxRound})", maxRound);
 
@@ -78,11 +76,11 @@ namespace Logic.Mapek
                 // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
                 var optimalSimulationConfiguration = _mapekPlan.Plan(optimalConditionsAndActions.Item1, optimalConditionsAndActions.Item2, propertyCache, instanceModel, fmuDirectory, ActuationSimulationGranularity);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
-                _mapekExecute.Execute(optimalSimulationConfiguration, propertyCache, _simulateTwinningTarget);
+                _mapekExecute.Execute(optimalSimulationConfiguration, propertyCache, simulateTwinningTarget);
 
                 // Write MAPE-K state to CSV.
-                CsvUtils.WritePropertyStatesToCsv(@"C:\dev\ruleless-digital-twins\state-data", currentRound, propertyCache);
-                CsvUtils.WriteActuatorStatesToCsv(@"C:\dev\ruleless-digital-twins\state-data", currentRound, optimalSimulationConfiguration);
+                CsvUtils.WritePropertyStatesToCsv(dataDirectory, currentRound, propertyCache);
+                CsvUtils.WriteActuatorStatesToCsv(dataDirectory, currentRound, optimalSimulationConfiguration);
 
                 if (maxRound > 0)
                 {

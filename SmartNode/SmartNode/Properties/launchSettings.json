@@ -2,11 +2,11 @@
   "profiles": {
     "SmartNode": {
       "commandName": "Project",
-      "commandLineArgs": "$(MSBuildProjectDirectory)/../../models-and-rules/inferred-model-1.ttl $(MSBuildProjectDirectory)/../Implementations/FMUs/ -s"
+      "commandLineArgs": "$(MSBuildProjectDirectory)/../../models-and-rules/inferred-model-1.ttl $(MSBuildProjectDirectory)/../Implementations/FMUs/ $(MSBuildProjectDirectory)/../../state-data -s"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",
-      "commandLineArgs": "inferred-model-1.ttl \\SmartNode\\Implementations\\FMUs\\ -s"
+      "commandLineArgs": "inferred-model-1.ttl \\SmartNode\\Implementations\\FMUs\\ \\state-data -s"
     }
   }
 }

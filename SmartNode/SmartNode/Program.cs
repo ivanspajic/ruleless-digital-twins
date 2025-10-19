@@ -6,28 +6,35 @@ using Logic.FactoryInterface;
 using System.CommandLine;
 using System.Reflection;
 
-namespace SmartNode {
-    internal class Program {
-        static void Main(string[] args) {
+namespace SmartNode
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
             // Parse the command line arguments.
-            RootCommand rootCommand = new();
+            var rootCommand = new RootCommand();
 
-            Argument<FileInfo> fileNameArg = new("file")
+            var fileNameArg = new Argument<FileInfo>("file")
             {
                 Description = "RDF instance model"
             };
-            Argument<string> fmuDirectoryFilepathArgument = new("fmuDirectory")
+            var fmuDirectoryArgument = new Argument<string>("fmuDirectory")
             {
                 Description = "Directory containing FMUs."
             };
+            var dataDirectoryArgument = new Argument<string>("dataDirectory")
+            {
+                Description = "Directory for storing MAPE-K data."
+            };
 
-            Option<int> maxRoundOption = new("--round", "-r")
+            var maxRoundOption = new Option<int>("--round", "-r")
             {
                 Description = "Maximum number of rounds for MAPE-K loop.",
                 DefaultValueFactory = parseResult => 4,
             };
 
-            Option<bool> simulateTwinningTargetOption = new("--simulate", "-s")
+            var simulateTwinningTargetOption = new Option<bool>("--simulate", "-s")
             {
                 DefaultValueFactory = parseResult => false,
                 Description = "Simulate the twinning target."
@@ -36,18 +43,21 @@ namespace SmartNode {
             rootCommand.Add(maxRoundOption);
             rootCommand.Add(simulateTwinningTargetOption);
             rootCommand.Add(fileNameArg);
-            rootCommand.Add(fmuDirectoryFilepathArgument);
+            rootCommand.Add(fmuDirectoryArgument);
+            rootCommand.Add(dataDirectoryArgument);
 
             ParseResult parseResult = rootCommand.Parse(args);
 
             var maxRound = parseResult.GetValue(maxRoundOption);
             var simulateTwinningTarget = parseResult.GetValue(simulateTwinningTargetOption);
             var modelFile = parseResult.GetValue(fileNameArg);
-            var fmuDirectory = parseResult.GetValue(fmuDirectoryFilepathArgument);
+            var fmuDirectory = parseResult.GetValue(fmuDirectoryArgument);
+            var dataDirectory = parseResult.GetValue(dataDirectoryArgument);
 
             if (parseResult.Errors.Count != 0 ||
                 modelFile is not FileInfo parsedFile ||
-                string.IsNullOrEmpty(fmuDirectory)) {
+                string.IsNullOrEmpty(fmuDirectory) ||
+                string.IsNullOrEmpty(dataDirectory)) {
                 throw new ArgumentException(parseResult.Errors[0].Message); // Are there always errors here?
             }
 
@@ -63,9 +73,7 @@ namespace SmartNode {
             builder.Services.AddSingleton<IMapekAnalyze, MapekAnalyze>(serviceProvider => new MapekAnalyze(serviceProvider));
             builder.Services.AddSingleton<IMapekPlan, MapekPlan>(serviceProvider => new MapekPlan(serviceProvider));
             builder.Services.AddSingleton<IMapekExecute, MapekExecute>(serviceProvider => new MapekExecute(serviceProvider));
-            builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceprovider =>{
-                return new MapekManager(serviceprovider, simulateTwinningTarget);
-            });
+            builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceprovider => new MapekManager(serviceprovider));
 
             using var host = builder.Build();
 
@@ -86,7 +94,7 @@ namespace SmartNode {
 
             // Start the loop.
             try {
-                mapekManager.StartLoop(modelFilePath, fmuDirectory, maxRound);
+                mapekManager.StartLoop(modelFilePath, fmuDirectory, dataDirectory, maxRound, simulateTwinningTarget);
             }
             catch (Exception exception) {
                 logger.LogCritical(exception, "Exception");

@@ -159,7 +159,7 @@ namespace Logic.Mapek
             // Get the unsatisfied OptimalCondition with the lowest mitigation time to use it as the simulation's maximum time.
             var unsatisfiedOptimalConditions = optimalConditions.Where(optimalCondition => optimalCondition.UnsatisfiedAtomicConstraints.Any());
             var maximumSimulationTime = 0;
-            if (unsatisfiedOptimalConditions.Count() != 0)
+            if (unsatisfiedOptimalConditions.Any())
             {
                 maximumSimulationTime = GetMaximumSimulationTime(unsatisfiedOptimalConditions);
             }
@@ -183,7 +183,7 @@ namespace Logic.Mapek
 
                         var simulationTick = new SimulationTick
                         {
-                            ActionsToExecute = actuationActionCombination.ToList(),
+                            ActionsToExecute = actuationActionCombination,
                             TickIndex = i,
                             TickDurationSeconds = timeInterval
                         };
@@ -207,7 +207,7 @@ namespace Logic.Mapek
                         {
                             simulationConfiguration = new SimulationConfiguration
                             {
-                                SimulationTicks = simulationTickCombination.Reverse().ToList(), // Must be reversed due to how the combinations are constructed.
+                                SimulationTicks = simulationTickCombination.Reverse(), // Must be reversed due to how the combinations are constructed.
                                 PostTickActions = reconfigurationActionCombination
                             };
                         }
@@ -216,7 +216,7 @@ namespace Logic.Mapek
                     {
                         simulationConfiguration = new SimulationConfiguration
                         {
-                            SimulationTicks = simulationTickCombination.Reverse().ToList(), // Must be reversed due to how the combinations are constructed.
+                            SimulationTicks = simulationTickCombination.Reverse(), // Must be reversed due to how the combinations are constructed.
                             PostTickActions = []
                         };
                     }
@@ -397,7 +397,7 @@ namespace Logic.Mapek
             return propertyCacheCopy;
         }
 
-        private IEnumerable<Property> GetObservablePropertiesFromPropertyCache(IGraph instanceModel, PropertyCache propertyCache)
+        private List<Property> GetObservablePropertiesFromPropertyCache(IGraph instanceModel, PropertyCache propertyCache)
         {
             var observableProperties = new List<Property>();
 

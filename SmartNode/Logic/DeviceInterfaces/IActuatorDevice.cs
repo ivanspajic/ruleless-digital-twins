@@ -2,8 +2,8 @@
 {
     public interface IActuatorDevice
     {
-        public string ActuatorName { get; init; }
+        public string ActuatorName { get; }
 
-        public void Actuate(object state, double durationSeconds);
+        public void Actuate(object state);
     }
 }

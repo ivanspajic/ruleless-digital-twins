@@ -2,8 +2,8 @@
 
 namespace Logic.Mapek
 {
-    internal interface IMapekExecute
+    public interface IMapekExecute
     {
-        public void Execute(SimulationConfiguration simulationConfiguration, PropertyCache propertyCache);
+        public void Execute(SimulationConfiguration simulationConfiguration, PropertyCache propertyCache, bool useSimulatedTwinningTarget);
     }
 }

@@ -4,9 +4,9 @@ using VDS.RDF;
 
 namespace Logic.Mapek
 {
-    internal interface IMapekAnalyze
+    public interface IMapekAnalyze
     {
-        public Tuple<IEnumerable<OptimalCondition>, IEnumerable<Models.OntologicalModels.Action>> Analyze(IGraph instanceModel,
+        public Tuple<List<OptimalCondition>, List<Models.OntologicalModels.Action>> Analyze(IGraph instanceModel,
             PropertyCache propertyCache,
             int configurableParameterGranularity);
     }

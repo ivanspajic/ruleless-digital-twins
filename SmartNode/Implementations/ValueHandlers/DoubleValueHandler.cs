@@ -4,7 +4,7 @@ using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 using System.Globalization;
 
-namespace SensorActuatorImplementations.ValueHandlers
+namespace Implementations.ValueHandlers
 {
     public class DoubleValueHandler : IValueHandler
     {
@@ -143,6 +143,32 @@ namespace SensorActuatorImplementations.ValueHandlers
             }
         }
 
+        public int IncreaseComp(object comparingValue, object targetValue)
+        {
+            if (comparingValue is not double)
+            {
+                comparingValue = double.Parse(comparingValue.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            if (targetValue is not double)
+            {
+                targetValue = double.Parse(targetValue.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            if ((double)comparingValue > (double)targetValue)
+            {
+                return 1;
+            }
+            else if ((double)comparingValue < (double)targetValue)
+            {
+                return -1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
         public bool IsGreaterThanOrEqualTo(object comparingValue, object targetValue)
         {
             if (comparingValue is not double)
@@ -242,10 +268,13 @@ namespace SensorActuatorImplementations.ValueHandlers
             var minimumValue = 0.0;
             var maximumValue = 12.0;
 
-            var possibleValues = new List<object>();
+            var possibleValues = new List<object>
+            {
+                currentValueDouble
+            };
 
             var valueRange = maximumValue - minimumValue;
-            var intervalSize = valueRange / rangeGranularity;
+            var intervalSize = valueRange / (rangeGranularity - 1);
 
             for (var i = minimumValue; i < maximumValue; i += intervalSize)
             {

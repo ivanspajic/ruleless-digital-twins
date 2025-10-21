@@ -1,5 +1,5 @@
 ﻿using Logic.FactoryInterface;
-using Logic.Mapek.EqualityComparers;
+using Logic.Mapek.Comparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +9,7 @@ using VDS.RDF.Query;
 
 namespace Logic.Mapek
 {
-    internal class MapekAnalyze : IMapekAnalyze
+    public class MapekAnalyze : IMapekAnalyze
     {
         private readonly ILogger<MapekAnalyze> _logger;
         private readonly IFactory _factory;
@@ -20,7 +20,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public Tuple<IEnumerable<OptimalCondition>, IEnumerable<Models.OntologicalModels.Action>> Analyze(IGraph instanceModel,
+        public Tuple<List<OptimalCondition>, List<Models.OntologicalModels.Action>> Analyze(IGraph instanceModel,
             PropertyCache propertyCache,
             int configurableParameterGranularity)
         {
@@ -30,19 +30,18 @@ namespace Logic.Mapek
             var unsatisfiedOptimalConditions = GetAllUnsatisfiedOptimalConditions(optimalConditions, propertyCache);
             var mitigationActions = GetMitigationActionsFromUnsatisfiedOptimalConditions(instanceModel,
                 propertyCache,
-                unsatisfiedOptimalConditions,
-                configurableParameterGranularity);
-            var optimizationActions = GetOptimizationActions(instanceModel, propertyCache, configurableParameterGranularity);
+                unsatisfiedOptimalConditions);
+            var optimizationActions = GetOptimizationActions(instanceModel, propertyCache);
 
             // Combine the Action collections into one.
-            mitigationActions = mitigationActions.Concat(optimizationActions);
+            mitigationActions = mitigationActions.Concat(optimizationActions).ToList();
             // Filter out duplicates.
-            mitigationActions = mitigationActions.Distinct(new ActionEqualityComparer());
+            mitigationActions = mitigationActions.Distinct(new ActionEqualityComparer()).ToList();
 
             return new (optimalConditions, mitigationActions);
         }
 
-        private IEnumerable<OptimalCondition> GetAllOptimalConditions(IGraph instanceModel, PropertyCache propertyCache)
+        private List<OptimalCondition> GetAllOptimalConditions(IGraph instanceModel, PropertyCache propertyCache)
         {
             var optimalConditions = new List<OptimalCondition>();
 
@@ -83,7 +82,7 @@ namespace Logic.Mapek
                 var reachedInMaximumSecondsValue = reachedInMaximumSeconds.ToString().Split('^')[0];
 
                 // Build this OptimalCondition's full expression tree.
-                var constraints = GetOptimalConditionConstraints(instanceModel, optimalConditionNode, propertyNode, reachedInMaximumSeconds, property.Value);
+                var constraints = GetOptimalConditionConstraints(instanceModel, optimalConditionNode, propertyNode, reachedInMaximumSeconds);
 
                 if (constraints == null)
                 {
@@ -96,7 +95,8 @@ namespace Logic.Mapek
                     ConstraintValueType = property.OwlType,
                     Name = optimalConditionNode.ToString(),
                     Property = propertyName,
-                    ReachedInMaximumSeconds = int.Parse(reachedInMaximumSecondsValue)
+                    ReachedInMaximumSeconds = int.Parse(reachedInMaximumSecondsValue),
+                    UnsatisfiedAtomicConstraints = []
                 };
 
                 optimalConditions.Add(optimalCondition);
@@ -105,7 +105,7 @@ namespace Logic.Mapek
             return optimalConditions;
         }
 
-        private IEnumerable<OptimalCondition> GetAllUnsatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
+        private List<OptimalCondition> GetAllUnsatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
         {
             var unsatisfiedOptimalConditions = new List<OptimalCondition>();
 
@@ -152,12 +152,11 @@ namespace Logic.Mapek
                 }
             }
 
-            return unsatisfiedOptimalConditions.DistinctBy(x => x.Name);
+            return unsatisfiedOptimalConditions.DistinctBy(x => x.Name).ToList();
         }
 
-        private IEnumerable<Models.OntologicalModels.Action> GetOptimizationActions(IGraph instanceModel,
-            PropertyCache propertyCache,
-            int configurableParameterGranularity)
+        private List<Models.OntologicalModels.Action> GetOptimizationActions(IGraph instanceModel,
+            PropertyCache propertyCache)
         {
             var actions = new List<Models.OntologicalModels.Action>();
 
@@ -216,11 +215,10 @@ namespace Logic.Mapek
             return actions;
         }
 
-        private IEnumerable<ConstraintExpression> GetOptimalConditionConstraints(IGraph instanceModel,
+        private List<ConstraintExpression> GetOptimalConditionConstraints(IGraph instanceModel,
             INode optimalCondition,
             INode property,
-            INode reachedInMaximumSeconds,
-            object propertyValue)
+            INode reachedInMaximumSeconds)
         {
             var constraintExpressions = new List<ConstraintExpression>();
 
@@ -628,7 +626,7 @@ namespace Logic.Mapek
             }
         }
 
-        private string GetOperatorFilterFromConstraintType(ConstraintType constraintType)
+        private static string GetOperatorFilterFromConstraintType(ConstraintType constraintType)
         {
             return constraintType switch
             {
@@ -640,10 +638,9 @@ namespace Logic.Mapek
             };
         }
 
-        private IEnumerable<Models.OntologicalModels.Action> GetMitigationActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel,
+        private List<Models.OntologicalModels.Action> GetMitigationActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel,
             PropertyCache propertyCache,
-            IEnumerable<OptimalCondition> optimalConditions,
-            int configurableParameterGranularity)
+            IEnumerable<OptimalCondition> optimalConditions)
         {
             var actions = new List<Models.OntologicalModels.Action>();
 

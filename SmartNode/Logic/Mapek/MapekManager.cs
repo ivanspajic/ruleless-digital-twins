@@ -1,8 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Logic.Models.MapekModels;
+using Logic.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
 using VDS.RDF;
 using VDS.RDF.Parsing;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 [assembly: InternalsVisibleTo("TestProject")]
 
@@ -16,7 +19,7 @@ namespace Logic.Mapek
         // Decides on the granularity of steps in increasing/decreasing ConfigurableParameter values.
         private const int ConfigurableParameterGranularity = 7;
 
-        private readonly ILogger<MapekManager> _logger;
+        private readonly ILogger<IMapekManager> _logger;
         private readonly IMapekMonitor _mapekMonitor;
         private readonly IMapekAnalyze _mapekAnalyze;
         private readonly IMapekPlan _mapekPlan;
@@ -26,17 +29,17 @@ namespace Logic.Mapek
 
         public MapekManager(IServiceProvider serviceProvider)
         {
-            _logger = serviceProvider.GetRequiredService<ILogger<MapekManager>>();
-            _mapekMonitor = new MapekMonitor(serviceProvider);
-            _mapekAnalyze = new MapekAnalyze(serviceProvider);
-            _mapekPlan = new MapekPlan(serviceProvider);
-            _mapekExecute = new MapekExecute(serviceProvider);
+            _logger = serviceProvider.GetRequiredService<ILogger<IMapekManager>>();
+            _mapekMonitor = serviceProvider.GetRequiredService<IMapekMonitor>();
+            _mapekAnalyze = serviceProvider.GetRequiredService<IMapekAnalyze>();
+            _mapekPlan = serviceProvider.GetRequiredService<IMapekPlan>();
+            _mapekExecute = serviceProvider.GetRequiredService<IMapekExecute>();
         }
 
-        public void StartLoop(string instanceModelFilePath, int maxRound = -1)
+        public void StartLoop(string instanceModelFilePath, string fmuDirectory, string dataDirectory, int maxRound = -1, bool simulateTwinningTarget = false)
         {
             _isLoopActive = true;
-            RunMapekLoop(instanceModelFilePath, maxRound);
+            RunMapekLoop(instanceModelFilePath, fmuDirectory, dataDirectory, maxRound, simulateTwinningTarget);
         }
 
         public void StopLoop()
@@ -44,9 +47,11 @@ namespace Logic.Mapek
             _isLoopActive = false;
         }
 
-        private void RunMapekLoop(string instanceModelFilePath, int maxRound = -1)
+        private void RunMapekLoop(string instanceModelFilePath, string fmuDirectory, string dataDirectory, int maxRound = -1, bool simulateTwinningTarget = false)
         {
             _logger.LogInformation("Starting the MAPE-K loop. (maxRounds= {maxRound})", maxRound);
+
+            var currentRound = 0;
 
             while (_isLoopActive)
             {
@@ -69,9 +74,13 @@ namespace Logic.Mapek
                 // them with all OptimalConditions.
                 var optimalConditionsAndActions = _mapekAnalyze.Analyze(instanceModel, propertyCache, ConfigurableParameterGranularity);
                 // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
-                var optimalConfiguration = _mapekPlan.Plan(optimalConditionsAndActions.Item1, optimalConditionsAndActions.Item2, propertyCache, instanceModel, ActuationSimulationGranularity);
+                var optimalSimulationConfiguration = _mapekPlan.Plan(optimalConditionsAndActions.Item1, optimalConditionsAndActions.Item2, propertyCache, instanceModel, fmuDirectory, ActuationSimulationGranularity);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
-                _mapekExecute.Execute(optimalConfiguration, propertyCache);
+                _mapekExecute.Execute(optimalSimulationConfiguration, propertyCache, simulateTwinningTarget);
+
+                // Write MAPE-K state to CSV.
+                CsvUtils.WritePropertyStatesToCsv(dataDirectory, currentRound, propertyCache);
+                CsvUtils.WriteActuatorStatesToCsv(dataDirectory, currentRound, optimalSimulationConfiguration);
 
                 if (maxRound > 0)
                 {
@@ -83,7 +92,9 @@ namespace Logic.Mapek
                     break; // We can sleep when we're dead.
                 }
 
-                Thread.Sleep(SleepyTimeMilliseconds);
+                currentRound++;
+
+                // Thread.Sleep(SleepyTimeMilliseconds);
             }
         }
 

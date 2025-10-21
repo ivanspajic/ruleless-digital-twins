@@ -3,7 +3,7 @@ using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 
-namespace SensorActuatorImplementations.ValueHandlers
+namespace Implementations.ValueHandlers
 {
     public class TimespanValueHandler : IValueHandler
     {
@@ -40,6 +40,11 @@ namespace SensorActuatorImplementations.ValueHandlers
         public object GetValueFromSimulationParameter(IInstance fmuInstance, IVariable parameter)
         {
             // There does not exist a method in the Femyou library for handling this type.
+            throw new NotImplementedException();
+        }
+
+        public int IncreaseComp(object comparingValue, object targetValue)
+        {
             throw new NotImplementedException();
         }
 

@@ -4,7 +4,7 @@ using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 using System.Globalization;
 
-namespace SensorActuatorImplementations.ValueHandlers
+namespace Implementations.ValueHandlers
 {
     // Example int Sensor value handler implementation.
     public class IntValueHandler : IValueHandler
@@ -26,6 +26,7 @@ namespace SensorActuatorImplementations.ValueHandlers
         {
             { "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit", new List<object>
                 {
+                    0,
                     1,
                     2,
                     3
@@ -33,6 +34,7 @@ namespace SensorActuatorImplementations.ValueHandlers
             },
             { "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier", new List<object>
                 {
+                    0,
                     1
                 }
             }
@@ -123,11 +125,14 @@ namespace SensorActuatorImplementations.ValueHandlers
             var minimumValue = 3;
             var maximumValue = 20;
 
-            var possibleValues = new List<object>();
+            var possibleValues = new List<object>
+            {
+                currentValueInt
+            };
 
             var valueRange = maximumValue - minimumValue;
             // This is a rough rounding in cases of integer values remainders from granularity values.
-            var intervalSize = (int)Math.Floor((double)valueRange / rangeGranularity);
+            var intervalSize = (int)Math.Floor((double)valueRange / (rangeGranularity - 1));
 
             for (var i = minimumValue; i < maximumValue; i += intervalSize)
             {
@@ -138,6 +143,11 @@ namespace SensorActuatorImplementations.ValueHandlers
             }
 
             return possibleValues;
+        }
+
+        public int IncreaseComp(object comparingValue, object targetValue)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -6,7 +6,7 @@ using Logic.Models.OntologicalModels;
 
 namespace Logic.Mapek
 {
-    internal class MapekExecute : IMapekExecute
+    public class MapekExecute : IMapekExecute
     {
         private readonly ILogger<MapekExecute> _logger;
         private readonly IFactory _factory;
@@ -17,9 +17,14 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public void Execute(SimulationConfiguration optimalConfiguration, PropertyCache propertyCache)
+        public void Execute(SimulationConfiguration optimalConfiguration, PropertyCache propertyCache, bool useSimulatedTwinningTarget)
         {
             _logger.LogInformation("Starting the Execute phase.");
+
+            if (optimalConfiguration == null)
+            {
+                return;
+            }
 
             foreach (var simulationTick in optimalConfiguration.SimulationTicks)
             {
@@ -27,12 +32,19 @@ namespace Logic.Mapek
                 {
                     ExecuteActuationAction(actuationAction, simulationTick.TickDurationSeconds);
                 }
+
+                if (!useSimulatedTwinningTarget)
+                {
+                    Thread.Sleep(simulationTick.TickDurationSeconds);
+                }
             }
 
             foreach (var reconfigurationAction in optimalConfiguration.PostTickActions)
             {
                 ExecuteReconfigurationAction(reconfigurationAction, propertyCache);
             }
+
+            LogExpectedPropertyValues(optimalConfiguration);
         }
 
         private void ExecuteActuationAction(ActuationAction actuationAction, double durationSeconds)
@@ -45,7 +57,7 @@ namespace Logic.Mapek
             var actuator = _factory.GetActuatorDeviceImplementation(actuationAction.Actuator.Name);
 
             // This cannot be a blocking call to ensure that multiple Actuators in an interval get executed for the same duration.
-            actuator.Actuate(actuationAction.NewStateValue, durationSeconds);
+            actuator.Actuate(actuationAction.NewStateValue);
         }
 
         private void ExecuteReconfigurationAction(ReconfigurationAction reconfigurationAction, PropertyCache propertyCache)
@@ -55,6 +67,23 @@ namespace Logic.Mapek
                 reconfigurationAction.NewParameterValue);
 
             propertyCache.ConfigurableParameters[reconfigurationAction.ConfigurableParameter.Name].Value = reconfigurationAction.NewParameterValue;
+        }
+
+        private void LogExpectedPropertyValues(SimulationConfiguration simulationConfiguration)
+        {
+            _logger.LogInformation("Expected Property values:");
+
+            foreach (var propertyKeyValue in simulationConfiguration.ResultingPropertyCache.Properties)
+            {
+                _logger.LogInformation("{propertyName}: {propertyValue}", propertyKeyValue.Key, propertyKeyValue.Value.Value.ToString());
+            }
+
+            foreach (var configurableParameterKeyValue in simulationConfiguration.ResultingPropertyCache.ConfigurableParameters)
+            {
+                _logger.LogInformation("{configurableParameterName}: {configurableParameterValue}",
+                    configurableParameterKeyValue.Key,
+                    configurableParameterKeyValue.Value.Value.ToString());
+            }
         }
     }
 }

@@ -1,98 +1,99 @@
 ﻿using Logic.DeviceInterfaces;
 using Logic.FactoryInterface;
 using Logic.ValueHandlerInterfaces;
-using SensorActuatorImplementations.Actuators;
-using SensorActuatorImplementations.Sensors;
-using SensorActuatorImplementations.ValueHandlers;
+using Implementations.Actuators;
+using Implementations.Sensors;
+using Implementations.ValueHandlers;
+using Implementations.SimulatedTwinningTargets;
 
 namespace SmartNode
 {
     internal class Factory : IFactory
     {
+        private readonly bool _useDummyDevices;
+
         // New implementations can simply be added to the factory collections.
-        private readonly Dictionary<(string, string), ISensorDevice> _sensors = new()
+        private readonly Dictionary<(string, string), ISensorDevice> _dummySensors = new()
         {
             {
                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1",
-                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm"), new ExampleSensor
-                {
-                    ProcedureName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm",
-                    SensorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1"
-                }
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm"),
+                new DummyTemperatureSensor(
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm",
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1",
+                    _dummyRoomM370)
             },
             {
                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2",
-                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure"), new ExampleSensor
-                {
-                    ProcedureName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure",
-                    SensorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2"
-                }
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure"),
+                new DummyTemperatureSensor(
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure",
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2",
+                    _dummyRoomM370)
             },
             {
                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1",
-                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure"), new ExampleSensor
-                {
-                    ProcedureName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure",
-                    SensorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1"
-                }
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure"),
+                new DummyTemperatureSensor(
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure",
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1",
+                    _dummyRoomM370)
             },
             {
                 ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
-                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm"), new ExampleSensor
-                {
-                    ProcedureName = "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm",
-                    SensorName = "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor"
-                }
+                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm"),
+                new DummySensor(
+                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm",
+                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor")
             },
             {
                 ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
-                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPiece"), new ExampleSensor
-                {
-                    ProcedureName = "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPiece",
-                    SensorName = "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor"
-                }
+                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPiece"),
+                new DummySensor(
+                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPiece",
+                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor")
             },
             {
                 ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1",
-                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1Procedure"), new ExampleSensor
-                {
-                    ProcedureName = "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1Procedure",
-                    SensorName = "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1"
-                }
+                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1Procedure"),
+                new DummyTemperatureSensor(
+                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1Procedure",
+                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1",
+                    _dummyRoomM370)
             },
             {
                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeter",
-                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterProcedure"), new ExampleSensor
-                {
-                    ProcedureName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterProcedure",
-                    SensorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeter"
-                }
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterProcedure"),
+                new DummyEnergyConsumptionSensor(
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterProcedure",
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeter",
+                    _dummyRoomM370)
             },
             {
                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor",
-                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure"), new ExampleSensor
-                {
-                    ProcedureName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure",
-                    SensorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor"
-                }
-            }
-        };
-        private readonly Dictionary<string, IActuatorDevice> _actuators = new()
-        {
-            {
-                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit", new ExampleActuator()
-                {
-                    ActuatorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit"
-                }
-            },
-            {
-                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier", new ExampleActuator()
-                {
-                    ActuatorName = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
-                }
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure"),
+                new DummyHumiditySensor(
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure",
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor",
+                    _dummyRoomM370)
             }
         };
 
+        private readonly Dictionary<string, IActuatorDevice> _dummyActuators = new()
+        {
+            {
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit",
+                new DummyAirConditioningUnit(
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit",
+                    _dummyRoomM370)
+            },
+            {
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier",
+                new DummyDehumidifier(
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier",
+                    _dummyRoomM370)
+            }
+        };
 
         // The keys represent the OWL (RDF/XSD) types supported by Protege, and the values are user implementations.
         private readonly Dictionary<string, IValueHandler> _valueHandlers = new()
@@ -101,11 +102,26 @@ namespace SmartNode
             { "int", new IntValueHandler() }
         };
 
+        // Keep an instance of the simulated TT.
+        private static readonly DummyRoomM370 _dummyRoomM370 = new();
+
+        public Factory(bool useDummyDevices)
+        {
+            _useDummyDevices = useDummyDevices;
+        }
+
         public ISensorDevice GetSensorDeviceImplementation(string sensorName, string procedureName)
         {
-            if (_sensors.TryGetValue((sensorName, procedureName), out ISensorDevice? sensor))
+            if (_useDummyDevices)
             {
-                return sensor;
+                if (_dummySensors.TryGetValue((sensorName, procedureName), out ISensorDevice? sensor))
+                {
+                    return sensor;
+                }
+            }
+            else
+            {
+                // Reserved for real implementations.
             }
 
             throw new Exception($"No implementation was found for Sensor {sensorName} with Procedure {procedureName}.");
@@ -113,12 +129,19 @@ namespace SmartNode
 
         public IActuatorDevice GetActuatorDeviceImplementation(string actuatorName)
         {
-            if (_actuators.TryGetValue(actuatorName, out IActuatorDevice? actuator))
+            if (_useDummyDevices)
             {
-                return actuator;
+                if (_dummyActuators.TryGetValue(actuatorName, out IActuatorDevice? actuator))
+                {
+                    return actuator;
+                }
+            }
+            else
+            {
+                // Reserved for real implementations.
             }
 
-            throw new Exception($"No implementation was found for Actuator {actuator}.");
+            throw new Exception($"No implementation was found for Actuator {actuatorName}.");
         }
 
         public IValueHandler GetValueHandlerImplementation(string owlType)

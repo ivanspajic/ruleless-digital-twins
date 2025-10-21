@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
+using Microsoft.Extensions.Logging;
 using VDS.RDF;
 using VDS.RDF.Query;
 
@@ -39,11 +41,27 @@ namespace Logic.Mapek
             var query = GetParameterizedStringQuery();
 
             query.CommandText = @"SELECT ?valueType WHERE {
-                @property rdf:type ?bNode .
-                ?bNode owl:onProperty meta:hasValue .
-                ?bNode owl:onDataRange ?valueType . }";
+                @property rdf:type ?bNode1 .
+                ?bNode1 owl:onProperty meta:hasValue .
+                ?bNode1 owl:onDataRange ?valueType .
+                FILTER NOT EXISTS { ?valueType owl:onDatatype ?bNode2 } }";
 
             var propertyType = GetPropertyValueType(query, logger, instanceModel, "property", propertyNode);
+
+            if (!string.IsNullOrEmpty(propertyType))
+            {
+                return propertyType;
+            }
+
+            query = GetParameterizedStringQuery();
+
+            query.CommandText = @"SELECT ?valueType WHERE {
+                @property rdf:type ?bNode1 .
+                ?bNode1 owl:onProperty meta:hasValue .
+                ?bNode1 owl:onDataRange ?bNode2 .
+                ?bNode2 owl:onDatatype ?valueType . }";
+
+            propertyType = GetPropertyValueType(query, logger, instanceModel, "property", propertyNode);
 
             if (!string.IsNullOrEmpty(propertyType))
             {
@@ -98,6 +116,16 @@ namespace Logic.Mapek
             }
 
             return queryResult;
+        }
+
+        public static Property GetPropertyFromPropertyCacheByName(PropertyCache propertyCache, string propertyName)
+        {
+            if (!propertyCache.Properties.TryGetValue(propertyName, out Property? property))
+            {
+                property = propertyCache.ConfigurableParameters[propertyName];
+            }
+
+            return property;
         }
 
         private static string GetPropertyValueType<T>(SparqlParameterizedString query, ILogger<T> logger, IGraph instanceModel, string parameterName, INode propertyNode)

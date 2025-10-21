@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Logic.Mapek.EqualityComparers
+namespace Logic.Mapek.Comparers
 {
     internal class ActionSetEqualityComparer : IEqualityComparer<HashSet<Models.OntologicalModels.Action>>
     {

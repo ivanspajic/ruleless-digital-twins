@@ -40,10 +40,21 @@ latest: Pulling from volkers/smartnode
 ```
 
 ## Running the Control Loop (SmartNode)
-The codebase is a .NET solution consisting of 4 projects: `Logic` (MAPE-K and models), `SensorActuatorImplementations` (for user-provided sensor/actuator implementations), `SmartNode` (startup project), and `TestProject` (unit tests). Users may choose between running the solution natively or containerized. The control loop takes a filepath representing the (inferred) instance model as an execution argument, so there are argument configurations for both kinds of executions.
+The codebase is a .NET 8 solution consisting of 4 projects: `Logic` (MAPE-K and models), `SensorActuatorImplementations` (for user-provided sensor/actuator implementations), `SmartNode` (startup project), and `TestProject` (unit tests). Users may choose between running the solution natively or containerized.
+
+The control loop accepts 3 initial arguments and 2 options:
+1. The filepath of the (inferred) instance model.
+2. The filepath of the directory storing the FMU (simulation) models.
+3. The filepath of the directory to store control loop cycle data (property values and chosen actuator states) in CSV files.
+4. The simulation boolean option for whether to use the dummy environment or not (default is false).
+5. The round number integer for the total number of MAPE-K cycle rounds to execute (default is 4 and unlimited is -1).
+
+**NB: Depending on your platform, the filepaths in the 3 initial arguments might be represented differently than the current defaults. Feel free to add/remove `/../`s as you see fit.**
 
 The Logic project provides interfaces in the `Logic.DeviceInterfaces` directory for users to implement when providing their own custom connections to sensors and actuators. It also provides the `IValueHandler` interface for user-provided implementations of logic handling various operations with specific OWL types. The solution contains the `DoubleValueHandler`, `IntValueHandler`, and `TimespanValueHandler` as example implementations in the `SensorActuatorImplementations` project. These are registered in the `Factory` in the `SmartNode` project, where the user is expected to register other custom implementations as well.
 
 The solution currently runs based on the example 1 instance model, found in `instance-model-1.ttl` in the `models-and-rules` directory. Running this through the inference engine produces `inferred-model-1.ttl` which is used throughout the control loop. You may also use `inferred-model-2.ttl`, representing cyber components, but note that the simulation process has not been implemented for cyber components.
 
-The instance model contains two `OptimalConditions` that are deliberately unsatisfied by the dummy value provided by the only example sensor. Users are welcome to add their own or change the value to see the effects throughout the loop. There are many logging statements showing various stages of execution as well as the specific SPARQL queries and their results. At the end of each control loop cycle, the solution should print its chosen combination of actions to take, demonstrating what the DT's decision would be.
+By default, the solution runs with a fake (dummy) environment as its twinning target, but users can easily add their own implementations of real devices via the `Factory` class. 
+
+The instance model contains two `OptimalConditions` that are satisfied in the first cycle by the dummy values provided by dummy sensor implementations. Users are welcome to add their own or change the value to see the effects throughout the loop. There are many logging statements showing various stages of execution as well as the specific SPARQL queries and their results. At the end of each control loop cycle, the solution should print its chosen combination of actions to take, demonstrating what the DT's decision would be.

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Text;
 using VDS.RDF;
+using VDS.RDF.Query.Algebra;
 
 namespace Logic.Mapek
 {
@@ -242,7 +243,20 @@ namespace Logic.Mapek
             return simulationConfigurations;
         }
 
-        private HashSet<HashSet<T>> GetNaryCartesianProducts<T>(IEnumerable<IEnumerable<T>> originalCollectionOfCollections)
+        static public IEnumerable<IEnumerable<T>> GetNaryCartesianProducts<T>
+            (IEnumerable<IEnumerable<T>> sequences)
+        {
+            IEnumerable<IEnumerable<T>> emptyProduct =
+              new[] { Enumerable.Empty<T>() };
+            return sequences.Aggregate(
+              emptyProduct,
+              (accumulator, sequence) =>
+                from accseq in accumulator
+                from item in sequence
+                select accseq.Concat(new[] { item }));
+        }
+ 
+        static public HashSet<HashSet<T>> OldGetNaryCartesianProducts<T>(IEnumerable<IEnumerable<T>> originalCollectionOfCollections)
         {
             // This method gets the n-ary Cartesian product of multiple collections.
             var combinations = new HashSet<HashSet<T>>(new SetEqualityComparer<T>());
@@ -267,7 +281,7 @@ namespace Logic.Mapek
                     else
                     {
                         // If there are remaining collections, get their n-ary Cartesian product and add the current element to all sets returned.
-                        var remainingCombinations = GetNaryCartesianProducts(collectionOfRemainingCollections);
+                        var remainingCombinations = OldGetNaryCartesianProducts(collectionOfRemainingCollections);
 
                         foreach (var remainingCombination in remainingCombinations)
                         {

@@ -81,7 +81,7 @@ namespace Logic.Mapek
             return optimalConfiguration!;
         }
 
-        private HashSet<HashSet<ActuationAction>> GetActuationActionCombinations(IEnumerable<ActuationAction> actuationActions)
+        private IEnumerable<IEnumerable<ActuationAction>> GetActuationActionCombinations(IEnumerable<ActuationAction> actuationActions)
         {
             var actuationActionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(new ActionSetEqualityComparer());
 
@@ -115,7 +115,7 @@ namespace Logic.Mapek
             return GetNaryCartesianProducts(actuatorActuationsByActuator);
         }
 
-        private HashSet<HashSet<ReconfigurationAction>> GetReconfigurationActionCombinations(IEnumerable<ReconfigurationAction> reconfigurationActions)
+        private IEnumerable<IEnumerable<ReconfigurationAction>> GetReconfigurationActionCombinations(IEnumerable<ReconfigurationAction> reconfigurationActions)
         {
             var reconfigurationActionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(new ActionSetEqualityComparer());
 

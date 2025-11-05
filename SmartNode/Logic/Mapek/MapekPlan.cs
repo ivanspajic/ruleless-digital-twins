@@ -433,7 +433,7 @@ namespace Logic.Mapek
                 _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
                 AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
 
-                _logger.LogInformation("Tick");
+                _logger.LogDebug("Tick");
                 // Keep simulation fidelity while advancing an appropriate amount of time.
                 var maximumSteps = (double)simulationTick.TickDurationSeconds / simulationFidelitySeconds;
                 var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
@@ -461,17 +461,17 @@ namespace Logic.Mapek
 
         private void AssignPropertyCacheCopyValues(IInstance fmuInstance, PropertyCache propertyCacheCopy, IReadOnlyDictionary<string, IVariable> fmuOutputs) {
             // Find the correct Property from the simpler output variable name and assign its value.
+            var logMsg = "";
             foreach (var fmuOutput in fmuOutputs) {
-                foreach (var propertyName in propertyCacheCopy.Properties.Keys) {
-                    if (propertyName.EndsWith($"#{fmuOutput.Key}")) {
+                foreach (var propertyName in propertyCacheCopy.Properties.Keys.Where(propertyName => propertyName.EndsWith($"#{fmuOutput.Key}"))) {
                         var valueHandler = _factory.GetValueHandlerImplementation(propertyCacheCopy.Properties[propertyName].OwlType);
                         var value = valueHandler.GetValueFromSimulationParameter(fmuInstance, fmuOutput.Value);
 
-                        _logger.LogInformation("New value for {propertyName}: {value}", propertyName, value);
+                        logMsg += $"New value for {propertyName}: {value}\n";
                         propertyCacheCopy.Properties[propertyName].Value = value;
-                    }
                 }
             }
+            _logger.LogInformation(logMsg);   
         }
 
         private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache) {

@@ -14,8 +14,8 @@ namespace Logic.Mapek
     public class MapekPlan : IMapekPlan
     {
         // Required as fields to preserve caching throughout multiple MAPE-K loop cycles.
-	    public static Dictionary<string, IModel> _fmuDict = [];
-	    public static Dictionary<string, IInstance> _iDict = [];
+	    private static readonly Dictionary<string, IModel> _fmuDict = [];
+	    private static readonly Dictionary<string, IInstance> _iDict = [];
 
         private readonly ILogger<MapekPlan> _logger;
         private readonly IFactory _factory;
@@ -64,7 +64,7 @@ namespace Logic.Mapek
                 optimalConditions,
                 actuationSimulationGranularity);
 
-            _logger.LogInformation("Generated a total of {total} simulation configurations.", simulationConfigurations.Count());
+            _logger.LogInformation("Generated a total of {total} simulation configurations.", simulationConfigurations.Count);
 
             // Execute the simulations and obtain their results.
             Simulate(simulationConfigurations, instanceModel, propertyCache, fmuDirectory);
@@ -72,41 +72,32 @@ namespace Logic.Mapek
             // Find the optimal simulation configuration.
             var optimalConfiguration = GetOptimalConfiguration(instanceModel, propertyCache, optimalConditions, simulationConfigurations);
 
-            if (optimalConfiguration != null)
-            {
+            if (optimalConfiguration != null) {
                 LogOptimalSimulationConfiguration(optimalConfiguration);
             }
 
             return optimalConfiguration!;
         }
 
-        private HashSet<HashSet<ActuationAction>> GetActuationActionCombinations(IEnumerable<ActuationAction> actuationActions)
+        private static IEnumerable<IEnumerable<ActuationAction>> GetActuationActionCombinations(IEnumerable<ActuationAction> actuationActions)
         {
             var actuationActionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(new ActionSetEqualityComparer());
 
             // Group ActuationActions by their Actuators to allow creating combinations that don't consist of different states of the same Actuator.
             var actuationActionsByActuatorMap = new Dictionary<string, List<ActuationAction>>();
 
-            foreach (var actuationAction in actuationActions)
-            {
-                if (actuationActionsByActuatorMap.TryGetValue(actuationAction.Actuator.Name, out List<ActuationAction>? actuationActionsInMap))
-                {
+            foreach (var actuationAction in actuationActions) {
+                if (actuationActionsByActuatorMap.TryGetValue(actuationAction.Actuator.Name, out List<ActuationAction>? actuationActionsInMap)) {
                     actuationActionsInMap.Add(actuationAction);
-                }
-                else
-                {
-                    actuationActionsByActuatorMap.Add(actuationAction.Actuator.Name, new List<ActuationAction>
-                    {
-                        actuationAction
-                    });
+                } else {
+                    actuationActionsByActuatorMap.Add(actuationAction.Actuator.Name, [ actuationAction ]);
                 }
             }
 
             // Convert to a simple collection.
             var actuatorActuationsByActuator = new List<List<ActuationAction>>();
 
-            foreach (var keyValuePair in actuationActionsByActuatorMap)
-            {
+            foreach (var keyValuePair in actuationActionsByActuatorMap) {
                 actuatorActuationsByActuator.Add(keyValuePair.Value);
             }
 
@@ -114,34 +105,26 @@ namespace Logic.Mapek
             return GetNaryCartesianProducts(actuatorActuationsByActuator);
         }
 
-        private HashSet<HashSet<ReconfigurationAction>> GetReconfigurationActionCombinations(IEnumerable<ReconfigurationAction> reconfigurationActions)
-        {
+        private static IEnumerable<IEnumerable<ReconfigurationAction>> GetReconfigurationActionCombinations(IEnumerable<ReconfigurationAction> reconfigurationActions) {
             var reconfigurationActionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(new ActionSetEqualityComparer());
 
             // Group ReconfigurationActions by their ConfigurableParameter to allow creating combinations that don't consist of different reconfigurations of the same Property.
             var reconfigurationActionsByConfigurableParameterMap = new Dictionary<string, List<ReconfigurationAction>>();
 
-            foreach (var reconfigurationAction in reconfigurationActions)
-            {
+            foreach (var reconfigurationAction in reconfigurationActions) {
                 if (reconfigurationActionsByConfigurableParameterMap.TryGetValue(reconfigurationAction.ConfigurableParameter.Name,
-                    out List<ReconfigurationAction>? reconfigurationActionsInMap))
-                {
+                    out List<ReconfigurationAction>? reconfigurationActionsInMap)) {
                     reconfigurationActionsInMap.Add(reconfigurationAction);
-                }
-                else
-                {
-                    reconfigurationActionsByConfigurableParameterMap.Add(reconfigurationAction.ConfigurableParameter.Name, new List<ReconfigurationAction>
-                    {
-                        reconfigurationAction
-                    });
+                } else {
+                    reconfigurationActionsByConfigurableParameterMap.Add(reconfigurationAction.ConfigurableParameter.Name,
+                    [reconfigurationAction]);
                 }
             }
 
             // Convert to a simple collection.
             var reconfigurationActionsByConfigurableParameter = new List<List<ReconfigurationAction>>();
 
-            foreach (var keyValuePair in reconfigurationActionsByConfigurableParameterMap)
-            {
+            foreach (var keyValuePair in reconfigurationActionsByConfigurableParameterMap) {
                 reconfigurationActionsByConfigurableParameter.Add(keyValuePair.Value);
             }
 
@@ -149,7 +132,7 @@ namespace Logic.Mapek
             return GetNaryCartesianProducts(reconfigurationActionsByConfigurableParameter);
         }
 
-        private List<SimulationConfiguration> GetSimulationConfigurationsFromActionCombinations(IEnumerable<IEnumerable<ActuationAction>> actuationActionCombinations,
+        private static List<SimulationConfiguration> GetSimulationConfigurationsFromActionCombinations(IEnumerable<IEnumerable<ActuationAction>> actuationActionCombinations,
             IEnumerable<IEnumerable<ReconfigurationAction>> reconfigurationActionCombinations,
             IEnumerable<OptimalCondition> optimalConditions,
             int simulationGranularity)
@@ -159,30 +142,23 @@ namespace Logic.Mapek
             // Get the unsatisfied OptimalCondition with the lowest mitigation time to use it as the simulation's maximum time.
             var unsatisfiedOptimalConditions = optimalConditions.Where(optimalCondition => optimalCondition.UnsatisfiedAtomicConstraints.Any());
             var maximumSimulationTime = 0;
-            if (unsatisfiedOptimalConditions.Any())
-            {
+            if (unsatisfiedOptimalConditions.Any()) {
                 maximumSimulationTime = GetMaximumSimulationTime(unsatisfiedOptimalConditions);
-            }
-            else
-            {
+            } else {
                 maximumSimulationTime = MaximumSimulationTimeSeconds;
             }
 
-            if (actuationActionCombinations.Any())
-            {
+            if (actuationActionCombinations.Any()) {
                 // Populate simulation ticks with every possible ActuationAction combination by index.
                 var allSimulationTicksByIndex = new List<List<SimulationTick>>();
 
-                for (var i = 0; i < simulationGranularity; i++)
-                {
+                for (var i = 0; i < simulationGranularity; i++) {
                     var simulationTicksWithCurrentIndex = new List<SimulationTick>();
 
-                    foreach (var actuationActionCombination in actuationActionCombinations)
-                    {
+                    foreach (var actuationActionCombination in actuationActionCombinations) {
                         var timeInterval = maximumSimulationTime / simulationGranularity;
 
-                        var simulationTick = new SimulationTick
-                        {
+                        var simulationTick = new SimulationTick {
                             ActionsToExecute = actuationActionCombination,
                             TickIndex = i,
                             TickDurationSeconds = timeInterval
@@ -197,25 +173,18 @@ namespace Logic.Mapek
                 // Get all possible Cartesian pairings of simulation ticks that together form full simulation configurations.
                 var simulationTickCombinations = GetNaryCartesianProducts(allSimulationTicksByIndex);
 
-                foreach (var simulationTickCombination in simulationTickCombinations)
-                {
+                foreach (var simulationTickCombination in simulationTickCombinations) {
                     SimulationConfiguration simulationConfiguration = null!;
 
-                    if (reconfigurationActionCombinations.Any())
-                    {
-                        foreach (var reconfigurationActionCombination in reconfigurationActionCombinations)
-                        {
-                            simulationConfiguration = new SimulationConfiguration
-                            {
+                    if (reconfigurationActionCombinations.Any()) {
+                        foreach (var reconfigurationActionCombination in reconfigurationActionCombinations) {
+                            simulationConfiguration = new SimulationConfiguration {
                                 SimulationTicks = simulationTickCombination.Reverse(), // Must be reversed due to how the combinations are constructed.
                                 PostTickActions = reconfigurationActionCombination
                             };
                         }
-                    }
-                    else
-                    {
-                        simulationConfiguration = new SimulationConfiguration
-                        {
+                    } else {
+                        simulationConfiguration = new SimulationConfiguration {
                             SimulationTicks = simulationTickCombination.Reverse(), // Must be reversed due to how the combinations are constructed.
                             PostTickActions = []
                         };
@@ -223,14 +192,10 @@ namespace Logic.Mapek
 
                     simulationConfigurations.Add(simulationConfiguration);
                 }
-            }
-            else
-            {
+            } else {
                 // In case of no ActuationActions present, simply construct simulation configurations from all combinations of ReconfigurationActions.
-                foreach (var reconfigurationActionCombination in reconfigurationActionCombinations)
-                {
-                    var simulationConfiguration = new SimulationConfiguration
-                    {
+                foreach (var reconfigurationActionCombination in reconfigurationActionCombinations) {
+                    var simulationConfiguration = new SimulationConfiguration {
                         SimulationTicks = [],
                         PostTickActions = reconfigurationActionCombination
                     };
@@ -242,35 +207,35 @@ namespace Logic.Mapek
             return simulationConfigurations;
         }
 
-        private HashSet<HashSet<T>> GetNaryCartesianProducts<T>(IEnumerable<IEnumerable<T>> originalCollectionOfCollections)
-        {
+        public static IEnumerable<IEnumerable<T>> GetNaryCartesianProducts<T> (IEnumerable<IEnumerable<T>> sequences) {
+            IEnumerable<IEnumerable<T>> emptyProduct = new[] { Enumerable.Empty<T>() };
+            return sequences.Aggregate(
+              emptyProduct,
+              (accumulator, sequence) =>
+                from accseq in accumulator
+                from item in sequence
+                select accseq.Concat(new[] { item }));
+        }
+ 
+        public static HashSet<HashSet<T>> OldGetNaryCartesianProducts<T>(IEnumerable<IEnumerable<T>> originalCollectionOfCollections) {
             // This method gets the n-ary Cartesian product of multiple collections.
             var combinations = new HashSet<HashSet<T>>(new SetEqualityComparer<T>());
 
-            foreach (var currentCollection in originalCollectionOfCollections)
-            {
+            foreach (var currentCollection in originalCollectionOfCollections) {
                 // Get all remaining collections.
                 var collectionOfRemainingCollections = originalCollectionOfCollections.Where(collection => collection != currentCollection);
 
-                foreach (var element in currentCollection)
-                {
-                    if (!collectionOfRemainingCollections.Any())
-                    {
+                foreach (var element in currentCollection) {
+                    if (!collectionOfRemainingCollections.Any()) {
                         // If there are no remaining collections, simply make a set of the current element.
-                        var singleElementCombination = new HashSet<T>()
-                        {
-                            element
-                        };
+                        var singleElementCombination = new HashSet<T>() { element };
 
                         combinations.Add(singleElementCombination);
-                    }
-                    else
-                    {
+                    } else {
                         // If there are remaining collections, get their n-ary Cartesian product and add the current element to all sets returned.
-                        var remainingCombinations = GetNaryCartesianProducts(collectionOfRemainingCollections);
+                        var remainingCombinations = OldGetNaryCartesianProducts(collectionOfRemainingCollections);
 
-                        foreach (var remainingCombination in remainingCombinations)
-                        {
+                        foreach (var remainingCombination in remainingCombinations) {
                             remainingCombination.Add(element);
                         }
 
@@ -283,8 +248,7 @@ namespace Logic.Mapek
             return combinations;
         }
 
-        private void Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations, IGraph instanceModel, PropertyCache propertyCache, string fmuDirectory)
-        {
+        private void Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations, IGraph instanceModel, PropertyCache propertyCache, string fmuDirectory) {
             // Retrieve the host platform FMU and its simulation fidelity for ActuationAction simulations.
             var fmuModel = GetHostPlatformFmuModel(instanceModel, simulationConfigurations.First(), fmuDirectory);
 
@@ -294,20 +258,18 @@ namespace Logic.Mapek
 
             int i = 0;
             // TODO: Parallelize simulations (#13).
-            foreach (var simulationConfiguration in simulationConfigurations)
-            {
+            foreach (var simulationConfiguration in simulationConfigurations) {
                 _logger.LogInformation("Running simulation #{run}", i++);
 
                 // Make a deep copy of the property cache for the current simulation configuration.
                 var propertyCacheCopy = GetPropertyCacheCopy(propertyCache);
 
-                if (simulationConfiguration.SimulationTicks.Any())
-                {
+                if (simulationConfiguration.SimulationTicks.Any()) {
+                    // TODO: pass `fmuModel` instead of (some of) its components?
                     ExecuteActuationActionFmu(fmuModel.FilePath, simulationConfiguration, instanceModel, propertyCacheCopy, fmuModel.SimulationFidelitySeconds);
                 }
 
-                if (simulationConfiguration.PostTickActions.Any())
-                {
+                if (simulationConfiguration.PostTickActions.Any()) {
                     // Executing/simulating soft sensors during the Plan phase is not yet supported.
                 }
 
@@ -326,12 +288,9 @@ namespace Logic.Mapek
             var actuatorNames = new HashSet<string>();
             var clauseBuilder = new StringBuilder();
 
-            foreach (var simulationTick in simulationConfiguration.SimulationTicks)
-            {
-                foreach (var actuationAction in simulationTick.ActionsToExecute)
-                {
-                    if (!actuatorNames.Contains(actuationAction.Actuator.Name))
-                    {
+            foreach (var simulationTick in simulationConfiguration.SimulationTicks) {
+                foreach (var actuationAction in simulationTick.ActionsToExecute) {
+                    if (!actuatorNames.Contains(actuationAction.Actuator.Name)) {
                         actuatorNames.Add(actuationAction.Actuator.Name);
                         
                         // Add the Actuator name to the query filter.
@@ -358,36 +317,29 @@ namespace Logic.Mapek
             // per instance model. There should therefore be only one result.
             var fmuModel = queryResult.Results[0];
 
-            return new FmuModel
-            {
+            return new FmuModel {
                 Name = fmuModel["fmuModel"].ToString(),
                 FilePath = Path.Combine(fmuDirectory, fmuModel["fmuFilePath"].ToString().Split('^')[0]),
                 SimulationFidelitySeconds = int.Parse(fmuModel["simulationFidelitySeconds"].ToString().Split('^')[0])
             };
         }
 
-        private static PropertyCache GetPropertyCacheCopy(PropertyCache originalPropertyCache)
-        {
-            var propertyCacheCopy = new PropertyCache
-            {
+        private static PropertyCache GetPropertyCacheCopy(PropertyCache originalPropertyCache) {
+            var propertyCacheCopy = new PropertyCache {
                 Properties = new Dictionary<string, Property>(),
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
             };
 
-            foreach (var keyValuePair in originalPropertyCache.Properties)
-            {
-                propertyCacheCopy.Properties.Add(keyValuePair.Key, new Property
-                {
+            foreach (var keyValuePair in originalPropertyCache.Properties) {
+                propertyCacheCopy.Properties.Add(keyValuePair.Key, new Property {
                     Name = keyValuePair.Value.Name,
                     OwlType = keyValuePair.Value.OwlType,
                     Value = keyValuePair.Value.Value
                 });
             }
 
-            foreach (var keyValuePair in originalPropertyCache.ConfigurableParameters)
-            {
-                propertyCacheCopy.Properties.Add(keyValuePair.Key, new ConfigurableParameter
-                {
+            foreach (var keyValuePair in originalPropertyCache.ConfigurableParameters) {
+                propertyCacheCopy.Properties.Add(keyValuePair.Key, new ConfigurableParameter {
                     Name = keyValuePair.Value.Name,
                     OwlType = keyValuePair.Value.OwlType,
                     Value = keyValuePair.Value.Value
@@ -409,16 +361,12 @@ namespace Logic.Mapek
 
             var queryResult = instanceModel.ExecuteQuery(query, _logger);
 
-            foreach (var result in queryResult.Results)
-            {
+            foreach (var result in queryResult.Results) {
                 var propertyName = result["observableProperty"].ToString();
 
-                if (propertyCache.Properties.TryGetValue(propertyName, out Property property))
-                {
+                if (propertyCache.Properties.TryGetValue(propertyName, out Property property)) {
                     observableProperties.Add(property);
-                }
-                else
-                {
+                } else {
                     throw new Exception($"ObservableProperty {propertyName} was not in the cache.");
                 }
             }
@@ -426,19 +374,8 @@ namespace Logic.Mapek
             return observableProperties;
         }
 
-        private static int GetMaximumSimulationTime(IEnumerable<OptimalCondition> optimalConditions)
-        {
-            var maximumSimulationTime = int.MaxValue;
-
-            foreach (var optimalCondition in optimalConditions)
-            {
-                if (optimalCondition.ReachedInMaximumSeconds < maximumSimulationTime)
-                {
-                    maximumSimulationTime = optimalCondition.ReachedInMaximumSeconds;
-                }
-            }
-
-            return maximumSimulationTime;
+        private static int GetMaximumSimulationTime(IEnumerable<OptimalCondition> optimalConditions) {
+            return optimalConditions.Select(oc => oc.ReachedInMaximumSeconds).Min();
         }
 
         private void ExecuteActuationActionFmu(string fmuFilePath,
@@ -447,9 +384,9 @@ namespace Logic.Mapek
             PropertyCache propertyCacheCopy,
             int simulationFidelitySeconds)
         {
-            _logger.LogInformation($"Simulation {simulationConfiguration} ({simulationConfiguration.SimulationTicks.Count()} ticks)");
-            if (!_fmuDict.TryGetValue(fmuFilePath, out IModel? model))
-            {
+            // The LogDebug calls here are primarily to keep an eye on crashes in the FMU which are otherwise a tad harder to track down.
+            _logger.LogInformation("Simulation {simulationConfiguration} ({ticks} ticks)", simulationConfiguration, simulationConfiguration.SimulationTicks.Count());
+            if (!_fmuDict.TryGetValue(fmuFilePath, out IModel? model)) {
                 _logger.LogDebug("Loading Model {filePath}", fmuFilePath);
                 model = Model.Load(fmuFilePath);
                 _fmuDict.Add(fmuFilePath, model);
@@ -472,39 +409,35 @@ namespace Logic.Mapek
             Debug.Assert(fmuInstance != null, "Instance is null after creation.");
 
             // Run the simulation by executing ActuationActions in their respective simulation intervals.
-            foreach (var simulationTick in simulationConfiguration.SimulationTicks)
-            {
+            foreach (var simulationTick in simulationConfiguration.SimulationTicks) {
                 var fmuActuationInputs = new List<(string, string, object)>();
 
                 // Get all ObservableProperties and add them to the inputs for the FMU.
                 var observableProperties = GetObservablePropertiesFromPropertyCache(instanceModel, propertyCacheCopy);
 
-                foreach (var observableProperty in observableProperties)
-                {
+                foreach (var observableProperty in observableProperties) {
                     // Shave off the long name URIs from the instance model.
                     var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
                     fmuActuationInputs.Add((simpleObservablePropertyName, observableProperty.OwlType, observableProperty.Value));
                 }
 
                 // Add all ActuatorStates to the inputs for the FMU.
-                foreach (var actuationAction in simulationTick.ActionsToExecute)
-                {
+                foreach (var actuationAction in simulationTick.ActionsToExecute) {
                     // Shave off the long name URIs from the instance model.
                     var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.Actuator.Name);
                     fmuActuationInputs.Add((simpleActuatorName + "State", "int", actuationAction.NewStateValue));
                 }
 
-                _logger.LogInformation($"Parameters: {string.Join(", ", fmuActuationInputs.Select(i => i.ToString()))}");
+                _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
                 AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
 
-                _logger.LogInformation("Tick");
+                _logger.LogDebug("Tick");
                 // Keep simulation fidelity while advancing an appropriate amount of time.
                 var maximumSteps = (double)simulationTick.TickDurationSeconds / simulationFidelitySeconds;
                 var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
                 var difference = maximumSteps - maximumStepsRoundedDown;
 
-                for (var i = 0; i < maximumStepsRoundedDown; i++)
-                {
+                for (var i = 0; i < maximumStepsRoundedDown; i++) {
                     fmuInstance.AdvanceTime(simulationFidelitySeconds);
                 }
 
@@ -515,10 +448,8 @@ namespace Logic.Mapek
             }
         }
 
-        private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs)
-        {
-            foreach (var input in fmuInputs)
-            {
+        private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs) {
+            foreach (var input in fmuInputs) {
                 var valueHandler = _factory.GetValueHandlerImplementation(input.Item2);
                 var fmuVariable = model.Variables[input.Item1];
 
@@ -526,54 +457,41 @@ namespace Logic.Mapek
             }
         }
 
-        private void AssignPropertyCacheCopyValues(IInstance fmuInstance, PropertyCache propertyCacheCopy, IReadOnlyDictionary<string, IVariable> fmuOutputs)
-        {
+        private void AssignPropertyCacheCopyValues(IInstance fmuInstance, PropertyCache propertyCacheCopy, IReadOnlyDictionary<string, IVariable> fmuOutputs) {
             // Find the correct Property from the simpler output variable name and assign its value.
-            foreach (var fmuOutput in fmuOutputs)
-            {
-                foreach (var propertyName in propertyCacheCopy.Properties.Keys)
-                {
-                    if (propertyName.EndsWith($"#{fmuOutput.Key}"))
-                    {
+            var logMsg = "";
+            foreach (var fmuOutput in fmuOutputs) {
+                foreach (var propertyName in propertyCacheCopy.Properties.Keys.Where(propertyName => propertyName.EndsWith($"#{fmuOutput.Key}"))) {
                         var valueHandler = _factory.GetValueHandlerImplementation(propertyCacheCopy.Properties[propertyName].OwlType);
                         var value = valueHandler.GetValueFromSimulationParameter(fmuInstance, fmuOutput.Value);
 
-                        _logger.LogInformation("New value for {propertyName}: {value}", propertyName, value);
+                        logMsg += $"New value for {propertyName}: {value}\n";
                         propertyCacheCopy.Properties[propertyName].Value = value;
-                    }
                 }
             }
+            _logger.LogInformation(logMsg);   
         }
 
-        private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
-        {
+        private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache) {
             var numberOfSatisfiedOptimalConditions = 0;
 
-            foreach (var optimalCondition in optimalConditions)
-            {
+            foreach (var optimalCondition in optimalConditions) {
                 var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.ConstraintValueType);
 
                 object propertyValue;
 
-                if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property, out ConfigurableParameter configurableParameter))
-                {
+                if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property, out ConfigurableParameter configurableParameter)) {
                     propertyValue = configurableParameter.Value;
-                }
-                else if (propertyCache.Properties.TryGetValue(optimalCondition.Property, out Property property))
-                {
+                } else if (propertyCache.Properties.TryGetValue(optimalCondition.Property, out Property property)) {
                     propertyValue = property.Value;
-                }
-                else
-                {
+                } else {
                     throw new Exception($"Property {optimalCondition.Property} was not found in the system.");
                 }
 
-                foreach (var constraint in optimalCondition.Constraints)
-                {
+                foreach (var constraint in optimalCondition.Constraints) {
                     var unsatisfiedConstraints = valueHandler.GetUnsatisfiedConstraintsFromEvaluation(constraint, propertyValue);
 
-                    if (!unsatisfiedConstraints.Any())
-                    {
+                    if (!unsatisfiedConstraints.Any()) {
                         numberOfSatisfiedOptimalConditions++;
                     }
                 }
@@ -593,57 +511,44 @@ namespace Logic.Mapek
             // 2. Filter for simulation configurations that have the highest number of the most optimized Properties.
             // 3. Pick the first one.
 
-            if (!simulationConfigurations.Any())
-            {
+            if (!simulationConfigurations.Any()) {
                 return null!;
             }
 
             // Filter for simulation configurations that satisfy the most OptimalConditions.
             var simulationConfigurationsWithMostOptimalConditionsSatisfied = GetSimulationConfigurationsWithMostOptimalConditionsSatisfied(simulationConfigurations, optimalConditions);
 
-            if (simulationConfigurationsWithMostOptimalConditionsSatisfied.Count() == 1)
-            {
+            if (simulationConfigurationsWithMostOptimalConditionsSatisfied.Count == 1) {
                 return simulationConfigurationsWithMostOptimalConditionsSatisfied.First();
             }
 
-            _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationConfigurationsWithMostOptimalConditionsSatisfied.Count());
+            _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationConfigurationsWithMostOptimalConditionsSatisfied.Count);
 
             // Filter for simulation configurations that optimize the most targeted Properties.
             var simulationConfigurationsWithMostOptimizedProperties = GetSimulationConfigurationsWithMostOptimizedProperties(simulationConfigurationsWithMostOptimalConditionsSatisfied,
                 instanceModel,
                 propertyCache);
 
-            if (simulationConfigurationsWithMostOptimizedProperties.Count() == 1)
-            {
-                return simulationConfigurationsWithMostOptimizedProperties.First();
-            }
-
-            _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationConfigurationsWithMostOptimizedProperties.Count());
+            _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationConfigurationsWithMostOptimizedProperties.Count);
 
             // At this point, arbitrarily return the first one regardless of the number of simulation configurations remaining.
             return simulationConfigurationsWithMostOptimizedProperties.First();
         }
 
         private List<SimulationConfiguration> GetSimulationConfigurationsWithMostOptimalConditionsSatisfied(IEnumerable<SimulationConfiguration> simulationConfigurations,
-            IEnumerable<OptimalCondition> optimalConditions)
-        {
+            IEnumerable<OptimalCondition> optimalConditions) {
             var passingSimulationConfigurations = new List<SimulationConfiguration>();
             var highestNumberOfSatisfiedOptimalConditions = 0;
 
-            foreach (var simulationConfiguration in simulationConfigurations)
-            {
+            foreach (var simulationConfiguration in simulationConfigurations) {
                 var numberOfSatisfiedOptimalConditions = GetNumberOfSatisfiedOptimalConditions(optimalConditions, simulationConfiguration.ResultingPropertyCache);
 
-                if (numberOfSatisfiedOptimalConditions > highestNumberOfSatisfiedOptimalConditions)
-                {
+                if (numberOfSatisfiedOptimalConditions > highestNumberOfSatisfiedOptimalConditions) {
                     highestNumberOfSatisfiedOptimalConditions = numberOfSatisfiedOptimalConditions;
-                    passingSimulationConfigurations = new List<SimulationConfiguration>
-                    {
+                    passingSimulationConfigurations = new List<SimulationConfiguration> {
                         simulationConfiguration
                     };
-                }
-                else if (numberOfSatisfiedOptimalConditions == highestNumberOfSatisfiedOptimalConditions)
-                {
+                } else if (numberOfSatisfiedOptimalConditions == highestNumberOfSatisfiedOptimalConditions) {
                     passingSimulationConfigurations.Add(simulationConfiguration);
                 }
             }
@@ -653,8 +558,7 @@ namespace Logic.Mapek
 
         private List<SimulationConfiguration> GetSimulationConfigurationsWithMostOptimizedProperties(IEnumerable<SimulationConfiguration> simulationConfigurations,
             IGraph instanceModel,
-            PropertyCache propertyCache)
-        {
+            PropertyCache propertyCache) {
             var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(instanceModel, propertyCache);
             var valueHandlers = propertyChangesToOptimizeFor.Select(p => _factory.GetValueHandlerImplementation(p.Property.OwlType));
 
@@ -668,8 +572,7 @@ namespace Logic.Mapek
                 .ToList();
         }
 
-        private List<PropertyChange> GetPropertyChangesToOptimizeFor(IGraph instanceModel, PropertyCache propertyCache)
-        {
+        private List<PropertyChange> GetPropertyChangesToOptimizeFor(IGraph instanceModel, PropertyCache propertyCache) {
             var propertyChangesToOptimizeFor = new List<PropertyChange>();
 
             var query = MapekUtilities.GetParameterizedStringQuery();
@@ -682,8 +585,7 @@ namespace Logic.Mapek
 
             var queryResult = instanceModel.ExecuteQuery(query, _logger);
 
-            foreach (var result in queryResult.Results)
-            {
+            foreach (var result in queryResult.Results) {
                 var propertyChangeName = result["propertyChange"].ToString();
                 var propertyName = result["property"].ToString();
                 var effectName = result["effect"].ToString().Split("/")[^1];
@@ -693,20 +595,17 @@ namespace Logic.Mapek
                 var propertyFound = propertyCache.Properties.TryGetValue(propertyName, out property!);
 
                 // Check where in the property cache the Property is. Shouldn't really fail.
-                if (!propertyFound)
-                {
+                if (!propertyFound) {
                     property = propertyCache.ConfigurableParameters[propertyName];
                 }
 
-                if (!Enum.TryParse(effectName, out Effect effect))
-                {
+                if (!Enum.TryParse(effectName, out Effect effect)) {
                     throw new Exception($"Enum value {effectName} is not supported.");
                 }
 
                 // TODO: Review, fishy constructing PropertyChange with `null`, should probably be non-nullable?
                 Debug.Assert(property != null, $"Didn't find {propertyName}.");
-                var propertyChange = new PropertyChange
-                {
+                var propertyChange = new PropertyChange {
                     Name = propertyChangeName,
                     Property = property,
                     OptimizeFor = effect
@@ -718,27 +617,23 @@ namespace Logic.Mapek
             return propertyChangesToOptimizeFor;
         }
 
-        private void LogOptimalSimulationConfiguration(SimulationConfiguration optimalSimulationConfiguration)
-        {
+        private void LogOptimalSimulationConfiguration(SimulationConfiguration optimalSimulationConfiguration) {
             var logMsg = "Chosen optimal configuration, Actuation actions:\n";
 
             // Convert to a list to use indexing.
             var simulationTickList = optimalSimulationConfiguration.SimulationTicks.ToList();
 
-            for (var i = 0; i < simulationTickList.Count; i++)
-            {
+            for (var i = 0; i < simulationTickList.Count; i++) {
                 logMsg += $"Interval {i + 1}:\n";
 
-                foreach (var action in simulationTickList[i].ActionsToExecute)
-                {
+                foreach (var action in simulationTickList[i].ActionsToExecute) {
                     logMsg += $"Actuator: {action.Actuator.Name}, Actuator state: {action.NewStateValue.ToString()}\n";
                 }
             }
 
             logMsg += "Post-tick actions:\n";
 
-            foreach (var postTickAction in optimalSimulationConfiguration.PostTickActions)
-            {
+            foreach (var postTickAction in optimalSimulationConfiguration.PostTickActions) {
                 logMsg += $"Configurable parameter: {postTickAction.ConfigurableParameter.Name}; ";
                 logMsg += $"New Value: {postTickAction.NewParameterValue.ToString()}\n";
             }

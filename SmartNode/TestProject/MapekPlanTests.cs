@@ -1,8 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Logic.Mapek;
 
 namespace SmartNode.TestProject
@@ -10,7 +5,7 @@ namespace SmartNode.TestProject
     public class MapekPlanTestsTest
     {
 
-        private void AssertCombinationsEqual(IEnumerable<IEnumerable<object>> expected, IEnumerable<IEnumerable<object>> actual)
+        private static void AssertCombinationsEqual(IEnumerable<IEnumerable<object>> expected, IEnumerable<IEnumerable<object>> actual)
         {
             var exp = expected.Select(e => string.Join("||", e.Select(x => x?.ToString() ?? "null"))).OrderBy(s => s).ToList();
             var act = actual.Select(e => string.Join("||", e.Select(x => x?.ToString() ?? "null"))).OrderBy(s => s).ToList();
@@ -81,9 +76,8 @@ namespace SmartNode.TestProject
             };
 
             var actual = MapekPlan.OldGetNaryCartesianProducts(inputs);
-
             Assert.True(actual.Count == 0);
-            Assert.True(MapekPlan.GetNaryCartesianProducts(inputs).Count() == 0);
+            Assert.False(MapekPlan.GetNaryCartesianProducts(inputs).Any());
         }
 
         [Fact]

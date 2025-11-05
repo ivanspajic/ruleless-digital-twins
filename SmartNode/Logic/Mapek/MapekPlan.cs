@@ -207,10 +207,8 @@ namespace Logic.Mapek
             return simulationConfigurations;
         }
 
-        public static IEnumerable<IEnumerable<T>> GetNaryCartesianProducts<T>
-            (IEnumerable<IEnumerable<T>> sequences) {
-            IEnumerable<IEnumerable<T>> emptyProduct =
-              new[] { Enumerable.Empty<T>() };
+        public static IEnumerable<IEnumerable<T>> GetNaryCartesianProducts<T> (IEnumerable<IEnumerable<T>> sequences) {
+            IEnumerable<IEnumerable<T>> emptyProduct = new[] { Enumerable.Empty<T>() };
             return sequences.Aggregate(
               emptyProduct,
               (accumulator, sequence) =>

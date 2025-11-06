@@ -58,3 +58,8 @@ The solution currently runs based on the example 1 instance model, found in `ins
 By default, the solution runs with a fake (dummy) environment as its twinning target, but users can easily add their own implementations of real devices via the `Factory` class. 
 
 The instance model contains two `OptimalConditions` that are satisfied in the first cycle by the dummy values provided by dummy sensor implementations. Users are welcome to add their own or change the value to see the effects throughout the loop. There are many logging statements showing various stages of execution as well as the specific SPARQL queries and their results. At the end of each control loop cycle, the solution should print its chosen combination of actions to take, demonstrating what the DT's decision would be.
+
+### Required Steps for Using Cyber TTs
+In our solution, cyber TTs are treated similarly to physical TTs. This means they use instance models conformant to the same ontology and use user-provided implementations to connect to soft sensors and software for reconfiguration as well for providing possible values for ConfigurableParameters. This means that, much like for providing implementations for generating Actuator states, a user should provide implementations for generating values of ConfigurableParameters.
+
+Cyber TT reconfiguration is currently not supported by our simulation system but is on the planned task list.

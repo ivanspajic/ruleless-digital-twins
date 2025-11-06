@@ -36,76 +36,69 @@ namespace Logic.Mapek
             return query;
         }
 
-        public static string GetPropertyType<T>(ILogger<T> logger, IGraph instanceModel, INode propertyNode)
-        {
+        public static SparqlParameterizedString GetParameterizedStringQuery(String commandText) {
             var query = GetParameterizedStringQuery();
+            query.CommandText = commandText;
+            return query;
+        }
 
-            query.CommandText = @"SELECT ?valueType WHERE {
+
+        // TODO: Document a bit what's going on here with the fall-throughs.
+        public static string GetPropertyType<T>(ILogger<T> logger, IGraph instanceModel, INode propertyNode){
+            var query = GetParameterizedStringQuery(@"SELECT ?valueType WHERE {
                 @property rdf:type ?bNode1 .
                 ?bNode1 owl:onProperty meta:hasValue .
                 ?bNode1 owl:onDataRange ?valueType .
-                FILTER NOT EXISTS { ?valueType owl:onDatatype ?bNode2 } }";
+                FILTER NOT EXISTS { ?valueType owl:onDatatype ?bNode2 } }");
 
             var propertyType = GetPropertyValueType(query, logger, instanceModel, "property", propertyNode);
 
-            if (!string.IsNullOrEmpty(propertyType))
-            {
+            if (!string.IsNullOrEmpty(propertyType)) {
                 return propertyType;
             }
 
-            query = GetParameterizedStringQuery();
-
-            query.CommandText = @"SELECT ?valueType WHERE {
+            query = GetParameterizedStringQuery(@"SELECT ?valueType WHERE {
                 @property rdf:type ?bNode1 .
                 ?bNode1 owl:onProperty meta:hasValue .
                 ?bNode1 owl:onDataRange ?bNode2 .
-                ?bNode2 owl:onDatatype ?valueType . }";
+                ?bNode2 owl:onDatatype ?valueType . }");
 
             propertyType = GetPropertyValueType(query, logger, instanceModel, "property", propertyNode);
 
-            if (!string.IsNullOrEmpty(propertyType))
-            {
+            if (!string.IsNullOrEmpty(propertyType)) {
                 return propertyType;
             }
 
-            query = GetParameterizedStringQuery();
-
-            query.CommandText = @"SELECT ?valueType WHERE {
+            query = GetParameterizedStringQuery(@"SELECT ?valueType WHERE {
                 @property rdf:type sosa:ObservableProperty .
                 @property rdf:type ?bNode .
                 ?bNode owl:onProperty meta:hasUpperLimitValue .
-                ?bNode owl:onDataRange ?valueType . }";
+                ?bNode owl:onDataRange ?valueType . }");
 
             propertyType = GetPropertyValueType(query, logger, instanceModel, "property", propertyNode);
 
-            if (!string.IsNullOrEmpty(propertyType))
-            {
+            if (!string.IsNullOrEmpty(propertyType)) {
                 return propertyType;
             }
 
             throw new Exception("The property " + propertyNode.ToString() + " was found without a value type.");
         }
 
-        public static string GetSimpleName(string longName)
-        {
+        public static string GetSimpleName(string longName) {
             var simpleName = string.Empty;
             var simpleNameArray = longName.Split('#');
 
             // Check if the name URI ends with a '/' instead of a '#'.
-            if (simpleNameArray.Length == 1)
-            {
+            if (simpleNameArray.Length == 1) {
                 simpleName = longName.Split('/')[^1];
-            }
-            else
-            {
+            } else {
                 simpleName = simpleNameArray[1];
             }
 
             return simpleName;
         }
 
-        public static SparqlResultSet ExecuteQuery<T>(this IGraph instanceModel, SparqlParameterizedString query, ILogger<T> logger)
-        {
+        public static SparqlResultSet ExecuteQuery<T>(this IGraph instanceModel, SparqlParameterizedString query, ILogger<T> logger) {
 
             var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
             logger.LogInformation("Executed query: {query} ({numResults})", query.CommandText, queryResult.Results.Count);

@@ -1,10 +1,5 @@
 ﻿using Femyou;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TestProject
 {
@@ -32,8 +27,8 @@ namespace TestProject
             fmuInstance.AdvanceTime(10);
             actualValue = fmuInstance.ReadReal(energyConsumption).ToArray()[0];
 
-            // fmuInstance.Dispose();
-            // model.Dispose();
+            fmuInstance.Dispose();
+            model.Dispose();
 
             // Assert
             Assert.Equal(expectedValue, actualValue);
@@ -70,8 +65,8 @@ namespace TestProject
 
             actualValue = fmuInstance.ReadReal(roomTemperature).ToArray()[0];
 
-            // fmuInstance.Dispose();
-            // model.Dispose();
+            fmuInstance.Dispose();
+            model.Dispose();
 
             // Assert
             Assert.Equal(expectedValue, actualValue);

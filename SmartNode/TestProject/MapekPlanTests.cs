@@ -1,6 +1,6 @@
 using Logic.Mapek;
 
-namespace SmartNode.TestProject
+namespace TestProject
 {
     public class MapekPlanTestsTest
     {

@@ -16,20 +16,24 @@ namespace Logic.Mapek
         // for checking of existing/non-existing Properties in the cache every MAPE-K cycle.
         private PropertyCache _oldPropertyCache;
 
-        public MapekMonitor(IServiceProvider serviceProvider) {
+        public MapekMonitor(IServiceProvider serviceProvider)
+        {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekMonitor>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
 
-            _oldPropertyCache = new PropertyCache {
+            _oldPropertyCache = new PropertyCache
+            {
                 Properties = new Dictionary<string, Property>(),
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
             };
         }
 
-        public PropertyCache Monitor(IGraph instanceModel) {
+        public PropertyCache Monitor(IGraph instanceModel)
+        {
             _logger.LogInformation("Starting the Monitor phase.");
 
-            var propertyCache = new PropertyCache {
+            var propertyCache = new PropertyCache
+            {
                 Properties = new Dictionary<string, Property>(),
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
             };
@@ -46,7 +50,8 @@ namespace Logic.Mapek
 
             // Get the values of all measured Properties (Sensor Inputs/Outputs and ConfigurableParameters) and populate the
             // cache.
-            foreach (var result in queryResult.Results) {
+            foreach (var result in queryResult.Results)
+            {
                 var property = result["property"];
                 PopulateInputOutputsAndConfigurableParametersCaches(instanceModel, property, propertyCache);
             }
@@ -60,12 +65,14 @@ namespace Logic.Mapek
             return propertyCache;
         }
 
-        private void PopulateInputOutputsAndConfigurableParametersCaches(IGraph instanceModel, INode propertyNode, PropertyCache propertyCache) {
+        private void PopulateInputOutputsAndConfigurableParametersCaches(IGraph instanceModel, INode propertyNode, PropertyCache propertyCache)
+        {
             var propertyName = propertyNode.ToString();
 
             // Simply return if the current Property already exists in the cache. This is necessary to avoid unnecessary multiple
             // executions of the same Sensors since a single Property can be an Input to multiple soft Sensors.
-            if (propertyCache.Properties.ContainsKey(propertyName) || propertyCache.ConfigurableParameters.ContainsKey(propertyName)) {
+            if (propertyCache.Properties.ContainsKey(propertyName) || propertyCache.ConfigurableParameters.ContainsKey(propertyName))
+            {
                 return;
             }   
 
@@ -85,7 +92,8 @@ namespace Logic.Mapek
             var procedureQueryResult = instanceModel.ExecuteQuery(query, _logger);
 
             // If the current Property is not an Output of any other Procedures, then it must be a ConfigurableParameter.
-            if (procedureQueryResult.IsEmpty) {
+            if (procedureQueryResult.IsEmpty)
+            {
                 AddConfigurableParameterToCache(propertyNode.ToString(), propertyType, propertyCache);
                 return;
             }
@@ -96,7 +104,8 @@ namespace Logic.Mapek
                     @sensor ssn:implements @procedure . }");
 
             // Otherwise, for each Procedure, find the Inputs.
-            foreach (var result in procedureQueryResult.Results) {
+            foreach (var result in procedureQueryResult.Results)
+            {
                 var procedureNode = result["procedure"];
                 var sensorNode = result["sensor"];
                 // Get an instance of a Sensor from the factory.
@@ -113,22 +122,29 @@ namespace Logic.Mapek
 
                 // For each Input Property, call this method recursively and record the newly-cached value in inputProperties
                 // for the current Sensor to use on invocation. In case of no Inputs, the inputProperties array remains empty.
-                for (var i = 0; i < innerQueryResult.Results.Count; i++) {
+                for (var i = 0; i < innerQueryResult.Results.Count; i++)
+                {
                     var inputProperty = innerQueryResult.Results[i]["inputProperty"];
                     PopulateInputOutputsAndConfigurableParametersCaches(instanceModel, inputProperty, propertyCache);
 
-                    if (propertyCache.Properties.ContainsKey(inputProperty.ToString())) {
+                    if (propertyCache.Properties.ContainsKey(inputProperty.ToString()))
+                    {
                         inputProperties[i] = propertyCache.Properties[inputProperty.ToString()].Value;
-                    } else if (propertyCache.ConfigurableParameters.ContainsKey(inputProperty.ToString())) {
+                    }
+                    else if (propertyCache.ConfigurableParameters.ContainsKey(inputProperty.ToString()))
+                    {
                         inputProperties[i] = propertyCache.ConfigurableParameters[inputProperty.ToString()].Value;
-                    } else{
+                    }
+                    else
+                    {
                         throw new Exception($"The Input Property {inputProperty.ToString()} was not found in the respective Property caches.");
                     }
                 }
 
                 // Invoke the Sensor with the corresponding Inputs and save the returned value in the map.
                 var propertyValue = sensor.ObservePropertyValue(inputProperties);
-                var property = new Property {
+                var property = new Property
+                {
                     Name = propertyNode.ToString(),
                     OwlType = propertyType,
                     Value = propertyValue
@@ -140,8 +156,10 @@ namespace Logic.Mapek
             }
         }
 
-        private void AddConfigurableParameterToCache(string propertyName, string propertyType, PropertyCache propertyCache) {
-            if (_oldPropertyCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? value)) {
+        private void AddConfigurableParameterToCache(string propertyName, string propertyType, PropertyCache propertyCache)
+        {
+            if (_oldPropertyCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? value))
+            {
                 propertyCache.ConfigurableParameters.Add(propertyName, value);
                 return;
             }
@@ -150,7 +168,8 @@ namespace Logic.Mapek
             var initialValue = valueHandler.GetInitialValueForConfigurableParameter(propertyName);
 
             // Instantiate the new ConfigurableParameter and add it to the cache.
-            var configurableParameter = new ConfigurableParameter {
+            var configurableParameter = new ConfigurableParameter
+            {
                 Name = propertyName,
                 Value = initialValue,
                 OwlType = propertyType
@@ -161,7 +180,8 @@ namespace Logic.Mapek
             _logger.LogInformation("Added ConfigurableParameter {configurableParameter} to the cache.", propertyName);
         }
 
-        private void PopulateObservablePropertiesCache(IGraph instanceModel, PropertyCache propertyCache) {
+        private void PopulateObservablePropertiesCache(IGraph instanceModel, PropertyCache propertyCache)
+        {
             // Get all ObservableProperties.
             var query = MapekUtilities.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty ?valueType WHERE {
                 ?sensor rdf:type sosa:Sensor .
@@ -175,7 +195,8 @@ namespace Logic.Mapek
                     ?sensor ssn:implements ?procedure .
                     ?procedure ssn:hasOutput ?outputProperty . }");
 
-            foreach (var result in queryResult.Results) {
+            foreach (var result in queryResult.Results)
+            {
                 var observablePropertyNode = result["observableProperty"];
                 var observablePropertyName = observablePropertyNode.ToString();
                 var valueType = MapekUtilities.GetPropertyType(_logger, instanceModel, observablePropertyNode);
@@ -187,12 +208,16 @@ namespace Logic.Mapek
                 var measuredPropertyValues = new object[innerQueryResult.Results.Count];
 
                 // Populate the input value array with measured Property values.
-                for (var i = 0; i < measuredPropertyValues.Length; i++) {
+                for (var i = 0; i < measuredPropertyValues.Length; i++)
+                {
                     var propertyName = innerQueryResult.Results[i]["outputProperty"].ToString();
 
-                    if (propertyCache.Properties.TryGetValue(propertyName, out Property property)) {
+                    if (propertyCache.Properties.TryGetValue(propertyName, out Property property))
+                    {
                         measuredPropertyValues[i] = property.Value;
-                    } else {
+                    }
+                    else
+                    {
                         throw new Exception($"Property {propertyName} not found in property cache.");
                     }
                 }

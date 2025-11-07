@@ -57,14 +57,16 @@ namespace SmartNode
             if (parseResult.Errors.Count != 0 ||
                 modelFile is not FileInfo parsedFile ||
                 string.IsNullOrEmpty(fmuDirectory) ||
-                string.IsNullOrEmpty(dataDirectory)) {
+                string.IsNullOrEmpty(dataDirectory))
+            {
                 throw new ArgumentException(parseResult.Errors[0].Message); // Are there always errors here?
             }
 
             var builder = Host.CreateApplicationBuilder(args);
 
             // Register services here.
-            builder.Services.AddLogging(loggingBuilder => {
+            builder.Services.AddLogging(loggingBuilder =>
+            {
                 loggingBuilder.AddConsole(options => options.TimestampFormat = "HH:mm:ss ");
             });
             // Register a factory to allow for dynamic constructor argument passing through DI.
@@ -93,10 +95,12 @@ namespace SmartNode
             modelFilePath = Path.GetFullPath(modelFile.FullName);
 
             // Start the loop.
-            try {
+            try
+            {
                 mapekManager.StartLoop(modelFilePath, fmuDirectory, dataDirectory, maxRound, simulateTwinningTarget);
             }
-            catch (Exception exception) {
+            catch (Exception exception)
+            {
                 logger.LogCritical(exception, "Exception");
                 throw;
             }

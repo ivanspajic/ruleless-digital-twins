@@ -1,11 +1,9 @@
-﻿using Logic.Models.MapekModels;
-using Logic.Utilities;
+﻿using Logic.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
 using VDS.RDF;
 using VDS.RDF.Parsing;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 [assembly: InternalsVisibleTo("TestProject")]
 
@@ -55,7 +53,8 @@ namespace Logic.Mapek
 
             while (_isLoopActive)
             {
-                if (maxRound > -1) {
+                if (maxRound > -1)
+                {
                     _logger.LogInformation("MAPE-K rounds left: {maxRound})", maxRound);
                 }
                 // Load the instance model into a graph object. Doing this inside the loop allows for dynamic model updates at
@@ -74,7 +73,12 @@ namespace Logic.Mapek
                 // them with all OptimalConditions.
                 var optimalConditionsAndActions = _mapekAnalyze.Analyze(instanceModel, propertyCache, ConfigurableParameterGranularity);
                 // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
-                var optimalSimulationConfiguration = _mapekPlan.Plan(optimalConditionsAndActions.Item1, optimalConditionsAndActions.Item2, propertyCache, instanceModel, fmuDirectory, ActuationSimulationGranularity);
+                var optimalSimulationConfiguration = _mapekPlan.Plan(optimalConditionsAndActions.Item1,
+                    optimalConditionsAndActions.Item2,
+                    propertyCache,
+                    instanceModel,
+                    fmuDirectory,
+                    ActuationSimulationGranularity);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
                 _mapekExecute.Execute(optimalSimulationConfiguration, propertyCache, simulateTwinningTarget);
 

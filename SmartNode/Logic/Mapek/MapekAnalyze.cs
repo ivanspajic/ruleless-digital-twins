@@ -82,12 +82,8 @@ namespace Logic.Mapek
                 var reachedInMaximumSecondsValue = reachedInMaximumSeconds.ToString().Split('^')[0];
 
                 // Build this OptimalCondition's full expression tree.
-                var constraints = GetOptimalConditionConstraints(instanceModel, optimalConditionNode, propertyNode, reachedInMaximumSeconds);
-
-                if (constraints == null)
-                {
+                var constraints = GetOptimalConditionConstraints(instanceModel, optimalConditionNode, propertyNode, reachedInMaximumSeconds) ??
                     throw new Exception($"OptimalCondition {optimalConditionNode.ToString()} has no constraints.");
-                }
 
                 var optimalCondition = new OptimalCondition()
                 {

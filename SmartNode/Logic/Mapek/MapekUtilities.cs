@@ -36,15 +36,18 @@ namespace Logic.Mapek
             return query;
         }
 
-        public static SparqlParameterizedString GetParameterizedStringQuery(String commandText) {
+        public static SparqlParameterizedString GetParameterizedStringQuery(string commandText)
+        {
             var query = GetParameterizedStringQuery();
             query.CommandText = commandText;
             return query;
         }
 
+        public static string GetPropertyType<T>(ILogger<T> logger, IGraph instanceModel, INode propertyNode)
+        {
+            // Different constraint types will reference the Property type through varying levels of bNodes and other RDF/OWL elements.
+            // This filter supports multiple such constraint types.
 
-        // TODO: Document a bit what's going on here with the fall-throughs.
-        public static string GetPropertyType<T>(ILogger<T> logger, IGraph instanceModel, INode propertyNode){
             var query = GetParameterizedStringQuery(@"SELECT ?valueType WHERE {
                 @property rdf:type ?bNode1 .
                 ?bNode1 owl:onProperty meta:hasValue .
@@ -53,7 +56,8 @@ namespace Logic.Mapek
 
             var propertyType = GetPropertyValueType(query, logger, instanceModel, "property", propertyNode);
 
-            if (!string.IsNullOrEmpty(propertyType)) {
+            if (!string.IsNullOrEmpty(propertyType))
+            {
                 return propertyType;
             }
 
@@ -65,7 +69,8 @@ namespace Logic.Mapek
 
             propertyType = GetPropertyValueType(query, logger, instanceModel, "property", propertyNode);
 
-            if (!string.IsNullOrEmpty(propertyType)) {
+            if (!string.IsNullOrEmpty(propertyType))
+            {
                 return propertyType;
             }
 
@@ -77,33 +82,40 @@ namespace Logic.Mapek
 
             propertyType = GetPropertyValueType(query, logger, instanceModel, "property", propertyNode);
 
-            if (!string.IsNullOrEmpty(propertyType)) {
+            if (!string.IsNullOrEmpty(propertyType))
+            {
                 return propertyType;
             }
 
             throw new Exception("The property " + propertyNode.ToString() + " was found without a value type.");
         }
 
-        public static string GetSimpleName(string longName) {
+        public static string GetSimpleName(string longName)
+        {
             var simpleName = string.Empty;
             var simpleNameArray = longName.Split('#');
 
             // Check if the name URI ends with a '/' instead of a '#'.
-            if (simpleNameArray.Length == 1) {
+            if (simpleNameArray.Length == 1)
+            {
                 simpleName = longName.Split('/')[^1];
-            } else {
+            }
+            else
+            {
                 simpleName = simpleNameArray[1];
             }
 
             return simpleName;
         }
 
-        public static SparqlResultSet ExecuteQuery<T>(this IGraph instanceModel, SparqlParameterizedString query, ILogger<T> logger) {
+        public static SparqlResultSet ExecuteQuery<T>(this IGraph instanceModel, SparqlParameterizedString query, ILogger<T> logger)
+        {
 
             var queryResult = (SparqlResultSet)instanceModel.ExecuteQuery(query);
             logger.LogInformation("Executed query: {query} ({numResults})", query.CommandText, queryResult.Results.Count);
 
-            if (!queryResult.IsEmpty) {
+            if (!queryResult.IsEmpty)
+            {
                 var resultString = string.Join("\n", queryResult.Results.Select(r => r.ToString()));
                 logger.LogInformation("Query result: {resultString}", resultString);
             }

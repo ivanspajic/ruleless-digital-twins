@@ -5,9 +5,11 @@ using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
 using VDS.RDF;
+using static Femyou.IModel;
 
 namespace Logic.Mapek
 {
@@ -445,7 +447,7 @@ namespace Logic.Mapek
             if (!_fmuDict.TryGetValue(fmuFilePath, out IModel? model))
             {
                 _logger.LogDebug("Loading Model {filePath}", fmuFilePath);
-                model = Model.Load(fmuFilePath);
+                model = Model.Load(fmuFilePath, new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]));
                 _fmuDict.Add(fmuFilePath, model);
             }
             Debug.Assert(model != null, "Model is null after loading.");

@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
 # [VS] We keep `omc` in the final product. If we only want the compiled FMU, and never expect the user to invoke `omc`
 #       in the container themselves, we could move this bit up a layer or two.
 USER root
-RUN apt-get update ; apt-get install -y ca-certificates curl gnupg ; curl -fsSL http://build.openmodelica.org/apt/openmodelica.asc | \
+RUN apt-get update ; apt-get install -y ca-certificates curl gnupg default-jre-headless; curl -fsSL http://build.openmodelica.org/apt/openmodelica.asc | \
      gpg --dearmor -o /usr/share/keyrings/openmodelica-keyring.gpg ; \
      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/openmodelica-keyring.gpg] \
   https://build.openmodelica.org/apt \

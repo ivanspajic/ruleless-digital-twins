@@ -1,18 +1,24 @@
 ## Introduction
-This is the accompanying artifact to the Spajić and Stolz 2025 DataMod paper. It consists of an ontology, instance models, an inference engine JAR and source code, inference (and verification) rules, control loop (logic) codebase, and a simulation model (FMU) and its source code.
+This is the accompanying artifact to the Spajić and Stolz 2025 DataMod paper ([preprint as PDF](http://foldr.org/selabhvl/2025/2025-datamod-prepreprint.pdf)). It consists of an ontology, instance models, an inference engine JAR and source code, inference (and verification) rules, control loop (logic) codebase, and a simulation model (FMU) and its source code.
 
 ## Running the Inference Engine
 The `ruleless-digital-twins-inference-engine.jar` file (available with models and rules) should be executed from the console with 4 arguments provided:
 1. The filepath of the ontology.
 2. The filepath of the instance model (that uses the ontology).
 3. The filepath of the inference rules. In case of multiple inference rules files, this filepath should be of the main file that includes the others.
-4. The filepath of the inferred model.
+4. The output filepath of the inferred model.
 
 If you are using multiple `.rules` files for inferencing, then you must make sure to match the `@include` directive filepaths in the main `.rules` file with the placement of the JAR file executing it. This repository contains a `verification-rules.rules` file which is included by the main `inference-rules.rules` file. This means that the filepath listed under the `@include` directive by default forces the JAR file to be executed from the same directory. Executing the JAR file from another directory will therefore require updating the filepath in the `@include` directive of the `inference-rules.rules` file.
 
 `OptimalConditions` are meant to be used for optimal ranges of `Property` values, so the solution currently only offers support for the `>, >=, <, <=` operators being used in constraints. Note that one may define multiple constraints per `OptimalCondition`, which will be used in conjunctions for the `Property` specified. Likewise, multiple `OptimalCondition` individuals defined for the same `Property` will have their constraints applied in conjunction (and must thus adhere to verification rules). We also offer support for disjoint ranges which users can specify with disjunctions, e.g., (Protege Manchester syntax) `hasValueConstraint exactly 1 (xsd:double[< "5.4"^^xsd:double] or xsd:double[> "10.8"^^xsd:double])`.
 
 Users are also encouraged to add their own files through the included `user-rules.rules` file.
+
+### Example
+
+```
+$ java -jar ruleless-digital-twins-inference-engine.jar ../Ontology/ruleless-digital-twins.ttl instance-model-1.ttl inference-rules.rules inf-out.ttl
+```
 
 ## Docker-based example
 

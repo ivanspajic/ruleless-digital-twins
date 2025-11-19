@@ -102,13 +102,16 @@
 
 
 
-// Upon locating the marks for OptimalCondition constraints or optimization targets, these rules find the
-// relevant PropertyChanges and use them for a temporary mark.
+// Upon locating the marks for OptimalCondition constraints, these rules evaluate the constraints and find the respective
+// mitigating PropertyChanges.
 
-[rule2a:    (?bNode rdf:comment ?property)
+[rule2a:    (?restriction rdf:comment ?property)
             (?property meta:propertyFor ?propertyChange)
-            (?propertyChange meta:affectsPropertyWith ?someChange)
-            (?bNode owl:hasValue ?value)
+            (?restriction xsd:minExclusive ?optimalConditionValue)
+            (?property meta:hasValue ?propertyValue)
+            notBNode(?propertyValue)
+            le(?propertyValue, ?optimalConditionValue)
+            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             ->  (_: rdf:comment ?propertyChange)
                 print()
                 print("Located", ?propertyChange)
@@ -118,8 +121,11 @@
 
 [rule2b:    (?restriction rdf:comment ?property)
             (?property meta:propertyFor ?propertyChange)
+            (?restriction xsd:minInclusive ?optimalConditionValue)
+            (?property meta:hasValue ?propertyValue)
+            notBNode(?propertyValue)
+            lessThan(?propertyValue, ?optimalConditionValue)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
-            (?restriction xsd:minExclusive ?value)
             ->  (_: rdf:comment ?propertyChange)
                 print()
                 print("Located", ?propertyChange)
@@ -129,8 +135,11 @@
 
 [rule2c:    (?restriction rdf:comment ?property)
             (?property meta:propertyFor ?propertyChange)
-            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
-            (?restriction xsd:minInclusive ?value)
+            (?restriction xsd:maxExclusive ?optimalConditionValue)
+            (?property meta:hasValue ?propertyValue)
+            notBNode(?propertyValue)
+            ge(?propertyValue, ?optimalConditionValue)
+            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             ->  (_: rdf:comment ?propertyChange)
                 print()
                 print("Located", ?propertyChange)
@@ -140,30 +149,15 @@
 
 [rule2d:    (?restriction rdf:comment ?property)
             (?property meta:propertyFor ?propertyChange)
+            (?restriction xsd:maxInclusive ?optimalConditionValue)
+            (?property meta:hasValue ?propertyValue)
+            notBNode(?propertyValue)
+            greaterThan(?propertyValue, ?optimalConditionValue)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
-            (?restriction xsd:maxExclusive ?value)
             ->  (_: rdf:comment ?propertyChange)
                 print()
                 print("Located", ?propertyChange)
                 print("as a relevant PropertyChange for the given constraint(s) on", ?property)
-                print()
-]
-
-[rule2e:    (?restriction rdf:comment ?property)
-            (?property meta:propertyFor ?propertyChange)
-            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
-            (?restriction xsd:maxInclusive ?value)
-            ->  (_: rdf:comment ?propertyChange)
-                print()
-                print("Located", ?propertyChange)
-                print("as a relevant PropertyChange for the given constraint(s) on", ?property)
-                print()
-]
-
-[rule2f:    (?thing meta:optimizesFor ?propertyChange)
-            ->  (_: rdf:comment ?propertyChange)
-                print()
-                print("Located", ?propertyChange, "as a PropertyChange to optimize for.")
                 print()
 ]
 

@@ -28,8 +28,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public SimulationConfiguration Plan(IEnumerable<OptimalCondition> optimalConditions,
-            IEnumerable<Models.OntologicalModels.Action> actions,
+        public SimulationConfiguration Plan(IEnumerable<Models.OntologicalModels.Action> actions,
             PropertyCache propertyCache,
             IGraph instanceModel,
             string fmuDirectory,
@@ -61,7 +60,6 @@ namespace Logic.Mapek
             // Get all possible simulation configurations for the given Actions.
             var simulationConfigurations = GetSimulationConfigurationsFromActionCombinations(actuationActionCombinations,
                 reconfigurationActionCombinations,
-                optimalConditions,
                 actuationSimulationGranularity);
 
             _logger.LogInformation("Generated a total of {total} simulation configurations.", simulationConfigurations.Count);
@@ -145,7 +143,6 @@ namespace Logic.Mapek
 
         private static List<SimulationConfiguration> GetSimulationConfigurationsFromActionCombinations(IEnumerable<IEnumerable<ActuationAction>> actuationActionCombinations,
             IEnumerable<IEnumerable<ReconfigurationAction>> reconfigurationActionCombinations,
-            IEnumerable<OptimalCondition> optimalConditions,
             int simulationGranularity)
         {
             var simulationConfigurations = new List<SimulationConfiguration>();

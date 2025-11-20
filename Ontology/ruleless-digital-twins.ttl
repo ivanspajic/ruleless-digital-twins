@@ -21,6 +21,14 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Object Properties
 #################################################################
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#hasAction
+:hasAction rdf:type owl:ObjectProperty ;
+           rdfs:domain :ActionCombination ;
+           rdfs:range :Action ;
+           rdfs:comment "Represents the relation between an ActionCombination and its Actions."@en ;
+           rdfs:label "hasAction"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith
 :affectsPropertyWith rdf:type owl:ObjectProperty ;
                      rdfs:range :Effect ;
@@ -50,31 +58,12 @@ xsd:duration rdf:type rdfs:Datatype .
         rdfs:label "enacts"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActionValueGenerator
-:hasActionValueGenerator rdf:type owl:ObjectProperty ;
-                         rdfs:range :ActionValueGenerator .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuationValueGenerator
-:hasActuationValueGenerator rdf:type owl:ObjectProperty ;
-                            rdfs:subPropertyOf :hasActionValueGenerator ;
-                            rdfs:domain <http://www.w3.org/ns/sosa/Actuator> ;
-                            rdfs:range :ActuationValueGenerator .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator
 :hasActuator rdf:type owl:ObjectProperty ;
              rdfs:domain :ActuationAction ;
              rdfs:range <http://www.w3.org/ns/sosa/Actuator> ;
              rdfs:comment "The relation between an ActuationExecution and an Actuator it uses."@en ;
              rdfs:label "hasActuator"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasReconfigurationValueGenerator
-:hasReconfigurationValueGenerator rdf:type owl:ObjectProperty ;
-                                  rdfs:subPropertyOf :hasActionValueGenerator ;
-                                  rdfs:domain :ConfigurableParameter ;
-                                  rdfs:range :ReconfigurationValueGenerator .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel
@@ -125,12 +114,12 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Data properties
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/configuresNewValue
-:configuresNewValue rdf:type owl:DatatypeProperty ;
-                    rdfs:domain :ReconfigurationAction ;
-                    rdfs:range rdfs:Literal ;
-                    rdfs:comment "Represents the relation between a ReconfiguationAction and the literal (value) it changes a ConfigurableParameter to."@en ;
-                    rdfs:label "configuresNewValue"@en .
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState
+:hasActuatorState rdf:type owl:DatatypeProperty ;
+                  rdfs:domain <http://www.w3.org/ns/sosa/Actuator> ;
+                  rdfs:range rdfs:Literal ;
+                  rdfs:comment "Represents a relation between an Actuator and its state."@en ;
+                  rdfs:label "hasActuatorState"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasIdentifier
@@ -185,15 +174,20 @@ xsd:duration rdf:type rdfs:Datatype .
                          rdfs:label "reachedInMaximumSeconds"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/setsActuatorToState
-:setsActuatorToState rdf:type owl:DatatypeProperty ;
-                     rdfs:domain :ActuationAction ;
-                     rdfs:range rdfs:Literal .
-
-
 #################################################################
 #    Classes
 #################################################################
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#ActionCombination
+:ActionCombination rdf:type owl:Class ;
+                   rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                     owl:onProperty :hasAction ;
+                                     owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                     owl:onClass :Action
+                                   ] ;
+                   rdfs:comment "Acts as a wrapper for multiple Actions."@en ;
+                   rdfs:label "ActionCombination"@en .
+
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action
 :Action rdf:type owl:Class ;
@@ -226,7 +220,7 @@ xsd:duration rdf:type rdfs:Datatype .
                                    owl:onClass <http://www.w3.org/ns/sosa/Actuator>
                                  ] ,
                                  [ rdf:type owl:Restriction ;
-                                   owl:onProperty :setsActuatorToState ;
+                                   owl:onProperty :hasActuatorState ;
                                    owl:cardinality "1"^^xsd:nonNegativeInteger
                                  ] ;
                  owl:disjointWith :ReconfigurationAction ;
@@ -355,7 +349,7 @@ xsd:duration rdf:type rdfs:Datatype .
                                          owl:onClass :ConfigurableParameter
                                        ] ,
                                        [ rdf:type owl:Restriction ;
-                                         owl:onProperty :configuresNewValue ;
+                                         owl:onProperty :hasValue ;
                                          owl:cardinality "1"^^xsd:nonNegativeInteger
                                        ] ;
                        rdfs:comment "Represents a single system Action with a parameter reconfiguration, either for optimization or regaining optimal conditions."@en ;

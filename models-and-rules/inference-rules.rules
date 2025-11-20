@@ -160,13 +160,6 @@
                 print()
 ]
 
-[rule2f:    (?thing meta:optimizesFor ?propertyChange)
-            ->  (_: rdf:comment ?propertyChange)
-                print()
-                print("Located", ?propertyChange, "as a PropertyChange to optimize for.")
-                print()
-]
-
 
 
 // The following rules locate PropertyChange marks and generate appropriate Actions, either with Actuators
@@ -177,9 +170,11 @@
 [rule3a:    (?thing rdf:comment ?propertyChange)
             (?propertyChange meta:enactedBy ?actuator)
             (?actuator rdf:type sosa:Actuator)
-            uriConcat(?actuator, meta:ActuationAction, ?actionName)
+            (?actuator meta:hasState ?actuatorState)
+            uriConcat(?actuator, "_setTo_", ?actuatorState, ?actionName)
             ->  (?actionName rdf:type meta:ActuationAction)
                 (?actionName meta:hasActuator ?actuator)
+                (?actionName meta:hasActuatorState ?actuatorState)
                 print()
                 print("Generated ActuationAction", ?actionName)
                 print()
@@ -188,10 +183,30 @@
 [rule3b:    (?thing rdf:comment ?propertyChange)
             (?propertyChange meta:enactedBy ?configurableParameter)
             (?configurableParameter rdf:type meta:ConfigurableParameter)
-            uriConcat(?configurableParameter, meta:ReconfigurationAction, ?actionName)
+            (?configurableParameter meta:hasValue ?configurableParameterValue)
+            uriConcat(?configurableParameter, "_setTo_", ?configurableParameterValue, ?actionName)
             ->  (?actionName rdf:type meta:ReconfigurationAction)
                 (?actionName ssn:forProperty ?configurableParameter)
+                (?actionName meta:hasValue ?configurableParameterValue)
                 print()
                 print("Generated ReconfigurationAction", ?actionName)
                 print()
+]
+
+
+
+// Something.
+
+[rule4a:    (?actionCombination rdf:type meta:ActionCombination)
+            (?actuationAction1 rdf:type meta:ActuationAction)
+            (?actuationAction2 rdf:type meta:ActuationAction)
+            (?actuationAction1 meta:hasActuator ?actuator1)
+            (?actuationAction2 meta:hasActuator ?actuator2)
+            noValue(?actionCombination meta:hasAction ?actuationAction2)
+            equal(?actuationAction1, ?actuationAction2)
+            equal(?actuator1, ?actuator2)
+            ->  print("ActuationAction")
+                print("actuator1", ?actuator1)
+                print("actuator2", ?actuator2)
+                (:Poopy :hasActuationAction ?actuationAction1)
 ]

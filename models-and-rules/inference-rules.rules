@@ -184,30 +184,21 @@
 
 // Something.
 
-[rule4a:    (?actuationAction1 rdf:type meta:ActuationAction)
-            (?actuationAction1 meta:hasActuator ?actuator1)
-            (?actuationAction2 rdf:type meta:ActuationAction)
-            (?actuationAction2 meta:hasActuator ?actuator2)
-            notEqual(?actuator1, ?actuator2)
+[rule4a:    (?actuationAction rdf:type meta:ActuationAction)
+            (?actuationAction meta:hasActuator ?actuator)
             makeTemp(?actionCombination)
-            makeTemp(?actionList1)
-            makeTemp(?actionList2)
-            makeTemp(?actuatorList1)
-            makeTemp(?actuatorList2)
+            makeTemp(?actionList)
+            makeTemp(?actuatorList)
             ->  (?actionCombination rdf:type meta:ActionCombination)
-                (?actionCombination meta:hasActions ?actionList1)
-                (?actionList1 rdf:type rdf:List)
-                (?actionList1 rdf:first ?actuationAction1)
-                (?actionList1 rdf:rest ?actionList2)
-                (?actionList2 rdf:type rdf:List)
-                (?actionList2 rdf:first ?actuationAction2)
-                (?actionList2 rdf:rest rdf:nil)
-                (?actionCombination meta:hasActuators ?actuatorList1)
-                (?actuatorList1 rdf:type rdf:List)
-                (?actuatorList1 rdf:first ?actuator1)
-                (?actuatorList1 rdf:rest ?actuatorList2)
-                (?actuatorList2 rdf:first ?actuator2)
-                (?actuatorList2 rdf:rest rdf:nil) ]
+                (?actionCombination rdf:comment "max size")
+                (?actionCombination meta:hasActions ?actionList)
+                (?actionList rdf:type rdf:List)
+                (?actionList rdf:first ?actuationAction)
+                (?actionList rdf:rest rdf:nil)
+                (?actionCombination meta:hasActuators ?actuatorList)
+                (?actuatorList rdf:type rdf:List)
+                (?actuatorList rdf:first ?actuator)
+                (?actuatorList rdf:rest rdf:nil) ]
 
 [rule4b:    (?actionCombination rdf:type meta:ActionCombination)
             (?actionCombination meta:hasActions ?actionList)
@@ -219,6 +210,7 @@
             makeTemp(?newActionList)
             makeTemp(?newActuatorList)
             ->  (?newActionCombination rdf:type meta:ActionCombination)
+                (?newActionCombination rdf:comment "max size")
                 (?newActionCombination meta:hasActions ?newActionList)
                 (?newActionList rdf:type rdf:List)
                 (?newActionList rdf:first ?actuationAction)
@@ -227,3 +219,20 @@
                 (?newActuatorList rdf:type rdf:List)
                 (?newActuatorList rdf:first ?actuator)
                 (?newActuatorList rdf:rest ?actuatorList) ]
+
+[rule4c:    (?actionCombination1 rdf:type meta:ActionCombination)
+            (?actionCombination1 rdf:comment "max size")
+            (?actionCombination1 meta:hasActions ?actionList1)
+            (?actionCombination2 rdf:type meta:ActionCombination)
+            (?actionCombination2 rdf:comment "max size")
+            (?actionCombination2 meta:hasActions ?actionList2)
+            listLength(?actionList1, ?actionList1Length)
+            listLength(?actionList2, ?actionList2Length)
+            greaterThan(?actionList1Length, ?actionList2Length)
+            ->  remove(4) ]
+
+// instead of all combinations having max size by default, they should get it only when they reach max size. this way, it will be possible to flatten only the max sized ones into objects
+// how to do this?
+// we can first get the actuators before the actuation actions
+// after that, we know the max size of the combinations, so we just need a rule for when a combination hits that size, then mark it as max size
+// after that, we can try to flatten

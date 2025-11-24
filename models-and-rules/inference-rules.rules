@@ -20,7 +20,8 @@
             ->  (?restriction rdf:comment ?property)
                 print()
                 print("Marked a value restriction with Property", ?property)
-                print() ]
+                print()
+]
 
 [rule1b:    (?individual rdf:type meta:OptimalCondition)
             (?individual ssn:forProperty ?property)
@@ -32,7 +33,8 @@
             ->  (?restriction rdf:comment ?property)
                 print()
                 print("Marked a value restriction with Property", ?property)
-                print() ]
+                print()
+]
 
 // These rules support disjunctive constraint definitions in OptimalConditions. E.g., (>15, <=20) or (>=24, <35).
 // Such definitions cover cases whose Property values might fit in disjoint ranges. Currently, only 2 constraints
@@ -49,7 +51,8 @@
             ->  (?restriction rdf:comment ?property)
                 print()
                 print("Marked a value restriction with Property", ?property)
-                print() ]
+                print()
+]
 
 [rule1d:    (?individual rdf:type meta:OptimalCondition)
             (?individual ssn:forProperty ?property)
@@ -63,7 +66,8 @@
             ->  (?restriction rdf:comment ?property)
                 print()
                 print("Marked a value restriction with Property", ?property)
-                print() ]
+                print()
+]
 
 [rule1e:    (?individual rdf:type meta:OptimalCondition)
             (?individual ssn:forProperty ?property)
@@ -77,7 +81,8 @@
             ->  (?restriction rdf:comment ?property)
                 print()
                 print("Marked a value restriction with Property", ?property)
-                print() ]
+                print()
+]
 
 [rule1f:    (?individual rdf:type meta:OptimalCondition)
             (?individual ssn:forProperty ?property)
@@ -92,7 +97,8 @@
             ->  (?restriction rdf:comment ?property)
                 print()
                 print("Marked a value restriction with Property", ?property)
-                print() ]
+                print()
+]
 
 
 
@@ -107,7 +113,8 @@
                 print()
                 print("Located", ?propertyChange)
                 print("as a relevant PropertyChange for the given constraint(s) on", ?property)
-                print() ]
+                print()
+]
 
 [rule2b:    (?restriction rdf:comment ?property)
             (?property meta:propertyFor ?propertyChange)
@@ -117,7 +124,8 @@
                 print()
                 print("Located", ?propertyChange)
                 print("as a relevant PropertyChange for the given constraint(s) on", ?property)
-                print() ]
+                print()
+]
 
 [rule2c:    (?restriction rdf:comment ?property)
             (?property meta:propertyFor ?propertyChange)
@@ -127,7 +135,8 @@
                 print()
                 print("Located", ?propertyChange)
                 print("as a relevant PropertyChange for the given constraint(s) on", ?property)
-                print() ]
+                print()
+]
 
 [rule2d:    (?restriction rdf:comment ?property)
             (?property meta:propertyFor ?propertyChange)
@@ -137,7 +146,8 @@
                 print()
                 print("Located", ?propertyChange)
                 print("as a relevant PropertyChange for the given constraint(s) on", ?property)
-                print() ]
+                print()
+]
 
 [rule2e:    (?restriction rdf:comment ?property)
             (?property meta:propertyFor ?propertyChange)
@@ -147,7 +157,8 @@
                 print()
                 print("Located", ?propertyChange)
                 print("as a relevant PropertyChange for the given constraint(s) on", ?property)
-                print() ]
+                print()
+]
 
 
 
@@ -156,29 +167,31 @@
 // elements in an Action. This ensures that no duplicate Actions are generated in cases of, e.g., multiple
 // actuators causing multiple different PropertyChanges.
 
-[rule3a:    (?thing rdf:comment ?propertyChange)
-            (?propertyChange meta:enactedBy ?actuator)
-            (?actuator rdf:type sosa:Actuator)
-            (?actuator meta:hasActuatorState ?actuatorState)
-            uriConcat(?actuator, "_", ?actuatorState, ?actionName)
-            ->  (?actionName rdf:type meta:ActuationAction)
-                (?actionName meta:hasActuator ?actuator)
-                (?actionName meta:hasActuatorState ?actuatorState)
-                print()
-                print("Generated ActuationAction", ?actionName)
-                print() ]
+[rule3a:   (?thing rdf:comment ?propertyChange)
+           (?propertyChange meta:enactedBy ?actuator)
+           (?actuator rdf:type sosa:Actuator)
+           (?actuator meta:hasActuatorState ?actuatorState)
+           uriConcat(?actuator, "_", ?actuatorState, ?actionName)
+           ->  (?actionName rdf:type meta:ActuationAction)
+               (?actionName meta:hasActuator ?actuator)
+               (?actionName meta:hasActuatorState ?actuatorState)
+               print()
+               print("Generated ActuationAction", ?actionName)
+               print()
+]
 
-[rule3b:    (?thing rdf:comment ?propertyChange)
-            (?propertyChange meta:enactedBy ?configurableParameter)
-            (?configurableParameter rdf:type meta:ConfigurableParameter)
-            (?configurableParameter meta:hasValue ?configurableParameterValue)
-            uriConcat(?configurableParameter, "_", ?configurableParameterValue, ?actionName)
-            ->  (?actionName rdf:type meta:ReconfigurationAction)
-                (?actionName ssn:forProperty ?configurableParameter)
-                (?actionName meta:hasValue ?configurableParameterValue)
-                print()
-                print("Generated ReconfigurationAction", ?actionName)
-                print() ]
+[rule3b:   (?thing rdf:comment ?propertyChange)
+           (?propertyChange meta:enactedBy ?configurableParameter)
+           (?configurableParameter rdf:type meta:ConfigurableParameter)
+           (?configurableParameter meta:hasValue ?configurableParameterValue)
+           uriConcat(?configurableParameter, "_", ?configurableParameterValue, ?actionName)
+           ->  (?actionName rdf:type meta:ReconfigurationAction)
+               (?actionName ssn:forProperty ?configurableParameter)
+               (?actionName meta:hasValue ?configurableParameterValue)
+               print()
+               print("Generated ReconfigurationAction", ?actionName)
+               print()
+]
 
 
 
@@ -190,7 +203,6 @@
             makeTemp(?actionList)
             makeTemp(?actuatorList)
             ->  (?actionCombination rdf:type meta:ActionCombination)
-                (?actionCombination rdf:comment "max size")
                 (?actionCombination meta:hasActions ?actionList)
                 (?actionList rdf:type rdf:List)
                 (?actionList rdf:first ?actuationAction)
@@ -198,9 +210,10 @@
                 (?actionCombination meta:hasActuators ?actuatorList)
                 (?actuatorList rdf:type rdf:List)
                 (?actuatorList rdf:first ?actuator)
-                (?actuatorList rdf:rest rdf:nil) ]
+                (?actuatorList rdf:rest rdf:nil)
+]
 
-[rule4b:    (?actionCombination rdf:type meta:ActionCombination)
+[rule4c:    (?actionCombination rdf:type meta:ActionCombination)
             (?actionCombination meta:hasActions ?actionList)
             (?actionCombination meta:hasActuators ?actuatorList)
             (?actuationAction rdf:type meta:ActuationAction)
@@ -210,7 +223,6 @@
             makeTemp(?newActionList)
             makeTemp(?newActuatorList)
             ->  (?newActionCombination rdf:type meta:ActionCombination)
-                (?newActionCombination rdf:comment "max size")
                 (?newActionCombination meta:hasActions ?newActionList)
                 (?newActionList rdf:type rdf:List)
                 (?newActionList rdf:first ?actuationAction)
@@ -218,21 +230,5 @@
                 (?newActionCombination meta:hasActuators ?newActuatorList)
                 (?newActuatorList rdf:type rdf:List)
                 (?newActuatorList rdf:first ?actuator)
-                (?newActuatorList rdf:rest ?actuatorList) ]
-
-[rule4c:    (?actionCombination1 rdf:type meta:ActionCombination)
-            (?actionCombination1 rdf:comment "max size")
-            (?actionCombination1 meta:hasActions ?actionList1)
-            (?actionCombination2 rdf:type meta:ActionCombination)
-            (?actionCombination2 rdf:comment "max size")
-            (?actionCombination2 meta:hasActions ?actionList2)
-            listLength(?actionList1, ?actionList1Length)
-            listLength(?actionList2, ?actionList2Length)
-            greaterThan(?actionList1Length, ?actionList2Length)
-            ->  remove(4) ]
-
-// instead of all combinations having max size by default, they should get it only when they reach max size. this way, it will be possible to flatten only the max sized ones into objects
-// how to do this?
-// we can first get the actuators before the actuation actions
-// after that, we know the max size of the combinations, so we just need a rule for when a combination hits that size, then mark it as max size
-// after that, we can try to flatten
+                (?newActuatorList rdf:rest ?actuatorList)
+]

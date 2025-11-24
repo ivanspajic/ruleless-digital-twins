@@ -21,14 +21,6 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Object Properties
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#hasAction
-:hasAction rdf:type owl:ObjectProperty ;
-           rdfs:domain :ActionCombination ;
-           rdfs:range :Action ;
-           rdfs:comment "Represents the relation between an ActionCombination and its Actions."@en ;
-           rdfs:label "hasAction"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith
 :affectsPropertyWith rdf:type owl:ObjectProperty ;
                      rdfs:range :Effect ;
@@ -116,7 +108,11 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState
 :hasActuatorState rdf:type owl:DatatypeProperty ;
-                  rdfs:domain <http://www.w3.org/ns/sosa/Actuator> ;
+                  rdfs:domain [ rdf:type owl:Class ;
+                                owl:unionOf ( :ActuationAction
+                                              <http://www.w3.org/ns/sosa/Actuator>
+                                            )
+                              ] ;
                   rdfs:range rdfs:Literal ;
                   rdfs:comment "Represents a relation between an Actuator and its state."@en ;
                   rdfs:label "hasActuatorState"@en .
@@ -178,21 +174,16 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Classes
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#ActionCombination
-:ActionCombination rdf:type owl:Class ;
-                   rdfs:subClassOf [ rdf:type owl:Restriction ;
-                                     owl:onProperty :hasAction ;
-                                     owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                     owl:onClass :Action
-                                   ] ;
-                   rdfs:comment "Acts as a wrapper for multiple Actions."@en ;
-                   rdfs:label "ActionCombination"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action
 :Action rdf:type owl:Class ;
         rdfs:comment "Represents a single system Action."@en ;
         rdfs:label "Action"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination
+:ActionCombination rdf:type owl:Class ;
+                   rdfs:comment "Acts as a wrapper for multiple Actions."@en ;
+                   rdfs:label "ActionCombination"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator

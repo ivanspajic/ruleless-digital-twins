@@ -15,8 +15,7 @@
                 print("Conflicting optimizations detected!")
                 print(?thing1, "optimizes for", ?property, "with ValueIncrease through", ?propertyChange1)
                 print(?thing2, "optimizes for", ?property, "with ValueDecrease through", ?propertyChange2)
-                print()
-]
+                print() ]
 
 // Checks for two different OptimalConditions with conflicting constraints for the same Property. This is only an
 // issue in the case of impossible values for specific combinations of operators. In other words, using some
@@ -46,8 +45,7 @@
             (?bNode3_2 rdf:first ?restriction2)
             noValue(?bNode3_2, rdf:rest, isBNode(?bNode4_2))
             ->  (?restriction1 rdf:comment "verification mark")
-                (?restriction2 rdf:comment "verification mark")
-]
+                (?restriction2 rdf:comment "verification mark") ]
 
 // Checks for OptimalConditions where one has a single-valued and the other a double-valued range constraint.
 [rule4c:    (?individual1 rdf:type meta:OptimalCondition)
@@ -69,8 +67,7 @@
             noValue(?bNode3_2, rdf:rest, isBNode(?bNode4_2))
             ->  (?restriction1 rdf:comment "verification mark")
                 (?restriction2 rdf:comment "verification mark")
-                (?restriction3 rdf:comment "verification mark")
-]
+                (?restriction3 rdf:comment "verification mark") ]
 
 // Checks for OptimalConditions with double-valued range constraints.
 [rule4d:    (?individual1 rdf:type meta:OptimalCondition)
@@ -94,8 +91,7 @@
             ->  (?restriction1 rdf:comment "verification mark")
                 (?restriction2 rdf:comment "verification mark")
                 (?restriction3 rdf:comment "verification mark")
-                (?restriction4 rdf:comment "verification mark")
-]
+                (?restriction4 rdf:comment "verification mark") ]
 
 // Checks if the marked constraints have disallowed values for '>' and '<' operators.
 [rule4e:    (?restriction1 rdf:comment ?property)
@@ -109,8 +105,7 @@
             ->  print()
                 print("Conflicting conditions detected!")
                 print("Conditions for", ?property, "are >", ?value1, "and <", ?value2, "at the same time.")
-                print()
-]
+                print() ]
 
 // Checks if the marked constraints have disallowed values for '>=' and '<' operators.
 [rule4f:    (?restriction1 rdf:comment ?property)
@@ -124,8 +119,7 @@
             ->  print()
                 print("Conflicting conditions detected!")
                 print("Conditions for", ?property, "are >=", ?value1, "and <", ?value2, "at the same time.")
-                print()
-]
+                print() ]
 
 // Checks if the marked constraints have disallowed values for '>' and '<=' operators.
 [rule4g:    (?restriction1 rdf:comment ?property)
@@ -139,8 +133,7 @@
             ->  print()
                 print("Conflicting conditions detected!")
                 print("Conditions for", ?property, "are >", ?value1, "and <=", ?value2, "at the same time.")
-                print()
-]
+                print() ]
 
 // Checks if the marked constraints have disallowed values for '>=' and '<=' operators.
 [rule4h:    (?restriction1 rdf:comment ?property)
@@ -154,5 +147,4 @@
             ->  print()
                 print("Conflicting conditions detected!")
                 print("Conditions for", ?property, "are >=", ?value1, "and <=", ?value2, "at the same time.")
-                print()
-]
+                print() ]

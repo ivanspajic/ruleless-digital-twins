@@ -33,14 +33,14 @@ namespace Implementations.Sensors {
             // TODO: streamline. Maybe we just go through the string anyways and pick up the necessary bits.
             if (_attribute == null) {
                 // Only sensor id given? Straightforward.
-                var response = _httpClient.GetFromJsonAsync<SensorValue>(requestUri).GetAwaiter().GetResult();
+                var response = _httpClient.GetFromJsonAsync<SensorValue>(requestUri).Result;
                 Debug.Assert(response != null, "Response from Home Assistant is null.");
                 // For units, we'd have to look into the attributes and look for "unit_of_measurement".                
                 // Trace.WriteLine("unit: "+response.Attributes.unit_of_measurement);
                 return response.State;
             } else {
                 // Do we need to peek into the JSON structure?
-                var response = _httpClient.GetStringAsync(requestUri).GetAwaiter().GetResult();
+                var response = _httpClient.GetStringAsync(requestUri).Result;
                 Debug.Assert(response != null, "Response from Home Assistant is null.");
                 // Apparently C# is not good at garbage collection? If we switch to .NET 10, apply CA2026 here
                 using var jsonDoc = System.Text.Json.JsonDocument.Parse(response);

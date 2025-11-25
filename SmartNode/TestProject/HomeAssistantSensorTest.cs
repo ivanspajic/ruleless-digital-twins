@@ -14,6 +14,7 @@ public class HomeAssistantSensorTest : IDisposable {
 
     public void Dispose() {
         _handler.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     [Theory]
@@ -30,7 +31,7 @@ public class HomeAssistantSensorTest : IDisposable {
         var TOKEN = secrets[tokenName];
         Assert.SkipWhen(TOKEN == null, $"No token for host {id}.");
 
-        var httpClient = new HttpClient(_handler, disposeHandler: false) {
+        using var httpClient = new HttpClient(_handler, disposeHandler: false) {
             BaseAddress = new Uri(url)
         };
         httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {TOKEN}");

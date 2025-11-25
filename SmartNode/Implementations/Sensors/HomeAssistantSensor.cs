@@ -47,7 +47,8 @@ namespace Implementations.Sensors {
                 jsonDoc.RootElement.GetProperty("attributes").TryGetProperty(_attribute, out var value);
                 // TODO: Maybe we can eventually do something useful with it:
                 jsonDoc.RootElement.GetProperty("attributes").TryGetProperty(_attribute + "_unit", out var unit);
-                return value;
+                // We're disposing the JSON, so get the goods now:
+                return value.ValueKind == JsonValueKind.Undefined ? 0.0 : value.GetDouble();
             }
         }
     }

@@ -3,7 +3,24 @@ using Implementations.Sensors;
 
 namespace TestProject;
 
-public class HomeAssistantSensorTest {
+public class HomeAssistantSensorTest : IDisposable {
+    private readonly SocketsHttpHandler _handler;
+    private readonly IConfigurationRoot _secrets;
+
+    public HomeAssistantSensorTest() {
+        _handler = new SocketsHttpHandler
+        {
+            PooledConnectionLifetime = TimeSpan.FromMinutes(2)
+        };
+        _secrets = new ConfigurationBuilder()
+            .AddUserSecrets<HomeAssistantSensorTest>()
+            .Build();
+    }
+
+    public void Dispose() {
+        _handler.Dispose();
+        GC.SuppressFinalize(this);
+    }
 
     [Theory]
     [InlineData("MH30", "https://mh30.foldr.org:8123/", "HA:TOKEN", "sensor.pwr", null)]
@@ -13,13 +30,10 @@ public class HomeAssistantSensorTest {
     // example with potentially missing data & units, schema at https://developers.home-assistant.io/docs/core/entity/weather/:
     [InlineData("IoTLab-precipitation", "http://100.104.156.81:8123/", "HA:TOKEN_IOTLAB", "weather.forecast_home", "precipitation")]
     public void TestObservePropertyValue(string id, string url, string tokenName, string sensorId, string? attribute) {
-        var secrets = new ConfigurationBuilder()
-            .AddUserSecrets<HomeAssistantSensorTest>()
-            .Build();
-        var TOKEN = secrets[tokenName];
+        var TOKEN = _secrets[tokenName];
         Assert.SkipWhen(TOKEN == null, $"No token for host {id}.");
 
-        using var httpClient = new HttpClient {
+        using var httpClient = new HttpClient(_handler, disposeHandler: false) {
             BaseAddress = new Uri(url)
         };
         httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {TOKEN}");

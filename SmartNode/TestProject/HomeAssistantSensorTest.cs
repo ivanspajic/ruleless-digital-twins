@@ -3,7 +3,18 @@ using Implementations.Sensors;
 
 namespace TestProject;
 
-public class HomeAssistantSensorTest {
+public class HomeAssistantSensorTest : IDisposable {
+    private readonly SocketsHttpHandler _handler;
+
+    public HomeAssistantSensorTest() {
+        _handler = new SocketsHttpHandler {
+            PooledConnectionLifetime = TimeSpan.FromMinutes(2)
+        };
+    }
+
+    public void Dispose() {
+        _handler.Dispose();
+    }
 
     [Theory]
     [InlineData("MH30", "https://mh30.foldr.org:8123/", "HA:TOKEN", "sensor.pwr", null)]
@@ -19,7 +30,7 @@ public class HomeAssistantSensorTest {
         var TOKEN = secrets[tokenName];
         Assert.SkipWhen(TOKEN == null, $"No token for host {id}.");
 
-        using var httpClient = new HttpClient {
+        var httpClient = new HttpClient(_handler, disposeHandler: false) {
             BaseAddress = new Uri(url)
         };
         httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {TOKEN}");

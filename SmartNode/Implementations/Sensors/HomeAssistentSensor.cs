@@ -32,8 +32,7 @@ namespace Implementations.Sensors {
             // TODO: streamline. Maybe we just go through the string anyways and pick up the necessary bits.
             if (_attribute == null) {
                 // Only sensor id given? Straightforward.
-                var task = Task.Run(async () => await _httpClient.GetFromJsonAsync<SensorValue>(requestUri));
-                var response = task.Result;
+                var response = _httpClient.GetFromJsonAsync<SensorValue>(requestUri).GetAwaiter().GetResult();
                 Debug.Assert(response != null, "Response from Home Assistant is null.");
                 // For units, we'd have to look into the attributes and look for "unit_of_measurement".                
                 // Trace.WriteLine("unit: "+response.Attributes.unit_of_measurement);

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Logic.DeviceInterfaces;
 
 namespace Implementations.Sensors {
@@ -48,7 +49,7 @@ namespace Implementations.Sensors {
                 // TODO: Maybe we can eventually do something useful with it:
                 jsonDoc.RootElement.GetProperty("attributes").TryGetProperty(_attribute + "_unit", out var unit);
                 // We're disposing the JSON, so get the goods now:
-                return value.GetDouble();
+                return value.ValueKind == JsonValueKind.Undefined ? 0.0 : value.GetDouble();
             }
         }
     }

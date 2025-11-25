@@ -19,7 +19,7 @@ public class HomeAssistantSensorTest {
         var TOKEN = secrets[tokenName];
         Assert.SkipWhen(TOKEN == null, $"No token for host {id}.");
 
-        var httpClient = new HttpClient {
+        using var httpClient = new HttpClient {
             BaseAddress = new Uri(url)
         };
         httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {TOKEN}");

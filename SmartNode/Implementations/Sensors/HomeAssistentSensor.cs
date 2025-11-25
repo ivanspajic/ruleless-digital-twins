@@ -39,12 +39,10 @@ namespace Implementations.Sensors {
                 return response.State;
             } else {
                 // Do we need to peek into the JSON structure?
-                var task = Task.Run(async () => await _httpClient.GetStringAsync(requestUri));
-                var response = task.Result;
+                var response = _httpClient.GetStringAsync(requestUri).GetAwaiter().GetResult();
                 Debug.Assert(response != null, "Response from Home Assistant is null.");
-                var bytes = System.Text.Encoding.UTF8.GetBytes(response);
-                var reader = new System.Text.Json.Utf8JsonReader(bytes);
-                var jsonElement = System.Text.Json.JsonElement.ParseValue(ref reader);
+                // Apparently C# is not good at garbage collection? If we switch to .NET 10, apply CA2026 here
+                using var jsonDoc = System.Text.Json.JsonDocument.Parse(response);
                 // TODO: set to 0 if missing? Yr doesn't include precipitation values if it's dry, but the unit!
                 jsonElement.GetProperty("attributes").TryGetProperty(_attribute, out var value);
                 // TODO: Maybe we can eventually do something useful with it:

@@ -7,7 +7,11 @@ public class HomeAssistantSensorTest {
 
     [Theory]
     [InlineData("MH30", "https://mh30.foldr.org:8123/", "HA:TOKEN", "sensor.pwr", null)]
-    [InlineData("IoTLab", "http://100.104.156.81:8123/", "HA:TOKEN_IOTLAB", "weather.forecast_home", "temperature")]
+    [InlineData("IoTLab", "http://100.104.156.81:8123/", "HA:TOKEN_IOTLAB", "sensor.nordpool_kwh_no5_nok_3_10_025", null)]
+    // example with attributes:
+    [InlineData("IoTLab-temperature", "http://100.104.156.81:8123/", "HA:TOKEN_IOTLAB", "weather.forecast_home", "temperature")]
+    // example with potentially missing data & units, schema at https://developers.home-assistant.io/docs/core/entity/weather/:
+    [InlineData("IoTLab-precipitation", "http://100.104.156.81:8123/", "HA:TOKEN_IOTLAB", "weather.forecast_home", "precipitation")]
     public void TestObservePropertyValue(string id, string url, string tokenName, string sensorId, string? attribute) {
         var secrets = new ConfigurationBuilder()
             .AddUserSecrets<HomeAssistantSensorTest>()
@@ -27,5 +31,4 @@ public class HomeAssistantSensorTest {
         // Prints stuff in the Debug Console:
         System.Diagnostics.Trace.WriteLine($"Observed Sensor Value: {value}");
     }
-    
 }

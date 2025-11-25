@@ -20,7 +20,8 @@ namespace Implementations.Sensors {
 
         public string ProcedureName { get; private set; }
 
-        record class SensorValue(double State); // For deserializing the JSON response
+        record class HAAttributes(string? unit_of_measurement);
+        record class SensorValue(double State, HAAttributes Attributes); // For deserializing the JSON response
 
         public object ObservePropertyValue(params object[] inputProperties) {
             // Console.WriteLine($"Observing Home Assistant Sensor Value: {inputProperties[0]}");
@@ -28,12 +29,14 @@ namespace Implementations.Sensors {
             // 
             var requestUri = $"api/states/{ProcedureName}";
             // TODO: return value only works for double values at the moment.
-            // TODO: streamline
+            // TODO: streamline. Maybe we just go through the string anyways and pick up the necessary bits.
             if (_attribute == null) {
                 // Only sensor id given? Straightforward.
                 var task = Task.Run(async () => await _httpClient.GetFromJsonAsync<SensorValue>(requestUri));
                 var response = task.Result;
                 Debug.Assert(response != null, "Response from Home Assistant is null.");
+                // For units, we'd have to look into the attributes and look for "unit_of_measurement".                
+                // Trace.WriteLine("unit: "+response.Attributes.unit_of_measurement);
                 return response.State;
             } else {
                 // Do we need to peek into the JSON structure?
@@ -41,7 +44,10 @@ namespace Implementations.Sensors {
                 var response = task.Result;
                 Debug.Assert(response != null, "Response from Home Assistant is null.");
                 var jsonDoc = System.Text.Json.JsonDocument.Parse(response);
-                var value = jsonDoc.RootElement.GetProperty("attributes").GetProperty(_attribute);
+                // TODO: set to 0 if missing? Yr doesn't include precipitation values if it's dry, but the unit!
+                jsonDoc.RootElement.GetProperty("attributes").TryGetProperty(_attribute, out var value);
+                // TODO: Maybe we can eventually do something useful with it:
+                jsonDoc.RootElement.GetProperty("attributes").TryGetProperty(_attribute + "_unit", out var unit);
                 return value;
             }
         }

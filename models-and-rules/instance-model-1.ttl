@@ -141,7 +141,8 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                                                                       :RoomTemperatureDecrease ;
      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> "0"^^xsd:int ,
                                                                                                 "1"^^xsd:int ,
-                                                                                                "2"^^xsd:int .
+                                                                                                "2"^^xsd:int ,
+                                                                                                "3"^^xsd:int .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating
@@ -150,8 +151,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :EnergyConsumptionIncrease ,
                                                                                                :RoomTemperatureIncrease ;
               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> "0"^^xsd:int ,
-                                                                                                         "1"^^xsd:int ,
-                                                                                                         "2"^^xsd:int .
+                                                                                                         "1"^^xsd:int .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater
@@ -162,7 +162,9 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> "0"^^xsd:int ,
                                                                                                    "1"^^xsd:int ,
                                                                                                    "2"^^xsd:int ,
-                                                                                                   "3"^^xsd:int .
+                                                                                                   "3"^^xsd:int ,
+                                                                                                   "4"^^xsd:int ,
+                                                                                                   "5"^^xsd:int .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor
@@ -204,8 +206,8 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                                                      )
                                               ]
                             ] ;
-                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
-                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> "3600"^^xsd:int .
+                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> "3600"^^xsd:int ;
+                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition2
@@ -223,8 +225,8 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                                                      )
                                               ]
                             ] ;
-                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
-                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> "3600"^^xsd:int .
+                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> "3600"^^xsd:int ;
+                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomHumidity
@@ -253,7 +255,6 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
           <http://www.w3.org/ns/sosa/hosts> :Dehumidifier ,
                                             :EnergyConsumptionMeter ,
                                             :Fan ,
-                                            :FloorHeating ,
                                             :Heater ,
                                             :HumiditySensor ,
                                             :TemperatureSensor1 ,
@@ -344,7 +345,31 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
 ] .
 
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
 [ xsd:maxInclusive "3"^^xsd:int
+ ] .
+
+[ xsd:maxExclusive "30.2"^^xsd:double
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ xsd:maxInclusive "28.5"^^xsd:double
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
@@ -384,30 +409,6 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
  ] .
 
 [ xsd:minExclusive "10.1"^^xsd:double
- ] .
-
-[ xsd:maxExclusive "30.2"^^xsd:double
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ xsd:maxInclusive "28.5"^^xsd:double
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
 ###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

@@ -195,7 +195,18 @@
 
 
 
-// Something.
+// The following rules infer possible combinations of ActuationActions to take as part of the DT`s final decision. They effectively produce
+// a cartesian product of a variable number of sets (ActuationActions grouped by Actuators) with a variable number of elements (possible
+// ActuatorStates).
+//
+// The rules work by initially creating an ActionCombination for each ActuationAction found in the model (rule4a). Every ActionCombination
+// contains an rdf:List of ActuationActions, which it then expands as it encounters new ActuationActions (rule4b). To be added to the list,
+// these ActuationsActions must not already be contained in it and their Actuators must not be the same as those of other Actions already
+// in the list. Because this method generates permutations (lists of the same Actuators in different orders), an additional rule (rule4c)
+// is necessary to eliminate duplicates and reduce the combinatorial explosion.
+//
+// In the end, all ActionCombinations that are NOT marked with "duplicate" (same combination already exists) or "not final" (the combination
+// contains fewer ActuationActions than it should) are final.
 
 [rule4a:    (?actuationAction rdf:type meta:ActuationAction)
             (?actuationAction meta:hasActuator ?actuator)
@@ -211,7 +222,9 @@
                 (?actuatorList rdf:type rdf:List)
                 (?actuatorList rdf:first ?actuator)
                 (?actuatorList rdf:rest rdf:nil)
+                print()
                 print("Started an ActionCombination from ActuationAction", ?actuationAction)
+                print()
 ]
 
 [rule4b:    (?actionCombination rdf:type meta:ActionCombination)
@@ -235,6 +248,9 @@
                 (?newActuatorList rdf:first ?actuator)
                 (?newActuatorList rdf:rest ?actuatorList)
                 (?actionCombination rdf:comment "not final")
+                print()
+                print("Expanded an ActionCombination.")
+                print()
 ]
 
 [rule4c:    (?actionCombination1 rdf:type meta:ActionCombination)
@@ -247,6 +263,8 @@
             noValue(?actionCombination1 rdf:comment "duplicate")
             noValue(?actionCombination2 rdf:comment "duplicate")
             listEqual(?actionList1, ?actionList2)
-            listEqual(?actuatorList1, ?actuatorList2)
             ->  (?actionCombination2 rdf:comment "duplicate")
+                print()
+                print("Marked an ActionCombination as a duplicate.")
+                print()
 ]

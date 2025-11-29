@@ -1,12 +1,15 @@
 ﻿using Logic.Models.OntologicalModels;
-using System.Diagnostics;
+using System.Reflection;
 
 namespace TestProject.Utilities {
     internal static class InferenceTestHelper {
+        public static readonly string SolutionRootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
+        public static readonly string TestFileDirectory = Path.Combine(SolutionRootDirectory, "SmartNode", "TestFiles");
+
         public static TheoryData<string, IEnumerable<IEnumerable<ActuationAction>>> TestData =>
             new() {
                 {
-                    @"/TestFiles/unrestrictedDehumidifierFanHeater.ttl",
+                    "unrestrictedDehumidifierFanHeater.ttl",
                     new[] {
                         new ActuationAction[] {
                             new() {
@@ -62,7 +65,7 @@ namespace TestProject.Utilities {
                     }
                 },
                 {
-                    @"/TestFiles/restrictedDehumidifierFanHeater.ttl",
+                    "restrictedDehumidifierFanHeater.ttl",
                     new[] {
                         new ActuationAction[] {
                             new() {
@@ -104,7 +107,7 @@ namespace TestProject.Utilities {
                     }
                 },
                 {
-                    @"/TestFiles/unrestrictedDehumidifierFanHeaterFloorHeating.ttl",
+                    "unrestrictedDehumidifierFanHeaterFloorHeating.ttl",
                     new[] {
                         new ActuationAction[] {
                             new() {
@@ -167,7 +170,7 @@ namespace TestProject.Utilities {
                     }
                 },
                 {
-                    @"/TestFiles/restrictedDehumidifierFanHeaterFloorHeating.ttl",
+                    "restrictedDehumidifierFanHeaterFloorHeating.ttl",
                     new[] {
                         new ActuationAction[] {
                             new() {
@@ -216,7 +219,7 @@ namespace TestProject.Utilities {
                     }
                 },
                 {
-                    @"/TestFiles/restrictedDehumidifierFanHeaterManyStates.ttl",
+                    "restrictedDehumidifierFanHeaterManyStates.ttl",
                     new[] {
                         new ActuationAction[] {
                             new() {

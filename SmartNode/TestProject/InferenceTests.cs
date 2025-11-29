@@ -6,6 +6,7 @@ using TestProject.Utilities;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 using VDS.RDF.Query;
+using Xunit.Internal;
 
 namespace TestProject
 {
@@ -13,55 +14,63 @@ namespace TestProject
     {
         [Theory]
         [MemberData(nameof(InferenceTestHelper.TestData), MemberType = typeof(InferenceTestHelper))]
-        public void Correct_action_combinations_for_instance_model(string instanceModelFilepath, IEnumerable<IEnumerable<ActuationAction>> combinations) {
+        public void Correct_action_combinations_for_instance_model(string instanceModelFilename, IEnumerable<IEnumerable<ActuationAction>> expectedCombinations) {
             // Arrange
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var workingDirectoryPath = $"{executingAssemblyPath}/../../models-and-rules/";
-            var ontologyFilepath = $"{executingAssemblyPath}/../../Ontology/ruleless-digital-twins.ttl";
-            var inferenceRulesFilepath = $"{executingAssemblyPath}/../../models-and-rules/inference-rules.rules";
-            var inferredInstanceModelFilepath = Path.Combine("inferred_", instanceModelFilepath);
+            var workingDirectoryPath = Path.Combine(InferenceTestHelper.SolutionRootDirectory, "models-and-rules");
+            var ontologyFilepath = Path.Combine(InferenceTestHelper.SolutionRootDirectory, "Ontology", "ruleless-digital-twins.ttl");
+            var inferenceRulesFilepath = Path.Combine(InferenceTestHelper.SolutionRootDirectory, "models-and-rules", "inference-rules.rules");
+            var instanceModelFilepath = Path.Combine(InferenceTestHelper.TestFileDirectory, instanceModelFilename);
+            var inferredInstanceModelFilepath = Path.Combine(InferenceTestHelper.TestFileDirectory, instanceModelFilename.Split('.')[0] + "Inferred.ttl");
 
             var inferredModel = new Graph();
             var turtleParser = new TurtleParser();
 
             // Act
-            ExecuteJarFile("../../../models-and-rules/ruleless-digital-twins-inference-engine.jar",
-                [$"{ontologyFilepath}", $"{instanceModelFilepath}", $"{inferenceRulesFilepath}", $"{inferredInstanceModelFilepath}"],
+            ExecuteJarFile($"\"{Path.Combine(InferenceTestHelper.SolutionRootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar")}\"",
+                [$"\"{ontologyFilepath}\"", $"\"{instanceModelFilepath}\"", $"\"{inferenceRulesFilepath}\"", $"\"{inferredInstanceModelFilepath}\""],
                 workingDirectoryPath);
 
             turtleParser.Load(inferredModel, inferredInstanceModelFilepath);
 
-            var actionCombinations = GetActionCombinationsFromInferredModel(inferredModel);
+            var actualCombinations = GetActionCombinationsFromInferredModel(inferredModel);
 
             // Assert
-
+            Assert.Equivalent(expectedCombinations, actualCombinations, true);
         }
 
         private static void ExecuteJarFile(string jarFilepath, string[] arguments, string workingDirectoryPath) {
             var process = new Process();
 
+            // Assumes "java" is added to the PATH and can be invoked from anywhere.
             process.StartInfo.FileName = "java";
             process.StartInfo.Arguments = $"-jar {jarFilepath} {string.Join(" ", arguments)}";
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
-            process.StartInfo.UseShellExecute = true;
-            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = false;
             process.StartInfo.WorkingDirectory = workingDirectoryPath;
 
+            process.OutputDataReceived += (sender, e) => {
+                Debug.WriteLine(e.ToString());
+            };
+
+            process.ErrorDataReceived += (sender, e) => {
+                Debug.WriteLine(e.ToString());
+            };
+
             process.Start();
-
-            string standardOutput = process.StandardOutput.ReadToEnd();
-            string standardError = process.StandardError.ReadToEnd();
-
             process.WaitForExit();
+
+            
         }
 
         private static List<List<ActuationAction>> GetActionCombinationsFromInferredModel(IGraph inferredModel) {
             var actionCombinations = new List<List<ActuationAction>>();
 
-            var actuationQuery = MapekUtilities.GetParameterizedStringQuery();
+            var actionCombinationQuery = MapekUtilities.GetParameterizedStringQuery();
 
-            actuationQuery.CommandText = @"SELECT ?actionCombination (GROUP_CONCAT(?action; SEPARATOR="" "") AS ?actions) WHERE {
+            actionCombinationQuery.CommandText = @"SELECT ?actionCombination (GROUP_CONCAT(?action; SEPARATOR="" "") AS ?actions) WHERE {
 	                ?actionCombination rdf:type meta:ActionCombination .
 	                FILTER NOT EXISTS {
 		                {
@@ -76,11 +85,40 @@ namespace TestProject
 	                ?actionList rdf:rest*/rdf:first ?action . }
                 GROUP BY ?actionCombination";
 
-            var actuationQueryResult = (SparqlResultSet)inferredModel.ExecuteQuery(actuationQuery);
+            var actionCombinationQueryResult = (SparqlResultSet)inferredModel.ExecuteQuery(actionCombinationQuery);
 
-            foreach (var result in actuationQueryResult.Results) {
-                
-            }
+            actionCombinationQueryResult.Results.ForEach(combinationResult => {
+                var actions = combinationResult["actions"].ToString().Split(' ');
+
+                var combination = new List<ActuationAction>();
+
+                actions.ForEach(action => {
+                    var actionQuery = MapekUtilities.GetParameterizedStringQuery();
+
+                    actionQuery.CommandText = @"SELECT ?action ?actuator ?actuatorState WHERE {
+                        ?action rdf:type meta:ActuationAction .
+                        ?action meta:hasActuator ?actuator .
+                        ?action meta:hasActuatorState ?actuatorState . }";
+
+                    var actionQueryResult = (SparqlResultSet)inferredModel.ExecuteQuery(actionQuery);
+
+                    actionQueryResult.Results.ForEach(actionResult => {
+                        var actionName = actionResult["action"].ToString();
+                        var actuatorName = actionResult["actuator"].ToString();
+                        var actuatorState = actionResult["actuatorState"].ToString().Split('^')[0];
+
+                        combination.Add(new ActuationAction {
+                            Name = actionName,
+                            Actuator = new Actuator {
+                                Name = actuatorName
+                            },
+                            NewStateValue = actuatorState
+                        });
+                    });
+                });
+
+                actionCombinations.Add(combination);
+            });
 
             return actionCombinations;
         }

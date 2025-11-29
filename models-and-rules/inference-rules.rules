@@ -99,38 +99,39 @@
 // Upon locating the marks for OptimalCondition constraints or optimization targets, these rules find the
 // relevant PropertyChanges and use them for a temporary mark.
 
-[rule2a:    (?bNode rdf:comment ?property)
+[rule2a:    (?restriction rdf:comment ?property)
+            (?property meta:hasValue ?propertyValue)
             (?property meta:propertyFor ?propertyChange)
-            (?propertyChange meta:affectsPropertyWith ?someChange)
-            (?bNode owl:hasValue ?value)
+            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
+            (?restriction xsd:minExclusive ?restrictionValue)
+            le(?propertyValue, ?restrictionValue)
             ->  (_: rdf:comment ?propertyChange)
 ]
 
 [rule2b:    (?restriction rdf:comment ?property)
+            (?property meta:hasValue ?propertyValue)
             (?property meta:propertyFor ?propertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
-            (?restriction xsd:minExclusive ?value)
+            (?restriction xsd:minInclusive ?restrictionValue)
+            lessThan(?propertyValue, ?restrictionValue)
             ->  (_: rdf:comment ?propertyChange)
 ]
 
 [rule2c:    (?restriction rdf:comment ?property)
+            (?property meta:hasValue ?propertyValue)
             (?property meta:propertyFor ?propertyChange)
-            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
-            (?restriction xsd:minInclusive ?value)
+            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
+            (?restriction xsd:maxExclusive ?restrictionValue)
+            ge(?propertyValue, ?restrictionValue)
             ->  (_: rdf:comment ?propertyChange)
 ]
 
 [rule2d:    (?restriction rdf:comment ?property)
+            (?property meta:hasValue ?propertyValue)
             (?property meta:propertyFor ?propertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
-            (?restriction xsd:maxExclusive ?value)
-            ->  (_: rdf:comment ?propertyChange)
-]
-
-[rule2e:    (?restriction rdf:comment ?property)
-            (?property meta:propertyFor ?propertyChange)
-            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
-            (?restriction xsd:maxInclusive ?value)
+            (?restriction xsd:maxInclusive ?restrictionValue)
+            greaterThan(?propertyValue, ?restrictionValue)
             ->  (_: rdf:comment ?propertyChange)
 ]
 
@@ -288,17 +289,6 @@
 ]
 
 [rule4e:    (?actionCombination1 rdf:type meta:ActionCombination)
-            (?actionCombination1 meta:hasActions ?actionList1)
-            (?actionCombination2 rdf:type meta:ActionCombination)
-            (?actionCombination2 meta:hasActions ?actionList2)
-            notEqual(?actionCombination1, ?actionCombination2)
-            noValue(?actionCombination1 rdf:comment "duplicate")
-            noValue(?actionCombination2 rdf:comment "duplicate")
-            listEqual(?actionList1, ?actionList2)
-            ->  (?actionCombination2 rdf:comment "duplicate")
-]
-
-[rule4f:    (?actionCombination1 rdf:type meta:ActionCombination)
             (?actionCombination1 meta:hasActions ?actionList1)
             (?actionCombination2 rdf:type meta:ActionCombination)
             (?actionCombination2 meta:hasActions ?actionList2)

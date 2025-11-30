@@ -4,7 +4,7 @@ using System.Reflection;
 namespace TestProject.Utilities {
     internal static class InferenceTestHelper {
         public static readonly string SolutionRootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
-        public static readonly string TestFileDirectory = Path.Combine(SolutionRootDirectory, "SmartNode", "TestFiles");
+        public static readonly string TestFileDirectory = Path.Combine(SolutionRootDirectory, "SmartNode", "TestProject", "TestFiles");
 
         public static TheoryData<string, IEnumerable<IEnumerable<ActuationAction>>> TestData =>
             new() {
@@ -13,51 +13,276 @@ namespace TestProject.Utilities {
                     new[] {
                         new ActuationAction[] {
                             new() {
-                                Name = "Dehumidifier_0",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_0",
                                 Actuator = new Actuator {
-                                    Name = "Dehumidifier"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
                                 },
                                 NewStateValue = "0"
                             },
                             new() {
-                                Name = "Dehumidifier_1",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_0",
                                 Actuator = new Actuator {
-                                    Name = "Dehumidifier"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_2",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "2"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
                                 },
                                 NewStateValue = "1"
                             },
                             new() {
-                                Name = "Fan_0",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
                                 Actuator = new Actuator {
-                                    Name = "Fan"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
                                 },
                                 NewStateValue = "0"
                             },
                             new() {
-                                Name = "Fan_1",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_1",
                                 Actuator = new Actuator {
-                                    Name = "Fan"
-                                },
-                                NewStateValue= "1"
-                            },
-                            new() {
-                                Name = "Heater_0",
-                                Actuator = new Actuator {
-                                    Name = "Heater"
-                                },
-                                NewStateValue = "0"
-                            },
-                            new() {
-                                Name = "Heater_1",
-                                Actuator = new Actuator {
-                                    Name = "Heater"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
                                 },
                                 NewStateValue = "1"
                             },
                             new() {
-                                Name = "Heater_2",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
                                 Actuator = new Actuator {
-                                    Name = "Heater"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_2",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "2"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_2",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "2"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_2",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
                                 },
                                 NewStateValue = "2"
                             }
@@ -69,37 +294,27 @@ namespace TestProject.Utilities {
                     new[] {
                         new ActuationAction[] {
                             new() {
-                                Name = "Fan_0",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
                                 Actuator = new Actuator {
-                                    Name = "Fan"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
                                 },
                                 NewStateValue = "0"
-                            },
+                            }
+                        },
+                        new ActuationAction[] {
                             new() {
-                                Name = "Fan_1",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
                                 Actuator = new Actuator {
-                                    Name = "Fan"
-                                },
-                                NewStateValue= "1"
-                            },
-                            new() {
-                                Name = "Heater_0",
-                                Actuator = new Actuator {
-                                    Name = "Heater"
-                                },
-                                NewStateValue = "0"
-                            },
-                            new() {
-                                Name = "Heater_1",
-                                Actuator = new Actuator {
-                                    Name = "Heater"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
                                 },
                                 NewStateValue = "1"
-                            },
+                            }
+                        },
+                        new ActuationAction[] {
                             new() {
-                                Name = "Heater_2",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_2",
                                 Actuator = new Actuator {
-                                    Name = "Heater"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
                                 },
                                 NewStateValue = "2"
                             }
@@ -111,58 +326,480 @@ namespace TestProject.Utilities {
                     new[] {
                         new ActuationAction[] {
                             new() {
-                                Name = "Dehumidifier_0",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_0",
                                 Actuator = new Actuator {
-                                    Name = "Dehumidifier"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
                                 },
                                 NewStateValue = "0"
                             },
                             new() {
-                                Name = "Dehumidifier_1",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_0",
                                 Actuator = new Actuator {
-                                    Name = "Dehumidifier"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
                                 },
                                 NewStateValue = "1"
                             },
                             new() {
-                                Name = "Fan_0",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_0",
                                 Actuator = new Actuator {
-                                    Name = "Fan"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
                                 },
                                 NewStateValue = "0"
                             },
                             new() {
-                                Name = "Fan_1",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_0",
                                 Actuator = new Actuator {
-                                    Name = "Fan"
-                                },
-                                NewStateValue= "1"
-                            },
-                            new() {
-                                Name = "Heater_0",
-                                Actuator = new Actuator {
-                                    Name = "Heater"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
                                 },
                                 NewStateValue = "0"
                             },
                             new() {
-                                Name = "Heater_1",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
                                 Actuator = new Actuator {
-                                    Name = "Heater"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
                                 },
                                 NewStateValue = "1"
                             },
                             new() {
-                                Name = "FloorHeating_0",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_1",
                                 Actuator = new Actuator {
-                                    Name = "FloorHeating"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
                                 },
                                 NewStateValue = "0"
                             },
                             new() {
-                                Name = "FloorHeating_1",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_1",
                                 Actuator = new Actuator {
-                                    Name = "FloorHeating"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fan"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
                                 },
                                 NewStateValue = "1"
                             }
@@ -174,44 +811,64 @@ namespace TestProject.Utilities {
                     new[] {
                         new ActuationAction[] {
                             new() {
-                                Name = "Fan_0",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
                                 Actuator = new Actuator {
-                                    Name = "Fan"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
                                 },
                                 NewStateValue = "0"
                             },
                             new() {
-                                Name = "Fan_1",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_0",
                                 Actuator = new Actuator {
-                                    Name = "Fan"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
                                 },
-                                NewStateValue= "1"
-                            },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
                             new() {
-                                Name = "Heater_0",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
                                 Actuator = new Actuator {
-                                    Name = "Heater"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
                                 },
                                 NewStateValue = "0"
                             },
                             new() {
-                                Name = "Heater_1",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_1",
                                 Actuator = new Actuator {
-                                    Name = "Heater"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
                                 },
                                 NewStateValue = "1"
                             },
                             new() {
-                                Name = "FloorHeating_0",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_0",
                                 Actuator = new Actuator {
-                                    Name = "FloorHeating"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
                                 },
                                 NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "1"
                             },
                             new() {
-                                Name = "FloorHeating_1",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_1",
                                 Actuator = new Actuator {
-                                    Name = "FloorHeating"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
                                 },
                                 NewStateValue = "1"
                             }
@@ -219,64 +876,246 @@ namespace TestProject.Utilities {
                     }
                 },
                 {
-                    "restrictedDehumidifierFanHeaterManyStates.ttl",
+                    "restrictedDehumidifierHeaterFloorHeatingManyStates.ttl",
                     new[] {
                         new ActuationAction[] {
                             new() {
-                                Name = "Fan_0",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
                                 Actuator = new Actuator {
-                                    Name = "Fan"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
                                 },
                                 NewStateValue = "0"
                             },
                             new() {
-                                Name = "Fan_1",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_0",
                                 Actuator = new Actuator {
-                                    Name = "Fan"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
                                 },
-                                NewStateValue= "1"
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "0"
                             },
                             new() {
-                                Name = "Fan_2",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_1",
                                 Actuator = new Actuator {
-                                    Name = "Fan"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "0"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_2",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
                                 },
                                 NewStateValue = "2"
-                            },
+                            }
+                        },
+                        new ActuationAction[] {
                             new() {
-                                Name = "Heater_0",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
                                 Actuator = new Actuator {
-                                    Name = "Heater"
-                                },
-                                NewStateValue = "0"
-                            },
-                            new() {
-                                Name = "Heater_1",
-                                Actuator = new Actuator {
-                                    Name = "Heater"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
                                 },
                                 NewStateValue = "1"
                             },
                             new() {
-                                Name = "Heater_2",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_0",
                                 Actuator = new Actuator {
-                                    Name = "Heater"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "1"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_2",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "2"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_2",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
                                 },
                                 NewStateValue = "2"
                             },
                             new() {
-                                Name = "Heater_3",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_0",
                                 Actuator = new Actuator {
-                                    Name = "Heater"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_2",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "2"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_2",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "2"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_2",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "2"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_3",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
                                 },
                                 NewStateValue = "3"
                             },
                             new() {
-                                Name = "Heater_4",
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_0",
                                 Actuator = new Actuator {
-                                    Name = "Heater"
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_3",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "3"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_3",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "3"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_2",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "2"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_4",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
                                 },
                                 NewStateValue = "4"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_0",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "0"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_4",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "4"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_1",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "1"
+                            }
+                        },
+                        new ActuationAction[] {
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater_4",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater"
+                                },
+                                NewStateValue = "4"
+                            },
+                            new() {
+                                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating_2",
+                                Actuator = new Actuator {
+                                    Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating"
+                                },
+                                NewStateValue = "2"
                             }
                         }
                     }

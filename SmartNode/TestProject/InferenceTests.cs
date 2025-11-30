@@ -12,6 +12,7 @@ namespace TestProject
 {
     public class InferenceTests
     {
+        // TODO: check how to make this work in containers. These paths most likely won't check out.
         [Theory]
         [MemberData(nameof(InferenceTestHelper.TestData), MemberType = typeof(InferenceTestHelper))]
         public void Correct_action_combinations_for_instance_model(string instanceModelFilename, IEnumerable<IEnumerable<ActuationAction>> expectedCombinations) {
@@ -40,29 +41,34 @@ namespace TestProject
         }
 
         private static void ExecuteJarFile(string jarFilepath, string[] arguments, string workingDirectoryPath) {
-            var process = new Process();
+            var processInfo = new ProcessStartInfo {
+                FileName = "java",
+                Arguments = $"-jar {jarFilepath} {string.Join(" ", arguments)}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = workingDirectoryPath
+            };
+            
+            using var process = Process.Start(processInfo);
 
-            // Assumes "java" is added to the PATH and can be invoked from anywhere.
-            process.StartInfo.FileName = "java";
-            process.StartInfo.Arguments = $"-jar {jarFilepath} {string.Join(" ", arguments)}";
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.CreateNoWindow = false;
-            process.StartInfo.WorkingDirectory = workingDirectoryPath;
-
-            process.OutputDataReceived += (sender, e) => {
-                Debug.WriteLine(e.ToString());
+            process!.OutputDataReceived += (sender, e) => {
+                Debug.WriteLine(e.Data);
             };
 
             process.ErrorDataReceived += (sender, e) => {
-                Debug.WriteLine(e.ToString());
+                Debug.WriteLine(e.Data);
             };
 
-            process.Start();
+            Debug.WriteLine($"Process started with ID {process.Id}.");
             process.WaitForExit();
 
-            
+            if (process.ExitCode != 0) {
+                throw new Exception($"The inference engine encountered an error. Process {process.Id} exited with code {process.ExitCode}.");
+            }
+
+            Debug.WriteLine($"Process {process.Id} exited with code {process.ExitCode}.");
         }
 
         private static List<List<ActuationAction>> GetActionCombinationsFromInferredModel(IGraph inferredModel) {
@@ -88,27 +94,28 @@ namespace TestProject
             var actionCombinationQueryResult = (SparqlResultSet)inferredModel.ExecuteQuery(actionCombinationQuery);
 
             actionCombinationQueryResult.Results.ForEach(combinationResult => {
-                var actions = combinationResult["actions"].ToString().Split(' ');
+                var actions = combinationResult["actions"].ToString().Split('^')[0].Split(' ');
 
                 var combination = new List<ActuationAction>();
 
                 actions.ForEach(action => {
                     var actionQuery = MapekUtilities.GetParameterizedStringQuery();
 
-                    actionQuery.CommandText = @"SELECT ?action ?actuator ?actuatorState WHERE {
-                        ?action rdf:type meta:ActuationAction .
-                        ?action meta:hasActuator ?actuator .
-                        ?action meta:hasActuatorState ?actuatorState . }";
+                    actionQuery.CommandText = @"SELECT ?actuator ?actuatorState WHERE {
+                        @action rdf:type meta:ActuationAction .
+                        @action meta:hasActuator ?actuator .
+                        @action meta:hasActuatorState ?actuatorState . }";
+
+                    actionQuery.SetUri("action", new Uri(action));
 
                     var actionQueryResult = (SparqlResultSet)inferredModel.ExecuteQuery(actionQuery);
 
                     actionQueryResult.Results.ForEach(actionResult => {
-                        var actionName = actionResult["action"].ToString();
                         var actuatorName = actionResult["actuator"].ToString();
                         var actuatorState = actionResult["actuatorState"].ToString().Split('^')[0];
 
                         combination.Add(new ActuationAction {
-                            Name = actionName,
+                            Name = action,
                             Actuator = new Actuator {
                                 Name = actuatorName
                             },

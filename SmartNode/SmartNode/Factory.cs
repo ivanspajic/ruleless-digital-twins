@@ -76,6 +76,13 @@ namespace SmartNode
                     "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure",
                     "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor",
                     _dummyRoomM370)
+            },
+            { // [VS] Abuse:
+                ("http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummySensor",
+                "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProcedure"),
+                new ConstantSensor(
+                    "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProcedure",
+                    "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummySensor", -1)
             }
         };
 

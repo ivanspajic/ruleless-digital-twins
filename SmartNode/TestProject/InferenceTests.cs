@@ -12,8 +12,8 @@ namespace TestProject
 {
     public class InferenceTests
     {
-        // TODO: check how to make this work in containers. These paths most likely won't check out.
-        [Theory]
+        // TODO: make this work in containers. xUnit allows for skippable tests depending on the platform, so we can have a similar one for containers.
+        [Theory(Skip = "This test takes a long time to run. To run it, simply remove this attribute.")]
         [MemberData(nameof(InferenceTestHelper.TestData), MemberType = typeof(InferenceTestHelper))]
         public void Correct_action_combinations_for_instance_model(string instanceModelFilename, IEnumerable<IEnumerable<ActuationAction>> expectedCombinations) {
             // Arrange

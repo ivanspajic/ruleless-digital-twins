@@ -12,7 +12,7 @@ owl:Nothing  rdf:type        owl:Class , rdfs:Class , rdfs:Resource , owl:Thing;
 
 owl:FunctionalProperty
         rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , owl:FunctionalProperty , rdf:Property;
+        rdfs:subClassOf      owl:FunctionalProperty , rdfs:Resource , rdf:Property;
         owl:equivalentClass  owl:FunctionalProperty;
         owl:sameAs           owl:FunctionalProperty .
 
@@ -31,13 +31,13 @@ rdfs:domain  rdf:type           rdf:Property , rdfs:Resource , owl:Thing;
 
 <http://www.w3.org/ns/ssn/Property>
         rdf:type             rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , <http://www.w3.org/ns/ssn/Property>;
+        rdfs:subClassOf      <http://www.w3.org/ns/ssn/Property> , rdfs:Resource;
         owl:equivalentClass  <http://www.w3.org/ns/ssn/Property>;
         owl:sameAs           <http://www.w3.org/ns/ssn/Property> .
 
 <http://www.w3.org/ns/sosa/Sensor>
         rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , <http://www.w3.org/ns/sosa/Sensor>;
+        rdfs:subClassOf      <http://www.w3.org/ns/sosa/Sensor> , rdfs:Resource;
         owl:equivalentClass  <http://www.w3.org/ns/sosa/Sensor>;
         owl:sameAs           <http://www.w3.org/ns/sosa/Sensor> .
 
@@ -62,7 +62,7 @@ rdf:nil  rdf:type   rdf:List , rdfs:Resource , owl:Thing;
         owl:sameAs  () .
 
 xsd:float  rdf:type          rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Class , owl:Thing;
-        rdfs:subClassOf      rdfs:Resource , xsd:float , owl:Thing;
+        rdfs:subClassOf      xsd:float , rdfs:Resource , owl:Thing;
         owl:disjointWith     xsd:nonNegativeInteger , xsd:int , xsd:decimal , xsd:time , xsd:nonPositiveInteger , xsd:short , xsd:boolean , xsd:date , xsd:dateTime , xsd:string , xsd:duration , xsd:integer , xsd:byte , xsd:unsignedLong , xsd:long , xsd:unsignedByte , xsd:unsignedShort , xsd:unsignedInt;
         owl:equivalentClass  xsd:float;
         owl:sameAs           xsd:float .
@@ -100,14 +100,14 @@ rdf:object  rdf:type            rdf:Property , rdfs:Resource , owl:Thing;
         owl:sameAs              rdf:object .
 
 owl:DatatypeProperty  rdf:type  rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , owl:DatatypeProperty , rdf:Property;
+        rdfs:subClassOf      owl:DatatypeProperty , rdfs:Resource , rdf:Property;
         owl:equivalentClass  owl:DatatypeProperty;
         owl:sameAs           owl:DatatypeProperty .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasReconfigurationValueGenerator>
         rdf:type                owl:ObjectProperty , rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:domain             owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter> , rdfs:Resource , _:b3 , <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Input>;
-        rdfs:range              owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationValueGenerator> , rdfs:Resource , _:b4 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator> , _:b5 , <http://www.w3.org/ns/sosa/Procedure> , _:b6;
+        rdfs:range              owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationValueGenerator> , rdfs:Resource , _:b4 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator> , _:b5 , _:b6 , <http://www.w3.org/ns/sosa/Procedure>;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActionValueGenerator> , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasReconfigurationValueGenerator>;
         owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasReconfigurationValueGenerator>;
         owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasReconfigurationValueGenerator> .
@@ -132,13 +132,13 @@ owl:inverseOf  rdf:type         rdf:Property , rdfs:Resource , owl:Thing;
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuationValueGenerator>
         rdf:type                owl:ObjectProperty , rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:domain             owl:Thing , <http://www.w3.org/ns/sosa/Actuator> , rdfs:Resource , _:b0;
-        rdfs:range              owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationValueGenerator> , rdfs:Resource , _:b7 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator> , _:b5 , <http://www.w3.org/ns/sosa/Procedure> , _:b6;
+        rdfs:range              owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationValueGenerator> , rdfs:Resource , _:b7 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator> , <http://www.w3.org/ns/sosa/Procedure> , _:b5 , _:b6;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActionValueGenerator> , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuationValueGenerator>;
         owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuationValueGenerator>;
         owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuationValueGenerator> .
 
 owl:equivalentProperty
-        rdf:type            rdf:Property , rdfs:Resource , owl:Thing;
+        rdf:type            rdf:Property , owl:Thing , rdfs:Resource;
         rdfs:subPropertyOf  owl:equivalentProperty;
         owl:sameAs          owl:equivalentProperty .
 
@@ -160,8 +160,8 @@ xsd:unsignedByte  rdf:type   rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Cl
         owl:equivalentClass  xsd:unsignedByte;
         owl:sameAs           xsd:unsignedByte .
 
-xsd:negativeInteger  rdf:type  rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , xsd:negativeInteger;
+xsd:negativeInteger  rdf:type  rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
+        rdfs:subClassOf      xsd:negativeInteger , rdfs:Resource;
         owl:equivalentClass  xsd:negativeInteger;
         owl:sameAs           xsd:negativeInteger .
 
@@ -170,8 +170,15 @@ owl:onDatatype  rdf:type        rdf:Property , rdfs:Resource , owl:Thing;
         owl:equivalentProperty  owl:onDatatype;
         owl:sameAs              owl:onDatatype .
 
+_:b8    rdf:type              rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
+        rdfs:subClassOf       _:b8 , rdfs:Resource;
+        owl:equivalentClass   _:b8;
+        owl:onDatatype        xsd:double;
+        owl:sameAs            _:b8;
+        owl:withRestrictions  _:b9 .
+
 xsd:gDay  rdf:type           rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , xsd:gDay;
+        rdfs:subClassOf      xsd:gDay , rdfs:Resource;
         owl:equivalentClass  xsd:gDay;
         owl:sameAs           xsd:gDay .
 
@@ -189,7 +196,7 @@ owl:onClass  rdf:type           rdf:Property , rdfs:Resource , owl:Thing;
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/configuresNewValue>
         rdf:type                owl:DatatypeProperty , owl:Property , rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "Represents the relation between a ReconfiguationAction and the literal (value) it changes a ConfigurableParameter to."@en;
-        rdfs:domain             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationAction> , owl:Thing , rdfs:Resource , _:b8 , _:b9 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action>;
+        rdfs:domain             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationAction> , owl:Thing , rdfs:Resource , _:b10 , _:b11 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action>;
         rdfs:label              "configuresNewValue"@en;
         rdfs:range              rdfs:Literal , rdfs:Resource , owl:Thing;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/configuresNewValue>;
@@ -213,13 +220,13 @@ rdf:Property  rdf:type       rdfs:Class , rdfs:Resource , owl:Class , owl:Thing;
         owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/isInputOf> .
 
 xsd:gYear  rdf:type          rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , xsd:gYear;
+        rdfs:subClassOf      xsd:gYear , rdfs:Resource;
         owl:equivalentClass  xsd:gYear;
         owl:sameAs           xsd:gYear .
 
 owl:InverseFunctionalProperty
         rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , owl:InverseFunctionalProperty , owl:ObjectProperty;
+        rdfs:subClassOf      owl:InverseFunctionalProperty , rdfs:Resource , owl:ObjectProperty;
         owl:equivalentClass  owl:InverseFunctionalProperty;
         owl:sameAs           owl:InverseFunctionalProperty .
 
@@ -233,13 +240,13 @@ owl:InverseFunctionalProperty
         owl:sameAs              <http://www.w3.org/ns/ssn/hasInput> .
 
 xsd:decimal  rdf:type        rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Class , owl:Thing;
-        rdfs:subClassOf      rdfs:Resource , xsd:decimal , owl:Thing;
+        rdfs:subClassOf      xsd:decimal , rdfs:Resource , owl:Thing;
         owl:disjointWith     xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration;
         owl:equivalentClass  xsd:decimal;
         owl:sameAs           xsd:decimal .
 
-xsd:gMonth  rdf:type         rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , xsd:gMonth;
+xsd:gMonth  rdf:type         rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
+        rdfs:subClassOf      xsd:gMonth , rdfs:Resource;
         owl:equivalentClass  xsd:gMonth;
         owl:sameAs           xsd:gMonth .
 
@@ -272,32 +279,32 @@ owl:disjointWith  rdf:type      owl:SymmetricProperty , rdf:Property , rdfs:Reso
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel>
         rdf:type                rdf:Property , owl:ObjectProperty , owl:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "Represents a model used for simulations of the corresponding Platform."@en;
-        rdfs:domain             owl:Thing , <http://www.w3.org/ns/sosa/Platform> , rdfs:Resource , _:b10 , _:b11 , _:b12;
+        rdfs:domain             owl:Thing , <http://www.w3.org/ns/sosa/Platform> , rdfs:Resource , _:b12 , _:b13 , _:b14;
         rdfs:label              "hasSimulationModel"@en;
         rdfs:range              owl:Thing , <http://www.w3.org/ns/sosa/Procedure> , rdfs:Resource;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel>;
         owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel>;
         owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel> .
 
-rdf:Seq  rdf:type            rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , rdf:Seq , rdfs:Container;
+rdf:Seq  rdf:type            rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
+        rdfs:subClassOf      rdf:Seq , rdfs:Resource , rdfs:Container;
         owl:equivalentClass  rdf:Seq;
         owl:sameAs           rdf:Seq .
 
 rdfs:Container  rdf:type     rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , rdfs:Container;
+        rdfs:subClassOf      rdfs:Container , rdfs:Resource;
         owl:equivalentClass  rdfs:Container;
         owl:sameAs           rdfs:Container .
 
 owl:ObjectProperty  rdf:type  rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , owl:ObjectProperty , rdf:Property;
+        rdfs:subClassOf      owl:ObjectProperty , rdfs:Resource , rdf:Property;
         owl:equivalentClass  owl:ObjectProperty;
         owl:sameAs           owl:ObjectProperty .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>
         rdf:type                owl:DatatypeProperty , owl:Property , rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "Represents the maximum amount of time in seconds to reach an OptimalCondition."@en;
-        rdfs:domain             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:Thing , rdfs:Resource , _:b13 , _:b14 , _:b15;
+        rdfs:domain             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:Thing , rdfs:Resource , _:b15 , _:b16 , _:b17;
         rdfs:label              "reachedInMaximumSeconds"@en;
         rdfs:range              xsd:int , rdfs:Resource , xsd:integer , xsd:long , xsd:decimal , owl:Thing;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>;
@@ -342,7 +349,7 @@ owl:versionInfo  rdf:type  owl:AnnotationProperty , rdfs:Resource , owl:Thing;
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
         rdf:type                owl:ObjectProperty , owl:Property , rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "The relation between an ActuationExecution and an Actuator it uses."@en;
-        rdfs:domain             owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction> , rdfs:Resource , _:b16 , _:b17 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action>;
+        rdfs:domain             owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction> , rdfs:Resource , _:b18 , _:b19 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action>;
         rdfs:label              "hasActuator"@en;
         rdfs:range              owl:Thing , <http://www.w3.org/ns/sosa/Actuator> , rdfs:Resource , _:b0;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>;
@@ -351,12 +358,12 @@ owl:versionInfo  rdf:type  owl:AnnotationProperty , rdfs:Resource , owl:Thing;
 
 owl:TransitiveProperty
         rdf:type             rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , owl:TransitiveProperty , owl:ObjectProperty;
+        rdfs:subClassOf      owl:TransitiveProperty , rdfs:Resource , owl:ObjectProperty;
         owl:equivalentClass  owl:TransitiveProperty;
         owl:sameAs           owl:TransitiveProperty .
 
 xsd:boolean  rdf:type        rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Class , owl:Thing;
-        rdfs:subClassOf      rdfs:Resource , xsd:boolean , owl:Thing;
+        rdfs:subClassOf      xsd:boolean , rdfs:Resource , owl:Thing;
         owl:disjointWith     xsd:nonNegativeInteger , xsd:int , xsd:decimal , xsd:time , xsd:nonPositiveInteger , xsd:short , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration , xsd:integer , xsd:byte , xsd:unsignedLong , xsd:long , xsd:unsignedByte , xsd:unsignedShort , xsd:unsignedInt;
         owl:equivalentClass  xsd:boolean;
         owl:sameAs           xsd:boolean .
@@ -368,8 +375,8 @@ rdf:rest  rdf:type              rdf:Property , owl:FunctionalProperty , rdfs:Res
         owl:equivalentProperty  rdf:rest;
         owl:sameAs              rdf:rest .
 
-xsd:double  rdf:type         rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , xsd:double;
+xsd:double  rdf:type         rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
+        rdfs:subClassOf      xsd:double , rdfs:Resource;
         owl:equivalentClass  xsd:double;
         owl:sameAs           xsd:double .
 
@@ -412,7 +419,7 @@ owl:cardinality  rdf:type       rdf:Property , rdfs:Resource , owl:Thing;
         owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/propertyFor> .
 
 xsd:positiveInteger  rdf:type  rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , xsd:positiveInteger;
+        rdfs:subClassOf      xsd:positiveInteger , rdfs:Resource;
         owl:equivalentClass  xsd:positiveInteger;
         owl:sameAs           xsd:positiveInteger .
 
@@ -428,15 +435,15 @@ rdf:type  rdf:type              rdf:Property , rdfs:Resource , owl:Thing;
         owl:sameAs              rdf:type .
 
 rdfs:ContainerMembershipProperty
-        rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , rdfs:ContainerMembershipProperty , rdf:Property;
+        rdf:type             rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
+        rdfs:subClassOf      rdfs:ContainerMembershipProperty , rdfs:Resource , rdf:Property;
         owl:equivalentClass  rdfs:ContainerMembershipProperty;
         owl:sameAs           rdfs:ContainerMembershipProperty .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor>
         rdf:type                owl:ObjectProperty , owl:Property , rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "Represents a relation between a platform and a PropertyChange that indicates that platform's optimization of those properties."@en;
-        rdfs:domain             owl:Thing , <http://www.w3.org/ns/sosa/Platform> , rdfs:Resource , _:b10 , _:b11 , _:b12;
+        rdfs:domain             owl:Thing , <http://www.w3.org/ns/sosa/Platform> , rdfs:Resource , _:b12 , _:b13 , _:b14;
         rdfs:label              "optimizesFor"@en;
         rdfs:range              owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> , rdfs:Resource , _:b1 , _:b2;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor>;
@@ -451,7 +458,7 @@ rdfs:ContainerMembershipProperty
         owl:sameAs              <http://www.w3.org/ns/ssn/implements> .
 
 xsd:dateTime  rdf:type       rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Class , owl:Thing;
-        rdfs:subClassOf      rdfs:Resource , xsd:dateTime , owl:Thing;
+        rdfs:subClassOf      xsd:dateTime , rdfs:Resource , owl:Thing;
         owl:disjointWith     xsd:nonNegativeInteger , xsd:int , xsd:decimal , xsd:time , xsd:nonPositiveInteger , xsd:short , xsd:boolean , xsd:float , xsd:date , xsd:string , xsd:duration , xsd:integer , xsd:byte , xsd:unsignedLong , xsd:long , xsd:unsignedByte , xsd:unsignedShort , xsd:unsignedInt;
         owl:equivalentClass  xsd:dateTime;
         owl:sameAs           xsd:dateTime .
@@ -474,7 +481,7 @@ xsd:int  rdf:type            rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Cl
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/alteredBy>
         rdf:type                owl:ObjectProperty , owl:Property , rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "Represents a relation between a ConfigurableProperty and an Effect on it that causes a related property to change."@en;
-        rdfs:domain             owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration> , rdfs:Resource , _:b18 , _:b19 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> , _:b1 , _:b2;
+        rdfs:domain             owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration> , rdfs:Resource , _:b20 , _:b21 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> , _:b1 , _:b2;
         rdfs:label              "alteredBy"@en;
         rdfs:range              owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Effect> , rdfs:Resource;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/alteredBy>;
@@ -503,7 +510,7 @@ owl:backwardCompatibleWith
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI>
         rdf:type                rdf:Property , owl:DatatypeProperty , owl:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "Refers to an FMUs URI."@en;
-        rdfs:domain             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel> , rdfs:Resource , owl:Thing , _:b20 , _:b21 , <http://www.w3.org/ns/sosa/Procedure>;
+        rdfs:domain             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel> , rdfs:Resource , owl:Thing , _:b22 , _:b23 , <http://www.w3.org/ns/sosa/Procedure>;
         rdfs:label              "hasURI"@en;
         rdfs:range              xsd:anyURI , rdfs:Resource , owl:Thing;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI>;
@@ -513,12 +520,12 @@ owl:backwardCompatibleWith
 [ rdf:comment  :DummyChange ] .
 
 xsd:gMonthDay  rdf:type      rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , xsd:gMonthDay;
+        rdfs:subClassOf      xsd:gMonthDay , rdfs:Resource;
         owl:equivalentClass  xsd:gMonthDay;
         owl:sameAs           xsd:gMonthDay .
 
 rdf:Alt  rdf:type            rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , rdf:Alt , rdfs:Container;
+        rdfs:subClassOf      rdf:Alt , rdfs:Resource , rdfs:Container;
         owl:equivalentClass  rdf:Alt;
         owl:sameAs           rdf:Alt .
 
@@ -540,18 +547,18 @@ owl:onDataRange  rdf:type       rdf:Property , rdfs:Resource , owl:Thing;
 
 xsd:nonPositiveInteger
         rdf:type             rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Class , owl:Thing;
-        rdfs:subClassOf      rdfs:Resource , xsd:nonPositiveInteger , owl:Thing;
+        rdfs:subClassOf      xsd:nonPositiveInteger , rdfs:Resource , owl:Thing;
         owl:disjointWith     xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration;
         owl:equivalentClass  xsd:nonPositiveInteger;
         owl:sameAs           xsd:nonPositiveInteger .
 
 owl:OntologyProperty  rdf:type  rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , owl:OntologyProperty , rdf:Property;
+        rdfs:subClassOf      owl:OntologyProperty , rdfs:Resource , rdf:Property;
         owl:equivalentClass  owl:OntologyProperty;
         owl:sameAs           owl:OntologyProperty .
 
-rdf:XMLLiteral  rdf:type     rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , rdf:XMLLiteral;
+rdf:XMLLiteral  rdf:type     rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
+        rdfs:subClassOf      rdf:XMLLiteral , rdfs:Resource;
         owl:equivalentClass  rdf:XMLLiteral;
         owl:sameAs           rdf:XMLLiteral .
 
@@ -562,32 +569,32 @@ rdf:subject  rdf:type           rdf:Property , rdfs:Resource , owl:Thing;
         owl:sameAs              rdf:subject .
 
 owl:NamedIndividual  rdf:type  rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , owl:NamedIndividual;
+        rdfs:subClassOf      owl:NamedIndividual , rdfs:Resource;
         owl:equivalentClass  owl:NamedIndividual;
         owl:sameAs           owl:NamedIndividual .
 
 xsd:time  rdf:type           rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Class , owl:Thing;
-        rdfs:subClassOf      rdfs:Resource , xsd:time , owl:Thing;
+        rdfs:subClassOf      xsd:time , rdfs:Resource , owl:Thing;
         owl:disjointWith     xsd:nonNegativeInteger , xsd:int , xsd:decimal , xsd:nonPositiveInteger , xsd:short , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration , xsd:integer , xsd:byte , xsd:unsignedLong , xsd:long , xsd:unsignedByte , xsd:unsignedShort , xsd:unsignedInt;
         owl:equivalentClass  xsd:time;
         owl:sameAs           xsd:time .
 
 rdf:Bag  rdf:type            rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , rdf:Bag , rdfs:Container;
+        rdfs:subClassOf      rdf:Bag , rdfs:Resource , rdfs:Container;
         owl:equivalentClass  rdf:Bag;
         owl:sameAs           rdf:Bag .
 
 xsd:gYearMonth  rdf:type     rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , xsd:gYearMonth;
+        rdfs:subClassOf      xsd:gYearMonth , rdfs:Resource;
         owl:equivalentClass  xsd:gYearMonth;
         owl:sameAs           xsd:gYearMonth .
 
 <http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#UnitActuatorhttp://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>
-        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction> , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action> , _:b16 , _:b17;
+        rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction> , owl:Thing , rdfs:Resource , _:b19 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action> , _:b18;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
                 :UnitActuator;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/setsActuatorToState>
-                _:b22 , _:b23;
+                _:b24 , _:b25;
         owl:sameAs  <http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#UnitActuatorhttp://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction> .
 
 owl:equivalentClass  rdf:type   rdf:Property , rdfs:Resource , owl:Thing;
@@ -602,7 +609,7 @@ owl:equivalentClass  rdf:type   rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "A relation between a Property and a Platform optimizing for it."@en;
         rdfs:domain             owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> , rdfs:Resource , _:b1 , _:b2;
         rdfs:label              "optimizedBy"@en;
-        rdfs:range              owl:Thing , <http://www.w3.org/ns/sosa/Platform> , rdfs:Resource , _:b10 , _:b11 , _:b12;
+        rdfs:range              owl:Thing , <http://www.w3.org/ns/sosa/Platform> , rdfs:Resource , _:b12 , _:b13 , _:b14;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizedBy>;
         owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizedBy>;
         owl:inverseOf           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor>;
@@ -638,20 +645,20 @@ owl:minQualifiedCardinality
         owl:sameAs              owl:minQualifiedCardinality .
 
 rdfs:Datatype  rdf:type      rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , rdfs:Datatype , rdfs:Class;
+        rdfs:subClassOf      rdfs:Datatype , rdfs:Resource , rdfs:Class;
         owl:equivalentClass  rdfs:Datatype;
         owl:sameAs           rdfs:Datatype .
 
 <http://www.w3.org/ns/ssn/Input>
         rdf:type             rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , <http://www.w3.org/ns/ssn/Input>;
+        rdfs:subClassOf      <http://www.w3.org/ns/ssn/Input> , rdfs:Resource;
         owl:equivalentClass  <http://www.w3.org/ns/ssn/Input>;
         owl:sameAs           <http://www.w3.org/ns/ssn/Input> .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds>
         rdf:type                rdf:Property , owl:DatatypeProperty , owl:Property , rdfs:Resource , owl:Thing;
         rdfs:comment            "Represents the fidelity of the simulation models (FMUs) with respect to the equations they contain."@en;
-        rdfs:domain             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel> , owl:Thing , rdfs:Resource , _:b20 , _:b21 , <http://www.w3.org/ns/sosa/Procedure>;
+        rdfs:domain             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel> , owl:Thing , rdfs:Resource , _:b22 , _:b23 , <http://www.w3.org/ns/sosa/Procedure>;
         rdfs:label              "hasSimulationFidelitySeconds"@en;
         rdfs:range              xsd:int , rdfs:Resource , xsd:integer , xsd:long , xsd:decimal , owl:Thing;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds>;
@@ -669,7 +676,7 @@ rdfs:seeAlso  rdf:type          rdfs:Resource , rdf:Property , owl:Thing;
         owl:sameAs              rdfs:seeAlso .
 
 xsd:date  rdf:type           rdfs:Datatype , rdfs:Resource , owl:Class , rdfs:Class , owl:Thing;
-        rdfs:subClassOf      rdfs:Resource , xsd:date , owl:Thing;
+        rdfs:subClassOf      xsd:date , rdfs:Resource , owl:Thing;
         owl:disjointWith     xsd:nonNegativeInteger , xsd:int , xsd:decimal , xsd:time , xsd:nonPositiveInteger , xsd:short , xsd:boolean , xsd:float , xsd:dateTime , xsd:string , xsd:duration , xsd:integer , xsd:byte , xsd:unsignedLong , xsd:long , xsd:unsignedByte , xsd:unsignedShort , xsd:unsignedInt;
         owl:equivalentClass  xsd:date;
         owl:sameAs           xsd:date .
@@ -678,13 +685,6 @@ xsd:minInclusive  rdf:type      rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:subPropertyOf      xsd:minInclusive;
         owl:equivalentProperty  xsd:minInclusive;
         owl:sameAs              xsd:minInclusive .
-
-_:b24   rdf:type              rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf       rdfs:Resource , _:b24;
-        owl:equivalentClass   _:b24;
-        owl:onDatatype        xsd:double;
-        owl:sameAs            _:b24;
-        owl:withRestrictions  _:b25 .
 
 <http://www.w3.org/ns/ssn/forProperty>
         rdf:type                rdf:Property , owl:Property , rdfs:Resource , owl:Thing;
@@ -702,7 +702,7 @@ owl:oneOf  rdf:type             rdf:Property , rdfs:Resource , owl:Thing;
         owl:sameAs              owl:oneOf .
 
 xsd:hexBinary  rdf:type      rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , xsd:hexBinary;
+        rdfs:subClassOf      xsd:hexBinary , rdfs:Resource;
         owl:equivalentClass  xsd:hexBinary;
         owl:sameAs           xsd:hexBinary .
 
@@ -713,7 +713,7 @@ owl:Ontology  rdf:type       rdfs:Class , rdfs:Resource , owl:Class , owl:Thing;
 
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/setsActuatorToState>
         rdf:type                owl:DatatypeProperty , owl:Property , rdf:Property , rdfs:Resource , owl:Thing;
-        rdfs:domain             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction> , owl:Thing , rdfs:Resource , _:b16 , _:b17 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action>;
+        rdfs:domain             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction> , owl:Thing , rdfs:Resource , _:b18 , _:b19 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action>;
         rdfs:range              rdfs:Literal , rdfs:Resource , owl:Thing;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/setsActuatorToState>;
         owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/setsActuatorToState>;
@@ -744,14 +744,14 @@ owl:withRestrictions  rdf:type  rdf:Property , rdfs:Resource , owl:Thing;
 
 <http://www.w3.org/ns/sosa/ObservableProperty>
         rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , <http://www.w3.org/ns/sosa/ObservableProperty> , _:b26;
+        rdfs:subClassOf      <http://www.w3.org/ns/sosa/ObservableProperty> , rdfs:Resource , _:b26;
         owl:equivalentClass  <http://www.w3.org/ns/sosa/ObservableProperty>;
         owl:sameAs           <http://www.w3.org/ns/sosa/ObservableProperty> .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActionValueGenerator>
         rdf:type                owl:ObjectProperty , rdf:Property , rdfs:Resource , owl:Thing;
         rdfs:domain             owl:Thing , rdfs:Resource;
-        rdfs:range              owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator> , rdfs:Resource , _:b5 , _:b6 , <http://www.w3.org/ns/sosa/Procedure>;
+        rdfs:range              owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator> , rdfs:Resource , _:b6 , _:b5 , <http://www.w3.org/ns/sosa/Procedure>;
         rdfs:subPropertyOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActionValueGenerator>;
         owl:equivalentProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActionValueGenerator>;
         owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActionValueGenerator> .
@@ -763,7 +763,7 @@ rdf:predicate  rdf:type         rdf:Property , rdfs:Resource , owl:Thing;
         owl:sameAs              rdf:predicate .
 
 xsd:base64Binary  rdf:type   rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , xsd:base64Binary;
+        rdfs:subClassOf      xsd:base64Binary , rdfs:Resource;
         owl:equivalentClass  xsd:base64Binary;
         owl:sameAs           xsd:base64Binary .
 
@@ -819,13 +819,13 @@ owl:Restriction  rdf:type    rdfs:Class , rdfs:Resource , owl:Class , owl:Thing;
 
 <http://www.w3.org/ns/ssn/Output>
         rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , <http://www.w3.org/ns/ssn/Output>;
+        rdfs:subClassOf      <http://www.w3.org/ns/ssn/Output> , rdfs:Resource;
         owl:equivalentClass  <http://www.w3.org/ns/ssn/Output>;
         owl:sameAs           <http://www.w3.org/ns/ssn/Output> .
 
 <http://www.w3.org/ns/sosa/Platform>
         rdf:type             rdfs:Class , rdfs:Resource , owl:Class , owl:Thing;
-        rdfs:subClassOf      owl:Thing , rdfs:Resource , <http://www.w3.org/ns/sosa/Platform> , _:b10 , _:b11 , _:b12;
+        rdfs:subClassOf      owl:Thing , rdfs:Resource , <http://www.w3.org/ns/sosa/Platform> , _:b12 , _:b13 , _:b14;
         owl:equivalentClass  <http://www.w3.org/ns/sosa/Platform>;
         owl:sameAs           <http://www.w3.org/ns/sosa/Platform> .
 
@@ -844,7 +844,7 @@ rdfs:subPropertyOf  rdf:type    rdf:Property , rdfs:Resource , owl:Thing;
 
 owl:AnnotationProperty
         rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , owl:AnnotationProperty;
+        rdfs:subClassOf      owl:AnnotationProperty , rdfs:Resource;
         owl:equivalentClass  owl:AnnotationProperty;
         owl:sameAs           owl:AnnotationProperty .
 
@@ -881,7 +881,7 @@ xsd:string  rdf:type         rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Cl
 
 owl:SymmetricProperty
         rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , owl:SymmetricProperty , owl:ObjectProperty;
+        rdfs:subClassOf      owl:SymmetricProperty , rdfs:Resource , owl:ObjectProperty;
         owl:equivalentClass  owl:SymmetricProperty;
         owl:sameAs           owl:SymmetricProperty .
 
@@ -891,6 +891,14 @@ owl:maxQualifiedCardinality
         owl:equivalentProperty  owl:maxQualifiedCardinality;
         owl:sameAs              owl:maxQualifiedCardinality .
 
+_:b21   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf              owl:Thing , rdfs:Resource , _:b21;
+        owl:equivalentClass          _:b21;
+        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter>;
+        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enactedBy>;
+        owl:sameAs                   _:b21 .
+
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter>
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
         rdfs:comment         "A parameter not directly observable or actuatable but rather used for configuring an an Input to a System or Procedure."@en;
@@ -898,164 +906,6 @@ owl:maxQualifiedCardinality
         rdfs:subClassOf      rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter> , owl:Thing , _:b3 , <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Input>;
         owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter>;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter> .
-
-_:b27   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           _:b27 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b27;
-        owl:onDataRange           xsd:double;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b27 .
-
-_:b7    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b7;
-        owl:equivalentClass       _:b7;
-        owl:onClass               <http://www.w3.org/ns/sosa/Actuator>;
-        owl:onProperty            <http://www.w3.org/ns/ssn/hasInput>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b7 .
-
-_:b16   rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf      owl:Thing , rdfs:Resource , _:b16 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction> , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action> , _:b17;
-        owl:cardinality      "1"^^xsd:nonNegativeInteger;
-        owl:equivalentClass  _:b16 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
-        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/setsActuatorToState>;
-        owl:sameAs           _:b16 .
-
-_:b4    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b4;
-        owl:equivalentClass       _:b4;
-        owl:onClass               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter>;
-        owl:onProperty            <http://www.w3.org/ns/ssn/hasInput>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b4 .
-
-_:b3    rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf              owl:Thing , rdfs:Resource , _:b3;
-        owl:equivalentClass          _:b3;
-        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration>;
-        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts>;
-        owl:sameAs                   _:b3 .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>
-        rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
-        rdfs:comment         "Represents a specific property change in a given system, either via a changed configuration property or an actuation on an observable one."@en;
-        rdfs:label           "PropertyChange"@en;
-        rdfs:subClassOf      rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> , owl:Thing , _:b1 , _:b2;
-        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>;
-        owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> .
-
-_:b15   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b15;
-        owl:equivalentClass       _:b15;
-        owl:onClass               <http://www.w3.org/ns/ssn/Property>;
-        owl:onProperty            <http://www.w3.org/ns/ssn/forProperty>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b15 .
-
-_:b28   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           _:b28 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b28;
-        owl:onDataRange           _:b24;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValueConstraint>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b28 .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>
-        rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
-        rdfs:comment         "Represents a specific PropertyChange as a result of actuating on the respective Property."@en;
-        rdfs:label           "PropertyChangeByActuation"@en;
-        rdfs:subClassOf      owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> , _:b29 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> , _:b2 , _:b1;
-        owl:disjointWith     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration>;
-        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>;
-        owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> .
-
-_:b26   rdf:type             rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf      rdfs:Resource , owl:Thing , _:b26;
-        owl:cardinality      "1"^^xsd:nonNegativeInteger;
-        owl:equivalentClass  _:b26;
-        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>;
-        owl:sameAs           _:b26 .
-
-_:b30   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           _:b30 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b30;
-        owl:onDataRange           xsd:double;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b30 .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>
-        rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
-        rdfs:comment         "Represents a single system Action with an actuation, either for optimization or regaining optimal conditions."@en;
-        rdfs:label           "ActuationAction"@en;
-        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction> , owl:Thing , rdfs:Resource , _:b16 , _:b17 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action>;
-        owl:disjointWith     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationAction>;
-        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction> , _:b16;
-        owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction> .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationValueGenerator>
-        rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationValueGenerator> , owl:Thing , rdfs:Resource , _:b4 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator> , _:b5 , <http://www.w3.org/ns/sosa/Procedure> , _:b6;
-        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationValueGenerator>;
-        owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationValueGenerator> .
-
-_:b20   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b20;
-        owl:equivalentClass       _:b20;
-        owl:onDataRange           xsd:anyURI;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b20 .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Effect>
-        rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
-        rdfs:comment         "The type of effect on the value of a property."@en;
-        rdfs:label           "Effect"@en;
-        rdfs:subClassOf      rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Effect> , owl:Thing;
-        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Effect>;
-        owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Effect> .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator>
-        rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
-        rdfs:comment         "Represents a specific Procedure that generates concrete Action values. For example, the number of ActuatorStates might be unknown for a certain Actuator, so a Procedure should specify them for concrete ActuationActions. Likewise, ConfigurableParameter values should be specified for concrete ReconfigurationActions."@en;
-        rdfs:label           "ActionValueGenerator"@en;
-        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator> , rdfs:Resource , owl:Thing , _:b5 , _:b6 , <http://www.w3.org/ns/sosa/Procedure>;
-        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator>;
-        owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator> .
-
-_:b31   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           _:b31 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b31;
-        owl:onDataRange           xsd:double;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b31 .
-
-_:b0    rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf              owl:Thing , rdfs:Resource , _:b0;
-        owl:equivalentClass          _:b0;
-        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>;
-        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts>;
-        owl:sameAs                   _:b0 .
-
-_:b9    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b9;
-        owl:equivalentClass       _:b9;
-        owl:onClass               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter>;
-        owl:onProperty            <http://www.w3.org/ns/ssn/forProperty>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b9 .
-
-_:b1    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b1;
-        owl:equivalentClass       _:b1;
-        owl:onClass               <http://www.w3.org/ns/ssn/Property>;
-        owl:onProperty            <http://www.w3.org/ns/ssn/forProperty>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b1 .
 
 _:b2    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
         rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b2;
@@ -1065,21 +915,235 @@ _:b2    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdf
         owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
         owl:sameAs                _:b2 .
 
+_:b0    rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf              owl:Thing , rdfs:Resource , _:b0;
+        owl:equivalentClass          _:b0;
+        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>;
+        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts>;
+        owl:sameAs                   _:b0 .
+
+_:b18   rdf:type             rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf      rdfs:Resource , owl:Thing , _:b18 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction> , _:b19 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action>;
+        owl:cardinality      "1"^^xsd:nonNegativeInteger;
+        owl:equivalentClass  _:b18 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
+        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/setsActuatorToState>;
+        owl:sameAs           _:b18 .
+
+_:b5    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b5;
+        owl:equivalentClass       _:b5;
+        owl:onClass               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Effect>;
+        owl:onProperty            <http://www.w3.org/ns/ssn/hasInput>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b5 .
+
+_:b27   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf              owl:Thing , rdfs:Resource , _:b27;
+        owl:equivalentClass          _:b27;
+        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:onClass                  <http://www.w3.org/ns/sosa/Actuator>;
+        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enactedBy>;
+        owl:sameAs                   _:b27 .
+
+<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>
+        rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
+        rdfs:comment         "Represents a specific property change in a given system, either via a changed configuration property or an actuation on an observable one."@en;
+        rdfs:label           "PropertyChange"@en;
+        rdfs:subClassOf      rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> , owl:Thing , _:b1 , _:b2;
+        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>;
+        owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> .
+
+_:b15   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf              owl:Thing , rdfs:Resource , _:b15;
+        owl:equivalentClass          _:b15;
+        owl:maxQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:onDataRange              xsd:int;
+        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>;
+        owl:sameAs                   _:b15 .
+
+_:b4    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b4;
+        owl:equivalentClass       _:b4;
+        owl:onClass               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter>;
+        owl:onProperty            <http://www.w3.org/ns/ssn/hasInput>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b4 .
+
+_:b28   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           _:b28 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass       _:b28;
+        owl:onDataRange           xsd:double;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b28 .
+
+_:b20   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b20;
+        owl:equivalentClass       _:b20;
+        owl:onClass               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Effect>;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/alteredBy>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b20 .
+
+_:b11   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b11;
+        owl:equivalentClass       _:b11;
+        owl:onClass               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter>;
+        owl:onProperty            <http://www.w3.org/ns/ssn/forProperty>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b11 .
+
+<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>
+        rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
+        rdfs:comment         "Represents a specific PropertyChange as a result of actuating on the respective Property."@en;
+        rdfs:label           "PropertyChangeByActuation"@en;
+        rdfs:subClassOf      owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> , _:b27 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> , _:b1 , _:b2;
+        owl:disjointWith     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration>;
+        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>;
+        owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> .
+
+_:b10   rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf      _:b10 , rdfs:Resource , owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationAction> , _:b11 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action>;
+        owl:cardinality      "1"^^xsd:nonNegativeInteger;
+        owl:equivalentClass  _:b10 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationAction>;
+        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/configuresNewValue>;
+        owl:sameAs           _:b10 .
+
+_:b19   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b19;
+        owl:equivalentClass       _:b19;
+        owl:onClass               <http://www.w3.org/ns/sosa/Actuator>;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b19 .
+
+_:b3    rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf              owl:Thing , rdfs:Resource , _:b3;
+        owl:equivalentClass          _:b3;
+        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration>;
+        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts>;
+        owl:sameAs                   _:b3 .
+
+_:b1    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b1;
+        owl:equivalentClass       _:b1;
+        owl:onClass               <http://www.w3.org/ns/ssn/Property>;
+        owl:onProperty            <http://www.w3.org/ns/ssn/forProperty>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b1 .
+
+<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>
+        rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
+        rdfs:comment         "Represents a single system Action with an actuation, either for optimization or regaining optimal conditions."@en;
+        rdfs:label           "ActuationAction"@en;
+        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction> , owl:Thing , rdfs:Resource , _:b18 , _:b19 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action>;
+        owl:disjointWith     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationAction>;
+        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction> , _:b18;
+        owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction> .
+
+_:b7    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b7;
+        owl:equivalentClass       _:b7;
+        owl:onClass               <http://www.w3.org/ns/sosa/Actuator>;
+        owl:onProperty            <http://www.w3.org/ns/ssn/hasInput>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b7 .
+
+<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationValueGenerator>
+        rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationValueGenerator> , owl:Thing , rdfs:Resource , _:b4 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator> , _:b5 , _:b6 , <http://www.w3.org/ns/sosa/Procedure>;
+        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationValueGenerator>;
+        owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationValueGenerator> .
+
+_:b17   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b17;
+        owl:equivalentClass       _:b17;
+        owl:onClass               <http://www.w3.org/ns/ssn/Property>;
+        owl:onProperty            <http://www.w3.org/ns/ssn/forProperty>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b17 .
+
+<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Effect>
+        rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
+        rdfs:comment         "The type of effect on the value of a property."@en;
+        rdfs:label           "Effect"@en;
+        rdfs:subClassOf      rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Effect> , owl:Thing;
+        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Effect>;
+        owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Effect> .
+
+_:b29   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           _:b29 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass       _:b29;
+        owl:onDataRange           _:b8;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValueConstraint>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b29 .
+
+<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator>
+        rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
+        rdfs:comment         "Represents a specific Procedure that generates concrete Action values. For example, the number of ActuatorStates might be unknown for a certain Actuator, so a Procedure should specify them for concrete ActuationActions. Likewise, ConfigurableParameter values should be specified for concrete ReconfigurationActions."@en;
+        rdfs:label           "ActionValueGenerator"@en;
+        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator> , rdfs:Resource , owl:Thing , _:b6 , _:b5 , <http://www.w3.org/ns/sosa/Procedure>;
+        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator>;
+        owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator> .
+
+_:b30   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           _:b30 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass       _:b30;
+        owl:onDataRange           xsd:double;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b30 .
+
+_:b31   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           _:b31 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass       _:b31;
+        owl:onDataRange           xsd:double;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b31 .
+
+_:b13   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf              owl:Thing , rdfs:Resource , _:b13;
+        owl:equivalentClass          _:b13;
+        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>;
+        owl:onProperty               <http://www.w3.org/ns/ssn/implements>;
+        owl:sameAs                   _:b13 .
+
+_:b6    rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf      owl:Thing , _:b6 , rdfs:Resource;
+        owl:cardinality      "1"^^xsd:nonNegativeInteger;
+        owl:equivalentClass  _:b6;
+        owl:onProperty       <http://www.w3.org/ns/ssn/hasOutput>;
+        owl:sameAs           _:b6 .
+
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationAction>
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
         rdfs:comment         "Represents a single system Action with a parameter reconfiguration, either for optimization or regaining optimal conditions."@en;
         rdfs:label           "ReconfigurationAction"@en;
-        rdfs:subClassOf      owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationAction> , rdfs:Resource , _:b8 , _:b9 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action>;
+        rdfs:subClassOf      owl:Thing , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationAction> , rdfs:Resource , _:b10 , _:b11 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action>;
         owl:disjointWith     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
-        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationAction> , _:b8;
+        owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationAction> , _:b10;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationAction> .
 
-_:b8    rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf      owl:Thing , rdfs:Resource , _:b8 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationAction> , _:b9 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action>;
-        owl:cardinality      "1"^^xsd:nonNegativeInteger;
-        owl:equivalentClass  _:b8 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationAction>;
-        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/configuresNewValue>;
-        owl:sameAs           _:b8 .
+_:b32   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           _:b32 , rdfs:Resource , owl:Thing;
+        owl:equivalentClass       _:b32;
+        owl:onDataRange           xsd:double;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b32 .
+
+_:b22   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b22;
+        owl:equivalentClass       _:b22;
+        owl:onDataRange           xsd:anyURI;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b22 .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action>
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
@@ -1089,130 +1153,82 @@ _:b8    rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Res
         owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action>;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Action> .
 
-_:b19   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf              owl:Thing , rdfs:Resource , _:b19;
-        owl:equivalentClass          _:b19;
-        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter>;
-        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enactedBy>;
-        owl:sameAs                   _:b19 .
-
-_:b29   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf              owl:Thing , rdfs:Resource , _:b29;
-        owl:equivalentClass          _:b29;
-        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:onClass                  <http://www.w3.org/ns/sosa/Actuator>;
-        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enactedBy>;
-        owl:sameAs                   _:b29 .
-
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel>
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
         rdfs:comment         "Represents a simulation model in the form of a Functional Mock-up Unit (FMU)."@en;
         rdfs:label           "FmuModel"@en;
-        rdfs:subClassOf      owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel> , _:b20 , _:b21 , <http://www.w3.org/ns/sosa/Procedure>;
+        rdfs:subClassOf      owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel> , _:b22 , _:b23 , <http://www.w3.org/ns/sosa/Procedure>;
         owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel>;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel> .
 
-_:b21   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b21;
-        owl:equivalentClass       _:b21;
+_:b23   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b23;
+        owl:equivalentClass       _:b23;
         owl:onDataRange           xsd:int;
         owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds>;
         owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b21 .
+        owl:sameAs                _:b23 .
 
-_:b11   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf              owl:Thing , rdfs:Resource , _:b11;
-        owl:equivalentClass          _:b11;
-        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>;
-        owl:onProperty               <http://www.w3.org/ns/ssn/implements>;
-        owl:sameAs                   _:b11 .
-
-_:b10   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b10;
-        owl:equivalentClass       _:b10;
-        owl:onClass               <http://www.w3.org/ns/sosa/Procedure>;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b10 .
-
-_:b13   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf              owl:Thing , rdfs:Resource , _:b13;
-        owl:equivalentClass          _:b13;
-        owl:maxQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:onDataRange              xsd:int;
-        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>;
-        owl:sameAs                   _:b13 .
-
-_:b12   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf              owl:Thing , rdfs:Resource , _:b12;
-        owl:equivalentClass          _:b12;
-        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>;
-        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor>;
-        owl:sameAs                   _:b12 .
+_:b26   rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf      rdfs:Resource , _:b26 , owl:Thing;
+        owl:cardinality      "1"^^xsd:nonNegativeInteger;
+        owl:equivalentClass  _:b26;
+        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>;
+        owl:sameAs           _:b26 .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration>
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
         rdfs:comment         "Represents a specific PropertyChange as a result of reconfiguring a related ConfigurableProperty."@en;
         rdfs:label           "PropertyChangeByReconfiguration"@en;
-        rdfs:subClassOf      rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration> , owl:Thing , _:b18 , _:b19 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> , _:b1 , _:b2;
+        rdfs:subClassOf      rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration> , owl:Thing , _:b20 , _:b21 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> , _:b1 , _:b2;
         owl:disjointWith     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>;
         owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration>;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration> .
 
-_:b14   rdf:type             rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf      rdfs:Resource , owl:Thing , _:b14;
+_:b16   rdf:type             rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf      owl:Thing , rdfs:Resource , _:b16;
         owl:cardinality      "1"^^xsd:nonNegativeInteger;
-        owl:equivalentClass  _:b14;
+        owl:equivalentClass  _:b16;
         owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValueConstraint>;
-        owl:sameAs           _:b14 .
+        owl:sameAs           _:b16 .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
         rdfs:comment         "An optimal property condition, such as a desired value range definition. For example, an optimal temperature condition of a room could be defined as values greater than 18 and lower than 22 degrees Celsius."@en;
         rdfs:label           "OptimalCondition"@en;
-        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:Thing , rdfs:Resource , _:b13 , _:b14 , _:b15;
+        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:Thing , rdfs:Resource , _:b15 , _:b16 , _:b17;
         owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> .
 
-_:b18   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b18;
-        owl:equivalentClass       _:b18;
-        owl:onClass               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Effect>;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/alteredBy>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b18 .
-
-_:b6    rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b6;
-        owl:equivalentClass       _:b6;
-        owl:onClass               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Effect>;
-        owl:onProperty            <http://www.w3.org/ns/ssn/hasInput>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b6 .
-
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationValueGenerator>
         rdf:type             rdfs:Class , owl:Class , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationValueGenerator> , owl:Thing , rdfs:Resource , _:b7 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator> , _:b5 , <http://www.w3.org/ns/sosa/Procedure> , _:b6;
+        rdfs:subClassOf      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationValueGenerator> , owl:Thing , rdfs:Resource , _:b7 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator> , <http://www.w3.org/ns/sosa/Procedure> , _:b5 , _:b6;
         owl:equivalentClass  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationValueGenerator>;
         owl:sameAs           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationValueGenerator> .
 
-_:b17   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b17;
-        owl:equivalentClass       _:b17;
-        owl:onClass               <http://www.w3.org/ns/sosa/Actuator>;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
-        owl:sameAs                _:b17 .
+_:b14   rdf:type                     owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf              owl:Thing , rdfs:Resource , _:b14;
+        owl:equivalentClass          _:b14;
+        owl:minQualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:onClass                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>;
+        owl:onProperty               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor>;
+        owl:sameAs                   _:b14 .
 
-_:b5    rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
-        rdfs:subClassOf      rdfs:Resource , _:b5 , owl:Thing;
-        owl:cardinality      "1"^^xsd:nonNegativeInteger;
-        owl:equivalentClass  _:b5;
-        owl:onProperty       <http://www.w3.org/ns/ssn/hasOutput>;
-        owl:sameAs           _:b5 .
+_:b12   rdf:type                  owl:Class , rdfs:Class , owl:Restriction , rdfs:Resource , owl:Thing;
+        rdfs:subClassOf           owl:Thing , rdfs:Resource , _:b12;
+        owl:equivalentClass       _:b12;
+        owl:onClass               <http://www.w3.org/ns/sosa/Procedure>;
+        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel>;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger;
+        owl:sameAs                _:b12 .
+
+_:b9    rdf:type    rdf:List , rdfs:Resource , owl:Thing;
+        rdf:first   [ rdf:comment       "verification mark";
+                      rdf:comment       :DummyProperty;
+                      xsd:minInclusive  "0.0"^^xsd:double
+                    ];
+        rdf:rest    ();
+        owl:sameAs  _:b9 .
 
 :DummyProcedure  rdf:type  <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual , owl:Thing , rdfs:Resource;
         owl:sameAs  :DummyProcedure;
@@ -1224,12 +1240,12 @@ _:b5    rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Res
         owl:imports  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins>;
         owl:sameAs   <http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97> .
 
-:PriceMeasure  rdf:type  _:b31 , <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual , owl:Thing , rdfs:Resource;
+:PriceMeasure  rdf:type  _:b28 , <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual , owl:Thing , rdfs:Resource;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/isOutputOf>
                 :PriceProcedure;
         owl:sameAs  :PriceMeasure .
 
-:DummyChange  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> , owl:NamedIndividual , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> , _:b2 , _:b1 , _:b29;
+:DummyChange  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> , owl:NamedIndividual , owl:Thing , rdfs:Resource , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> , _:b2 , _:b1 , _:b27;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith>
                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enactedBy>
@@ -1238,7 +1254,7 @@ _:b5    rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Res
         <http://www.w3.org/ns/ssn/forProperty>
                 :DummyProperty .
 
-:NordPoolTest  rdf:type  <http://www.w3.org/ns/sosa/Platform> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b12 , _:b11 , _:b10;
+:NordPoolTest  rdf:type  <http://www.w3.org/ns/sosa/Platform> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b14 , _:b13 , _:b12;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel>
                 :NordPoolFMU;
         owl:sameAs  :NordPoolTest .
@@ -1248,9 +1264,9 @@ _:b5    rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Res
         <http://www.w3.org/ns/sosa/observes>
                 :price .
 
-:DummyProperty  rdf:type  <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b26;
+:DummyProperty  rdf:type  _:b32 , <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b26;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                _:b32;
+                _:b33;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/propertyFor>
                 :DummyOptCond , :DummyChange;
         owl:sameAs  :DummyProperty .
@@ -1263,36 +1279,28 @@ _:b5    rdf:type             owl:Class , rdfs:Class , owl:Restriction , rdfs:Res
                 :DummyProcedure .
 
 :MeasuredOutputProperty
-        rdf:type    _:b27 , <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual , owl:Thing , rdfs:Resource;
+        rdf:type    _:b31 , <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual , owl:Thing , rdfs:Resource;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/isOutputOf>
                 :DummyProcedure;
         owl:sameAs  :MeasuredOutputProperty .
 
-:DummyOptCond  rdf:type  _:b28 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b14 , _:b15 , _:b13;
+:DummyOptCond  rdf:type  _:b29 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b17 , _:b16 , _:b15;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValueConstraint>
-                _:b33;
+                _:b34;
         owl:sameAs  :DummyOptCond;
         <http://www.w3.org/ns/ssn/forProperty>
                 :DummyProperty .
-
-_:b25   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
-        rdf:first   [ rdf:comment       "verification mark";
-                      rdf:comment       :DummyProperty;
-                      xsd:minInclusive  "0.0"^^xsd:double
-                    ];
-        rdf:rest    ();
-        owl:sameAs  _:b25 .
 
 :UnitActuator  rdf:type  <http://www.w3.org/ns/sosa/Actuator> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b0;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts>
                 :DummyChange;
         owl:sameAs  :UnitActuator .
 
-:NordPoolFMU  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel> , owl:NamedIndividual , owl:Thing , rdfs:Resource , <http://www.w3.org/ns/sosa/Procedure> , _:b21 , _:b20;
+:NordPoolFMU  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel> , owl:NamedIndividual , owl:Thing , rdfs:Resource , <http://www.w3.org/ns/sosa/Procedure> , _:b23 , _:b22;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds>
                 "900"^^xsd:int;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI>
-                "NordPool.fmu"^^xsd:anyURI;
+                "Nordpool-FMU/NordPool.fmu"^^xsd:anyURI;
         owl:sameAs  :NordPoolFMU .
 
 :PriceProcedure  rdf:type  <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual , owl:Thing , rdfs:Resource;
@@ -1304,7 +1312,7 @@ _:b25   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
 
 :price  rdf:type    _:b30 , <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual , owl:Thing , rdfs:Resource , _:b26;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                _:b34;
+                _:b35;
         owl:sameAs  :price .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>
@@ -1324,23 +1332,20 @@ _:b25   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
         rdf:type    owl:Ontology , rdfs:Resource , owl:Thing;
         owl:sameAs  <http://www.w3.org/ns/ssn/> .
 
-_:b34   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
-        owl:sameAs  _:b34 .
-
-_:b32   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
-        owl:sameAs  _:b32 .
-
 _:b33   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b33 .
 
-_:b23   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
-        owl:sameAs  _:b23 .
-
-_:b22   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
-        owl:sameAs  _:b22 .
-
-_:b35   rdf:type    owl:Thing , rdfs:Resource;
+_:b35   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b35 .
+
+_:b34   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+        owl:sameAs  _:b34 .
+
+_:b25   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+        owl:sameAs  _:b25 .
+
+_:b24   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+        owl:sameAs  _:b24 .
 
 _:b36   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b36 .
@@ -1369,43 +1374,43 @@ _:b43   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
 _:b44   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b44 .
 
-_:b45   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b45   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b45 .
 
-_:b46   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b46   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b46 .
 
-_:b47   rdf:type    owl:Thing , rdfs:Resource;
+_:b47   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b47 .
 
-_:b48   rdf:type    owl:Thing , rdfs:Resource;
+_:b48   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b48 .
 
 _:b49   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b49 .
 
-_:b50   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b50   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b50 .
 
-_:b51   rdf:type    owl:Thing , rdfs:Resource;
+_:b51   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b51 .
 
-_:b52   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b52   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b52 .
 
 _:b53   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b53 .
 
-_:b54   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b54   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b54 .
 
-_:b55   rdf:type    owl:Thing , rdfs:Resource;
+_:b55   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b55 .
 
-_:b56   rdf:type    owl:Thing , rdfs:Resource;
+_:b56   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b56 .
 
-_:b57   rdf:type    owl:Thing , rdfs:Resource;
+_:b57   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b57 .
 
 _:b58   rdf:type    owl:Thing , rdfs:Resource;
@@ -1417,49 +1422,49 @@ _:b59   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
 _:b60   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b60 .
 
-_:b61   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b61   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b61 .
 
-_:b62   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b62   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b62 .
 
-_:b63   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b63   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b63 .
 
-_:b64   rdf:type    owl:Thing , rdfs:Resource;
+_:b64   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b64 .
 
 _:b65   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b65 .
 
-_:b66   rdf:type    owl:Thing , rdfs:Resource;
+_:b66   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b66 .
 
-_:b67   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b67   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b67 .
 
-_:b68   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b68   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b68 .
 
-_:b69   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b69   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b69 .
 
-_:b70   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b70   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b70 .
 
-_:b71   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b71   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b71 .
 
 _:b72   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b72 .
 
-_:b73   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b73   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b73 .
 
-_:b74   rdf:type    owl:Thing , rdfs:Resource;
+_:b74   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b74 .
 
-_:b75   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b75   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b75 .
 
 _:b76   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
@@ -1468,23 +1473,32 @@ _:b76   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
 _:b77   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b77 .
 
-_:b78   rdf:type    owl:Thing , rdfs:Resource;
+_:b78   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b78 .
 
-_:b79   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b79   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b79 .
 
-_:b80   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b80   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b80 .
 
-_:b81   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b81   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b81 .
 
-_:b82   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b82   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b82 .
 
-_:b83   rdf:type    owl:Thing , rdfs:Resource;
+_:b83   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b83 .
 
-_:b84   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b84   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b84 .
+
+_:b85   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+        owl:sameAs  _:b85 .
+
+_:b86   rdf:type    owl:Thing , rdfs:Resource;
+        owl:sameAs  _:b86 .
+
+_:b87   rdf:type    owl:Thing , rdfs:Resource;
+        owl:sameAs  _:b87 .

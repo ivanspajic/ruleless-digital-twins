@@ -98,8 +98,8 @@ namespace SmartNode
         // The keys represent the OWL (RDF/XSD) types supported by Protege, and the values are user implementations.
         private readonly Dictionary<string, IValueHandler> _valueHandlers = new()
         {
-            { "double", new DoubleValueHandler() },
-            { "int", new IntValueHandler() }
+            { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
+            { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
         };
 
         // Keep an instance of the simulated TT.

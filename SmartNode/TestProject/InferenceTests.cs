@@ -1,5 +1,4 @@
-﻿using Logic.Mapek;
-using Logic.Models.OntologicalModels;
+﻿using Logic.Models.OntologicalModels;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Utilities;
@@ -13,6 +12,7 @@ namespace TestProject
     public class InferenceTests
     {
         // TODO: make this work in containers. xUnit allows for skippable tests depending on the platform, so we can have a similar one for containers.
+        // This is really an integration test.
         [Theory(Skip = "This test takes a long time to run. To run it, simply remove this attribute.")]
         [MemberData(nameof(InferenceTestHelper.TestData), MemberType = typeof(InferenceTestHelper))]
         public void Correct_action_combinations_for_instance_model(string instanceModelFilename, IEnumerable<IEnumerable<ActuationAction>> expectedCombinations) {
@@ -74,9 +74,7 @@ namespace TestProject
         private static List<List<ActuationAction>> GetActionCombinationsFromInferredModel(IGraph inferredModel) {
             var actionCombinations = new List<List<ActuationAction>>();
 
-            var actionCombinationQuery = MapekUtilities.GetParameterizedStringQuery();
-
-            actionCombinationQuery.CommandText = @"SELECT ?actionCombination (GROUP_CONCAT(?action; SEPARATOR="" "") AS ?actions) WHERE {
+            var actionCombinationQuery = GetParameterizedStringQuery(@"SELECT ?actionCombination (GROUP_CONCAT(?action; SEPARATOR="" "") AS ?actions) WHERE {
 	                ?actionCombination rdf:type meta:ActionCombination .
 	                FILTER NOT EXISTS {
 		                {
@@ -89,7 +87,7 @@ namespace TestProject
 	                }
 	                ?actionCombination meta:hasActions ?actionList .
 	                ?actionList rdf:rest*/rdf:first ?action . }
-                GROUP BY ?actionCombination";
+                GROUP BY ?actionCombination");
 
             var actionCombinationQueryResult = (SparqlResultSet)inferredModel.ExecuteQuery(actionCombinationQuery);
 
@@ -99,12 +97,10 @@ namespace TestProject
                 var combination = new List<ActuationAction>();
 
                 actions.ForEach(action => {
-                    var actionQuery = MapekUtilities.GetParameterizedStringQuery();
-
-                    actionQuery.CommandText = @"SELECT ?actuator ?actuatorState WHERE {
+                    var actionQuery = GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState WHERE {
                         @action rdf:type meta:ActuationAction .
                         @action meta:hasActuator ?actuator .
-                        @action meta:hasActuatorState ?actuatorState . }";
+                        @action meta:hasActuatorState ?actuatorState . }");
 
                     actionQuery.SetUri("action", new Uri(action));
 
@@ -128,6 +124,34 @@ namespace TestProject
             });
 
             return actionCombinations;
+        }
+
+        private static SparqlParameterizedString GetParameterizedStringQuery(string queryString) {
+            var dtPrefix = "meta";
+            var dtUri = "http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/";
+            var sosaPrefix = "sosa";
+            var sosaUri = "http://www.w3.org/ns/sosa/";
+            var ssnPrefix = "ssn";
+            var ssnUri = "http://www.w3.org/ns/ssn/";
+            var rdfPrefix = "rdf";
+            var rdfUri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+            var owlPrefix = "owl";
+            var owlUri = "http://www.w3.org/2002/07/owl#";
+            var xsdPrefix = "xsd";
+            var xsdUri = "http://www.w3.org/2001/XMLSchema#";
+
+            var query = new SparqlParameterizedString {
+                CommandText = queryString
+            };
+
+            query.Namespaces.AddNamespace(dtPrefix, new Uri(dtUri));
+            query.Namespaces.AddNamespace(sosaPrefix, new Uri(sosaUri));
+            query.Namespaces.AddNamespace(ssnPrefix, new Uri(ssnUri));
+            query.Namespaces.AddNamespace(rdfPrefix, new Uri(rdfUri));
+            query.Namespaces.AddNamespace(owlPrefix, new Uri(owlUri));
+            query.Namespaces.AddNamespace(xsdPrefix, new Uri(xsdUri));
+
+            return query;
         }
     }
 }

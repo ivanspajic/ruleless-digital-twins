@@ -13,11 +13,13 @@ namespace Logic.Mapek
     {
         private readonly ILogger<MapekAnalyze> _logger;
         private readonly IFactory _factory;
+        private readonly IMapekKnowledge _mapekKnowledge;
 
         public MapekAnalyze(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekAnalyze>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
+            _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
         }
 
         public Tuple<List<OptimalCondition>, List<Models.OntologicalModels.Action>> Analyze(IGraph instanceModel,
@@ -45,15 +47,12 @@ namespace Logic.Mapek
         {
             var optimalConditions = new List<OptimalCondition>();
 
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            // Get all OptimalConditions.
-            query.CommandText = @"SELECT ?optimalCondition ?property ?reachedInMaximumSeconds WHERE {
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?optimalCondition ?property ?reachedInMaximumSeconds WHERE {
                 ?optimalCondition rdf:type meta:OptimalCondition .
                 ?optimalCondition ssn:forProperty ?property .
-                ?optimalCondition meta:reachedInMaximumSeconds ?reachedInMaximumSeconds . }";
+                ?optimalCondition meta:reachedInMaximumSeconds ?reachedInMaximumSeconds . }");
 
-            var queryResult = instanceModel.ExecuteQuery(query, _logger);
+            var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
             // For each OptimalCondition, process its respective constraints and get the appropriate Actions
             // for mitigation.
@@ -156,19 +155,17 @@ namespace Logic.Mapek
         {
             var actions = new List<Models.OntologicalModels.Action>();
 
-            var actuationQuery = MapekUtilities.GetParameterizedStringQuery();
-
             // Get all ActuationActions and their Actuators that cause PropertyChanges equal to those that the system
             // wishes to optimize for.
-            actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuator WHERE {
+            var actuationQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?actuationAction ?actuator WHERE {
                 ?actuationAction rdf:type meta:ActuationAction .
                 ?actuationAction meta:hasActuator ?actuator .
                 ?actuator rdf:type sosa:Actuator .
                 ?actuator meta:enacts ?propertyChange .
                 ?platform rdf:type sosa:Platform .
-                ?platform meta:optimizesFor ?propertyChange . }";
+                ?platform meta:optimizesFor ?propertyChange . }");
 
-            var actuationQueryResult = instanceModel.ExecuteQuery(actuationQuery, _logger);
+            var actuationQueryResult = _mapekKnowledge.ExecuteQuery(actuationQuery);
 
             foreach (var result in actuationQueryResult.Results)
             {
@@ -176,19 +173,17 @@ namespace Logic.Mapek
                 AddActuationActionToCollectionFromQueryResult(result, actions, "actuationAction", "actuator");
             }
 
-            var reconfigurationQuery = MapekUtilities.GetParameterizedStringQuery();
-
             // Get all ReconfigurationActions, their ConfigurableParameters, and their Effects that cause PropertyChanges equal to those that the
             // system wishes to optimize for.
-            reconfigurationQuery.CommandText = @"SELECT DISTINCT ?reconfigurationAction ?configurableParameter ?effect WHERE {
+            var reconfigurationQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?reconfigurationAction ?configurableParameter ?effect WHERE {
                 ?reconfigurationAction rdf:type meta:ReconfigurationAction .
                 ?reconfigurationAction ssn:forProperty ?configurableParameter .
                 ?configurableParameter meta:enacts ?propertyChange .
                 ?platform meta:optimizesFor ?propertyChange . 
                 ?platform rdf:type sosa:Platform .
-                ?propertyChange meta:alteredBy ?effect . }";
+                ?propertyChange meta:alteredBy ?effect . }");
 
-            var reconfigurationQueryResult = instanceModel.ExecuteQuery(reconfigurationQuery, _logger);
+            var reconfigurationQueryResult = _mapekKnowledge.ExecuteQuery(reconfigurationQuery);
 
             foreach (var result in reconfigurationQueryResult.Results)
             {
@@ -287,23 +282,22 @@ namespace Logic.Mapek
             foreach (var constraintType in constraintTypes)
             {
                 var operatorFilter = GetOperatorFilterFromConstraintType(constraintType);
-                var query = MapekUtilities.GetParameterizedStringQuery();
 
                 // Gets the constraints of first or only values of ranges.
-                query.CommandText = @"SELECT ?constraint WHERE {
+                var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
                     @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
                     @optimalCondition rdf:type ?bNode1 .
                     ?bNode1 owl:onProperty meta:hasValueConstraint .
                     ?bNode1 owl:onDataRange ?bNode2 .
                     ?bNode2 owl:withRestrictions ?bNode3 .
-                    ?bNode3 rdf:first [ " + operatorFilter + " ?constraint ] .}";
+                    ?bNode3 rdf:first [ " + operatorFilter + " ?constraint ] .}");
 
                 query.SetParameter("optimalCondition", optimalCondition);
                 query.SetParameter("property", property);
                 query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                var queryResult = instanceModel.ExecuteQuery(query, _logger);
+                var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
                 foreach (var result in queryResult.Results)
                 {
@@ -330,10 +324,9 @@ namespace Logic.Mapek
             foreach (var constraintType in constraintTypes)
             {
                 var operatorFilter = GetOperatorFilterFromConstraintType(constraintType);
-                var query = MapekUtilities.GetParameterizedStringQuery();
 
                 // Gets the constraints of the second values of ranges.
-                query.CommandText = @"SELECT ?constraint WHERE {
+                var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?constraint WHERE {
                     @optimalCondition ssn:forProperty @property .
                     @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
                     @optimalCondition rdf:type ?bNode1 .
@@ -341,13 +334,13 @@ namespace Logic.Mapek
                     ?bNode1 owl:onDataRange ?bNode2 .
                     ?bNode2 owl:withRestrictions ?bNode3 .
                     ?bNode3 rdf:rest ?bNode4 .
-                    ?bNode4 rdf:first [ " + operatorFilter + " ?constraint ] . }";
+                    ?bNode4 rdf:first [ " + operatorFilter + " ?constraint ] . }");
 
                 query.SetParameter("optimalCondition", optimalCondition);
                 query.SetParameter("property", property);
                 query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                var queryResult = instanceModel.ExecuteQuery(query, _logger);
+                var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
                 foreach (var result in queryResult.Results)
                 {
@@ -378,10 +371,9 @@ namespace Logic.Mapek
                 foreach (var constraintType2 in constraintTypes)
                 {
                     var operatorFilter2 = GetOperatorFilterFromConstraintType(constraintType2);
-                    var query = MapekUtilities.GetParameterizedStringQuery();
 
                     // Gets the constraints of two disjunctive, single-valued ranges.
-                    query.CommandText = @"SELECT ?constraint1 ?constraint2 WHERE {
+                    var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?constraint1 ?constraint2 WHERE {
                         @optimalCondition ssn:forProperty @property .
                         @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
                         @optimalCondition rdf:type ?bNode1 .
@@ -396,13 +388,13 @@ namespace Logic.Mapek
                         ?bNode4_2 rdf:first ?bNode5_2 .
                         ?bNode5_2 owl:withRestrictions ?bNode6_2 .
                         ?bNode6_2 rdf:first [ " + operatorFilter2 + @" ?constraint2 ] .
-                        ?bNode6_2 rdf:rest () . }";
+                        ?bNode6_2 rdf:rest () . }");
 
                     query.SetParameter("optimalCondition", optimalCondition);
                     query.SetParameter("property", property);
                     query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                    var queryResult = instanceModel.ExecuteQuery(query, _logger);
+                    var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
                     foreach (var result in queryResult.Results)
                     {
@@ -450,10 +442,9 @@ namespace Logic.Mapek
                     foreach (var constraintType3 in constraintTypes)
                     {
                         var operatorFilter3 = GetOperatorFilterFromConstraintType(constraintType3);
-                        var query = MapekUtilities.GetParameterizedStringQuery();
 
                         // Gets the constraints of two disjunctive ranges, one two-valued and the other single-valued.
-                        query.CommandText = @"SELECT ?constraint1 ?constraint2 ?constraint3 WHERE {
+                        var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?constraint1 ?constraint2 ?constraint3 WHERE {
                             @optimalCondition ssn:forProperty @property .
                             @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
                             @optimalCondition rdf:type ?bNode1 .
@@ -469,13 +460,13 @@ namespace Logic.Mapek
                             ?bNode4_2 rdf:first ?bNode5_2 .
                             ?bNode5_2 owl:withRestrictions ?bNode6_2 .
                             ?bNode6_2 rdf:first [ " + operatorFilter3 + @" ?constraint3 ] .
-                            ?bNode6_2 rdf:rest () . }";
+                            ?bNode6_2 rdf:rest () . }");
 
                         query.SetParameter("optimalCondition", optimalCondition);
                         query.SetParameter("property", property);
                         query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                        var queryResult = instanceModel.ExecuteQuery(query, _logger);
+                        var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
                         foreach (var result in queryResult.Results)
                         {
@@ -540,10 +531,9 @@ namespace Logic.Mapek
                         foreach (var constraintType4 in constraintTypes)
                         {
                             var operatorFilter4 = GetOperatorFilterFromConstraintType(constraintType4);
-                            var query = MapekUtilities.GetParameterizedStringQuery();
 
                             // Gets the constraints of two disjunctive, two-valued ranges.
-                            query.CommandText = @"SELECT ?constraint1 ?constraint2 ?constraint3 ?constraint4 WHERE {
+                            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?constraint1 ?constraint2 ?constraint3 ?constraint4 WHERE {
                                 @optimalCondition ssn:forProperty @property .
                                 @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
                                 @optimalCondition rdf:type ?bNode1 .
@@ -560,13 +550,13 @@ namespace Logic.Mapek
                                 ?bNode5_2 owl:withRestrictions ?bNode6_2 .
                                 ?bNode6_2 rdf:first [ " + operatorFilter3 + @" ?constraint3 ] .
                                 ?bNode6_2 rdf:rest ?bNode7_2 .
-                                ?bNode7_2 rdf:first [ " + operatorFilter4 + " ?constraint4 ] . }";
+                                ?bNode7_2 rdf:first [ " + operatorFilter4 + " ?constraint4 ] . }");
 
                             query.SetParameter("optimalCondition", optimalCondition);
                             query.SetParameter("property", property);
                             query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                            var queryResult = instanceModel.ExecuteQuery(query, _logger);
+                            var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
                             foreach (var result in queryResult.Results)
                             {
@@ -669,20 +659,18 @@ namespace Logic.Mapek
                             break;
                     }
 
-                    var actuationQuery = MapekUtilities.GetParameterizedStringQuery();
-
                     // Get all ActuationActions, ActuatorStates, and Actuators that match as relevant Actions given the appropriate filter.
-                    actuationQuery.CommandText = @"SELECT DISTINCT ?actuationAction ?actuator WHERE {
+                    var actuationQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?actuationAction ?actuator WHERE {
                         ?actuationAction rdf:type meta:ActuationAction.
                         ?actuationAction meta:hasActuator ?actuator .
                         ?actuator meta:enacts ?propertyChange .
                         ?actuator rdf:type sosa:Actuator .
                         ?propertyChange ssn:forProperty @property .
-                        ?propertyChange meta:affectsPropertyWith " + filter + " . }";
+                        ?propertyChange meta:affectsPropertyWith " + filter + " . }");
 
                     actuationQuery.SetUri("property", new Uri(optimalCondition.Property));
 
-                    var actuationQueryResult = instanceModel.ExecuteQuery(actuationQuery, _logger);
+                    var actuationQueryResult = _mapekKnowledge.ExecuteQuery(actuationQuery);
 
                     foreach (var result in actuationQueryResult.Results)
                     {
@@ -696,18 +684,16 @@ namespace Logic.Mapek
                             result["actuationAction"].ToString());
                     }
 
-                    var reconfigurationQuery = MapekUtilities.GetParameterizedStringQuery();
-
                     // Get all ReconfigurationActions and ConfigurableParameters that match as relevant Actions given the appropriate filter.
-                    reconfigurationQuery.CommandText = @"SELECT DISTINCT ?reconfigurationAction ?configurableParameter WHERE {
+                    var reconfigurationQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?reconfigurationAction ?configurableParameter WHERE {
                         ?reconfigurationAction rdf:type meta:ReconfigurationAction .
                         ?reconfigurationAction ssn:forProperty ?configurableParameter .
                         ?configurableParameter meta:enacts ?propertyChange .
-                        ?propertyChange ssn:forProperty @property . }";
+                        ?propertyChange ssn:forProperty @property . }");
 
                     reconfigurationQuery.SetUri("property", new Uri(optimalCondition.Property));
 
-                    var reconfigurationQueryResult = instanceModel.ExecuteQuery(reconfigurationQuery, _logger);
+                    var reconfigurationQueryResult = _mapekKnowledge.ExecuteQuery(reconfigurationQuery);
 
                     foreach (var result in reconfigurationQueryResult.Results)
                     {

@@ -28,7 +28,7 @@ namespace Logic.Mapek
 
             foreach (var simulationTick in optimalConfiguration.SimulationTicks)
             {
-                foreach (var actuationAction in simulationTick.ActionsToExecute)
+                foreach (var actuationAction in simulationTick.ActuationActions)
                 {
                     ExecuteActuationAction(actuationAction, simulationTick.TickDurationSeconds);
                 }

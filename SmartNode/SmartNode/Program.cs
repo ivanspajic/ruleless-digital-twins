@@ -1,10 +1,12 @@
-﻿using Logic.Mapek;
+﻿using Logic.FactoryInterface;
+using Logic.Mapek;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Logic.FactoryInterface;
 using System.CommandLine;
 using System.Reflection;
+using VDS.RDF;
+using VDS.RDF.Parsing;
 
 namespace SmartNode
 {
@@ -62,6 +64,16 @@ namespace SmartNode
                 throw new ArgumentException(parseResult.Errors[0].Message); // Are there always errors here?
             }
 
+            // TODO: i have a hunch this is making it work for docker without other filepaths specified. theoretically, we shouldn't need it
+            // For native:
+            // Get executing assembly path.
+            var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            // Combine it with the relative path of the inferred model file.
+            var modelFilePath = Path.Combine(executingAssemblyPath!, modelFile.FullName);
+
+            // Make it system-agnostic.
+            modelFilePath = Path.GetFullPath(modelFile.FullName);
+
             var builder = Host.CreateApplicationBuilder(args);
 
             // Register services here.
@@ -75,6 +87,7 @@ namespace SmartNode
             builder.Services.AddSingleton<IMapekAnalyze, MapekAnalyze>(serviceProvider => new MapekAnalyze(serviceProvider));
             builder.Services.AddSingleton<IMapekPlan, MapekPlan>(serviceProvider => new MapekPlan(serviceProvider));
             builder.Services.AddSingleton<IMapekExecute, MapekExecute>(serviceProvider => new MapekExecute(serviceProvider));
+            builder.Services.AddSingleton<IMapekKnowledge, MapekKnowledge>(serviceProvider => new MapekKnowledge(serviceProvider, modelFilePath));
             builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceprovider => new MapekManager(serviceprovider));
 
             using var host = builder.Build();
@@ -83,16 +96,6 @@ namespace SmartNode
 
             // Get an instance of the MAPE-K manager.
             var mapekManager = host.Services.GetRequiredService<IMapekManager>();
-
-            // TODO: i have a hunch this is making it work for docker without other filepaths specified. theoretically, we shouldn't need it
-            // For native:
-            // Get executing assembly path.
-            var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            // Combine it with the relative path of the inferred model file.
-            var modelFilePath = Path.Combine(executingAssemblyPath!, modelFile.FullName);
-
-            // Make it system-agnostic.
-            modelFilePath = Path.GetFullPath(modelFile.FullName);
 
             // Start the loop.
             try

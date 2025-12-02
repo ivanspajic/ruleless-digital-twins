@@ -21,50 +21,25 @@ namespace Logic.Mapek
 
         private readonly ILogger<MapekPlan> _logger;
         private readonly IFactory _factory;
+        private readonly IMapekKnowledge _mapekKnowledge;
 
-        private const int MaximumSimulationTimeSeconds = 3_600;
+        private const int MaximumSimulationTimeSeconds = 900;
 
         public MapekPlan(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekPlan>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
+            _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
         }
 
-        public SimulationConfiguration Plan(IEnumerable<OptimalCondition> optimalConditions,
-            IEnumerable<Models.OntologicalModels.Action> actions,
-            PropertyCache propertyCache,
-            IGraph instanceModel,
-            string fmuDirectory,
-            int actuationSimulationGranularity)
+        public SimulationConfiguration Plan(PropertyCache propertyCache, string fmuDirectory, int lookAheadCycles)
         {
             _logger.LogInformation("Starting the Plan phase.");
-
-            // The two Action types should be split to facilitate simulations. ActuationActions may be de/activated at any point during
-            // the available time to restore an OptimalCondition. On the other hand, ReconfigurationActions can't necessarily be dependent
-            // on a time factor since the underlying soft Sensor algorithms may take long to run. However, they will nonetheless be included
-            // in simulation configurations to ensure that all OptimalConditions are met when simulating different types of Actions in
-            // conjunction. To avoid generating duplicate combinations for simulation ticks (intervals), the removal of ReconfigurationActions
-            // should be done before by splitting the two types of Actions and generating combinations for each separately.
-            var actuationActions = actions.Where(action => action is ActuationAction)
-                .Select(action => action as ActuationAction);
-            var reconfigurationActions = actions.Where(action => action is ReconfigurationAction)
-                .Select(action => action as ReconfigurationAction);
-
-            _logger.LogInformation("Getting Action combinations.");
-
-            // Get all possible combinations for ActuationActions.
-            var actuationActionCombinations = GetActuationActionCombinations(actuationActions!);
-
-            // Get all possible combinations for ReconfigurationActions.
-            var reconfigurationActionCombinations = GetReconfigurationActionCombinations(reconfigurationActions!);
 
             _logger.LogInformation("Generating simulation configurations.");
 
             // Get all possible simulation configurations for the given Actions.
-            var simulationConfigurations = GetSimulationConfigurationsFromActionCombinations(actuationActionCombinations,
-                reconfigurationActionCombinations,
-                optimalConditions,
-                actuationSimulationGranularity);
+            var simulationConfigurations = GetSimulationConfigurations(lookAheadCycles);
 
             _logger.LogInformation("Generated a total of {total} simulation configurations.", simulationConfigurations.Count);
 
@@ -145,10 +120,7 @@ namespace Logic.Mapek
             return GetNaryCartesianProducts(reconfigurationActionsByConfigurableParameter);
         }
 
-        private static List<SimulationConfiguration> GetSimulationConfigurationsFromActionCombinations(IEnumerable<IEnumerable<ActuationAction>> actuationActionCombinations,
-            IEnumerable<IEnumerable<ReconfigurationAction>> reconfigurationActionCombinations,
-            IEnumerable<OptimalCondition> optimalConditions,
-            int simulationGranularity)
+        private static List<SimulationConfiguration> GetSimulationConfigurations(int lookAheadCycles)
         {
             var simulationConfigurations = new List<SimulationConfiguration>();
 
@@ -179,7 +151,7 @@ namespace Logic.Mapek
 
                         var simulationTick = new SimulationTick
                         {
-                            ActionsToExecute = actuationActionCombination,
+                            ActuationActions = actuationActionCombination,
                             TickIndex = i,
                             TickDurationSeconds = timeInterval
                         };
@@ -333,7 +305,7 @@ namespace Logic.Mapek
 
             foreach (var simulationTick in simulationConfiguration.SimulationTicks)
             {
-                foreach (var actuationAction in simulationTick.ActionsToExecute)
+                foreach (var actuationAction in simulationTick.ActuationActions)
                 {
                     if (!actuatorNames.Contains(actuationAction.Actuator.Name))
                     {
@@ -345,19 +317,17 @@ namespace Logic.Mapek
                 }
             }
 
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
             var clause = clauseBuilder.ToString();
 
-            query.CommandText = @"SELECT ?fmuModel ?fmuFilePath ?simulationFidelitySeconds WHERE {
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?fmuModel ?fmuFilePath ?simulationFidelitySeconds WHERE {
                 ?platform rdf:type sosa:Platform . " +
                 clause +
                 @"?platform meta:hasSimulationModel ?fmuModel .
                 ?fmuModel rdf:type meta:FmuModel .
                 ?fmuModel meta:hasURI ?fmuFilePath .
-                ?fmuModel meta:hasSimulationFidelitySeconds ?simulationFidelitySeconds . }";
+                ?fmuModel meta:hasSimulationFidelitySeconds ?simulationFidelitySeconds . }");
 
-            var queryResult = instanceModel.ExecuteQuery(query, _logger);
+            var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
             // There can theoretically be multiple Platforms hosting the same Actuator, but we limit ourselves to expect a single Platform
             // per instance model. There should therefore be only one result.
@@ -406,13 +376,11 @@ namespace Logic.Mapek
         {
             var observableProperties = new List<Property>();
 
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            query.CommandText = @"SELECT DISTINCT ?observableProperty WHERE {
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty WHERE {
                 ?sensor rdf:type sosa:Sensor .
-                ?sensor sosa:observes ?observableProperty . }";
+                ?sensor sosa:observes ?observableProperty . }");
 
-            var queryResult = instanceModel.ExecuteQuery(query, _logger);
+            var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
             foreach (var result in queryResult.Results)
             {
@@ -486,7 +454,7 @@ namespace Logic.Mapek
                 }
 
                 // Add all ActuatorStates to the inputs for the FMU.
-                foreach (var actuationAction in simulationTick.ActionsToExecute)
+                foreach (var actuationAction in simulationTick.ActuationActions)
                 {
                     // Shave off the long name URIs from the instance model.
                     var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.Actuator.Name);
@@ -497,7 +465,7 @@ namespace Logic.Mapek
                 AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
 
                 _logger.LogDebug("Tick");
-                // Keep simulation fidelity while advancing an appropriate amount of time.
+                // Advance the FMU time for the duration of the simulation tick in steps of simulation fidelity.
                 var maximumSteps = (double)simulationTick.TickDurationSeconds / simulationFidelitySeconds;
                 var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
                 var difference = maximumSteps - maximumStepsRoundedDown;
@@ -665,15 +633,13 @@ namespace Logic.Mapek
         {
             var propertyChangesToOptimizeFor = new List<PropertyChange>();
 
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            query.CommandText = @"SELECT ?propertyChange ?property ?effect WHERE {
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?propertyChange ?property ?effect WHERE {
                 ?platform rdf:type sosa:Platform .
                 ?platform meta:optimizesFor ?propertyChange .
                 ?propertyChange ssn:forProperty ?property .
-                ?propertyChange meta:affectsPropertyWith ?effect . }";
+                ?propertyChange meta:affectsPropertyWith ?effect . }");
 
-            var queryResult = instanceModel.ExecuteQuery(query, _logger);
+            var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
             foreach (var result in queryResult.Results)
             {
@@ -722,7 +688,7 @@ namespace Logic.Mapek
             {
                 logMsg += $"Interval {i + 1}:\n";
 
-                foreach (var action in simulationTickList[i].ActionsToExecute)
+                foreach (var action in simulationTickList[i].ActuationActions)
                 {
                     logMsg += $"Actuator: {action.Actuator.Name}, Actuator state: {action.NewStateValue.ToString()}\n";
                 }

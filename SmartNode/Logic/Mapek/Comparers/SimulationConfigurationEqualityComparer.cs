@@ -20,10 +20,10 @@ namespace Logic.Mapek.Comparers
                 {
                     if (xSimulationTicks[i].TickIndex == ySimulationTicks![i].TickIndex &&
                         xSimulationTicks[i].TickDurationSeconds == ySimulationTicks[i].TickDurationSeconds &&
-                        xSimulationTicks[i].ActionsToExecute.Count() == ySimulationTicks[i].ActionsToExecute.Count())
+                        xSimulationTicks[i].ActuationActions.Count() == ySimulationTicks[i].ActuationActions.Count())
                     {
-                        var xTickActionsToExecute = xSimulationTicks[i].ActionsToExecute.ToList();
-                        var yTickActionsToExecute = ySimulationTicks[i].ActionsToExecute.ToList();
+                        var xTickActionsToExecute = xSimulationTicks[i].ActuationActions.ToList();
+                        var yTickActionsToExecute = ySimulationTicks[i].ActuationActions.ToList();
 
                         foreach (var xTickActionToExecute in xTickActionsToExecute!)
                         {
@@ -77,7 +77,7 @@ namespace Logic.Mapek.Comparers
             {
                 finalHashCode *= simulationTick.TickIndex.GetHashCode() * simulationTick.TickDurationSeconds.GetHashCode();
 
-                foreach (var action in simulationTick.ActionsToExecute)
+                foreach (var action in simulationTick.ActuationActions)
                 {
                     finalHashCode *= _actionEqualityComparer.GetHashCode(action);
                 }

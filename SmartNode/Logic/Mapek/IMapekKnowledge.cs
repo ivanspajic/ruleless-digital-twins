@@ -1,0 +1,21 @@
+﻿using Logic.Models.OntologicalModels;
+using VDS.RDF;
+using VDS.RDF.Query;
+
+namespace Logic.Mapek {
+    public interface IMapekKnowledge {
+        public SparqlResultSet ExecuteQuery(string queryString);
+
+        public SparqlParameterizedString GetParameterizedStringQuery(string queryString);
+
+        public SparqlResultSet ExecuteQuery(SparqlParameterizedString query);
+
+        public string GetPropertyType(string propertyName);
+
+        public void UpdatePropertyValue(Property property);
+
+        public void UpdateConfigurableParameterValue(ConfigurableParameter configurableParameter);
+
+        public void CommitInMemoryInstanceModelToKnowledgeBase();
+    }
+}

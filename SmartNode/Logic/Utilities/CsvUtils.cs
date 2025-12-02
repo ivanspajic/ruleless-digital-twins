@@ -31,7 +31,7 @@ namespace Logic.Utilities
 
             foreach (var simulationTick in simulationConfiguration.SimulationTicks)
             {
-                foreach (var action in simulationTick.ActionsToExecute)
+                foreach (var action in simulationTick.ActuationActions)
                 {
                     var simpleName = MapekUtilities.GetSimpleName(action.Actuator.Name);
 

@@ -2,8 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
-using VDS.RDF;
-using VDS.RDF.Parsing;
 
 [assembly: InternalsVisibleTo("TestProject")]
 
@@ -51,17 +49,9 @@ namespace Logic.Mapek {
                 if (maxRound > -1) {
                     _logger.LogInformation("MAPE-K rounds left: {maxRound})", maxRound);
                 }
-                // Load the instance model into a graph object. Doing this inside the loop allows for dynamic model updates at
-                // runtime.
-                var instanceModel = Initialize(instanceModelFilePath);
-
-                // If nothing was loaded, don't start the loop.
-                if (instanceModel.IsEmpty) {
-                    throw new Exception("There is nothing in the instance model graph.");
-                }
 
                 // Monitor - Observe all hard and soft Sensor values.
-                var propertyCache = _mapekMonitor.Monitor(instanceModel);
+                var propertyCache = _mapekMonitor.Monitor();
 
                 // Analyze - Out of all possible Actions, filter out the irrelevant ones based on current Property values and return
                 // them with all OptimalConditions.
@@ -88,17 +78,6 @@ namespace Logic.Mapek {
 
                 // Thread.Sleep(SleepyTimeMilliseconds);
             }
-        }
-
-        private Graph Initialize(string instanceModelFilePath) {
-            _logger.LogInformation("Loading instance model file contents from {filePath}.", instanceModelFilePath);
-
-            var instanceModel = new Graph();
-
-            var turtleParser = new TurtleParser();
-            turtleParser.Load(instanceModel, instanceModelFilePath);
-
-            return instanceModel;
         }
     }
 }

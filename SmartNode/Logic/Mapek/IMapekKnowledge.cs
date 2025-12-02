@@ -1,5 +1,5 @@
-﻿using Logic.Models.OntologicalModels;
-using VDS.RDF;
+﻿using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
 using VDS.RDF.Query;
 
 namespace Logic.Mapek {
@@ -17,5 +17,7 @@ namespace Logic.Mapek {
         public void UpdateConfigurableParameterValue(ConfigurableParameter configurableParameter);
 
         public void CommitInMemoryInstanceModelToKnowledgeBase();
+
+        public FmuModel GetHostPlatformFmuModel(SimulationConfiguration simulationConfiguration, string fmuDirectory);
     }
 }

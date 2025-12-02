@@ -1,6 +1,6 @@
 ﻿namespace Logic.Models.OntologicalModels
 {
-    internal class FmuModel : NamedIndividual
+    public class FmuModel : NamedIndividual
     {
         public required string FilePath { get; init; }
 

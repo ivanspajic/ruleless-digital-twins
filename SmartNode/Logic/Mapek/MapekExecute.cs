@@ -30,12 +30,12 @@ namespace Logic.Mapek
             {
                 foreach (var actuationAction in simulationTick.ActuationActions)
                 {
-                    ExecuteActuationAction(actuationAction, simulationTick.TickDurationSeconds);
+                    ExecuteActuationAction(actuationAction);
                 }
 
                 if (!useSimulatedTwinningTarget)
                 {
-                    Thread.Sleep(simulationTick.TickDurationSeconds);
+                    // TODO: add a delay to match the duration of a cycle with the simulated interval.
                 }
             }
 
@@ -47,16 +47,15 @@ namespace Logic.Mapek
             LogExpectedPropertyValues(optimalConfiguration);
         }
 
-        private void ExecuteActuationAction(ActuationAction actuationAction, double durationSeconds)
+        private void ExecuteActuationAction(ActuationAction actuationAction)
         {
-            _logger.LogInformation("Actuating actuator {actuator} with state {actuatorState} and duration of {duration} seconds.",
+            _logger.LogInformation("Actuating actuator {actuator} with state {actuatorState}.",
                 actuationAction.Actuator.Name,
-                actuationAction.NewStateValue.ToString(),
-                durationSeconds);
+                actuationAction.NewStateValue.ToString());
 
             var actuator = _factory.GetActuatorDeviceImplementation(actuationAction.Actuator.Name);
 
-            // This cannot be a blocking call to ensure that multiple Actuators in an interval get executed for the same duration.
+            // This cannot be a blocking call to ensure that multiple Actuators in an interval get actuated for the same duration.
             actuator.Actuate(actuationAction.NewStateValue);
         }
 

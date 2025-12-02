@@ -30,9 +30,7 @@ namespace Logic.Mapek
 
             var optimalConditions = GetAllOptimalConditions(instanceModel, propertyCache);
             var unsatisfiedOptimalConditions = GetAllUnsatisfiedOptimalConditions(optimalConditions, propertyCache);
-            var mitigationActions = GetMitigationActionsFromUnsatisfiedOptimalConditions(instanceModel,
-                propertyCache,
-                unsatisfiedOptimalConditions);
+            var mitigationActions = GetMitigationActionsFromUnsatisfiedOptimalConditions(instanceModel, propertyCache, unsatisfiedOptimalConditions);
             var optimizationActions = GetOptimizationActions(instanceModel, propertyCache);
 
             // Combine the Action collections into one.

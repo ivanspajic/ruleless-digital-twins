@@ -19,7 +19,6 @@ namespace Logic.Mapek.Comparers
                 for (var i = 0; i < xSimulationTicks!.Count; i++)
                 {
                     if (xSimulationTicks[i].TickIndex == ySimulationTicks![i].TickIndex &&
-                        xSimulationTicks[i].TickDurationSeconds == ySimulationTicks[i].TickDurationSeconds &&
                         xSimulationTicks[i].ActuationActions.Count() == ySimulationTicks[i].ActuationActions.Count())
                     {
                         var xTickActionsToExecute = xSimulationTicks[i].ActuationActions.ToList();
@@ -75,7 +74,7 @@ namespace Logic.Mapek.Comparers
 
             foreach (var simulationTick in obj.SimulationTicks)
             {
-                finalHashCode *= simulationTick.TickIndex.GetHashCode() * simulationTick.TickDurationSeconds.GetHashCode();
+                finalHashCode *= simulationTick.TickIndex.GetHashCode();
 
                 foreach (var action in simulationTick.ActuationActions)
                 {

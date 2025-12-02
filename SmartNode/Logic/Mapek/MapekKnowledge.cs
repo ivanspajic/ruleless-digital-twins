@@ -1,6 +1,8 @@
-﻿using Logic.Models.OntologicalModels;
+﻿using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Text;
 using VDS.RDF;
 using VDS.RDF.Parsing;
 using VDS.RDF.Query;
@@ -36,6 +38,11 @@ namespace Logic.Mapek {
 
             _instanceModel = new Graph();
             new TurtleParser().Load(_instanceModel, instanceModelFilepath);
+            
+            // If nothing was loaded, don't start the loop.
+            if (_instanceModel.IsEmpty) {
+                throw new Exception("There is nothing in the instance model graph.");
+            }
         }
 
         public SparqlParameterizedString GetParameterizedStringQuery(string queryString) {
@@ -189,6 +196,46 @@ namespace Logic.Mapek {
 
         public void CommitInMemoryInstanceModelToKnowledgeBase() {
             _turtleWriter.Save(_instanceModel, _instanceModelFilepath);
+        }
+
+        public FmuModel GetHostPlatformFmuModel(SimulationConfiguration simulationConfiguration, string fmuDirectory) {
+            // Retrieve all Actuators to be used in the simulations and ensure that they belong to the same host Platform such that the Platform's
+            // FMU will contain all of their relevant input/output variables.
+            var actuatorNames = new HashSet<string>();
+            var clauseBuilder = new StringBuilder();
+
+            foreach (var simulationTick in simulationConfiguration.SimulationTicks) {
+                foreach (var actuationAction in simulationTick.ActuationActions) {
+                    if (!actuatorNames.Contains(actuationAction.Actuator.Name)) {
+                        actuatorNames.Add(actuationAction.Actuator.Name);
+
+                        // Add the Actuator name to the query filter.
+                        clauseBuilder.AppendLine("?platform sosa:hosts <" + actuationAction.Actuator.Name + "> .");
+                    }
+                }
+            }
+
+            var clause = clauseBuilder.ToString();
+
+            var query = GetParameterizedStringQuery(@"SELECT ?fmuModel ?fmuFilePath ?simulationFidelitySeconds WHERE {
+                ?platform rdf:type sosa:Platform . " +
+                clause +
+                @"?platform meta:hasSimulationModel ?fmuModel .
+                ?fmuModel rdf:type meta:FmuModel .
+                ?fmuModel meta:hasURI ?fmuFilePath .
+                ?fmuModel meta:hasSimulationFidelitySeconds ?simulationFidelitySeconds . }");
+
+            var queryResult = ExecuteQuery(query);
+
+            // There can theoretically be multiple Platforms hosting the same Actuator, but we limit ourselves to expect a single Platform
+            // per instance model. There should therefore be only one result.
+            var fmuModel = queryResult.Results[0];
+
+            return new FmuModel {
+                Name = fmuModel["fmuModel"].ToString(),
+                FilePath = Path.Combine(fmuDirectory, fmuModel["fmuFilePath"].ToString().Split('^')[0]),
+                SimulationFidelitySeconds = int.Parse(fmuModel["simulationFidelitySeconds"].ToString().Split('^')[0])
+            };
         }
     }
 }

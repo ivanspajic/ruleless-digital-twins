@@ -26,7 +26,7 @@ namespace Logic.Mapek {
             };
         }
 
-        public PropertyCache Monitor(IGraph instanceModel) {
+        public PropertyCache Monitor() {
             _logger.LogInformation("Starting the Monitor phase.");
 
             var propertyCache = new PropertyCache {
@@ -48,11 +48,11 @@ namespace Logic.Mapek {
             // cache.
             foreach (var result in queryResult.Results) {
                 var property = result["property"];
-                PopulateInputOutputsAndConfigurableParametersCaches(instanceModel, property, propertyCache);
+                PopulateInputOutputsAndConfigurableParametersCaches(property, propertyCache);
             }
 
             // Get the values of all ObservableProperties and populate the cache.
-            PopulateObservablePropertiesCache(instanceModel, propertyCache);
+            PopulateObservablePropertiesCache(propertyCache);
 
             // Keep a reference for the old cache.
             _oldPropertyCache = propertyCache;
@@ -63,7 +63,7 @@ namespace Logic.Mapek {
             return propertyCache;
         }
 
-        private void PopulateInputOutputsAndConfigurableParametersCaches(IGraph instanceModel, INode propertyNode, PropertyCache propertyCache) {
+        private void PopulateInputOutputsAndConfigurableParametersCaches(INode propertyNode, PropertyCache propertyCache) {
             var propertyName = propertyNode.ToString();
 
             // Simply return if the current Property already exists in the cache. This is necessary to avoid unnecessary multiple
@@ -117,7 +117,7 @@ namespace Logic.Mapek {
                 // for the current Sensor to use on invocation. In case of no Inputs, the inputProperties array remains empty.
                 for (var i = 0; i < innerQueryResult.Results.Count; i++) {
                     var inputProperty = innerQueryResult.Results[i]["inputProperty"];
-                    PopulateInputOutputsAndConfigurableParametersCaches(instanceModel, inputProperty, propertyCache);
+                    PopulateInputOutputsAndConfigurableParametersCaches(inputProperty, propertyCache);
 
                     if (propertyCache.Properties.ContainsKey(inputProperty.ToString())) {
                         inputProperties[i] = propertyCache.Properties[inputProperty.ToString()].Value;
@@ -163,7 +163,7 @@ namespace Logic.Mapek {
             _logger.LogInformation("Added ConfigurableParameter {configurableParameter} to the cache.", propertyName);
         }
 
-        private void PopulateObservablePropertiesCache(IGraph instanceModel, PropertyCache propertyCache) {
+        private void PopulateObservablePropertiesCache(PropertyCache propertyCache) {
             // Get all ObservableProperties.
             var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty ?valueType WHERE {
                 ?sensor rdf:type sosa:Sensor .

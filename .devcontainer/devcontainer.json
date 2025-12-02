@@ -6,6 +6,7 @@
     "privileged": true,
     "mounts": ["type=volume,src=rdt-arm,dst=/opt/arm64"],
     "postCreateCommand": "git submodule update --init ; pip install --user --break-system-packages fmpy pytz requests_cache python-dateutil rdflib yr-weather ; ( cd ${containerWorkspaceFolder}/SmartNode/Implementations/FMUs/PythonFMU ; sh build_unix.sh ; python3 setup.py install --user )",
+    "postStartCommand": "(if [ -e SmartNode/TestProject/obj ]; then touch SmartNode/TestProject/obj/*; fi)",
     "customizations": {
         "vscode": {
             "extensions": ["ms-dotnettools.csdevkit", "editorconfig.editorconfig"]

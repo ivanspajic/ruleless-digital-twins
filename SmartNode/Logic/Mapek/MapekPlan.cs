@@ -86,7 +86,9 @@ namespace Logic.Mapek
             // update the restriction setting before generating the next part of the path
             ExecuteJarFile();
             // query action combinations
-
+            // TODO: build a tracker based on a counter! simply create a tracker with the number of "digits" equal to the number of cycles to simulate for.
+            // use the digits on the tracker to increment and keep track of which actioncombination needs to go into which cycle
+            // you need a separate tracker from the simulationPaths collection coz we aren't necessarily including all simulation paths into that field
 
             yield return new Simulation
             {
@@ -105,8 +107,8 @@ namespace Logic.Mapek
                     $"\"{_filepathArguments.InstanceModelFilepath}\" " +
                     $"\"{_filepathArguments.InferenceRulesFilepath}\" " +
                     $"\"{_filepathArguments.InferredModelFilepath}\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
+                RedirectStandardOutput = true, // Unfortunately, doesn't seem to work.
+                RedirectStandardError = true, // Unfortunately, doesn't seem to work.
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 WorkingDirectory = Directory.GetParent(_filepathArguments.InstanceModelFilepath)!.FullName
@@ -261,7 +263,7 @@ namespace Logic.Mapek
             {
                 var propertyName = result["observableProperty"].ToString();
 
-                if (propertyCache.Properties.TryGetValue(propertyName, out Property property))
+                if (propertyCache.Properties.TryGetValue(propertyName, out Property? property))
                 {
                     observableProperties.Add(property);
                 }
@@ -835,11 +837,11 @@ namespace Logic.Mapek
 
                 object propertyValue;
 
-                if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property, out ConfigurableParameter configurableParameter))
+                if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property, out ConfigurableParameter? configurableParameter))
                 {
                     propertyValue = configurableParameter.Value;
                 }
-                else if (propertyCache.Properties.TryGetValue(optimalCondition.Property, out Property property))
+                else if (propertyCache.Properties.TryGetValue(optimalCondition.Property, out Property? property))
                 {
                     propertyValue = property.Value;
                 }
@@ -907,7 +909,7 @@ namespace Logic.Mapek
 
             foreach (var simulationPath in simulationPaths)
             {
-                var numberOfSatisfiedOptimalConditions = GetNumberOfSatisfiedOptimalConditions(optimalConditions, simulationPath.Simulations.Last().PropertyCache);
+                var numberOfSatisfiedOptimalConditions = GetNumberOfSatisfiedOptimalConditions(optimalConditions, simulationPath.Simulations.Last().PropertyCache!);
 
                 if (numberOfSatisfiedOptimalConditions > highestNumberOfSatisfiedOptimalConditions)
                 {

@@ -17,7 +17,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public void Execute(SimulationConfiguration optimalConfiguration, PropertyCache propertyCache, bool useSimulatedTwinningTarget)
+        public void Execute(SimulationPath optimalConfiguration, PropertyCache propertyCache, bool useSimulatedTwinningTarget)
         {
             _logger.LogInformation("Starting the Execute phase.");
 
@@ -26,7 +26,7 @@ namespace Logic.Mapek
                 return;
             }
 
-            foreach (var simulationTick in optimalConfiguration.SimulationTicks)
+            foreach (var simulationTick in optimalConfiguration.Simulations)
             {
                 foreach (var actuationAction in simulationTick.ActuationActions)
                 {
@@ -37,11 +37,6 @@ namespace Logic.Mapek
                 {
                     // TODO: add a delay to match the duration of a cycle with the simulated interval.
                 }
-            }
-
-            foreach (var reconfigurationAction in optimalConfiguration.PostTickActions)
-            {
-                ExecuteReconfigurationAction(reconfigurationAction, propertyCache);
             }
 
             LogExpectedPropertyValues(optimalConfiguration);
@@ -68,16 +63,20 @@ namespace Logic.Mapek
             propertyCache.ConfigurableParameters[reconfigurationAction.ConfigurableParameter.Name].Value = reconfigurationAction.NewParameterValue;
         }
 
-        private void LogExpectedPropertyValues(SimulationConfiguration simulationConfiguration)
+        private void LogExpectedPropertyValues(SimulationPath simulationPath)
         {
+            if (!simulationPath.Simulations.Any()) {
+                return;
+            }
+
             _logger.LogInformation("Expected Property values:");
 
-            foreach (var propertyKeyValue in simulationConfiguration.ResultingPropertyCache.Properties)
+            foreach (var propertyKeyValue in simulationPath.Simulations.Last().PropertyCache.Properties)
             {
                 _logger.LogInformation("{propertyName}: {propertyValue}", propertyKeyValue.Key, propertyKeyValue.Value.Value.ToString());
             }
 
-            foreach (var configurableParameterKeyValue in simulationConfiguration.ResultingPropertyCache.ConfigurableParameters)
+            foreach (var configurableParameterKeyValue in simulationPath.Simulations.Last().PropertyCache.ConfigurableParameters)
             {
                 _logger.LogInformation("{configurableParameterName}: {configurableParameterValue}",
                     configurableParameterKeyValue.Key,

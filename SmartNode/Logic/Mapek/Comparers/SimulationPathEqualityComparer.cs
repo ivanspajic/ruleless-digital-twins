@@ -3,22 +3,20 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Logic.Mapek.Comparers
 {
-    internal class SimulationConfigurationEqualityComparer : IEqualityComparer<SimulationConfiguration>
+    internal class SimulationPathEqualityComparer : IEqualityComparer<SimulationPath>
     {
         private readonly ActionEqualityComparer _actionEqualityComparer = new();
 
-        public bool Equals(SimulationConfiguration? x, SimulationConfiguration? y)
+        public bool Equals(SimulationPath? x, SimulationPath? y)
         {
-            if (x!.SimulationTicks.Count() == y!.SimulationTicks.Count())
+            if (x!.Simulations.Count() == y!.Simulations.Count())
             {
-                var xSimulationTicks = x.SimulationTicks.ToList();
-                var ySimulationTicks = y.SimulationTicks.ToList();
-                var xPostTickActions = x.PostTickActions.ToList();
-                var yPostTickActions = y.PostTickActions.ToList();
+                var xSimulationTicks = x.Simulations.ToList();
+                var ySimulationTicks = y.Simulations.ToList();
 
                 for (var i = 0; i < xSimulationTicks!.Count; i++)
                 {
-                    if (xSimulationTicks[i].TickIndex == ySimulationTicks![i].TickIndex &&
+                    if (xSimulationTicks[i].Index == ySimulationTicks![i].Index &&
                         xSimulationTicks[i].ActuationActions.Count() == ySimulationTicks[i].ActuationActions.Count())
                     {
                         var xTickActionsToExecute = xSimulationTicks[i].ActuationActions.ToList();
@@ -46,45 +44,24 @@ namespace Logic.Mapek.Comparers
                     }
                 }
 
-                foreach (var xPostTickAction in xPostTickActions!)
-                {
-                    if (!yPostTickActions!.Contains(xPostTickAction))
-                    {
-                        return false;
-                    }
-                }
-
-                foreach (var yPostTickAction in yPostTickActions!)
-                {
-                    if (!xPostTickActions.Contains(yPostTickAction))
-                    {
-                        return false;
-                    }
-                }
-
                 return true;
             }
 
             return false;
         }
 
-        public int GetHashCode([DisallowNull] SimulationConfiguration obj)
+        public int GetHashCode([DisallowNull] SimulationPath obj)
         {
             var finalHashCode = 1;
 
-            foreach (var simulationTick in obj.SimulationTicks)
+            foreach (var simulationTick in obj.Simulations)
             {
-                finalHashCode *= simulationTick.TickIndex.GetHashCode();
+                finalHashCode *= simulationTick.Index.GetHashCode();
 
                 foreach (var action in simulationTick.ActuationActions)
                 {
                     finalHashCode *= _actionEqualityComparer.GetHashCode(action);
                 }
-            }
-
-            foreach (var action in obj.PostTickActions)
-            {
-                finalHashCode *= _actionEqualityComparer.GetHashCode(action);
             }
 
             return finalHashCode;

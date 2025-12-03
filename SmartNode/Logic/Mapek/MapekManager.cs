@@ -20,6 +20,7 @@ namespace Logic.Mapek {
         private readonly IMapekAnalyze _mapekAnalyze;
         private readonly IMapekPlan _mapekPlan;
         private readonly IMapekExecute _mapekExecute;
+        private readonly IMapekKnowledge _mapekKnowledge;
 
         private bool _isLoopActive = false;
 
@@ -29,6 +30,7 @@ namespace Logic.Mapek {
             _mapekAnalyze = serviceProvider.GetRequiredService<IMapekAnalyze>();
             _mapekPlan = serviceProvider.GetRequiredService<IMapekPlan>();
             _mapekExecute = serviceProvider.GetRequiredService<IMapekExecute>();
+            _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
         }
 
         public void StartLoop(string instanceModelFilePath, string fmuDirectory, string dataDirectory, int maxRound = -1, bool simulateTwinningTarget = false) {
@@ -50,6 +52,9 @@ namespace Logic.Mapek {
                     _logger.LogInformation("MAPE-K rounds left: {maxRound})", maxRound);
                 }
 
+                // Reload the instance model for each cycle to ensure dynamic model updates are captured.
+                _mapekKnowledge.ReloadInstanceModelFromKnowledgeBase(); // This makes sense in theory but won't work without the Factory updating as well.
+
                 // Monitor - Observe all hard and soft Sensor values.
                 var propertyCache = _mapekMonitor.Monitor();
 
@@ -58,13 +63,13 @@ namespace Logic.Mapek {
                 // var optimalConditionsAndActions = _mapekAnalyze.Analyze(instanceModel, propertyCache, ConfigurableParameterGranularity);
 
                 // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
-                var optimalSimulationConfiguration = _mapekPlan.Plan(propertyCache, fmuDirectory, LookAheadCycles);
+                var optimalSimulationPath = _mapekPlan.Plan(propertyCache, LookAheadCycles);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
-                _mapekExecute.Execute(optimalSimulationConfiguration, propertyCache, simulateTwinningTarget);
+                _mapekExecute.Execute(optimalSimulationPath, propertyCache, simulateTwinningTarget);
 
                 // Write MAPE-K state to CSV.
                 CsvUtils.WritePropertyStatesToCsv(dataDirectory, currentRound, propertyCache);
-                CsvUtils.WriteActuatorStatesToCsv(dataDirectory, currentRound, optimalSimulationConfiguration);
+                CsvUtils.WriteActuatorStatesToCsv(dataDirectory, currentRound, optimalSimulationPath);
 
                 if (maxRound > 0) {
                     maxRound--;

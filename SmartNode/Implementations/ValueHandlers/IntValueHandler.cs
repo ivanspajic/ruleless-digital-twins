@@ -111,6 +111,13 @@ namespace Implementations.ValueHandlers
             throw new NotImplementedException();
         }
 
+        public string GetValueAsCultureInvariantString(object value) {
+            if (value is not int) {
+                value = int.Parse(value.ToString()!, CultureInfo.InvariantCulture);
+            }
+            return ((int)value).ToString(CultureInfo.InvariantCulture);
+        }
+
         private static IEnumerable<object> GetPossibleBucketSizeValues(object currentValue, Effect effect)
         {
             var rangeGranularity = 10;

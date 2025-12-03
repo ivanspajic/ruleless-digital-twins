@@ -25,11 +25,11 @@ namespace Logic.Utilities
             }
         }
 
-        public static void WriteActuatorStatesToCsv(string directoryPath, int roundNumber, SimulationConfiguration simulationConfiguration)
+        public static void WriteActuatorStatesToCsv(string directoryPath, int roundNumber, SimulationPath simulationPath)
         {
             var actuatorValues = new Dictionary<string, List<object>>();
 
-            foreach (var simulationTick in simulationConfiguration.SimulationTicks)
+            foreach (var simulationTick in simulationPath.Simulations)
             {
                 foreach (var action in simulationTick.ActuationActions)
                 {

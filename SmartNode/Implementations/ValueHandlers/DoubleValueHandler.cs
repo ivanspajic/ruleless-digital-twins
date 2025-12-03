@@ -214,6 +214,15 @@ namespace Implementations.ValueHandlers
             fmuInstance.WriteReal((parameter, (double)value));
         }
 
+        public string GetValueAsCultureInvariantString(object value)
+        {
+            if (value is not double)
+            {
+                value = double.Parse(value.ToString()!, CultureInfo.InvariantCulture);
+            }
+            return ((double)value).ToString(CultureInfo.InvariantCulture);
+        }
+
         private static bool EvaluateGreaterThan(double sensorValue, double optimalConditionValue)
         {
             return sensorValue > optimalConditionValue;

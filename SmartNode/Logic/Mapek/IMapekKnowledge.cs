@@ -18,6 +18,6 @@ namespace Logic.Mapek {
 
         public void CommitInMemoryInstanceModelToKnowledgeBase();
 
-        public FmuModel GetHostPlatformFmuModel(SimulationConfiguration simulationConfiguration, string fmuDirectory);
+        public void ReloadInstanceModelFromKnowledgeBase();
     }
 }

@@ -63,5 +63,9 @@ namespace Implementations.ValueHandlers
             // There does not exist a method in the Femyou library for handling this type.
             throw new NotImplementedException();
         }
+
+        public string GetValueAsCultureInvariantString(object value) {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Text;
 using VDS.RDF;
 using static Femyou.IModel;
 
@@ -14,54 +15,123 @@ namespace Logic.Mapek
 {
     public class MapekPlan : IMapekPlan
     {
-        // Required as fields to preserve caching throughout multiple MAPE-K loop cycles.
-	    private static readonly Dictionary<string, IModel> _fmuDict = [];
-	    private static readonly Dictionary<string, IInstance> _iDict = [];
+        private const int MaximumSimulationTimeSeconds = 900;
 
-        private readonly ILogger<MapekPlan> _logger;
+        // Required as fields to preserve caching throughout multiple MAPE-K loop cycles.
+        private readonly Dictionary<string, IModel> _fmuDict = [];
+	    private readonly Dictionary<string, IInstance> _iDict = [];
+        private readonly bool _restrictActionsToMitigateOptimalConditions = true;
+
+        private readonly ILogger<IMapekPlan> _logger;
         private readonly IFactory _factory;
         private readonly IMapekKnowledge _mapekKnowledge;
+        private readonly FilepathArguments _filepathArguments;
 
-        private const int MaximumSimulationTimeSeconds = 900;
+        private List<SimulationPath> _simulationPaths = [];
 
         public MapekPlan(IServiceProvider serviceProvider)
         {
-            _logger = serviceProvider.GetRequiredService<ILogger<MapekPlan>>();
+            _logger = serviceProvider.GetRequiredService<ILogger<IMapekPlan>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
             _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
+            _filepathArguments = serviceProvider.GetRequiredService<FilepathArguments>();
         }
 
-        public SimulationConfiguration Plan(PropertyCache propertyCache, string fmuDirectory, int lookAheadCycles)
+        public SimulationPath Plan(PropertyCache propertyCache, int lookAheadCycles)
         {
             _logger.LogInformation("Starting the Plan phase.");
 
-            _logger.LogInformation("Generating simulation configurations.");
+            _logger.LogInformation("Generating simulations.");
 
+            // This is necessary for the fitness function. This might change as we reevaluate how the fitness function should work
+            // and how it should be specified.
             var optimalConditions = GetAllOptimalConditions(propertyCache);
 
             // Get all combinations of possible simulation configurations for the given number of cycles.
-            var simulationConfigurations = GetSimulationConfigurations(lookAheadCycles);
-
-            _logger.LogInformation("Generated a total of {total} simulation configurations.", simulationConfigurations.Count);
+            var simulations = GetSimulationsAndGenerateSimulationPaths(lookAheadCycles);
 
             // Execute the simulations and obtain their results.
-            Simulate(simulationConfigurations, propertyCache, fmuDirectory);
+            Simulate(simulations, propertyCache);
 
-            // Find the optimal simulation configuration.
-            var optimalConfiguration = GetOptimalConfiguration(propertyCache, optimalConditions, simulationConfigurations);
-
-            if (optimalConfiguration != null)
+            if (!_simulationPaths.Any())
             {
-                LogOptimalSimulationConfiguration(optimalConfiguration);
+                _logger.LogInformation("No simulation paths were generated.");
+
+                return new SimulationPath
+                {
+                    Simulations = []
+                };
             }
 
-            return optimalConfiguration!;
+            _logger.LogInformation("Generated a total of {total} simulation paths.", _simulationPaths.Count());
+
+            // Find the optimal simulation path.
+            var optimalSimulationPath = GetOptimalSimulationPath(propertyCache, optimalConditions, _simulationPaths);
+
+            LogOptimalSimulationPath(optimalSimulationPath);
+
+            return optimalSimulationPath!;
         }
 
-        private List<SimulationConfiguration> GetSimulationConfigurations(int lookAheadCycles)
+        // TODO: consider making this async in the future.
+        private IEnumerable<Simulation> GetSimulationsAndGenerateSimulationPaths(int lookAheadCycles)
         {
-            // TODO: figure out an iterator implementation with 'yield return'.
-            return new List<SimulationConfiguration>();
+            _simulationPaths = new List<SimulationPath>();
+
+            // run the inference engine
+            // query the action combinations for the current setting
+            // the unrestricted set will always be the same in a given cycle, so it should only be computed once
+            // the restricted set will need to be remade dynamically after every simulation to ensure it uses its current property cache
+
+            // update the restriction setting before generating the next part of the path
+            ExecuteJarFile();
+            // query action combinations
+
+
+            yield return new Simulation
+            {
+                Index = 0,
+                ActuationActions = [],
+                ReconfigurationActions = [],
+                PropertyCache = null
+            };
+        }
+
+        private void ExecuteJarFile() {
+            var processInfo = new ProcessStartInfo {
+                FileName = "java", // Assumes JAVA is registered in the PATH environment variable (or equivalent).
+                Arguments = $"-jar \"{_filepathArguments.InferenceEngineFilepath}\" " +
+                    $"\"{_filepathArguments.OntologyFilepath}\" " +
+                    $"\"{_filepathArguments.InstanceModelFilepath}\" " +
+                    $"\"{_filepathArguments.InferenceRulesFilepath}\" " +
+                    $"\"{_filepathArguments.InferredModelFilepath}\"",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = Directory.GetParent(_filepathArguments.InstanceModelFilepath)!.FullName
+            };
+
+            using var process = Process.Start(processInfo);
+
+            _logger.LogInformation("Inferring action combinations.");
+
+            process!.OutputDataReceived += (sender, e) => {
+                _logger.LogInformation(e.Data);
+            };
+
+            process.ErrorDataReceived += (sender, e) => {
+                _logger.LogInformation(e.Data);
+            };
+
+            _logger.LogInformation("Process started with ID {processId}.", process.Id);
+            process.WaitForExit();
+
+            if (process.ExitCode != 0) {
+                throw new Exception($"The inference engine encountered an error. Process {process.Id} exited with code {process.ExitCode}.");
+            }
+
+            _logger.LogInformation("Process {processId} exited with code {processExitCode}.", process.Id, process.ExitCode);
         }
 
         public static IEnumerable<IEnumerable<T>> GetNaryCartesianProducts<T> (IEnumerable<IEnumerable<T>> sequences)
@@ -75,7 +145,7 @@ namespace Logic.Mapek
                 select accseq.Concat(new[] { item }));
         }
  
-        public static HashSet<HashSet<T>> OldGetNaryCartesianProducts<T>(IEnumerable<IEnumerable<T>> originalCollectionOfCollections)
+        internal static HashSet<HashSet<T>> OldGetNaryCartesianProducts<T>(IEnumerable<IEnumerable<T>> originalCollectionOfCollections)
         {
             // This method gets the n-ary Cartesian product of multiple collections.
             var combinations = new HashSet<HashSet<T>>(new SetEqualityComparer<T>());
@@ -113,10 +183,15 @@ namespace Logic.Mapek
             return combinations;
         }
 
-        private void Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations, PropertyCache propertyCache, string fmuDirectory)
+        private void Simulate(IEnumerable<Simulation> simulations, PropertyCache propertyCache)
         {
+
+            if (!simulations.Any()) {
+                return;
+            }
+
             // Retrieve the host platform FMU and its simulation fidelity for ActuationAction simulations.
-            var fmuModel = _mapekKnowledge.GetHostPlatformFmuModel(simulationConfigurations.First(), fmuDirectory);
+            var fmuModel = GetHostPlatformFmuModel(simulations.First(), _filepathArguments.FmuDirectory);
 
             // Measure simulation time.
             var stopwatch = new Stopwatch();
@@ -124,30 +199,21 @@ namespace Logic.Mapek
 
             int i = 0;
             // TODO: Parallelize simulations (#13).
-            foreach (var simulationConfiguration in simulationConfigurations)
+            foreach (var simulation in simulations)
             {
                 _logger.LogInformation("Running simulation #{run}", i++);
 
                 // Make a deep copy of the property cache for the current simulation configuration.
                 var propertyCacheCopy = GetPropertyCacheCopy(propertyCache);
-
-                if (simulationConfiguration.SimulationTicks.Any())
-                {
-                    // TODO: pass `fmuModel` instead of (some of) its components?
-                    ExecuteActuationActionFmu(fmuModel.FilePath, simulationConfiguration, propertyCacheCopy, fmuModel.SimulationFidelitySeconds);
-                }
-
-                if (simulationConfiguration.PostTickActions.Any())
-                {
-                    // Executing/simulating soft sensors during the Plan phase is not yet supported.
-                }
+                
+                ExecuteActuationActionFmu(fmuModel, simulation, propertyCacheCopy);
 
                 // Assign the final Property values to the results of the simulation configuration.
-                simulationConfiguration.ResultingPropertyCache = propertyCacheCopy;
+                simulation.PropertyCache = propertyCacheCopy;
             }
 
             stopwatch.Stop();
-            _logger.LogInformation("Total simulation time (minutes): {elapsedTime}", (double)stopwatch.ElapsedMilliseconds / 1000 / 60);
+            _logger.LogInformation("Total simulation time (seconds): {elapsedTime}", (double)stopwatch.ElapsedMilliseconds / 1000);
         }
 
         private static PropertyCache GetPropertyCacheCopy(PropertyCache originalPropertyCache)
@@ -208,19 +274,57 @@ namespace Logic.Mapek
             return observableProperties;
         }
 
-        private void ExecuteActuationActionFmu(string fmuFilePath, SimulationConfiguration simulationConfiguration, PropertyCache propertyCacheCopy, int simulationFidelitySeconds)
+        public FmuModel GetHostPlatformFmuModel(Simulation simulation, string fmuDirectory) {
+            // Retrieve all Actuators to be used in the simulations and ensure that they belong to the same host Platform such that the Platform's
+            // FMU will contain all of their relevant input/output variables.
+            var actuatorNames = new HashSet<string>();
+            var clauseBuilder = new StringBuilder();
+
+            foreach (var actuationAction in simulation.ActuationActions) {
+                if (!actuatorNames.Contains(actuationAction.Actuator.Name)) {
+                    actuatorNames.Add(actuationAction.Actuator.Name);
+
+                    // Add the Actuator name to the query filter.
+                    clauseBuilder.AppendLine("?platform sosa:hosts <" + actuationAction.Actuator.Name + "> .");
+                }
+            }
+
+            var clause = clauseBuilder.ToString();
+
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?fmuModel ?fmuFilePath ?simulationFidelitySeconds WHERE {
+                ?platform rdf:type sosa:Platform . " +
+                clause +
+                @"?platform meta:hasSimulationModel ?fmuModel .
+                ?fmuModel rdf:type meta:FmuModel .
+                ?fmuModel meta:hasURI ?fmuFilePath .
+                ?fmuModel meta:hasSimulationFidelitySeconds ?simulationFidelitySeconds . }");
+
+            var queryResult = _mapekKnowledge.ExecuteQuery(query);
+
+            // There can theoretically be multiple Platforms hosting the same Actuator, but we limit ourselves to expect a single Platform
+            // per instance model. There should therefore be only one result.
+            var fmuModel = queryResult.Results[0];
+
+            return new FmuModel {
+                Name = fmuModel["fmuModel"].ToString(),
+                Filepath = Path.Combine(fmuDirectory, fmuModel["fmuFilePath"].ToString().Split('^')[0]),
+                SimulationFidelitySeconds = int.Parse(fmuModel["simulationFidelitySeconds"].ToString().Split('^')[0])
+            };
+        }
+
+        private void ExecuteActuationActionFmu(FmuModel fmuModel, Simulation simulation, PropertyCache propertyCacheCopy)
         {
             // The LogDebug calls here are primarily to keep an eye on crashes in the FMU which are otherwise a tad harder to track down.
-            _logger.LogInformation("Simulation {simulationConfiguration} ({ticks} ticks)", simulationConfiguration, simulationConfiguration.SimulationTicks.Count());
-            if (!_fmuDict.TryGetValue(fmuFilePath, out IModel? model))
+            _logger.LogInformation("Simulation {simulation}", simulation);
+            if (!_fmuDict.TryGetValue(fmuModel.Filepath, out IModel? model))
             {
-                _logger.LogDebug("Loading Model {filePath}", fmuFilePath);
-                model = Model.Load(fmuFilePath, new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]));
-                _fmuDict.Add(fmuFilePath, model);
+                _logger.LogDebug("Loading Model {filePath}", fmuModel.Filepath);
+                model = Model.Load(fmuModel.Filepath, new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]));
+                _fmuDict.Add(fmuModel.Filepath, model);
             }
             Debug.Assert(model != null, "Model is null after loading.");
             // We're only using one instance per FMU, so we can just use the path as name.
-            var instanceName = fmuFilePath;
+            var instanceName = fmuModel.Filepath;
             if (!_iDict.TryGetValue(instanceName, out IInstance? fmuInstance))
             {
                 _logger.LogDebug("Creating instance.");
@@ -238,48 +342,45 @@ namespace Logic.Mapek
             }
             Debug.Assert(fmuInstance != null, "Instance is null after creation.");
 
-            // Run the simulation by executing ActuationActions in their respective simulation intervals.
-            foreach (var simulationTick in simulationConfiguration.SimulationTicks)
+            // Run the simulation by executing ActuationActions.
+            var fmuActuationInputs = new List<(string, string, object)>();
+
+            // Get all ObservableProperties and add them to the inputs for the FMU.
+            var observableProperties = GetObservablePropertiesFromPropertyCache(propertyCacheCopy);
+
+            foreach (var observableProperty in observableProperties)
             {
-                var fmuActuationInputs = new List<(string, string, object)>();
-
-                // Get all ObservableProperties and add them to the inputs for the FMU.
-                var observableProperties = GetObservablePropertiesFromPropertyCache(propertyCacheCopy);
-
-                foreach (var observableProperty in observableProperties)
-                {
-                    // Shave off the long name URIs from the instance model.
-                    var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
-                    fmuActuationInputs.Add((simpleObservablePropertyName, observableProperty.OwlType, observableProperty.Value));
-                }
-
-                // Add all ActuatorStates to the inputs for the FMU.
-                foreach (var actuationAction in simulationTick.ActuationActions)
-                {
-                    // Shave off the long name URIs from the instance model.
-                    var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.Actuator.Name);
-                    fmuActuationInputs.Add((simpleActuatorName + "State", "int", actuationAction.NewStateValue));
-                }
-
-                _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
-                AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
-
-                _logger.LogDebug("Tick");
-                // Advance the FMU time for the duration of the simulation tick in steps of simulation fidelity.
-                var maximumSteps = (double)MaximumSimulationTimeSeconds / simulationFidelitySeconds;
-                var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
-                var difference = maximumSteps - maximumStepsRoundedDown;
-
-                for (var i = 0; i < maximumStepsRoundedDown; i++)
-                {
-                    fmuInstance.AdvanceTime(simulationFidelitySeconds);
-                }
-
-                // Advance the remainder of time to stay true to the simulation interval duration.
-                fmuInstance.AdvanceTime(difference);
-
-                AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
+                // Shave off the long name URIs from the instance model.
+                var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
+                fmuActuationInputs.Add((simpleObservablePropertyName, observableProperty.OwlType, observableProperty.Value));
             }
+
+            // Add all ActuatorStates to the inputs for the FMU.
+            foreach (var actuationAction in simulation.ActuationActions)
+            {
+                // Shave off the long name URIs from the instance model.
+                var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.Actuator.Name);
+                fmuActuationInputs.Add((simpleActuatorName + "State", "int", actuationAction.NewStateValue));
+            }
+
+            _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
+            AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
+
+            _logger.LogDebug("Tick");
+            // Advance the FMU time for the duration of the simulation tick in steps of simulation fidelity.
+            var maximumSteps = (double)MaximumSimulationTimeSeconds / fmuModel.SimulationFidelitySeconds;
+            var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
+            var difference = maximumSteps - maximumStepsRoundedDown;
+
+            for (var i = 0; i < maximumStepsRoundedDown; i++)
+            {
+                fmuInstance.AdvanceTime(fmuModel.SimulationFidelitySeconds);
+            }
+
+            // Advance the remainder of time to stay true to the simulation duration.
+            fmuInstance.AdvanceTime(difference);
+
+            AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
         }
 
         private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs)
@@ -761,69 +862,71 @@ namespace Logic.Mapek
             return numberOfSatisfiedOptimalConditions;
         }
 
-        private SimulationConfiguration GetOptimalConfiguration(PropertyCache propertyCache,
+        private SimulationPath GetOptimalSimulationPath(PropertyCache propertyCache,
             IEnumerable<OptimalCondition> optimalConditions,
-            IEnumerable<SimulationConfiguration> simulationConfigurations)
+            IEnumerable<SimulationPath> simulationPaths)
         {
-            // This method is a filter for finding the optimal simulation configuration. It works in a few steps of descending precedance, each of which further reduces the set of
-            // simulation configurations:
-            // 1. Filter for simulation configurations that satisfy the most OptimalConditions.
-            // 2. Filter for simulation configurations that have the highest number of the most optimized Properties.
+            // This method is a filter for finding the optimal simulation path. It works in a few steps of descending precedance, each of which further reduces the set of
+            // simulation paths:
+            // 1. Filter for simulation paths that satisfy the most OptimalConditions.
+            // 2. Filter for simulation paths that have the highest number of the most optimized Properties.
             // 3. Pick the first one.
 
-            if (!simulationConfigurations.Any())
+            if (!simulationPaths.Any())
             {
                 return null!;
             }
 
             // Filter for simulation configurations that satisfy the most OptimalConditions.
-            var simulationConfigurationsWithMostOptimalConditionsSatisfied = GetSimulationConfigurationsWithMostOptimalConditionsSatisfied(simulationConfigurations, optimalConditions);
+            var simulationPathsWithMostOptimalConditionsSatisfied = GetSimulationPathsWithMostOptimalConditionsSatisfied(simulationPaths,
+                optimalConditions);
 
-            if (simulationConfigurationsWithMostOptimalConditionsSatisfied.Count == 1)
+            if (simulationPathsWithMostOptimalConditionsSatisfied.Count == 1)
             {
-                return simulationConfigurationsWithMostOptimalConditionsSatisfied.First();
+                return simulationPathsWithMostOptimalConditionsSatisfied.First();
             }
 
-            _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationConfigurationsWithMostOptimalConditionsSatisfied.Count);
+            _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationPathsWithMostOptimalConditionsSatisfied.Count);
 
             // Filter for simulation configurations that optimize the most targeted Properties.
-            var simulationConfigurationsWithMostOptimizedProperties = GetSimulationConfigurationsWithMostOptimizedProperties(simulationConfigurationsWithMostOptimalConditionsSatisfied,
-                propertyCache);
+            var simulationPathsWithMostOptimizedProperties =
+                GetSimulationPathsWithMostOptimizedProperties(simulationPathsWithMostOptimalConditionsSatisfied,
+                    propertyCache);
 
-            _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationConfigurationsWithMostOptimizedProperties.Count);
+            _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationPathsWithMostOptimizedProperties.Count);
 
             // At this point, arbitrarily return the first one regardless of the number of simulation configurations remaining.
-            return simulationConfigurationsWithMostOptimizedProperties.First();
+            return simulationPathsWithMostOptimizedProperties.First();
         }
 
-        private List<SimulationConfiguration> GetSimulationConfigurationsWithMostOptimalConditionsSatisfied(IEnumerable<SimulationConfiguration> simulationConfigurations,
+        private List<SimulationPath> GetSimulationPathsWithMostOptimalConditionsSatisfied(IEnumerable<SimulationPath> simulationPaths,
             IEnumerable<OptimalCondition> optimalConditions)
         {
-            var passingSimulationConfigurations = new List<SimulationConfiguration>();
+            var passingSimulationPaths = new List<SimulationPath>();
             var highestNumberOfSatisfiedOptimalConditions = 0;
 
-            foreach (var simulationConfiguration in simulationConfigurations)
+            foreach (var simulationPath in simulationPaths)
             {
-                var numberOfSatisfiedOptimalConditions = GetNumberOfSatisfiedOptimalConditions(optimalConditions, simulationConfiguration.ResultingPropertyCache);
+                var numberOfSatisfiedOptimalConditions = GetNumberOfSatisfiedOptimalConditions(optimalConditions, simulationPath.Simulations.Last().PropertyCache);
 
                 if (numberOfSatisfiedOptimalConditions > highestNumberOfSatisfiedOptimalConditions)
                 {
                     highestNumberOfSatisfiedOptimalConditions = numberOfSatisfiedOptimalConditions;
-                    passingSimulationConfigurations = new List<SimulationConfiguration>
+                    passingSimulationPaths = new List<SimulationPath>
                     {
-                        simulationConfiguration
+                        simulationPath
                     };
                 }
                 else if (numberOfSatisfiedOptimalConditions == highestNumberOfSatisfiedOptimalConditions)
                 {
-                    passingSimulationConfigurations.Add(simulationConfiguration);
+                    passingSimulationPaths.Add(simulationPath);
                 }
             }
 
-            return passingSimulationConfigurations;
+            return passingSimulationPaths;
         }
 
-        private List<SimulationConfiguration> GetSimulationConfigurationsWithMostOptimizedProperties(IEnumerable<SimulationConfiguration> simulationConfigurations,
+        private List<SimulationPath> GetSimulationPathsWithMostOptimizedProperties(IEnumerable<SimulationPath> simulationPaths,
             PropertyCache propertyCache)
         {
             var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(propertyCache);
@@ -831,11 +934,11 @@ namespace Logic.Mapek
 
             _logger.LogInformation("Ordering and filtering simulation results...");
             
-            var simulationConfigurationComparer = new SimulationConfigurationComparer(propertyChangesToOptimizeFor.Zip(valueHandlers));
+            var simulationPathComparer = new SimulationPathComparer(propertyChangesToOptimizeFor.Zip(valueHandlers));
 
             // Return the simulation configurations with the maximum score.
-            return simulationConfigurations.OrderByDescending(s => s, simulationConfigurationComparer)
-                .Where(s => simulationConfigurationComparer.Compare(s, simulationConfigurations.First()) > -1)
+            return simulationPaths.OrderByDescending(s => s, simulationPathComparer)
+                .Where(s => simulationPathComparer.Compare(s, simulationPaths.First()) > -1)
                 .ToList();
         }
 
@@ -887,30 +990,23 @@ namespace Logic.Mapek
             return propertyChangesToOptimizeFor;
         }
 
-        private void LogOptimalSimulationConfiguration(SimulationConfiguration optimalSimulationConfiguration)
+        private void LogOptimalSimulationPath(SimulationPath optimalSimulationPath)
         {
-            var logMsg = "Chosen optimal configuration, Actuation actions:\n";
+            var logMsg = "Chosen optimal path, Actuation actions:\n";
 
             // Convert to a list to use indexing.
-            var simulationTickList = optimalSimulationConfiguration.SimulationTicks.ToList();
+            var simulationList = optimalSimulationPath.Simulations.ToList();
 
-            for (var i = 0; i < simulationTickList.Count; i++)
+            for (var i = 0; i < simulationList.Count; i++)
             {
                 logMsg += $"Interval {i + 1}:\n";
 
-                foreach (var action in simulationTickList[i].ActuationActions)
+                foreach (var action in simulationList[i].ActuationActions)
                 {
                     logMsg += $"Actuator: {action.Actuator.Name}, Actuator state: {action.NewStateValue.ToString()}\n";
                 }
             }
 
-            logMsg += "Post-tick actions:\n";
-
-            foreach (var postTickAction in optimalSimulationConfiguration.PostTickActions)
-            {
-                logMsg += $"Configurable parameter: {postTickAction.ConfigurableParameter.Name}; ";
-                logMsg += $"New Value: {postTickAction.NewParameterValue.ToString()}\n";
-            }
             _logger.LogInformation(logMsg);
         }
     }

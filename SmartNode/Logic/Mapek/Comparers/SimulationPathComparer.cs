@@ -4,22 +4,22 @@ using Logic.ValueHandlerInterfaces;
 
 namespace Logic.Mapek.Comparers
 {
-    internal class SimulationConfigurationComparer : IComparer<SimulationConfiguration>
+    internal class SimulationPathComparer : IComparer<SimulationPath>
     {
-        public SimulationConfigurationComparer(IEnumerable<(PropertyChange First, IValueHandler Second)> enumerable)
+        public SimulationPathComparer(IEnumerable<(PropertyChange First, IValueHandler Second)> enumerable)
         {
             Enumerable = enumerable;
         }
 
         public IEnumerable<(PropertyChange First, IValueHandler Second)> Enumerable { get; }
 
-        public int Compare(SimulationConfiguration? x, SimulationConfiguration? y)
+        public int Compare(SimulationPath? x, SimulationPath? y)
         {
             var scores = Enumerable.Select(ep => {
                 var p = ep.Item1;
                 var valueHandler = ep.Item2;
-                var comparingProperty = MapekUtilities.GetPropertyFromPropertyCacheByName(x.ResultingPropertyCache, p.Property.Name);
-                var targetProperty = MapekUtilities.GetPropertyFromPropertyCacheByName(y.ResultingPropertyCache, p.Property.Name);
+                var comparingProperty = MapekUtilities.GetPropertyFromPropertyCacheByName(x.Simulations.Last().PropertyCache, p.Property.Name);
+                var targetProperty = MapekUtilities.GetPropertyFromPropertyCacheByName(y.Simulations.Last().PropertyCache, p.Property.Name);
                 if (p.OptimizeFor == Effect.ValueIncrease)
                 {
                     return valueHandler.IncreaseComp(comparingProperty.Value, targetProperty.Value);

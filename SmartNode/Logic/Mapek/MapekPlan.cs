@@ -28,8 +28,6 @@ namespace Logic.Mapek
         private readonly IMapekKnowledge _mapekKnowledge;
         private readonly FilepathArguments _filepathArguments;
 
-        private readonly SimulationTreeNode _simulationTree = new();
-
         public MapekPlan(IServiceProvider serviceProvider)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<IMapekPlan>>();
@@ -49,12 +47,20 @@ namespace Logic.Mapek
             var optimalConditions = GetAllOptimalConditions(propertyCache);
 
             // Get all combinations of possible simulation configurations for the given number of cycles.
-            var simulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles);
+            var simulationTree = new SimulationTreeNode {
+                Simulation = new Simulation {
+                    ActuationActions = [],
+                    Index = -1,
+                    ReconfigurationActions = [],
+                    PropertyCache = propertyCache
+                }
+            };
+            var simulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false);
 
             // Execute the simulations and obtain their results.
             Simulate(simulations, propertyCache);
 
-            if (!_simulationTree.Children.Any())
+            if (!simulationTree.Children.Any())
             {
                 _logger.LogInformation("No simulation paths were generated.");
 
@@ -64,10 +70,10 @@ namespace Logic.Mapek
                 };
             }
 
-            _logger.LogInformation("Generated a total of {total} simulation paths.", _simulationTree.ChildrenCount);
+            _logger.LogInformation("Generated a total of {total} simulation paths.", simulationTree.ChildrenCount);
 
             // Find the optimal simulation path.
-            var optimalSimulationPath = GetOptimalSimulationPath(propertyCache, optimalConditions, _simulationTree.SimulationPaths);
+            var optimalSimulationPath = GetOptimalSimulationPath(propertyCache, optimalConditions, simulationTree.SimulationPaths);
 
             LogOptimalSimulationPath(optimalSimulationPath);
 
@@ -113,7 +119,7 @@ namespace Logic.Mapek
                     simulationTreeNodeChildren.Add(childSimulationTreeNode);
 
                     var childSimulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles,
-                        currentCycle + 1,
+                        currentCycle++,
                         childSimulationTreeNode,
                         unrestrictedInferenceExecuted);
 
@@ -238,7 +244,7 @@ namespace Logic.Mapek
         }
 
         private bool GetKeepSimulation(Simulation simulation) {
-            return true; // Here, we can implement pruning logic based on the values of the simulation's property cache.
+            return true; // Here, we can implement dynamic pruning logic based on the values of the simulation's property cache.
         }
 
         public static IEnumerable<IEnumerable<T>> GetNaryCartesianProducts<T> (IEnumerable<IEnumerable<T>> sequences)
@@ -310,13 +316,13 @@ namespace Logic.Mapek
             {
                 _logger.LogInformation("Running simulation #{run}", i++);
 
-                // Make a deep copy of the property cache for the current simulation configuration.
-                var propertyCacheCopy = GetPropertyCacheCopy(propertyCache);
+                //// Make a deep copy of the property cache for the current simulation configuration.
+                //var propertyCacheCopy = GetPropertyCacheCopy(propertyCache);
                 
-                ExecuteActuationActionFmu(fmuModel, simulation, propertyCacheCopy);
+                //ExecuteActuationActionFmu(fmuModel, simulation, propertyCacheCopy);
 
-                // Assign the final Property values to the results of the simulation configuration.
-                simulation.PropertyCache = propertyCacheCopy;
+                //// Assign the final Property values to the results of the simulation configuration.
+                //simulation.PropertyCache = propertyCacheCopy;
             }
 
             stopwatch.Stop();
@@ -467,7 +473,7 @@ namespace Logic.Mapek
             {
                 // Shave off the long name URIs from the instance model.
                 var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.Actuator.Name);
-                fmuActuationInputs.Add((simpleActuatorName + "State", "int", actuationAction.NewStateValue));
+                fmuActuationInputs.Add((simpleActuatorName + "State", "http://www.w3.org/2001/XMLSchema#int", actuationAction.NewStateValue));
             }
 
             _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));

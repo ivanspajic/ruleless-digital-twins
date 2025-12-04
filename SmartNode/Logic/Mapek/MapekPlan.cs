@@ -20,14 +20,15 @@ namespace Logic.Mapek
         // Required as fields to preserve caching throughout multiple MAPE-K loop cycles.
         private readonly Dictionary<string, IModel> _fmuDict = [];
 	    private readonly Dictionary<string, IInstance> _iDict = [];
-        private readonly bool _restrictActionsToMitigateOptimalConditions = true;
+        // A setting that determines whether the DT operates in the 'reactive' or 'proactive' mode.
+        private readonly bool _restrictToReactiveActionsOnly = true;
 
         private readonly ILogger<IMapekPlan> _logger;
         private readonly IFactory _factory;
         private readonly IMapekKnowledge _mapekKnowledge;
         private readonly FilepathArguments _filepathArguments;
 
-        private List<SimulationPath> _simulationPaths = [];
+        private readonly SimulationTreeNode _simulationTree = new();
 
         public MapekPlan(IServiceProvider serviceProvider)
         {
@@ -48,12 +49,12 @@ namespace Logic.Mapek
             var optimalConditions = GetAllOptimalConditions(propertyCache);
 
             // Get all combinations of possible simulation configurations for the given number of cycles.
-            var simulations = GetSimulationsAndGenerateSimulationPaths(lookAheadCycles);
+            var simulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles);
 
             // Execute the simulations and obtain their results.
             Simulate(simulations, propertyCache);
 
-            if (!_simulationPaths.Any())
+            if (!_simulationTree.Children.Any())
             {
                 _logger.LogInformation("No simulation paths were generated.");
 
@@ -63,10 +64,10 @@ namespace Logic.Mapek
                 };
             }
 
-            _logger.LogInformation("Generated a total of {total} simulation paths.", _simulationPaths.Count());
+            _logger.LogInformation("Generated a total of {total} simulation paths.", _simulationTree.ChildrenCount);
 
             // Find the optimal simulation path.
-            var optimalSimulationPath = GetOptimalSimulationPath(propertyCache, optimalConditions, _simulationPaths);
+            var optimalSimulationPath = GetOptimalSimulationPath(propertyCache, optimalConditions, _simulationTree.SimulationPaths);
 
             LogOptimalSimulationPath(optimalSimulationPath);
 
@@ -74,32 +75,76 @@ namespace Logic.Mapek
         }
 
         // TODO: consider making this async in the future.
-        private IEnumerable<Simulation> GetSimulationsAndGenerateSimulationPaths(int lookAheadCycles)
-        {
-            _simulationPaths = new List<SimulationPath>();
+        private IEnumerable<Simulation> GetSimulationsAndGenerateSimulationTree(int lookAheadCycles,
+            int currentCycle,
+            SimulationTreeNode simulationTreeNode,
+            bool unrestrictedInferenceExecuted) {
+            UpdateRestrictionSetting();
 
-            // run the inference engine
-            // query the action combinations for the current setting
-            // the unrestricted set will always be the same in a given cycle, so it should only be computed once
-            // the restricted set will need to be remade dynamically after every simulation to ensure it uses its current property cache
+            if (_restrictToReactiveActionsOnly) {
+                // TODO: update the model before this.
+                InferActionCombinations();
+                unrestrictedInferenceExecuted = false;
+            } else if (!_restrictToReactiveActionsOnly && !unrestrictedInferenceExecuted) {
+                InferActionCombinations();
+                unrestrictedInferenceExecuted = true;
+            }
 
-            // update the restriction setting before generating the next part of the path
-            ExecuteJarFile();
-            // query action combinations
-            // TODO: build a tracker based on a counter! simply create a tracker with the number of "digits" equal to the number of cycles to simulate for.
-            // use the digits on the tracker to increment and keep track of which actioncombination needs to go into which cycle
-            // you need a separate tracker from the simulationPaths collection coz we aren't necessarily including all simulation paths into that field
+            var actionCombinations = GetActionCombinations();
 
-            yield return new Simulation
-            {
-                Index = 0,
-                ActuationActions = [],
-                ReconfigurationActions = [],
-                PropertyCache = null
-            };
+            var simulationTreeNodeChildren = new List<SimulationTreeNode>();
+            foreach (var actionCombination in actionCombinations) {
+                var simulation = new Simulation {
+                    ActuationActions = actionCombination,
+                    Index = currentCycle,
+                    ReconfigurationActions = [], // TODO: support ReconfigurationActions.
+                    PropertyCache = GetPropertyCacheCopy(simulationTreeNode.Simulation.PropertyCache!)
+                };
+
+                yield return simulation;
+
+                var keepSimulation = GetKeepSimulation(simulation);
+
+                if (currentCycle < lookAheadCycles - 1 && keepSimulation) {
+                    var childSimulationTreeNode = new SimulationTreeNode {
+                        Simulation = simulation
+                    };
+
+                    simulationTreeNodeChildren.Add(childSimulationTreeNode);
+
+                    var childSimulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles,
+                        currentCycle + 1,
+                        childSimulationTreeNode,
+                        unrestrictedInferenceExecuted);
+
+                    foreach (var childSimulation in childSimulations) {
+                        yield return childSimulation;
+                    }
+                }
+            }
         }
 
-        private void ExecuteJarFile() {
+        // Updates the setting for restricting Actions and thus ActionCombinations only to those mitigating OptimalConditions.
+        private void UpdateRestrictionSetting() {
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"DELETE {
+                    ?platform meta:generateCombinationsOnlyFromOptimalConditions ?oldValue .
+                }
+                INSERT {
+                    ?platform meta:generateCombinationsOnlyFromOptimalConditions @newValue .
+                }
+                WHERE {
+                    ?platform rdf:type sosa:Platform .
+                    ?platform meta:generateCombinationsOnlyFromOptimalConditions ?oldValue .
+                }");
+
+            query.SetLiteral("newValue", _restrictToReactiveActionsOnly);
+
+            _mapekKnowledge.UpdateModel(query);
+            _mapekKnowledge.CommitInMemoryInstanceModelToKnowledgeBase();
+        }
+
+        private void InferActionCombinations() {
+            // Execute the inference engine as an external process.
             var processInfo = new ProcessStartInfo {
                 FileName = "java", // Assumes JAVA is registered in the PATH environment variable (or equivalent).
                 Arguments = $"-jar \"{_filepathArguments.InferenceEngineFilepath}\" " +
@@ -134,6 +179,66 @@ namespace Logic.Mapek
             }
 
             _logger.LogInformation("Process {processId} exited with code {processExitCode}.", process.Id, process.ExitCode);
+        }
+
+        // This method currently only supports ActuationActions.
+        private List<List<ActuationAction>> GetActionCombinations() {
+            var actionCombinations = new List<List<ActuationAction>>();
+
+            var actionCombinationQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actionCombination (GROUP_CONCAT(?action; SEPARATOR="" "") AS ?actions) WHERE {
+	                ?actionCombination rdf:type meta:ActionCombination .
+	                FILTER NOT EXISTS {
+		                {
+			                ?actionCombination rdf:comment ""duplicate""^^<http://www.w3.org/2001/XMLSchema#string> .
+		                }
+		                UNION
+		                {
+			                ?actionCombination rdf:comment ""not final""^^<http://www.w3.org/2001/XMLSchema#string> .
+		                }
+	                }
+	                ?actionCombination meta:hasActions ?actionList .
+	                ?actionList rdf:rest*/rdf:first ?action . }
+                GROUP BY ?actionCombination");
+
+            var actionCombinationQueryResult = _mapekKnowledge.ExecuteQuery(actionCombinationQuery, true);
+
+            actionCombinationQueryResult.Results.ForEach(combinationResult => {
+                var actions = combinationResult["actions"].ToString().Split('^')[0].Split(' ').ToList();
+
+                var combination = new List<ActuationAction>();
+
+                actions.ForEach(action => {
+                    var actionQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState WHERE {
+                        @action rdf:type meta:ActuationAction .
+                        @action meta:hasActuator ?actuator .
+                        @action meta:hasActuatorState ?actuatorState . }");
+
+                    actionQuery.SetUri("action", new Uri(action));
+
+                    var actionQueryResult = _mapekKnowledge.ExecuteQuery(actionQuery, true);
+
+                    actionQueryResult.Results.ForEach(actionResult => {
+                        var actuatorName = actionResult["actuator"].ToString();
+                        var actuatorState = actionResult["actuatorState"].ToString().Split('^')[0];
+
+                        combination.Add(new ActuationAction {
+                            Name = action,
+                            Actuator = new Actuator {
+                                Name = actuatorName
+                            },
+                            NewStateValue = actuatorState
+                        });
+                    });
+                });
+
+                actionCombinations.Add(combination);
+            });
+
+            return actionCombinations;
+        }
+
+        private bool GetKeepSimulation(Simulation simulation) {
+            return true; // Here, we can implement pruning logic based on the values of the simulation's property cache.
         }
 
         public static IEnumerable<IEnumerable<T>> GetNaryCartesianProducts<T> (IEnumerable<IEnumerable<T>> sequences)

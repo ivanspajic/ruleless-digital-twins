@@ -30,6 +30,7 @@ namespace Logic.Mapek {
         private readonly FilepathArguments _filepathArguments;
 
         private readonly Graph _instanceModel;
+        private readonly Graph _inferredModel;
         private readonly TurtleParser _turtleParser;
         private readonly CompressingTurtleWriter _turtleWriter;
 
@@ -40,8 +41,9 @@ namespace Logic.Mapek {
             _turtleWriter = new CompressingTurtleWriter();
 
             _instanceModel = new Graph();
+            _inferredModel = new Graph();
             _turtleParser = new TurtleParser();
-            ReloadInstanceModelFromKnowledgeBase();
+            LoadModelsFromKnowledgeFromKnowledgeBase();
             
             // If nothing was loaded, don't start the loop.
             if (_instanceModel.IsEmpty) {
@@ -71,8 +73,15 @@ namespace Logic.Mapek {
             return ExecuteQuery(query);
         }
 
-        public SparqlResultSet ExecuteQuery(SparqlParameterizedString query) {
-            var queryResult = (SparqlResultSet)_instanceModel.ExecuteQuery(query);
+        public SparqlResultSet ExecuteQuery(SparqlParameterizedString query, bool useInferredModel = false) {
+            SparqlResultSet queryResult;
+            
+            if (useInferredModel) {
+                queryResult = (SparqlResultSet)_inferredModel.ExecuteQuery(query);
+            } else {
+                queryResult = (SparqlResultSet)_instanceModel.ExecuteQuery(query);
+            }
+
             _logger.LogInformation("Executed query: {query} ({numResults})", query.CommandText, queryResult.Results.Count);
 
             if (!queryResult.IsEmpty) {
@@ -151,12 +160,7 @@ namespace Logic.Mapek {
             query.SetUri("type", new Uri(property.OwlType));
             query.SetUri("property", new Uri(property.Name));
 
-            var sparqlUpdateParser = new SparqlUpdateParser();
-            var inMemoryDataset = new InMemoryDataset(_instanceModel);
-            var processor = new LeviathanUpdateProcessor(inMemoryDataset);
-            var commandSet = sparqlUpdateParser.ParseFromString(query);
-
-            processor.ProcessCommandSet(commandSet);
+            UpdateModel(query);
 
             // In case there was no match on an ObservableProperty, try to update a matching Output.
             query = GetParameterizedStringQuery(@"DELETE {
@@ -176,9 +180,7 @@ namespace Logic.Mapek {
             query.SetUri("type", new Uri(property.OwlType));
             query.SetUri("property", new Uri(property.Name));
 
-            commandSet = sparqlUpdateParser.ParseFromString(query);
-
-            processor.ProcessCommandSet(commandSet);
+            UpdateModel(query);
         }
 
         public void UpdateConfigurableParameterValue(ConfigurableParameter configurableParameter) {
@@ -198,17 +200,28 @@ namespace Logic.Mapek {
             query.SetUri("type", new Uri(configurableParameter.OwlType));
             query.SetUri("configurableParameter", new Uri(configurableParameter.Name));
 
-            ExecuteQuery(query);
+            UpdateModel(query);
         }
 
         public void CommitInMemoryInstanceModelToKnowledgeBase() {
             _turtleWriter.Save(_instanceModel, _filepathArguments.InstanceModelFilepath);
         }
 
-        public void ReloadInstanceModelFromKnowledgeBase() {
+        public void LoadModelsFromKnowledgeFromKnowledgeBase() {
             _instanceModel.Clear();
+            _inferredModel.Clear();
 
             _turtleParser.Load(_instanceModel, _filepathArguments.InstanceModelFilepath);
+            _turtleParser.Load(_inferredModel, _filepathArguments.InferredModelFilepath);
+        }
+
+        public void UpdateModel(SparqlParameterizedString query) {
+            var sparqlUpdateParser = new SparqlUpdateParser();
+            var inMemoryDataset = new InMemoryDataset(_instanceModel);
+            var processor = new LeviathanUpdateProcessor(inMemoryDataset);
+            var commandSet = sparqlUpdateParser.ParseFromString(query);
+
+            processor.ProcessCommandSet(commandSet);
         }
     }
 }

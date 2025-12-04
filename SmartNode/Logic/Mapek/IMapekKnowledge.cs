@@ -1,5 +1,4 @@
-﻿using Logic.Models.MapekModels;
-using Logic.Models.OntologicalModels;
+﻿using Logic.Models.OntologicalModels;
 using VDS.RDF.Query;
 
 namespace Logic.Mapek {
@@ -8,7 +7,7 @@ namespace Logic.Mapek {
 
         public SparqlParameterizedString GetParameterizedStringQuery(string queryString);
 
-        public SparqlResultSet ExecuteQuery(SparqlParameterizedString query);
+        public SparqlResultSet ExecuteQuery(SparqlParameterizedString query, bool useInferredModel = false);
 
         public string GetPropertyType(string propertyName);
 
@@ -18,6 +17,8 @@ namespace Logic.Mapek {
 
         public void CommitInMemoryInstanceModelToKnowledgeBase();
 
-        public void ReloadInstanceModelFromKnowledgeBase();
+        public void LoadModelsFromKnowledgeFromKnowledgeBase();
+
+        public void UpdateModel(SparqlParameterizedString query);
     }
 }

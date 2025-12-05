@@ -82,9 +82,15 @@ namespace SmartNode
         private readonly Dictionary<string, IActuatorDevice> _dummyActuators = new()
         {
             {
-                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit",
-                new DummyAirConditioningUnit(
-                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit",
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater",
+                new DummyHeater(
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater",
+                    _dummyRoomM370)
+            },
+            {
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating",
+                new DummyHeater(
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating",
                     _dummyRoomM370)
             },
             {

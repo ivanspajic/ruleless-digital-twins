@@ -18,8 +18,8 @@ namespace Logic.Mapek.Comparers
             var scores = Enumerable.Select(ep => {
                 var p = ep.Item1;
                 var valueHandler = ep.Item2;
-                var comparingProperty = MapekUtilities.GetPropertyFromPropertyCacheByName(x.Simulations.Last().PropertyCache, p.Property.Name);
-                var targetProperty = MapekUtilities.GetPropertyFromPropertyCacheByName(y.Simulations.Last().PropertyCache, p.Property.Name);
+                var comparingProperty = MapekUtilities.GetPropertyFromPropertyCacheByName(x!.Simulations.Last().PropertyCache!, p.Property.Name);
+                var targetProperty = MapekUtilities.GetPropertyFromPropertyCacheByName(y!.Simulations.Last().PropertyCache!, p.Property.Name);
                 if (p.OptimizeFor == Effect.ValueIncrease)
                 {
                     return valueHandler.IncreaseComp(comparingProperty.Value, targetProperty.Value);

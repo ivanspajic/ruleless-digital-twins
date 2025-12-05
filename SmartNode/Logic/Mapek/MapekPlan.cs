@@ -20,8 +20,8 @@ namespace Logic.Mapek
         // Required as fields to preserve caching throughout multiple MAPE-K loop cycles.
         private readonly Dictionary<string, IModel> _fmuDict = [];
 	    private readonly Dictionary<string, IInstance> _iDict = [];
-        // A setting that determines whether the DT operates in the 'reactive' or 'proactive' mode.
-        private readonly bool _restrictToReactiveActionsOnly = true;
+        // A setting that determines whether the DT operates in the 'reactive' (true) or 'proactive' (false) mode.
+        private readonly bool _restrictToReactiveActionsOnly = false;
 
         private readonly ILogger<IMapekPlan> _logger;
         private readonly IFactory _factory;
@@ -53,24 +53,23 @@ namespace Logic.Mapek
                     Index = -1,
                     ReconfigurationActions = [],
                     PropertyCache = propertyCache
-                }
+                },
+                Children = []
             };
             var simulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false);
 
             // Execute the simulations and obtain their results.
-            Simulate(simulations, propertyCache);
+            Simulate(simulations);
 
-            if (!simulationTree.Children.Any())
-            {
+            if (!simulationTree.Children.Any()) {
                 _logger.LogInformation("No simulation paths were generated.");
 
-                return new SimulationPath
-                {
+                return new SimulationPath {
                     Simulations = []
                 };
             }
 
-            _logger.LogInformation("Generated a total of {total} simulation paths.", simulationTree.ChildrenCount);
+            _logger.LogInformation("Generated a total of {total} simulation paths.", simulationTree.SimulationPaths.Count());
 
             // Find the optimal simulation path.
             var optimalSimulationPath = GetOptimalSimulationPath(propertyCache, optimalConditions, simulationTree.SimulationPaths);
@@ -88,22 +87,22 @@ namespace Logic.Mapek
             UpdateRestrictionSetting();
 
             if (_restrictToReactiveActionsOnly) {
-                // TODO: update the model before this.
                 InferActionCombinations();
                 unrestrictedInferenceExecuted = false;
             } else if (!_restrictToReactiveActionsOnly && !unrestrictedInferenceExecuted) {
-                InferActionCombinations();
+                //InferActionCombinations();
                 unrestrictedInferenceExecuted = true;
             }
 
             var actionCombinations = GetActionCombinations();
 
             var simulationTreeNodeChildren = new List<SimulationTreeNode>();
+
             foreach (var actionCombination in actionCombinations) {
                 var simulation = new Simulation {
                     ActuationActions = actionCombination,
                     Index = currentCycle,
-                    ReconfigurationActions = [], // TODO: support ReconfigurationActions.
+                    ReconfigurationActions = [], // TODO: add support for ReconfigurationActions.
                     PropertyCache = GetPropertyCacheCopy(simulationTreeNode.Simulation.PropertyCache!)
                 };
 
@@ -111,23 +110,26 @@ namespace Logic.Mapek
 
                 var keepSimulation = GetKeepSimulation(simulation);
 
+                var currentSimulationTreeNode = new SimulationTreeNode {
+                    Simulation = simulation,
+                    Children = []
+                };
+
                 if (currentCycle < lookAheadCycles - 1 && keepSimulation) {
-                    var childSimulationTreeNode = new SimulationTreeNode {
-                        Simulation = simulation
-                    };
-
-                    simulationTreeNodeChildren.Add(childSimulationTreeNode);
-
                     var childSimulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles,
-                        currentCycle++,
-                        childSimulationTreeNode,
+                        currentCycle + 1,
+                        currentSimulationTreeNode,
                         unrestrictedInferenceExecuted);
 
                     foreach (var childSimulation in childSimulations) {
                         yield return childSimulation;
                     }
                 }
+
+                simulationTreeNodeChildren.Add(currentSimulationTreeNode);
             }
+
+            simulationTreeNode.Children = simulationTreeNodeChildren;
         }
 
         // Updates the setting for restricting Actions and thus ActionCombinations only to those mitigating OptimalConditions.
@@ -296,9 +298,8 @@ namespace Logic.Mapek
             return combinations;
         }
 
-        private void Simulate(IEnumerable<Simulation> simulations, PropertyCache propertyCache)
+        private void Simulate(IEnumerable<Simulation> simulations)
         {
-
             if (!simulations.Any()) {
                 return;
             }
@@ -316,13 +317,7 @@ namespace Logic.Mapek
             {
                 _logger.LogInformation("Running simulation #{run}", i++);
 
-                //// Make a deep copy of the property cache for the current simulation configuration.
-                //var propertyCacheCopy = GetPropertyCacheCopy(propertyCache);
-                
-                //ExecuteActuationActionFmu(fmuModel, simulation, propertyCacheCopy);
-
-                //// Assign the final Property values to the results of the simulation configuration.
-                //simulation.PropertyCache = propertyCacheCopy;
+                ExecuteActuationActionFmu(fmuModel, simulation);
             }
 
             stopwatch.Stop();
@@ -425,7 +420,7 @@ namespace Logic.Mapek
             };
         }
 
-        private void ExecuteActuationActionFmu(FmuModel fmuModel, Simulation simulation, PropertyCache propertyCacheCopy)
+        private void ExecuteActuationActionFmu(FmuModel fmuModel, Simulation simulation)
         {
             // The LogDebug calls here are primarily to keep an eye on crashes in the FMU which are otherwise a tad harder to track down.
             _logger.LogInformation("Simulation {simulation}", simulation);
@@ -459,7 +454,7 @@ namespace Logic.Mapek
             var fmuActuationInputs = new List<(string, string, object)>();
 
             // Get all ObservableProperties and add them to the inputs for the FMU.
-            var observableProperties = GetObservablePropertiesFromPropertyCache(propertyCacheCopy);
+            var observableProperties = GetObservablePropertiesFromPropertyCache(simulation.PropertyCache!);
 
             foreach (var observableProperty in observableProperties)
             {
@@ -493,7 +488,7 @@ namespace Logic.Mapek
             // Advance the remainder of time to stay true to the simulation duration.
             fmuInstance.AdvanceTime(difference);
 
-            AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
+            AssignPropertyCacheCopyValues(fmuInstance, simulation.PropertyCache!, model.Variables);
         }
 
         private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs)
@@ -1025,10 +1020,7 @@ namespace Logic.Mapek
                 if (numberOfSatisfiedOptimalConditions > highestNumberOfSatisfiedOptimalConditions)
                 {
                     highestNumberOfSatisfiedOptimalConditions = numberOfSatisfiedOptimalConditions;
-                    passingSimulationPaths = new List<SimulationPath>
-                    {
-                        simulationPath
-                    };
+                    passingSimulationPaths = [simulationPath];
                 }
                 else if (numberOfSatisfiedOptimalConditions == highestNumberOfSatisfiedOptimalConditions)
                 {

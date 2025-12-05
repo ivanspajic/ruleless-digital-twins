@@ -11,28 +11,28 @@ namespace Logic.Mapek.Comparers
         {
             if (x!.Simulations.Count() == y!.Simulations.Count())
             {
-                var xSimulationTicks = x.Simulations.ToList();
-                var ySimulationTicks = y.Simulations.ToList();
+                var xSimulations = x.Simulations.ToList();
+                var ySimulations = y.Simulations.ToList();
 
-                for (var i = 0; i < xSimulationTicks!.Count; i++)
+                for (var i = 0; i < xSimulations!.Count; i++)
                 {
-                    if (xSimulationTicks[i].Index == ySimulationTicks![i].Index &&
-                        xSimulationTicks[i].ActuationActions.Count() == ySimulationTicks[i].ActuationActions.Count())
+                    if (xSimulations[i].Index == ySimulations![i].Index &&
+                        xSimulations[i].ActuationActions.Count() == ySimulations[i].ActuationActions.Count())
                     {
-                        var xTickActionsToExecute = xSimulationTicks[i].ActuationActions.ToList();
-                        var yTickActionsToExecute = ySimulationTicks[i].ActuationActions.ToList();
+                        var xSimulationActionsToExecute = xSimulations[i].ActuationActions.ToList();
+                        var ySimulationActionsToExecute = ySimulations[i].ActuationActions.ToList();
 
-                        foreach (var xTickActionToExecute in xTickActionsToExecute!)
+                        foreach (var xSimulationActionToExecute in xSimulationActionsToExecute!)
                         {
-                            if (!yTickActionsToExecute!.Contains(xTickActionToExecute, _actionEqualityComparer))
+                            if (!ySimulationActionsToExecute!.Contains(xSimulationActionToExecute, _actionEqualityComparer))
                             {
                                 return false;
                             }
                         }
 
-                        foreach (var yTickActionToExecute in yTickActionsToExecute!)
+                        foreach (var ySimulationActionToExecute in ySimulationActionsToExecute!)
                         {
-                            if (!xTickActionsToExecute.Contains(yTickActionToExecute, _actionEqualityComparer))
+                            if (!xSimulationActionsToExecute.Contains(ySimulationActionToExecute, _actionEqualityComparer))
                             {
                                 return false;
                             }

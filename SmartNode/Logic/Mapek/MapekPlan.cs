@@ -22,6 +22,8 @@ namespace Logic.Mapek
 	    private readonly Dictionary<string, IInstance> _iDict = [];
         // A setting that determines whether the DT operates in the 'reactive' (true) or 'proactive' (false) mode.
         private readonly bool _restrictToReactiveActionsOnly = false;
+        // Used for performance enhancements.
+        private bool _restrictToReactiveActionsOnlyOld = false;
 
         private readonly ILogger<IMapekPlan> _logger;
         private readonly IFactory _factory;
@@ -56,7 +58,7 @@ namespace Logic.Mapek
                 },
                 Children = []
             };
-            var simulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false);
+            var simulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<ActuationAction>>());
 
             // Execute the simulations and obtain their results.
             Simulate(simulations);
@@ -80,21 +82,30 @@ namespace Logic.Mapek
         }
 
         // TODO: consider making this async in the future.
+        // The booleans flags are used for performance improvements.
         private IEnumerable<Simulation> GetSimulationsAndGenerateSimulationTree(int lookAheadCycles,
             int currentCycle,
             SimulationTreeNode simulationTreeNode,
-            bool unrestrictedInferenceExecuted) {
-            UpdateRestrictionSetting();
+            bool unrestrictedInferenceExecuted,
+            bool reloadInferredModel,
+            IEnumerable<IEnumerable<ActuationAction>> actionCombinations) {
+            EnsureUpdatedRestrictionSetting();
 
             if (_restrictToReactiveActionsOnly) {
                 InferActionCombinations();
+
                 unrestrictedInferenceExecuted = false;
+                reloadInferredModel = true;
             } else if (!_restrictToReactiveActionsOnly && !unrestrictedInferenceExecuted) {
-                InferActionCombinations();
+                //InferActionCombinations();
                 unrestrictedInferenceExecuted = true;
             }
 
-            var actionCombinations = GetActionCombinations();
+            if (reloadInferredModel) {
+                actionCombinations = GetActionCombinations();
+
+                reloadInferredModel = false;
+            }
 
             var simulationTreeNodeChildren = new List<SimulationTreeNode>();
 
@@ -119,7 +130,9 @@ namespace Logic.Mapek
                     var childSimulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles,
                         currentCycle + 1,
                         currentSimulationTreeNode,
-                        unrestrictedInferenceExecuted);
+                        unrestrictedInferenceExecuted,
+                        reloadInferredModel,
+                        actionCombinations);
 
                     foreach (var childSimulation in childSimulations) {
                         yield return childSimulation;
@@ -133,17 +146,24 @@ namespace Logic.Mapek
         }
 
         // Updates the setting for restricting Actions and thus ActionCombinations only to those mitigating OptimalConditions.
-        private void UpdateRestrictionSetting() {
+        private void EnsureUpdatedRestrictionSetting() {
+            // Improves performance by not unnecessarily writing to disk.
+            if (_restrictToReactiveActionsOnly == _restrictToReactiveActionsOnlyOld) {
+                return;
+            } else {
+                _restrictToReactiveActionsOnlyOld = _restrictToReactiveActionsOnly;
+            }
+
             var query = _mapekKnowledge.GetParameterizedStringQuery(@"DELETE {
-                    ?platform meta:generateCombinationsOnlyFromOptimalConditions ?oldValue .
-                }
-                INSERT {
-                    ?platform meta:generateCombinationsOnlyFromOptimalConditions @newValue .
-                }
-                WHERE {
-                    ?platform rdf:type sosa:Platform .
-                    ?platform meta:generateCombinationsOnlyFromOptimalConditions ?oldValue .
-                }");
+                ?platform meta:generateCombinationsOnlyFromOptimalConditions ?oldValue .
+            }
+            INSERT {
+                ?platform meta:generateCombinationsOnlyFromOptimalConditions @newValue .
+            }
+            WHERE {
+                ?platform rdf:type sosa:Platform .
+                ?platform meta:generateCombinationsOnlyFromOptimalConditions ?oldValue .
+            }");
 
             query.SetLiteral("newValue", _restrictToReactiveActionsOnly);
 
@@ -208,6 +228,9 @@ namespace Logic.Mapek
 	                ?actionList rdf:rest*/rdf:first ?action . }
                 GROUP BY ?actionCombination");
 
+            // Make sure the updated inferred model is reloaded before querying for ActionCombinations.
+            _mapekKnowledge.LoadModelsFromKnowledgeFromKnowledgeBase();
+            
             var actionCombinationQueryResult = _mapekKnowledge.ExecuteQuery(actionCombinationQuery, true);
 
             actionCombinationQueryResult.Results.ForEach(combinationResult => {

@@ -97,7 +97,7 @@ namespace Logic.Mapek
                 unrestrictedInferenceExecuted = false;
                 reloadInferredModel = true;
             } else if (!_restrictToReactiveActionsOnly && !unrestrictedInferenceExecuted) {
-                //InferActionCombinations();
+                InferActionCombinations();
                 unrestrictedInferenceExecuted = true;
             }
 

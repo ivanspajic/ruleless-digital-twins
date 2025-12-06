@@ -1,6 +1,6 @@
 model roomM370
-  input Integer HeaterState(start = 2);
-  input Integer FloorHeatingState(start = 1);
+  input Integer HeaterState(start = 0);
+  input Integer FloorHeatingState(start = 0);
   input Integer DehumidifierState(start = 0);
   Real RoomTemperature;
   Real RoomHumidity;

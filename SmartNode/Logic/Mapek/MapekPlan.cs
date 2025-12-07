@@ -21,9 +21,9 @@ namespace Logic.Mapek
         private readonly Dictionary<string, IModel> _fmuDict = [];
 	    private readonly Dictionary<string, IInstance> _iDict = [];
         // A setting that determines whether the DT operates in the 'reactive' (true) or 'proactive' (false) mode.
-        private readonly bool _restrictToReactiveActionsOnly = false;
+        private readonly bool _restrictToReactiveActionsOnly = true;
         // Used for performance enhancements.
-        private bool _restrictToReactiveActionsOnlyOld = false;
+        private bool _restrictToReactiveActionsOnlyOld = true;
 
         private readonly ILogger<IMapekPlan> _logger;
         private readonly IFactory _factory;
@@ -92,6 +92,9 @@ namespace Logic.Mapek
             EnsureUpdatedRestrictionSetting();
 
             if (_restrictToReactiveActionsOnly) {
+                if (simulationTreeNode.Simulation.Index != -1) {
+                    UpdateInstanceModelWithSimulationValues(simulationTreeNode.Simulation.PropertyCache!);
+                }
                 InferActionCombinations();
 
                 unrestrictedInferenceExecuted = false;
@@ -168,6 +171,18 @@ namespace Logic.Mapek
             query.SetLiteral("newValue", _restrictToReactiveActionsOnly);
 
             _mapekKnowledge.UpdateModel(query);
+            _mapekKnowledge.CommitInMemoryInstanceModelToKnowledgeBase();
+        }
+
+        private void UpdateInstanceModelWithSimulationValues(PropertyCache simulationPropertyCache) {
+            foreach (var configurableParameterKeyValue in simulationPropertyCache.ConfigurableParameters) {
+                _mapekKnowledge.UpdateConfigurableParameterValue(configurableParameterKeyValue.Value);
+            }
+
+            foreach (var propertyKeyValue in simulationPropertyCache.Properties) {
+                _mapekKnowledge.UpdatePropertyValue(propertyKeyValue.Value);
+            }
+
             _mapekKnowledge.CommitInMemoryInstanceModelToKnowledgeBase();
         }
 

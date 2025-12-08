@@ -55,6 +55,10 @@ namespace TestProject.Mocks
             throw new NotImplementedException();
         }
 
+        public string GetValueAsCultureInvariantString(object value) {
+            throw new NotImplementedException();
+        }
+
         public object GetValueFromSimulationParameter(IInstance fmuInstance, IVariable parameter)
         {
             throw new NotImplementedException();

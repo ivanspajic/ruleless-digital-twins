@@ -15,227 +15,276 @@ namespace Logic.Mapek
 {
     public class MapekPlan : IMapekPlan
     {
+        private const int MaximumSimulationTimeSeconds = 900;
+
         // Required as fields to preserve caching throughout multiple MAPE-K loop cycles.
-	    private static readonly Dictionary<string, IModel> _fmuDict = [];
-	    private static readonly Dictionary<string, IInstance> _iDict = [];
+        private readonly Dictionary<string, IModel> _fmuDict = [];
+	    private readonly Dictionary<string, IInstance> _iDict = [];
+        // A setting that determines whether the DT operates in the 'reactive' (true) or 'proactive' (false) mode.
+        private readonly bool _restrictToReactiveActionsOnly = true;
+        // Used for performance enhancements.
+        private bool _restrictToReactiveActionsOnlyOld = true;
 
-        private readonly ILogger<MapekPlan> _logger;
+        private readonly ILogger<IMapekPlan> _logger;
         private readonly IFactory _factory;
-
-        private const int MaximumSimulationTimeSeconds = 3_600;
+        private readonly IMapekKnowledge _mapekKnowledge;
+        private readonly FilepathArguments _filepathArguments;
 
         public MapekPlan(IServiceProvider serviceProvider)
         {
-            _logger = serviceProvider.GetRequiredService<ILogger<MapekPlan>>();
+            _logger = serviceProvider.GetRequiredService<ILogger<IMapekPlan>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
+            _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
+            _filepathArguments = serviceProvider.GetRequiredService<FilepathArguments>();
         }
 
-        public SimulationConfiguration Plan(IEnumerable<OptimalCondition> optimalConditions,
-            IEnumerable<Models.OntologicalModels.Action> actions,
-            PropertyCache propertyCache,
-            IGraph instanceModel,
-            string fmuDirectory,
-            int actuationSimulationGranularity)
+        public SimulationPath Plan(PropertyCache propertyCache, int lookAheadCycles)
         {
             _logger.LogInformation("Starting the Plan phase.");
 
-            // The two Action types should be split to facilitate simulations. ActuationActions may be de/activated at any point during
-            // the available time to restore an OptimalCondition. On the other hand, ReconfigurationActions can't necessarily be dependent
-            // on a time factor since the underlying soft Sensor algorithms may take long to run. However, they will nonetheless be included
-            // in simulation configurations to ensure that all OptimalConditions are met when simulating different types of Actions in
-            // conjunction. To avoid generating duplicate combinations for simulation ticks (intervals), the removal of ReconfigurationActions
-            // should be done before by splitting the two types of Actions and generating combinations for each separately.
-            var actuationActions = actions.Where(action => action is ActuationAction)
-                .Select(action => action as ActuationAction);
-            var reconfigurationActions = actions.Where(action => action is ReconfigurationAction)
-                .Select(action => action as ReconfigurationAction);
+            _logger.LogInformation("Generating simulations.");
 
-            _logger.LogInformation("Getting Action combinations.");
+            // This is necessary for the fitness function. This might change as we reevaluate how the fitness function should work
+            // and how it should be specified.
+            var optimalConditions = GetAllOptimalConditions(propertyCache);
 
-            // Get all possible combinations for ActuationActions.
-            var actuationActionCombinations = GetActuationActionCombinations(actuationActions!);
-
-            // Get all possible combinations for ReconfigurationActions.
-            var reconfigurationActionCombinations = GetReconfigurationActionCombinations(reconfigurationActions!);
-
-            _logger.LogInformation("Generating simulation configurations.");
-
-            // Get all possible simulation configurations for the given Actions.
-            var simulationConfigurations = GetSimulationConfigurationsFromActionCombinations(actuationActionCombinations,
-                reconfigurationActionCombinations,
-                optimalConditions,
-                actuationSimulationGranularity);
-
-            _logger.LogInformation("Generated a total of {total} simulation configurations.", simulationConfigurations.Count);
+            // Get all combinations of possible simulation configurations for the given number of cycles.
+            var simulationTree = new SimulationTreeNode {
+                Simulation = new Simulation {
+                    ActuationActions = [],
+                    Index = -1,
+                    ReconfigurationActions = [],
+                    PropertyCache = propertyCache
+                },
+                Children = []
+            };
+            var simulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<ActuationAction>>());
 
             // Execute the simulations and obtain their results.
-            Simulate(simulationConfigurations, instanceModel, propertyCache, fmuDirectory);
+            Simulate(simulations);
 
-            // Find the optimal simulation configuration.
-            var optimalConfiguration = GetOptimalConfiguration(instanceModel, propertyCache, optimalConditions, simulationConfigurations);
+            if (!simulationTree.Children.Any()) {
+                _logger.LogInformation("No simulation paths were generated.");
 
-            if (optimalConfiguration != null)
-            {
-                LogOptimalSimulationConfiguration(optimalConfiguration);
+                return new SimulationPath {
+                    Simulations = []
+                };
             }
 
-            return optimalConfiguration!;
+            _logger.LogInformation("Generated a total of {total} simulation paths.", simulationTree.SimulationPaths.Count());
+
+            // Find the optimal simulation path.
+            var optimalSimulationPath = GetOptimalSimulationPath(propertyCache, optimalConditions, simulationTree.SimulationPaths);
+
+            LogOptimalSimulationPath(optimalSimulationPath);
+
+            return optimalSimulationPath!;
         }
 
-        private static IEnumerable<IEnumerable<ActuationAction>> GetActuationActionCombinations(IEnumerable<ActuationAction> actuationActions)
-        {
-            var actuationActionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(new ActionSetEqualityComparer());
+        // TODO: consider making this async in the future.
+        // The booleans flags are used for performance improvements.
+        private IEnumerable<Simulation> GetSimulationsAndGenerateSimulationTree(int lookAheadCycles,
+            int currentCycle,
+            SimulationTreeNode simulationTreeNode,
+            bool unrestrictedInferenceExecuted,
+            bool reloadInferredModel,
+            IEnumerable<IEnumerable<ActuationAction>> actionCombinations) {
+            EnsureUpdatedRestrictionSetting();
 
-            // Group ActuationActions by their Actuators to allow creating combinations that don't consist of different states of the same Actuator.
-            var actuationActionsByActuatorMap = new Dictionary<string, List<ActuationAction>>();
+            if (_restrictToReactiveActionsOnly) {
+                if (simulationTreeNode.Simulation.Index != -1) {
+                    UpdateInstanceModelWithSimulationValues(simulationTreeNode.Simulation.PropertyCache!);
+                }
+                InferActionCombinations();
 
-            foreach (var actuationAction in actuationActions)
-            {
-                if (actuationActionsByActuatorMap.TryGetValue(actuationAction.Actuator.Name, out List<ActuationAction>? actuationActionsInMap))
-                {
-                    actuationActionsInMap.Add(actuationAction);
-                }
-                else
-                {
-                    actuationActionsByActuatorMap.Add(actuationAction.Actuator.Name, [ actuationAction ]);
-                }
+                unrestrictedInferenceExecuted = false;
+                reloadInferredModel = true;
+            } else if (!_restrictToReactiveActionsOnly && !unrestrictedInferenceExecuted) {
+                InferActionCombinations();
+                unrestrictedInferenceExecuted = true;
             }
 
-            // Convert to a simple collection.
-            var actuatorActuationsByActuator = new List<List<ActuationAction>>();
+            if (reloadInferredModel) {
+                actionCombinations = GetActionCombinations();
 
-            foreach (var keyValuePair in actuationActionsByActuatorMap)
-            {
-                actuatorActuationsByActuator.Add(keyValuePair.Value);
+                reloadInferredModel = false;
             }
 
-            // Get the Cartesian product of ActuationActions that don't share Actuators.
-            return GetNaryCartesianProducts(actuatorActuationsByActuator);
+            var simulationTreeNodeChildren = new List<SimulationTreeNode>();
+
+            foreach (var actionCombination in actionCombinations) {
+                var simulation = new Simulation {
+                    ActuationActions = actionCombination,
+                    Index = currentCycle,
+                    ReconfigurationActions = [], // TODO: add support for ReconfigurationActions.
+                    PropertyCache = GetPropertyCacheCopy(simulationTreeNode.Simulation.PropertyCache!)
+                };
+
+                yield return simulation;
+
+                var keepSimulation = GetKeepSimulation(simulation);
+
+                var currentSimulationTreeNode = new SimulationTreeNode {
+                    Simulation = simulation,
+                    Children = []
+                };
+
+                if (currentCycle < lookAheadCycles - 1 && keepSimulation) {
+                    var childSimulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles,
+                        currentCycle + 1,
+                        currentSimulationTreeNode,
+                        unrestrictedInferenceExecuted,
+                        reloadInferredModel,
+                        actionCombinations);
+
+                    foreach (var childSimulation in childSimulations) {
+                        yield return childSimulation;
+                    }
+                }
+
+                simulationTreeNodeChildren.Add(currentSimulationTreeNode);
+            }
+
+            simulationTreeNode.Children = simulationTreeNodeChildren;
         }
 
-        private static IEnumerable<IEnumerable<ReconfigurationAction>> GetReconfigurationActionCombinations(IEnumerable<ReconfigurationAction> reconfigurationActions)
-        {
-            var reconfigurationActionCombinations = new HashSet<HashSet<Models.OntologicalModels.Action>>(new ActionSetEqualityComparer());
-
-            // Group ReconfigurationActions by their ConfigurableParameter to allow creating combinations that don't consist of different reconfigurations of the same Property.
-            var reconfigurationActionsByConfigurableParameterMap = new Dictionary<string, List<ReconfigurationAction>>();
-
-            foreach (var reconfigurationAction in reconfigurationActions)
-            {
-                if (reconfigurationActionsByConfigurableParameterMap.TryGetValue(reconfigurationAction.ConfigurableParameter.Name,
-                    out List<ReconfigurationAction>? reconfigurationActionsInMap))
-                {
-                    reconfigurationActionsInMap.Add(reconfigurationAction);
-                }
-                else
-                {
-                    reconfigurationActionsByConfigurableParameterMap.Add(reconfigurationAction.ConfigurableParameter.Name, [reconfigurationAction]);
-                }
+        // Updates the setting for restricting Actions and thus ActionCombinations only to those mitigating OptimalConditions.
+        private void EnsureUpdatedRestrictionSetting() {
+            // Improves performance by not unnecessarily writing to disk.
+            if (_restrictToReactiveActionsOnly == _restrictToReactiveActionsOnlyOld) {
+                return;
+            } else {
+                _restrictToReactiveActionsOnlyOld = _restrictToReactiveActionsOnly;
             }
 
-            // Convert to a simple collection.
-            var reconfigurationActionsByConfigurableParameter = new List<List<ReconfigurationAction>>();
-
-            foreach (var keyValuePair in reconfigurationActionsByConfigurableParameterMap)
-            {
-                reconfigurationActionsByConfigurableParameter.Add(keyValuePair.Value);
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"DELETE {
+                ?platform meta:generateCombinationsOnlyFromOptimalConditions ?oldValue .
             }
+            INSERT {
+                ?platform meta:generateCombinationsOnlyFromOptimalConditions @newValue .
+            }
+            WHERE {
+                ?platform rdf:type sosa:Platform .
+                ?platform meta:generateCombinationsOnlyFromOptimalConditions ?oldValue .
+            }");
 
-            // Get the Cartesian product of ReconfigurationActions that don't share ConfigurableParameters.
-            return GetNaryCartesianProducts(reconfigurationActionsByConfigurableParameter);
+            query.SetLiteral("newValue", _restrictToReactiveActionsOnly);
+
+            _mapekKnowledge.UpdateModel(query);
+            _mapekKnowledge.CommitInMemoryInstanceModelToKnowledgeBase();
         }
 
-        private static List<SimulationConfiguration> GetSimulationConfigurationsFromActionCombinations(IEnumerable<IEnumerable<ActuationAction>> actuationActionCombinations,
-            IEnumerable<IEnumerable<ReconfigurationAction>> reconfigurationActionCombinations,
-            IEnumerable<OptimalCondition> optimalConditions,
-            int simulationGranularity)
-        {
-            var simulationConfigurations = new List<SimulationConfiguration>();
-
-            // Get the unsatisfied OptimalCondition with the lowest mitigation time to use it as the simulation's maximum time.
-            var unsatisfiedOptimalConditions = optimalConditions.Where(optimalCondition => optimalCondition.UnsatisfiedAtomicConstraints.Any());
-            var maximumSimulationTime = 0;
-            if (unsatisfiedOptimalConditions.Any())
-            {
-                maximumSimulationTime = GetMaximumSimulationTime(unsatisfiedOptimalConditions);
-            }
-            else
-            {
-                maximumSimulationTime = MaximumSimulationTimeSeconds;
+        private void UpdateInstanceModelWithSimulationValues(PropertyCache simulationPropertyCache) {
+            foreach (var configurableParameterKeyValue in simulationPropertyCache.ConfigurableParameters) {
+                _mapekKnowledge.UpdateConfigurableParameterValue(configurableParameterKeyValue.Value);
             }
 
-            if (actuationActionCombinations.Any())
-            {
-                // Populate simulation ticks with every possible ActuationAction combination by index.
-                var allSimulationTicksByIndex = new List<List<SimulationTick>>();
-
-                for (var i = 0; i < simulationGranularity; i++)
-                {
-                    var simulationTicksWithCurrentIndex = new List<SimulationTick>();
-
-                    foreach (var actuationActionCombination in actuationActionCombinations)
-                    {
-                        var timeInterval = maximumSimulationTime / simulationGranularity;
-
-                        var simulationTick = new SimulationTick
-                        {
-                            ActionsToExecute = actuationActionCombination,
-                            TickIndex = i,
-                            TickDurationSeconds = timeInterval
-                        };
-
-                        simulationTicksWithCurrentIndex.Add(simulationTick);
-                    }
-
-                    allSimulationTicksByIndex.Add(simulationTicksWithCurrentIndex);
-                }
-
-                // Get all possible Cartesian pairings of simulation ticks that together form full simulation configurations.
-                var simulationTickCombinations = GetNaryCartesianProducts(allSimulationTicksByIndex);
-
-                foreach (var simulationTickCombination in simulationTickCombinations)
-                {
-                    SimulationConfiguration simulationConfiguration = null!;
-
-                    if (reconfigurationActionCombinations.Any())
-                    {
-                        foreach (var reconfigurationActionCombination in reconfigurationActionCombinations)
-                        {
-                            simulationConfiguration = new SimulationConfiguration
-                            {
-                                SimulationTicks = simulationTickCombination.Reverse(), // Must be reversed due to how the combinations are constructed.
-                                PostTickActions = reconfigurationActionCombination
-                            };
-                        }
-                    }
-                    else
-                    {
-                        simulationConfiguration = new SimulationConfiguration
-                        {
-                            SimulationTicks = simulationTickCombination.Reverse(), // Must be reversed due to how the combinations are constructed.
-                            PostTickActions = []
-                        };
-                    }
-
-                    simulationConfigurations.Add(simulationConfiguration);
-                }
-            }
-            else
-            {
-                // In case of no ActuationActions present, simply construct simulation configurations from all combinations of ReconfigurationActions.
-                foreach (var reconfigurationActionCombination in reconfigurationActionCombinations)
-                {
-                    var simulationConfiguration = new SimulationConfiguration
-                    {
-                        SimulationTicks = [],
-                        PostTickActions = reconfigurationActionCombination
-                    };
-
-                    simulationConfigurations.Add(simulationConfiguration);
-                }
+            foreach (var propertyKeyValue in simulationPropertyCache.Properties) {
+                _mapekKnowledge.UpdatePropertyValue(propertyKeyValue.Value);
             }
 
-            return simulationConfigurations;
+            _mapekKnowledge.CommitInMemoryInstanceModelToKnowledgeBase();
+        }
+
+        private void InferActionCombinations() {
+            // Execute the inference engine as an external process.
+            var processInfo = new ProcessStartInfo {
+                FileName = "java", // Assumes JAVA is registered in the PATH environment variable (or equivalent).
+                Arguments = $"-jar \"{_filepathArguments.InferenceEngineFilepath}\" " +
+                    $"\"{_filepathArguments.OntologyFilepath}\" " +
+                    $"\"{_filepathArguments.InstanceModelFilepath}\" " +
+                    $"\"{_filepathArguments.InferenceRulesFilepath}\" " +
+                    $"\"{_filepathArguments.InferredModelFilepath}\"",
+                RedirectStandardOutput = true, // Unfortunately, doesn't seem to work.
+                RedirectStandardError = true, // Unfortunately, doesn't seem to work.
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = Directory.GetParent(_filepathArguments.InstanceModelFilepath)!.FullName
+            };
+
+            using var process = Process.Start(processInfo);
+
+            _logger.LogInformation("Inferring action combinations.");
+
+            process!.OutputDataReceived += (sender, e) => {
+                _logger.LogInformation(e.Data);
+            };
+
+            process.ErrorDataReceived += (sender, e) => {
+                _logger.LogInformation(e.Data);
+            };
+
+            _logger.LogInformation("Process started with ID {processId}.", process.Id);
+            process.WaitForExit();
+
+            if (process.ExitCode != 0) {
+                throw new Exception($"The inference engine encountered an error. Process {process.Id} exited with code {process.ExitCode}.");
+            }
+
+            _logger.LogInformation("Process {processId} exited with code {processExitCode}.", process.Id, process.ExitCode);
+        }
+
+        // This method currently only supports ActuationActions.
+        private List<List<ActuationAction>> GetActionCombinations() {
+            var actionCombinations = new List<List<ActuationAction>>();
+
+            var actionCombinationQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actionCombination (GROUP_CONCAT(?action; SEPARATOR="" "") AS ?actions) WHERE {
+	                ?actionCombination rdf:type meta:ActionCombination .
+	                FILTER NOT EXISTS {
+		                {
+			                ?actionCombination rdf:comment ""duplicate""^^<http://www.w3.org/2001/XMLSchema#string> .
+		                }
+		                UNION
+		                {
+			                ?actionCombination rdf:comment ""not final""^^<http://www.w3.org/2001/XMLSchema#string> .
+		                }
+	                }
+	                ?actionCombination meta:hasActions ?actionList .
+	                ?actionList rdf:rest*/rdf:first ?action . }
+                GROUP BY ?actionCombination");
+
+            // Make sure the updated inferred model is reloaded before querying for ActionCombinations.
+            _mapekKnowledge.LoadModelsFromKnowledgeFromKnowledgeBase();
+            
+            var actionCombinationQueryResult = _mapekKnowledge.ExecuteQuery(actionCombinationQuery, true);
+
+            actionCombinationQueryResult.Results.ForEach(combinationResult => {
+                var actions = combinationResult["actions"].ToString().Split('^')[0].Split(' ').ToList();
+
+                var combination = new List<ActuationAction>();
+
+                actions.ForEach(action => {
+                    var actionQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState WHERE {
+                        @action rdf:type meta:ActuationAction .
+                        @action meta:hasActuator ?actuator .
+                        @action meta:hasActuatorState ?actuatorState . }");
+
+                    actionQuery.SetUri("action", new Uri(action));
+
+                    var actionQueryResult = _mapekKnowledge.ExecuteQuery(actionQuery, true);
+
+                    actionQueryResult.Results.ForEach(actionResult => {
+                        var actuatorName = actionResult["actuator"].ToString();
+                        var actuatorState = actionResult["actuatorState"].ToString().Split('^')[0];
+
+                        combination.Add(new ActuationAction {
+                            Name = action,
+                            Actuator = new Actuator {
+                                Name = actuatorName
+                            },
+                            NewStateValue = actuatorState
+                        });
+                    });
+                });
+
+                actionCombinations.Add(combination);
+            });
+
+            return actionCombinations;
+        }
+
+        private bool GetKeepSimulation(Simulation simulation) {
+            return true; // Here, we can implement dynamic pruning logic based on the values of the simulation's property cache.
         }
 
         public static IEnumerable<IEnumerable<T>> GetNaryCartesianProducts<T> (IEnumerable<IEnumerable<T>> sequences)
@@ -249,7 +298,7 @@ namespace Logic.Mapek
                 select accseq.Concat(new[] { item }));
         }
  
-        public static HashSet<HashSet<T>> OldGetNaryCartesianProducts<T>(IEnumerable<IEnumerable<T>> originalCollectionOfCollections)
+        internal static HashSet<HashSet<T>> OldGetNaryCartesianProducts<T>(IEnumerable<IEnumerable<T>> originalCollectionOfCollections)
         {
             // This method gets the n-ary Cartesian product of multiple collections.
             var combinations = new HashSet<HashSet<T>>(new SetEqualityComparer<T>());
@@ -287,10 +336,14 @@ namespace Logic.Mapek
             return combinations;
         }
 
-        private void Simulate(IEnumerable<SimulationConfiguration> simulationConfigurations, IGraph instanceModel, PropertyCache propertyCache, string fmuDirectory)
+        private void Simulate(IEnumerable<Simulation> simulations)
         {
+            if (!simulations.Any()) {
+                return;
+            }
+
             // Retrieve the host platform FMU and its simulation fidelity for ActuationAction simulations.
-            var fmuModel = GetHostPlatformFmuModel(instanceModel, simulationConfigurations.First(), fmuDirectory);
+            var fmuModel = GetHostPlatformFmuModel(simulations.First(), _filepathArguments.FmuDirectory);
 
             // Measure simulation time.
             var stopwatch = new Stopwatch();
@@ -298,77 +351,15 @@ namespace Logic.Mapek
 
             int i = 0;
             // TODO: Parallelize simulations (#13).
-            foreach (var simulationConfiguration in simulationConfigurations)
+            foreach (var simulation in simulations)
             {
                 _logger.LogInformation("Running simulation #{run}", i++);
 
-                // Make a deep copy of the property cache for the current simulation configuration.
-                var propertyCacheCopy = GetPropertyCacheCopy(propertyCache);
-
-                if (simulationConfiguration.SimulationTicks.Any())
-                {
-                    // TODO: pass `fmuModel` instead of (some of) its components?
-                    ExecuteActuationActionFmu(fmuModel.FilePath, simulationConfiguration, instanceModel, propertyCacheCopy, fmuModel.SimulationFidelitySeconds);
-                }
-
-                if (simulationConfiguration.PostTickActions.Any())
-                {
-                    // Executing/simulating soft sensors during the Plan phase is not yet supported.
-                }
-
-                // Assign the final Property values to the results of the simulation configuration.
-                simulationConfiguration.ResultingPropertyCache = propertyCacheCopy;
+                ExecuteActuationActionFmu(fmuModel, simulation);
             }
 
             stopwatch.Stop();
-            _logger.LogInformation("Total simulation time (minutes): {elapsedTime}", (double)stopwatch.ElapsedMilliseconds / 1000 / 60);
-        }
-
-        private FmuModel GetHostPlatformFmuModel(IGraph instanceModel, SimulationConfiguration simulationConfiguration, string fmuDirectory)
-        {
-            // Retrieve all Actuators to be used in the simulations and ensure that they belong to the same host Platform such that the Platform's
-            // FMU will contain all of their relevant input/output variables.
-            var actuatorNames = new HashSet<string>();
-            var clauseBuilder = new StringBuilder();
-
-            foreach (var simulationTick in simulationConfiguration.SimulationTicks)
-            {
-                foreach (var actuationAction in simulationTick.ActionsToExecute)
-                {
-                    if (!actuatorNames.Contains(actuationAction.Actuator.Name))
-                    {
-                        actuatorNames.Add(actuationAction.Actuator.Name);
-                        
-                        // Add the Actuator name to the query filter.
-                        clauseBuilder.AppendLine("?platform sosa:hosts <" + actuationAction.Actuator.Name + "> .");
-                    }
-                }
-            }
-
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            var clause = clauseBuilder.ToString();
-
-            query.CommandText = @"SELECT ?fmuModel ?fmuFilePath ?simulationFidelitySeconds WHERE {
-                ?platform rdf:type sosa:Platform . " +
-                clause +
-                @"?platform meta:hasSimulationModel ?fmuModel .
-                ?fmuModel rdf:type meta:FmuModel .
-                ?fmuModel meta:hasURI ?fmuFilePath .
-                ?fmuModel meta:hasSimulationFidelitySeconds ?simulationFidelitySeconds . }";
-
-            var queryResult = instanceModel.ExecuteQuery(query, _logger);
-
-            // There can theoretically be multiple Platforms hosting the same Actuator, but we limit ourselves to expect a single Platform
-            // per instance model. There should therefore be only one result.
-            var fmuModel = queryResult.Results[0];
-
-            return new FmuModel
-            {
-                Name = fmuModel["fmuModel"].ToString(),
-                FilePath = Path.Combine(fmuDirectory, fmuModel["fmuFilePath"].ToString().Split('^')[0]),
-                SimulationFidelitySeconds = int.Parse(fmuModel["simulationFidelitySeconds"].ToString().Split('^')[0])
-            };
+            _logger.LogInformation("Total simulation time (seconds): {elapsedTime}", (double)stopwatch.ElapsedMilliseconds / 1000);
         }
 
         private static PropertyCache GetPropertyCacheCopy(PropertyCache originalPropertyCache)
@@ -402,23 +393,21 @@ namespace Logic.Mapek
             return propertyCacheCopy;
         }
 
-        private List<Property> GetObservablePropertiesFromPropertyCache(IGraph instanceModel, PropertyCache propertyCache)
+        private List<Property> GetObservablePropertiesFromPropertyCache(PropertyCache propertyCache)
         {
             var observableProperties = new List<Property>();
 
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            query.CommandText = @"SELECT DISTINCT ?observableProperty WHERE {
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty WHERE {
                 ?sensor rdf:type sosa:Sensor .
-                ?sensor sosa:observes ?observableProperty . }";
+                ?sensor sosa:observes ?observableProperty . }");
 
-            var queryResult = instanceModel.ExecuteQuery(query, _logger);
+            var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
             foreach (var result in queryResult.Results)
             {
                 var propertyName = result["observableProperty"].ToString();
 
-                if (propertyCache.Properties.TryGetValue(propertyName, out Property property))
+                if (propertyCache.Properties.TryGetValue(propertyName, out Property? property))
                 {
                     observableProperties.Add(property);
                 }
@@ -431,28 +420,57 @@ namespace Logic.Mapek
             return observableProperties;
         }
 
-        private static int GetMaximumSimulationTime(IEnumerable<OptimalCondition> optimalConditions)
-        {
-            return optimalConditions.Select(oc => oc.ReachedInMaximumSeconds).Min();
+        public FmuModel GetHostPlatformFmuModel(Simulation simulation, string fmuDirectory) {
+            // Retrieve all Actuators to be used in the simulations and ensure that they belong to the same host Platform such that the Platform's
+            // FMU will contain all of their relevant input/output variables.
+            var actuatorNames = new HashSet<string>();
+            var clauseBuilder = new StringBuilder();
+
+            foreach (var actuationAction in simulation.ActuationActions) {
+                if (!actuatorNames.Contains(actuationAction.Actuator.Name)) {
+                    actuatorNames.Add(actuationAction.Actuator.Name);
+
+                    // Add the Actuator name to the query filter.
+                    clauseBuilder.AppendLine("?platform sosa:hosts <" + actuationAction.Actuator.Name + "> .");
+                }
+            }
+
+            var clause = clauseBuilder.ToString();
+
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?fmuModel ?fmuFilePath ?simulationFidelitySeconds WHERE {
+                ?platform rdf:type sosa:Platform . " +
+                clause +
+                @"?platform meta:hasSimulationModel ?fmuModel .
+                ?fmuModel rdf:type meta:FmuModel .
+                ?fmuModel meta:hasURI ?fmuFilePath .
+                ?fmuModel meta:hasSimulationFidelitySeconds ?simulationFidelitySeconds . }");
+
+            var queryResult = _mapekKnowledge.ExecuteQuery(query);
+
+            // There can theoretically be multiple Platforms hosting the same Actuator, but we limit ourselves to expect a single Platform
+            // per instance model. There should therefore be only one result.
+            var fmuModel = queryResult.Results[0];
+
+            return new FmuModel {
+                Name = fmuModel["fmuModel"].ToString(),
+                Filepath = Path.Combine(fmuDirectory, fmuModel["fmuFilePath"].ToString().Split('^')[0]),
+                SimulationFidelitySeconds = int.Parse(fmuModel["simulationFidelitySeconds"].ToString().Split('^')[0])
+            };
         }
 
-        private void ExecuteActuationActionFmu(string fmuFilePath,
-            SimulationConfiguration simulationConfiguration,
-            IGraph instanceModel,
-            PropertyCache propertyCacheCopy,
-            int simulationFidelitySeconds)
+        private void ExecuteActuationActionFmu(FmuModel fmuModel, Simulation simulation)
         {
             // The LogDebug calls here are primarily to keep an eye on crashes in the FMU which are otherwise a tad harder to track down.
-            _logger.LogInformation("Simulation {simulationConfiguration} ({ticks} ticks)", simulationConfiguration, simulationConfiguration.SimulationTicks.Count());
-            if (!_fmuDict.TryGetValue(fmuFilePath, out IModel? model))
+            _logger.LogInformation("Simulation {simulation}", simulation);
+            if (!_fmuDict.TryGetValue(fmuModel.Filepath, out IModel? model))
             {
-                _logger.LogDebug("Loading Model {filePath}", fmuFilePath);
-                model = Model.Load(fmuFilePath, new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]));
-                _fmuDict.Add(fmuFilePath, model);
+                _logger.LogDebug("Loading Model {filePath}", fmuModel.Filepath);
+                model = Model.Load(fmuModel.Filepath, new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]));
+                _fmuDict.Add(fmuModel.Filepath, model);
             }
             Debug.Assert(model != null, "Model is null after loading.");
             // We're only using one instance per FMU, so we can just use the path as name.
-            var instanceName = fmuFilePath;
+            var instanceName = fmuModel.Filepath;
             if (!_iDict.TryGetValue(instanceName, out IInstance? fmuInstance))
             {
                 _logger.LogDebug("Creating instance.");
@@ -470,48 +488,45 @@ namespace Logic.Mapek
             }
             Debug.Assert(fmuInstance != null, "Instance is null after creation.");
 
-            // Run the simulation by executing ActuationActions in their respective simulation intervals.
-            foreach (var simulationTick in simulationConfiguration.SimulationTicks)
+            // Run the simulation by executing ActuationActions.
+            var fmuActuationInputs = new List<(string, string, object)>();
+
+            // Get all ObservableProperties and add them to the inputs for the FMU.
+            var observableProperties = GetObservablePropertiesFromPropertyCache(simulation.PropertyCache!);
+
+            foreach (var observableProperty in observableProperties)
             {
-                var fmuActuationInputs = new List<(string, string, object)>();
-
-                // Get all ObservableProperties and add them to the inputs for the FMU.
-                var observableProperties = GetObservablePropertiesFromPropertyCache(instanceModel, propertyCacheCopy);
-
-                foreach (var observableProperty in observableProperties)
-                {
-                    // Shave off the long name URIs from the instance model.
-                    var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
-                    fmuActuationInputs.Add((simpleObservablePropertyName, observableProperty.OwlType, observableProperty.Value));
-                }
-
-                // Add all ActuatorStates to the inputs for the FMU.
-                foreach (var actuationAction in simulationTick.ActionsToExecute)
-                {
-                    // Shave off the long name URIs from the instance model.
-                    var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.Actuator.Name);
-                    fmuActuationInputs.Add((simpleActuatorName + "State", "int", actuationAction.NewStateValue));
-                }
-
-                _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
-                AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
-
-                _logger.LogDebug("Tick");
-                // Keep simulation fidelity while advancing an appropriate amount of time.
-                var maximumSteps = (double)simulationTick.TickDurationSeconds / simulationFidelitySeconds;
-                var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
-                var difference = maximumSteps - maximumStepsRoundedDown;
-
-                for (var i = 0; i < maximumStepsRoundedDown; i++)
-                {
-                    fmuInstance.AdvanceTime(simulationFidelitySeconds);
-                }
-
-                // Advance the remainder of time to stay true to the simulation interval duration.
-                fmuInstance.AdvanceTime(difference);
-
-                AssignPropertyCacheCopyValues(fmuInstance, propertyCacheCopy, model.Variables);
+                // Shave off the long name URIs from the instance model.
+                var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
+                fmuActuationInputs.Add((simpleObservablePropertyName, observableProperty.OwlType, observableProperty.Value));
             }
+
+            // Add all ActuatorStates to the inputs for the FMU.
+            foreach (var actuationAction in simulation.ActuationActions)
+            {
+                // Shave off the long name URIs from the instance model.
+                var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.Actuator.Name);
+                fmuActuationInputs.Add((simpleActuatorName + "State", "http://www.w3.org/2001/XMLSchema#int", actuationAction.NewStateValue));
+            }
+
+            _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
+            AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
+
+            _logger.LogDebug("Tick");
+            // Advance the FMU time for the duration of the simulation tick in steps of simulation fidelity.
+            var maximumSteps = (double)MaximumSimulationTimeSeconds / fmuModel.SimulationFidelitySeconds;
+            var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
+            var difference = maximumSteps - maximumStepsRoundedDown;
+
+            for (var i = 0; i < maximumStepsRoundedDown; i++)
+            {
+                fmuInstance.AdvanceTime(fmuModel.SimulationFidelitySeconds);
+            }
+
+            // Advance the remainder of time to stay true to the simulation duration.
+            fmuInstance.AdvanceTime(difference);
+
+            AssignPropertyCacheCopyValues(fmuInstance, simulation.PropertyCache!, model.Variables);
         }
 
         private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs)
@@ -543,6 +558,419 @@ namespace Logic.Mapek
             _logger.LogInformation(logMsg);   
         }
 
+        private List<OptimalCondition> GetAllOptimalConditions(PropertyCache propertyCache) {
+            var optimalConditions = new List<OptimalCondition>();
+
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?optimalCondition ?property ?reachedInMaximumSeconds WHERE {
+                ?optimalCondition rdf:type meta:OptimalCondition .
+                ?optimalCondition ssn:forProperty ?property .
+                ?optimalCondition meta:reachedInMaximumSeconds ?reachedInMaximumSeconds . }");
+
+            var queryResult = _mapekKnowledge.ExecuteQuery(query);
+
+            // For each OptimalCondition, process its respective constraints and get the appropriate Actions
+            // for mitigation.
+            foreach (var result in queryResult.Results) {
+                var optimalConditionNode = result["optimalCondition"];
+                var propertyNode = result["property"];
+                var propertyName = propertyNode.ToString();
+
+                Property property = null!;
+
+                if (propertyCache.Properties.ContainsKey(propertyName)) {
+                    property = propertyCache.Properties[propertyName];
+                } else if (propertyCache.ConfigurableParameters.ContainsKey(propertyName)) {
+                    property = propertyCache.ConfigurableParameters[propertyName];
+                } else {
+                    throw new Exception($"Property {propertyName} not found in the property cache.");
+                }
+
+                var reachedInMaximumSeconds = result["reachedInMaximumSeconds"];
+                var reachedInMaximumSecondsValue = reachedInMaximumSeconds.ToString().Split('^')[0];
+
+                // Build this OptimalCondition's full expression tree.
+                var constraints = GetOptimalConditionConstraints(optimalConditionNode, propertyNode, reachedInMaximumSeconds) ??
+                    throw new Exception($"OptimalCondition {optimalConditionNode.ToString()} has no constraints.");
+
+                var optimalCondition = new OptimalCondition() {
+                    Constraints = constraints,
+                    ConstraintValueType = property.OwlType,
+                    Name = optimalConditionNode.ToString(),
+                    Property = propertyName,
+                    ReachedInMaximumSeconds = int.Parse(reachedInMaximumSecondsValue),
+                    UnsatisfiedAtomicConstraints = []
+                };
+
+                optimalConditions.Add(optimalCondition);
+            }
+
+            return optimalConditions;
+        }
+
+        private List<ConstraintExpression> GetOptimalConditionConstraints(INode optimalCondition, INode property, INode reachedInMaximumSeconds) {
+            var constraintExpressions = new List<ConstraintExpression>();
+
+            // This could be made more streamlined and elegant through the use of fewer, more cleverly combined queries, however,
+            // SPARQL doesn't handle bNode identities, so these can't be used as variables for later referencing. For this reason, it's
+            // necessary to loop through all range constraint operators (">", ">=", "<", "<=") to execute the same queries with each one.
+            //
+            // Documentation: (https://www.w3.org/TR/sparql11-query/#BlankNodesInResults)
+            // "An application writer should not expect blank node labels in a query to refer to a particular blank node in the data."
+            // For this reason, queries can be constructed with contiguous chains of bNodes, however, saving their INode objects and
+            // using them as variables in subsequent queries doesn't work.
+            //
+            // A workaround would certainly be to insert triples as markings (much like for the inference rules), but the instance
+            // model should probably not be polluted in light of other options.
+            var operatorFilters = new List<ConstraintType>
+            {
+                ConstraintType.GreaterThan,
+                ConstraintType.GreaterThanOrEqualTo,
+                ConstraintType.LessThan,
+                ConstraintType.LessThanOrEqualTo
+            };
+
+            AddConstraintsOfFirstOrOnlyRangeValues(constraintExpressions,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                operatorFilters);
+
+            AddConstraintsOfSecondRangeValues(constraintExpressions,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                operatorFilters);
+
+            AddConstraintsOfDisjunctionsOfOneAndOne(constraintExpressions,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                operatorFilters);
+
+            // For models created with Protege (and the OWL API), disjunctions containing 1 and then 2 values will be converted to those
+            // containing 2 and then 1.
+            AddConstraintsOfDisjunctionsOfTwoAndOne(constraintExpressions,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                operatorFilters);
+
+            AddConstraintsOfDisjunctionsOfTwoAndTwo(constraintExpressions,
+                optimalCondition,
+                property,
+                reachedInMaximumSeconds,
+                operatorFilters);
+
+            return constraintExpressions;
+        }
+
+        private void AddConstraintsOfFirstOrOnlyRangeValues(IList<ConstraintExpression> constraintExpressions,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            IEnumerable<ConstraintType> constraintTypes) {
+            foreach (var constraintType in constraintTypes) {
+                var operatorFilter = GetOperatorFilterFromConstraintType(constraintType);
+
+                // Gets the constraints of first or only values of ranges.
+                var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onProperty meta:hasValueConstraint .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:withRestrictions ?bNode3 .
+                    ?bNode3 rdf:first [ " + operatorFilter + " ?constraint ] .}");
+
+                query.SetParameter("optimalCondition", optimalCondition);
+                query.SetParameter("property", property);
+                query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+                var queryResult = _mapekKnowledge.ExecuteQuery(query);
+
+                foreach (var result in queryResult.Results) {
+                    var constraint = result["constraint"].ToString().Split('^')[0];
+
+                    var constraintExpression = new AtomicConstraintExpression {
+                        Right = constraint,
+                        ConstraintType = constraintType
+                    };
+
+                    constraintExpressions.Add(constraintExpression);
+                }
+            }
+        }
+
+        private void AddConstraintsOfSecondRangeValues(IList<ConstraintExpression> constraintExpressions,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            IEnumerable<ConstraintType> constraintTypes) {
+            foreach (var constraintType in constraintTypes) {
+                var operatorFilter = GetOperatorFilterFromConstraintType(constraintType);
+
+                // Gets the constraints of the second values of ranges.
+                var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?constraint WHERE {
+                    @optimalCondition ssn:forProperty @property .
+                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @optimalCondition rdf:type ?bNode1 .
+                    ?bNode1 owl:onProperty meta:hasValueConstraint .
+                    ?bNode1 owl:onDataRange ?bNode2 .
+                    ?bNode2 owl:withRestrictions ?bNode3 .
+                    ?bNode3 rdf:rest ?bNode4 .
+                    ?bNode4 rdf:first [ " + operatorFilter + " ?constraint ] . }");
+
+                query.SetParameter("optimalCondition", optimalCondition);
+                query.SetParameter("property", property);
+                query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+                var queryResult = _mapekKnowledge.ExecuteQuery(query);
+
+                foreach (var result in queryResult.Results) {
+                    var constraint = result["constraint"].ToString().Split('^')[0];
+
+                    var constraintExpression = new AtomicConstraintExpression {
+                        Right = constraint,
+                        ConstraintType = constraintType
+                    };
+
+                    constraintExpressions.Add(constraintExpression);
+                }
+            }
+        }
+
+        private void AddConstraintsOfDisjunctionsOfOneAndOne(IList<ConstraintExpression> constraintExpressions,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            IEnumerable<ConstraintType> constraintTypes) {
+            foreach (var constraintType1 in constraintTypes) {
+                var operatorFilter1 = GetOperatorFilterFromConstraintType(constraintType1);
+
+                foreach (var constraintType2 in constraintTypes) {
+                    var operatorFilter2 = GetOperatorFilterFromConstraintType(constraintType2);
+
+                    // Gets the constraints of two disjunctive, single-valued ranges.
+                    var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?constraint1 ?constraint2 WHERE {
+                        @optimalCondition ssn:forProperty @property .
+                        @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                        @optimalCondition rdf:type ?bNode1 .
+                        ?bNode1 owl:onProperty meta:hasValueConstraint .
+                        ?bNode1 owl:onDataRange ?bNode2 .
+                        ?bNode2 owl:unionOf ?bNode3 .
+                        ?bNode3 rdf:first ?bNode4_1 .
+                        ?bNode4_1 owl:withRestrictions ?bNode5_1 .
+                        ?bNode5_1 rdf:first [ " + operatorFilter1 + @" ?constraint1 ] .
+                        ?bNode5_1 rdf:rest () .
+                        ?bNode3 rdf:rest ?bNode4_2 .
+                        ?bNode4_2 rdf:first ?bNode5_2 .
+                        ?bNode5_2 owl:withRestrictions ?bNode6_2 .
+                        ?bNode6_2 rdf:first [ " + operatorFilter2 + @" ?constraint2 ] .
+                        ?bNode6_2 rdf:rest () . }");
+
+                    query.SetParameter("optimalCondition", optimalCondition);
+                    query.SetParameter("property", property);
+                    query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+                    var queryResult = _mapekKnowledge.ExecuteQuery(query);
+
+                    foreach (var result in queryResult.Results) {
+                        var leftConstraint = result["constraint1"].ToString().Split('^')[0];
+                        var rightConstraint = result["constraint2"].ToString().Split('^')[0];
+
+                        var leftConstraintExpression = new AtomicConstraintExpression {
+                            Right = leftConstraint,
+                            ConstraintType = constraintType1
+                        };
+                        var rightConstraintExpression = new AtomicConstraintExpression {
+                            Right = rightConstraint,
+                            ConstraintType = constraintType2
+                        };
+                        var disjunctiveExpression = new NestedConstraintExpression {
+                            Left = leftConstraintExpression,
+                            Right = rightConstraintExpression,
+                            ConstraintType = ConstraintType.Or
+                        };
+
+                        constraintExpressions.Add(disjunctiveExpression);
+                    }
+                }
+            }
+        }
+
+        private void AddConstraintsOfDisjunctionsOfTwoAndOne(IList<ConstraintExpression> constraintExpressions,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            IEnumerable<ConstraintType> constraintTypes) {
+            foreach (var constraintType1 in constraintTypes) {
+                var operatorFilter1 = GetOperatorFilterFromConstraintType(constraintType1);
+
+                foreach (var constraintType2 in constraintTypes) {
+                    var operatorFilter2 = GetOperatorFilterFromConstraintType(constraintType2);
+
+                    foreach (var constraintType3 in constraintTypes) {
+                        var operatorFilter3 = GetOperatorFilterFromConstraintType(constraintType3);
+
+                        // Gets the constraints of two disjunctive ranges, one two-valued and the other single-valued.
+                        var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?constraint1 ?constraint2 ?constraint3 WHERE {
+                            @optimalCondition ssn:forProperty @property .
+                            @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                            @optimalCondition rdf:type ?bNode1 .
+                            ?bNode1 owl:onProperty meta:hasValueConstraint .
+                            ?bNode1 owl:onDataRange ?bNode2 .
+                            ?bNode2 owl:unionOf ?bNode3 .
+                            ?bNode3 rdf:first ?bNode4_1 .
+                            ?bNode4_1 owl:withRestrictions ?bNode5_1 .
+                            ?bNode5_1 rdf:first [ " + operatorFilter1 + @" ?constraint1 ] .
+                            ?bNode5_1 rdf:rest ?bNode6_1 .
+                            ?bNode6_1 rdf:first [ " + operatorFilter2 + @" ?constraint2 ] .
+                            ?bNode3 rdf:rest ?bNode4_2 .
+                            ?bNode4_2 rdf:first ?bNode5_2 .
+                            ?bNode5_2 owl:withRestrictions ?bNode6_2 .
+                            ?bNode6_2 rdf:first [ " + operatorFilter3 + @" ?constraint3 ] .
+                            ?bNode6_2 rdf:rest () . }");
+
+                        query.SetParameter("optimalCondition", optimalCondition);
+                        query.SetParameter("property", property);
+                        query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+                        var queryResult = _mapekKnowledge.ExecuteQuery(query);
+
+                        foreach (var result in queryResult.Results) {
+                            var leftConstraint1 = result["constraint1"].ToString().Split('^')[0];
+                            var leftConstraint2 = result["constraint2"].ToString().Split('^')[0];
+                            var rightConstraint = result["constraint3"].ToString().Split('^')[0];
+
+                            var leftConstraintExpression1 = new AtomicConstraintExpression {
+                                Right = leftConstraint1,
+                                ConstraintType = constraintType1
+                            };
+                            var leftConstraintExpression2 = new AtomicConstraintExpression {
+                                Right = leftConstraint2,
+                                ConstraintType = constraintType2
+                            };
+                            var rightConstraintExpression = new AtomicConstraintExpression {
+                                Right = rightConstraint,
+                                ConstraintType = constraintType3
+                            };
+                            var leftConstraintExpression = new NestedConstraintExpression {
+                                Left = leftConstraintExpression1,
+                                Right = leftConstraintExpression2,
+                                ConstraintType = ConstraintType.And
+                            };
+                            var disjunctiveExpression = new NestedConstraintExpression {
+                                Left = leftConstraintExpression,
+                                Right = rightConstraintExpression,
+                                ConstraintType = ConstraintType.Or
+                            };
+
+                            constraintExpressions.Add(disjunctiveExpression);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void AddConstraintsOfDisjunctionsOfTwoAndTwo(IList<ConstraintExpression> constraintExpressions,
+            INode optimalCondition,
+            INode property,
+            INode reachedInMaximumSeconds,
+            IEnumerable<ConstraintType> constraintTypes) {
+            foreach (var constraintType1 in constraintTypes) {
+                var operatorFilter1 = GetOperatorFilterFromConstraintType(constraintType1);
+
+                foreach (var constraintType2 in constraintTypes) {
+                    var operatorFilter2 = GetOperatorFilterFromConstraintType(constraintType2);
+
+                    foreach (var constraintType3 in constraintTypes) {
+                        var operatorFilter3 = GetOperatorFilterFromConstraintType(constraintType3);
+
+                        foreach (var constraintType4 in constraintTypes) {
+                            var operatorFilter4 = GetOperatorFilterFromConstraintType(constraintType4);
+
+                            // Gets the constraints of two disjunctive, two-valued ranges.
+                            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?constraint1 ?constraint2 ?constraint3 ?constraint4 WHERE {
+                                @optimalCondition ssn:forProperty @property .
+                                @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                                @optimalCondition rdf:type ?bNode1 .
+                                ?bNode1 owl:onProperty meta:hasValueConstraint .
+                                ?bNode1 owl:onDataRange ?bNode2 .
+                                ?bNode2 owl:unionOf ?bNode3 .
+                                ?bNode3 rdf:first ?bNode4_1 .
+                                ?bNode4_1 owl:withRestrictions ?bNode5_1 .
+                                ?bNode5_1 rdf:first [ " + operatorFilter1 + @" ?constraint1 ] .
+                                ?bNode5_1 rdf:rest ?bNode6_1 .
+                                ?bNode6_1 rdf:first [ " + operatorFilter2 + @" ?constraint2 ] .
+                                ?bNode3 rdf:rest ?bNode4_2 .
+                                ?bNode4_2 rdf:first ?bNode5_2 .
+                                ?bNode5_2 owl:withRestrictions ?bNode6_2 .
+                                ?bNode6_2 rdf:first [ " + operatorFilter3 + @" ?constraint3 ] .
+                                ?bNode6_2 rdf:rest ?bNode7_2 .
+                                ?bNode7_2 rdf:first [ " + operatorFilter4 + " ?constraint4 ] . }");
+
+                            query.SetParameter("optimalCondition", optimalCondition);
+                            query.SetParameter("property", property);
+                            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+                            var queryResult = _mapekKnowledge.ExecuteQuery(query);
+
+                            foreach (var result in queryResult.Results) {
+                                var leftConstraint1 = result["constraint1"].ToString().Split('^')[0];
+                                var leftConstraint2 = result["constraint2"].ToString().Split('^')[0];
+                                var rightConstraint1 = result["constraint3"].ToString().Split('^')[0];
+                                var rightConstraint2 = result["constraint4"].ToString().Split('^')[0];
+
+                                var leftConstraintExpression1 = new AtomicConstraintExpression {
+                                    Right = leftConstraint1,
+                                    ConstraintType = constraintType1
+                                };
+                                var leftConstraintExpression2 = new AtomicConstraintExpression {
+                                    Right = leftConstraint2,
+                                    ConstraintType = constraintType2
+                                };
+                                var rightConstraintExpression1 = new AtomicConstraintExpression {
+                                    Right = rightConstraint1,
+                                    ConstraintType = constraintType3
+                                };
+                                var rightConstraintExpression2 = new AtomicConstraintExpression {
+                                    Right = rightConstraint2,
+                                    ConstraintType = constraintType4
+                                };
+                                var leftConstraintExpression = new NestedConstraintExpression {
+                                    Left = leftConstraintExpression1,
+                                    Right = leftConstraintExpression2,
+                                    ConstraintType = ConstraintType.And
+                                };
+                                var rightConstraintExpression = new NestedConstraintExpression {
+                                    Left = rightConstraintExpression1,
+                                    Right = rightConstraintExpression2,
+                                    ConstraintType = ConstraintType.And
+                                };
+                                var disjunctiveExpression = new NestedConstraintExpression {
+                                    Left = leftConstraintExpression,
+                                    Right = rightConstraintExpression,
+                                    ConstraintType = ConstraintType.Or
+                                };
+
+                                constraintExpressions.Add(disjunctiveExpression);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private static string GetOperatorFilterFromConstraintType(ConstraintType constraintType) {
+            return constraintType switch {
+                ConstraintType.GreaterThan => "xsd:minExclusive",
+                ConstraintType.GreaterThanOrEqualTo => "xsd:minInclusive",
+                ConstraintType.LessThan => "xsd:maxExclusive",
+                ConstraintType.LessThanOrEqualTo => "xsd:maxInclusive",
+                _ => throw new Exception($"{constraintType} is an invalid comparison operator.")
+            };
+        }
+
         private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
         {
             var numberOfSatisfiedOptimalConditions = 0;
@@ -553,11 +981,11 @@ namespace Logic.Mapek
 
                 object propertyValue;
 
-                if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property, out ConfigurableParameter configurableParameter))
+                if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property, out ConfigurableParameter? configurableParameter))
                 {
                     propertyValue = configurableParameter.Value;
                 }
-                else if (propertyCache.Properties.TryGetValue(optimalCondition.Property, out Property property))
+                else if (propertyCache.Properties.TryGetValue(optimalCondition.Property, out Property? property))
                 {
                     propertyValue = property.Value;
                 }
@@ -580,100 +1008,94 @@ namespace Logic.Mapek
             return numberOfSatisfiedOptimalConditions;
         }
 
-        private SimulationConfiguration GetOptimalConfiguration(IGraph instanceModel,
-            PropertyCache propertyCache,
+        private SimulationPath GetOptimalSimulationPath(PropertyCache propertyCache,
             IEnumerable<OptimalCondition> optimalConditions,
-            IEnumerable<SimulationConfiguration> simulationConfigurations)
+            IEnumerable<SimulationPath> simulationPaths)
         {
-            // This method is a filter for finding the optimal simulation configuration. It works in a few steps of descending precedance, each of which further reduces the set of
-            // simulation configurations:
-            // 1. Filter for simulation configurations that satisfy the most OptimalConditions.
-            // 2. Filter for simulation configurations that have the highest number of the most optimized Properties.
+            // This method is a filter for finding the optimal simulation path. It works in a few steps of descending precedance, each of which further reduces the set of
+            // simulation paths:
+            // 1. Filter for simulation paths that satisfy the most OptimalConditions.
+            // 2. Filter for simulation paths that have the highest number of the most optimized Properties.
             // 3. Pick the first one.
 
-            if (!simulationConfigurations.Any())
+            if (!simulationPaths.Any())
             {
                 return null!;
             }
 
             // Filter for simulation configurations that satisfy the most OptimalConditions.
-            var simulationConfigurationsWithMostOptimalConditionsSatisfied = GetSimulationConfigurationsWithMostOptimalConditionsSatisfied(simulationConfigurations, optimalConditions);
+            var simulationPathsWithMostOptimalConditionsSatisfied = GetSimulationPathsWithMostOptimalConditionsSatisfied(simulationPaths,
+                optimalConditions);
 
-            if (simulationConfigurationsWithMostOptimalConditionsSatisfied.Count == 1)
+            if (simulationPathsWithMostOptimalConditionsSatisfied.Count == 1)
             {
-                return simulationConfigurationsWithMostOptimalConditionsSatisfied.First();
+                return simulationPathsWithMostOptimalConditionsSatisfied.First();
             }
 
-            _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationConfigurationsWithMostOptimalConditionsSatisfied.Count);
+            _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationPathsWithMostOptimalConditionsSatisfied.Count);
 
             // Filter for simulation configurations that optimize the most targeted Properties.
-            var simulationConfigurationsWithMostOptimizedProperties = GetSimulationConfigurationsWithMostOptimizedProperties(simulationConfigurationsWithMostOptimalConditionsSatisfied,
-                instanceModel,
-                propertyCache);
+            var simulationPathsWithMostOptimizedProperties =
+                GetSimulationPathsWithMostOptimizedProperties(simulationPathsWithMostOptimalConditionsSatisfied,
+                    propertyCache);
 
-            _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationConfigurationsWithMostOptimizedProperties.Count);
+            _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationPathsWithMostOptimizedProperties.Count);
 
             // At this point, arbitrarily return the first one regardless of the number of simulation configurations remaining.
-            return simulationConfigurationsWithMostOptimizedProperties.First();
+            return simulationPathsWithMostOptimizedProperties.First();
         }
 
-        private List<SimulationConfiguration> GetSimulationConfigurationsWithMostOptimalConditionsSatisfied(IEnumerable<SimulationConfiguration> simulationConfigurations,
+        private List<SimulationPath> GetSimulationPathsWithMostOptimalConditionsSatisfied(IEnumerable<SimulationPath> simulationPaths,
             IEnumerable<OptimalCondition> optimalConditions)
         {
-            var passingSimulationConfigurations = new List<SimulationConfiguration>();
+            var passingSimulationPaths = new List<SimulationPath>();
             var highestNumberOfSatisfiedOptimalConditions = 0;
 
-            foreach (var simulationConfiguration in simulationConfigurations)
+            foreach (var simulationPath in simulationPaths)
             {
-                var numberOfSatisfiedOptimalConditions = GetNumberOfSatisfiedOptimalConditions(optimalConditions, simulationConfiguration.ResultingPropertyCache);
+                var numberOfSatisfiedOptimalConditions = GetNumberOfSatisfiedOptimalConditions(optimalConditions, simulationPath.Simulations.Last().PropertyCache!);
 
                 if (numberOfSatisfiedOptimalConditions > highestNumberOfSatisfiedOptimalConditions)
                 {
                     highestNumberOfSatisfiedOptimalConditions = numberOfSatisfiedOptimalConditions;
-                    passingSimulationConfigurations = new List<SimulationConfiguration>
-                    {
-                        simulationConfiguration
-                    };
+                    passingSimulationPaths = [simulationPath];
                 }
                 else if (numberOfSatisfiedOptimalConditions == highestNumberOfSatisfiedOptimalConditions)
                 {
-                    passingSimulationConfigurations.Add(simulationConfiguration);
+                    passingSimulationPaths.Add(simulationPath);
                 }
             }
 
-            return passingSimulationConfigurations;
+            return passingSimulationPaths;
         }
 
-        private List<SimulationConfiguration> GetSimulationConfigurationsWithMostOptimizedProperties(IEnumerable<SimulationConfiguration> simulationConfigurations,
-            IGraph instanceModel,
+        private List<SimulationPath> GetSimulationPathsWithMostOptimizedProperties(IEnumerable<SimulationPath> simulationPaths,
             PropertyCache propertyCache)
         {
-            var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(instanceModel, propertyCache);
+            var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(propertyCache);
             var valueHandlers = propertyChangesToOptimizeFor.Select(p => _factory.GetValueHandlerImplementation(p.Property.OwlType));
 
             _logger.LogInformation("Ordering and filtering simulation results...");
             
-            var simulationConfigurationComparer = new SimulationConfigurationComparer(propertyChangesToOptimizeFor.Zip(valueHandlers));
+            var simulationPathComparer = new SimulationPathComparer(propertyChangesToOptimizeFor.Zip(valueHandlers));
 
             // Return the simulation configurations with the maximum score.
-            return simulationConfigurations.OrderByDescending(s => s, simulationConfigurationComparer)
-                .Where(s => simulationConfigurationComparer.Compare(s, simulationConfigurations.First()) > -1)
+            return simulationPaths.OrderByDescending(s => s, simulationPathComparer)
+                .Where(s => simulationPathComparer.Compare(s, simulationPaths.First()) > -1)
                 .ToList();
         }
 
-        private List<PropertyChange> GetPropertyChangesToOptimizeFor(IGraph instanceModel, PropertyCache propertyCache)
+        private List<PropertyChange> GetPropertyChangesToOptimizeFor(PropertyCache propertyCache)
         {
             var propertyChangesToOptimizeFor = new List<PropertyChange>();
 
-            var query = MapekUtilities.GetParameterizedStringQuery();
-
-            query.CommandText = @"SELECT ?propertyChange ?property ?effect WHERE {
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?propertyChange ?property ?effect WHERE {
                 ?platform rdf:type sosa:Platform .
                 ?platform meta:optimizesFor ?propertyChange .
                 ?propertyChange ssn:forProperty ?property .
-                ?propertyChange meta:affectsPropertyWith ?effect . }";
+                ?propertyChange meta:affectsPropertyWith ?effect . }");
 
-            var queryResult = instanceModel.ExecuteQuery(query, _logger);
+            var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
             foreach (var result in queryResult.Results)
             {
@@ -711,30 +1133,23 @@ namespace Logic.Mapek
             return propertyChangesToOptimizeFor;
         }
 
-        private void LogOptimalSimulationConfiguration(SimulationConfiguration optimalSimulationConfiguration)
+        private void LogOptimalSimulationPath(SimulationPath optimalSimulationPath)
         {
-            var logMsg = "Chosen optimal configuration, Actuation actions:\n";
+            var logMsg = "Chosen optimal path, Actuation actions:\n";
 
             // Convert to a list to use indexing.
-            var simulationTickList = optimalSimulationConfiguration.SimulationTicks.ToList();
+            var simulationList = optimalSimulationPath.Simulations.ToList();
 
-            for (var i = 0; i < simulationTickList.Count; i++)
+            for (var i = 0; i < simulationList.Count; i++)
             {
                 logMsg += $"Interval {i + 1}:\n";
 
-                foreach (var action in simulationTickList[i].ActionsToExecute)
+                foreach (var action in simulationList[i].ActuationActions)
                 {
                     logMsg += $"Actuator: {action.Actuator.Name}, Actuator state: {action.NewStateValue.ToString()}\n";
                 }
             }
 
-            logMsg += "Post-tick actions:\n";
-
-            foreach (var postTickAction in optimalSimulationConfiguration.PostTickActions)
-            {
-                logMsg += $"Configurable parameter: {postTickAction.ConfigurableParameter.Name}; ";
-                logMsg += $"New Value: {postTickAction.NewParameterValue.ToString()}\n";
-            }
             _logger.LogInformation(logMsg);
         }
     }

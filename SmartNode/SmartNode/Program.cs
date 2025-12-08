@@ -1,8 +1,9 @@
-﻿using Logic.Mapek;
+﻿using Logic.FactoryInterface;
+using Logic.Mapek;
+using Logic.Models.MapekModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Logic.FactoryInterface;
 using System.CommandLine;
 using System.Reflection;
 
@@ -15,16 +16,25 @@ namespace SmartNode
             // Parse the command line arguments.
             var rootCommand = new RootCommand();
 
-            var fileNameArg = new Argument<FileInfo>("file")
-            {
-                Description = "RDF instance model"
+            var inferenceEngineArgument = new Argument<FileInfo>("inferenceEngine") {
+                Description = "Inference engine."
             };
-            var fmuDirectoryArgument = new Argument<string>("fmuDirectory")
-            {
+            var ontologyArgument = new Argument<FileInfo>("ontology") {
+                Description = "Ontology."
+            };
+            var instanceModelArgument = new Argument<FileInfo>("instanceModel") {
+                Description = "TT instance model."
+            };
+            var inferenceRulesArgument = new Argument<FileInfo>("inferenceRules") {
+                Description = "Inference rules."
+            };
+            var inferredModelArgument = new Argument<FileInfo>("inferredModel") {
+                Description = "TT inferred model."
+            };
+            var fmuDirectoryArgument = new Argument<string>("fmuDirectory") {
                 Description = "Directory containing FMUs."
             };
-            var dataDirectoryArgument = new Argument<string>("dataDirectory")
-            {
+            var dataDirectoryArgument = new Argument<string>("dataDirectory") {
                 Description = "Directory for storing MAPE-K data."
             };
 
@@ -40,27 +50,60 @@ namespace SmartNode
                 Description = "Simulate the twinning target."
             };
 
-            rootCommand.Add(maxRoundOption);
-            rootCommand.Add(simulateTwinningTargetOption);
-            rootCommand.Add(fileNameArg);
+            rootCommand.Add(inferenceEngineArgument);
+            rootCommand.Add(ontologyArgument);
+            rootCommand.Add(instanceModelArgument);
+            rootCommand.Add(inferenceRulesArgument);
+            rootCommand.Add(inferredModelArgument);
             rootCommand.Add(fmuDirectoryArgument);
             rootCommand.Add(dataDirectoryArgument);
+            rootCommand.Add(maxRoundOption);
+            rootCommand.Add(simulateTwinningTargetOption);
 
             ParseResult parseResult = rootCommand.Parse(args);
 
-            var maxRound = parseResult.GetValue(maxRoundOption);
-            var simulateTwinningTarget = parseResult.GetValue(simulateTwinningTargetOption);
-            var modelFile = parseResult.GetValue(fileNameArg);
+            var inferenceEngineFile = parseResult.GetValue(inferenceEngineArgument);
+            var ontologyFile = parseResult.GetValue(ontologyArgument);
+            var instanceModelFile = parseResult.GetValue(instanceModelArgument);
+            var inferenceRulesFile = parseResult.GetValue(inferenceRulesArgument);
+            var inferredModelFile = parseResult.GetValue(inferredModelArgument);
             var fmuDirectory = parseResult.GetValue(fmuDirectoryArgument);
             var dataDirectory = parseResult.GetValue(dataDirectoryArgument);
+            var maxRound = parseResult.GetValue(maxRoundOption);
+            var simulateTwinningTarget = parseResult.GetValue(simulateTwinningTargetOption);
 
             if (parseResult.Errors.Count != 0 ||
-                modelFile is not FileInfo parsedFile ||
+                inferenceEngineFile is not FileInfo inferenceEngine ||
+                ontologyFile is not FileInfo ontology ||
+                instanceModelFile is not FileInfo parsedFile ||
+                inferenceRulesFile is not FileInfo inferenceRules ||
+                inferredModelFile is not FileInfo inferredModel ||
                 string.IsNullOrEmpty(fmuDirectory) ||
                 string.IsNullOrEmpty(dataDirectory))
             {
                 throw new ArgumentException(parseResult.Errors[0].Message); // Are there always errors here?
             }
+
+            // TODO: i have a hunch this is making it work for docker without other filepaths specified. theoretically, we shouldn't need it
+            // For native:
+            // Get executing assembly path.
+            var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var inferenceEngineFilePath = Path.Combine(executingAssemblyPath!, inferenceEngineFile.FullName);
+            var ontologyFilePath = Path.Combine(executingAssemblyPath!, ontologyFile.FullName);
+            var instanceModelFilePath = Path.Combine(executingAssemblyPath!, instanceModelFile.FullName);
+            var inferenceRulesFilePath = Path.Combine(executingAssemblyPath!, inferenceRulesFile.FullName);
+            var inferredModelFilePath = Path.Combine(executingAssemblyPath!, inferredModelFile.FullName);
+
+            // Make it system-agnostic and wrap it into a POCO.
+            var filepathArguments = new FilepathArguments {
+                InferenceEngineFilepath = Path.GetFullPath(inferenceEngineFile.FullName),
+                OntologyFilepath = Path.GetFullPath(ontologyFile.FullName),
+                InstanceModelFilepath = Path.GetFullPath(instanceModelFile.FullName),
+                InferenceRulesFilepath = Path.GetFullPath(inferenceRulesFile.FullName),
+                InferredModelFilepath = Path.GetFullPath(inferredModelFile.FullName),
+                FmuDirectory = Path.GetFullPath(fmuDirectory),
+                DataDirectory = Path.GetFullPath(dataDirectory)
+            };
 
             var builder = Host.CreateApplicationBuilder(args);
 
@@ -69,12 +112,14 @@ namespace SmartNode
             {
                 loggingBuilder.AddConsole(options => options.TimestampFormat = "HH:mm:ss ");
             });
+            builder.Services.AddSingleton(filepathArguments);
             // Register a factory to allow for dynamic constructor argument passing through DI.
             builder.Services.AddSingleton<IFactory, Factory>(serviceProvider => new Factory(simulateTwinningTarget));
             builder.Services.AddSingleton<IMapekMonitor, MapekMonitor>(serviceProvider => new MapekMonitor(serviceProvider));
             builder.Services.AddSingleton<IMapekAnalyze, MapekAnalyze>(serviceProvider => new MapekAnalyze(serviceProvider));
             builder.Services.AddSingleton<IMapekPlan, MapekPlan>(serviceProvider => new MapekPlan(serviceProvider));
             builder.Services.AddSingleton<IMapekExecute, MapekExecute>(serviceProvider => new MapekExecute(serviceProvider));
+            builder.Services.AddSingleton<IMapekKnowledge, MapekKnowledge>(serviceProvider => new MapekKnowledge(serviceProvider));
             builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceprovider => new MapekManager(serviceprovider));
 
             using var host = builder.Build();
@@ -84,20 +129,10 @@ namespace SmartNode
             // Get an instance of the MAPE-K manager.
             var mapekManager = host.Services.GetRequiredService<IMapekManager>();
 
-            // TODO: i have a hunch this is making it work for docker without other filepaths specified. theoretically, we shouldn't need it
-            // For native:
-            // Get executing assembly path.
-            var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            // Combine it with the relative path of the inferred model file.
-            var modelFilePath = Path.Combine(executingAssemblyPath!, modelFile.FullName);
-
-            // Make it system-agnostic.
-            modelFilePath = Path.GetFullPath(modelFile.FullName);
-
             // Start the loop.
             try
             {
-                mapekManager.StartLoop(modelFilePath, fmuDirectory, dataDirectory, maxRound, simulateTwinningTarget);
+                mapekManager.StartLoop(instanceModelFilePath, fmuDirectory, dataDirectory, maxRound, simulateTwinningTarget);
             }
             catch (Exception exception)
             {

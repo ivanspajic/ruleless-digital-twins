@@ -5,7 +5,7 @@
 @include <OWL>.
 
 // Verifies that system optimizations are not conflicting.
-[rule4a:    (?thing1 meta:optimizesFor ?propertyChange1)
+[rule1g:    (?thing1 meta:optimizesFor ?propertyChange1)
             (?propertyChange1 ssn:forProperty ?property)
             (?thing2 meta:optimizesFor ?propertyChange2)
             (?propertyChange2 ssn:forProperty ?property)
@@ -29,7 +29,7 @@
 // To represent disjoint ranges, we offer support for disjunctions. E.g., >20 or <15.
 
 // Checks for OptimalConditions with single-valued range constraints.
-[rule4b:    (?individual1 rdf:type meta:OptimalCondition)
+[rule1h:    (?individual1 rdf:type meta:OptimalCondition)
             (?individual1 ssn:forProperty ?property)
             (?individual1 rdf:type ?bNode1_1)
             (?bNode1_1 owl:onProperty meta:hasValueConstraint)
@@ -50,7 +50,7 @@
 ]
 
 // Checks for OptimalConditions where one has a single-valued and the other a double-valued range constraint.
-[rule4c:    (?individual1 rdf:type meta:OptimalCondition)
+[rule1i:    (?individual1 rdf:type meta:OptimalCondition)
             (?individual1 ssn:forProperty ?property)
             (?individual1 rdf:type ?bNode1_1)
             (?bNode1_1 owl:onProperty meta:hasValueConstraint)
@@ -73,7 +73,7 @@
 ]
 
 // Checks for OptimalConditions with double-valued range constraints.
-[rule4d:    (?individual1 rdf:type meta:OptimalCondition)
+[rule1j:    (?individual1 rdf:type meta:OptimalCondition)
             (?individual1 ssn:forProperty ?property)
             (?individual1 rdf:type ?bNode1_1)
             (?bNode1_1 owl:onProperty meta:hasValueConstraint)
@@ -98,7 +98,7 @@
 ]
 
 // Checks if the marked constraints have disallowed values for '>' and '<' operators.
-[rule4e:    (?restriction1 rdf:comment ?property)
+[rule1k:    (?restriction1 rdf:comment ?property)
             (?restriction1 rdf:comment "verification mark")
             (?restriction1 xsd:minExclusive ?value1)
             (?restriction2 rdf:comment ?property)
@@ -113,7 +113,7 @@
 ]
 
 // Checks if the marked constraints have disallowed values for '>=' and '<' operators.
-[rule4f:    (?restriction1 rdf:comment ?property)
+[rule1l:    (?restriction1 rdf:comment ?property)
             (?restriction1 rdf:comment "verification mark")
             (?restriction1 xsd:minInclusive ?value1)
             (?restriction2 rdf:comment ?property)
@@ -128,7 +128,7 @@
 ]
 
 // Checks if the marked constraints have disallowed values for '>' and '<=' operators.
-[rule4g:    (?restriction1 rdf:comment ?property)
+[rule1m:    (?restriction1 rdf:comment ?property)
             (?restriction1 rdf:comment "verification mark")
             (?restriction1 xsd:minExclusive ?value1)
             (?restriction2 rdf:comment ?property)
@@ -143,7 +143,7 @@
 ]
 
 // Checks if the marked constraints have disallowed values for '>=' and '<=' operators.
-[rule4h:    (?restriction1 rdf:comment ?property)
+[rule1n:    (?restriction1 rdf:comment ?property)
             (?restriction1 rdf:comment "verification mark")
             (?restriction1 xsd:minInclusive ?value1)
             (?restriction2 rdf:comment ?property)

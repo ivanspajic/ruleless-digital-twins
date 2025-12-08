@@ -2,7 +2,6 @@
 @prefix meta: <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/>.
 @prefix ssn: <http://www.w3.org/ns/ssn/>.
 @prefix sosa: <http://www.w3.org/ns/sosa/>.
-@include <OWL>.
 @include <verification-rules.rules>.
 @include <user-rules.rules>.
 
@@ -11,19 +10,20 @@
 // The following rules cover individuals with one or two value constraints. Once an OptimalCondition constraint
 // has been located, a mark will be placed to allow subsequent rules to match and fire.
 
-[rule1a:    (?individual rdf:type meta:OptimalCondition)
+[rule1a:    (?platform rdf:type sosa:Platform)
+            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?individual rdf:type meta:OptimalCondition)
             (?individual ssn:forProperty ?property)
             (?individual rdf:type ?bNode1)
             (?bNode1 owl:onDataRange ?bNode2)
             (?bNode2 owl:withRestrictions ?bNode3)
             (?bNode3 rdf:first ?restriction)
             ->  (?restriction rdf:comment ?property)
-                print()
-                print("Marked a value restriction with Property", ?property)
-                print()
 ]
 
-[rule1b:    (?individual rdf:type meta:OptimalCondition)
+[rule1b:    (?platform rdf:type sosa:Platform)
+            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?individual rdf:type meta:OptimalCondition)
             (?individual ssn:forProperty ?property)
             (?individual rdf:type ?bNode1)
             (?bNode1 owl:onDataRange ?bNode2)
@@ -31,16 +31,15 @@
             (?bNode3 rdf:rest ?bNode4)
             (?bNode4 rdf:first ?restriction)
             ->  (?restriction rdf:comment ?property)
-                print()
-                print("Marked a value restriction with Property", ?property)
-                print()
 ]
 
 // These rules support disjunctive constraint definitions in OptimalConditions. E.g., (>15, <=20) or (>=24, <35).
 // Such definitions cover cases whose Property values might fit in disjoint ranges. Currently, only 2 constraints
 // are supported, but it is naturally possible to support more.
 
-[rule1c:    (?individual rdf:type meta:OptimalCondition)
+[rule1c:    (?platform rdf:type sosa:Platform)
+            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?individual rdf:type meta:OptimalCondition)
             (?individual ssn:forProperty ?property)
             (?individual rdf:type ?bNode1)
             (?bNode1 owl:onDataRange ?bNode2)
@@ -49,12 +48,11 @@
             (?bNode4 owl:withRestrictions ?bNode5)
             (?bNode5 rdf:first ?restriction)
             ->  (?restriction rdf:comment ?property)
-                print()
-                print("Marked a value restriction with Property", ?property)
-                print()
 ]
 
-[rule1d:    (?individual rdf:type meta:OptimalCondition)
+[rule1d:    (?platform rdf:type sosa:Platform)
+            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?individual rdf:type meta:OptimalCondition)
             (?individual ssn:forProperty ?property)
             (?individual rdf:type ?bNode1)
             (?bNode1 owl:onDataRange ?bNode2)
@@ -64,12 +62,11 @@
             (?bNode5 rdf:rest ?bNode6)
             (?bNode6 rdf:first ?restriction)
             ->  (?restriction rdf:comment ?property)
-                print()
-                print("Marked a value restriction with Property", ?property)
-                print()
 ]
 
-[rule1e:    (?individual rdf:type meta:OptimalCondition)
+[rule1e:    (?platform rdf:type sosa:Platform)
+            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?individual rdf:type meta:OptimalCondition)
             (?individual ssn:forProperty ?property)
             (?individual rdf:type ?bNode1)
             (?bNode1 owl:onDataRange ?bNode2)
@@ -79,12 +76,11 @@
             (?bNode5 owl:withRestrictions ?bNode6)
             (?bNode6 rdf:first ?restriction)
             ->  (?restriction rdf:comment ?property)
-                print()
-                print("Marked a value restriction with Property", ?property)
-                print()
 ]
 
-[rule1f:    (?individual rdf:type meta:OptimalCondition)
+[rule1f:    (?platform rdf:type sosa:Platform)
+            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?individual rdf:type meta:OptimalCondition)
             (?individual ssn:forProperty ?property)
             (?individual rdf:type ?bNode1)
             (?bNode1 owl:onDataRange ?bNode2)
@@ -95,9 +91,6 @@
             (?bNode6 rdf:rest ?bNode7)
             (?bNode7 rdf:first ?restriction)
             ->  (?restriction rdf:comment ?property)
-                print()
-                print("Marked a value restriction with Property", ?property)
-                print()
 ]
 
 
@@ -105,66 +98,40 @@
 // Upon locating the marks for OptimalCondition constraints or optimization targets, these rules find the
 // relevant PropertyChanges and use them for a temporary mark.
 
-[rule2a:    (?bNode rdf:comment ?property)
+[rule2a:    (?restriction rdf:comment ?property)
+            (?property meta:hasValue ?propertyValue)
             (?property meta:propertyFor ?propertyChange)
-            (?propertyChange meta:affectsPropertyWith ?someChange)
-            (?bNode owl:hasValue ?value)
+            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
+            (?restriction xsd:minExclusive ?restrictionValue)
+            le(?propertyValue, ?restrictionValue)
             ->  (_: rdf:comment ?propertyChange)
-                print()
-                print("Located", ?propertyChange)
-                print("as a relevant PropertyChange for the given constraint(s) on", ?property)
-                print()
 ]
 
 [rule2b:    (?restriction rdf:comment ?property)
+            (?property meta:hasValue ?propertyValue)
             (?property meta:propertyFor ?propertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
-            (?restriction xsd:minExclusive ?value)
+            (?restriction xsd:minInclusive ?restrictionValue)
+            lessThan(?propertyValue, ?restrictionValue)
             ->  (_: rdf:comment ?propertyChange)
-                print()
-                print("Located", ?propertyChange)
-                print("as a relevant PropertyChange for the given constraint(s) on", ?property)
-                print()
 ]
 
 [rule2c:    (?restriction rdf:comment ?property)
+            (?property meta:hasValue ?propertyValue)
             (?property meta:propertyFor ?propertyChange)
-            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
-            (?restriction xsd:minInclusive ?value)
+            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
+            (?restriction xsd:maxExclusive ?restrictionValue)
+            ge(?propertyValue, ?restrictionValue)
             ->  (_: rdf:comment ?propertyChange)
-                print()
-                print("Located", ?propertyChange)
-                print("as a relevant PropertyChange for the given constraint(s) on", ?property)
-                print()
 ]
 
 [rule2d:    (?restriction rdf:comment ?property)
+            (?property meta:hasValue ?propertyValue)
             (?property meta:propertyFor ?propertyChange)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
-            (?restriction xsd:maxExclusive ?value)
+            (?restriction xsd:maxInclusive ?restrictionValue)
+            greaterThan(?propertyValue, ?restrictionValue)
             ->  (_: rdf:comment ?propertyChange)
-                print()
-                print("Located", ?propertyChange)
-                print("as a relevant PropertyChange for the given constraint(s) on", ?property)
-                print()
-]
-
-[rule2e:    (?restriction rdf:comment ?property)
-            (?property meta:propertyFor ?propertyChange)
-            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
-            (?restriction xsd:maxInclusive ?value)
-            ->  (_: rdf:comment ?propertyChange)
-                print()
-                print("Located", ?propertyChange)
-                print("as a relevant PropertyChange for the given constraint(s) on", ?property)
-                print()
-]
-
-[rule2f:    (?thing meta:optimizesFor ?propertyChange)
-            ->  (_: rdf:comment ?propertyChange)
-                print()
-                print("Located", ?propertyChange, "as a PropertyChange to optimize for.")
-                print()
 ]
 
 
@@ -174,24 +141,159 @@
 // elements in an Action. This ensures that no duplicate Actions are generated in cases of, e.g., multiple
 // actuators causing multiple different PropertyChanges.
 
-[rule3a:    (?thing rdf:comment ?propertyChange)
-            (?propertyChange meta:enactedBy ?actuator)
+[rule3a:   (?thing rdf:comment ?propertyChange)
+           (?propertyChange meta:enactedBy ?actuator)
+           (?actuator rdf:type sosa:Actuator)
+           (?actuator meta:hasActuatorState ?actuatorState)
+           uriConcat(?actuator, "_", ?actuatorState, ?actionName)
+           ->  (?actionName rdf:type meta:ActuationAction)
+               (?actionName meta:hasActuator ?actuator)
+               (?actionName meta:hasActuatorState ?actuatorState)
+               print()
+               print("Generated ActuationAction", ?actionName)
+               print()
+]
+
+[rule3b:   (?thing rdf:comment ?propertyChange)
+           (?propertyChange meta:enactedBy ?configurableParameter)
+           (?configurableParameter rdf:type meta:ConfigurableParameter)
+           (?configurableParameter meta:hasValue ?configurableParameterValue)
+           uriConcat(?configurableParameter, "_", ?configurableParameterValue, ?actionName)
+           ->  (?actionName rdf:type meta:ReconfigurationAction)
+               (?actionName ssn:forProperty ?configurableParameter)
+               (?actionName meta:hasValue ?configurableParameterValue)
+               print()
+               print("Generated ReconfigurationAction", ?actionName)
+               print()
+]
+
+// The following rules generate Actions provided the switch for generating restrictive combinations (only based on unsatisfied OptimalConditions)
+// is disabled.
+
+[rule3c:    (?platform rdf:type sosa:Platform)
+            (?platform meta:generateCombinationsOnlyFromOptimalConditions "false"^^xsd:boolean)
             (?actuator rdf:type sosa:Actuator)
-            uriConcat(?actuator, meta:ActuationAction, ?actionName)
+            (?actuator meta:hasActuatorState ?actuatorState)
+            uriConcat(?actuator, "_", ?actuatorState, ?actionName)
             ->  (?actionName rdf:type meta:ActuationAction)
                 (?actionName meta:hasActuator ?actuator)
+                (?actionName meta:hasActuatorState ?actuatorState)
                 print()
                 print("Generated ActuationAction", ?actionName)
                 print()
 ]
 
-[rule3b:    (?thing rdf:comment ?propertyChange)
-            (?propertyChange meta:enactedBy ?configurableParameter)
+[rule3d:    (?platform rdf:type sosa:Platform)
+            (?platform meta:generateCombinationsOnlyFromOptimalConditions "false"^^xsd:boolean)
             (?configurableParameter rdf:type meta:ConfigurableParameter)
-            uriConcat(?configurableParameter, meta:ReconfigurationAction, ?actionName)
+            (?configurableParameter meta:hasValue ?configurableParameterValue)
+            uriConcat(?configurableParameter, "_", ?configurableParameterValue, ?actionName)
             ->  (?actionName rdf:type meta:ReconfigurationAction)
                 (?actionName ssn:forProperty ?configurableParameter)
+                (?actionName meta:hasValue ?configurableParameterValue)
                 print()
                 print("Generated ReconfigurationAction", ?actionName)
                 print()
+]
+
+
+
+// The following rules infer possible combinations of Actions to take as part of the DT`s final decision. They effectively produce a
+// cartesian product of a variable number of sets (Actions grouped by Actuators or ConfigurableParameters) with a variable number of
+// elements (possible Actuator states or ConfigurableParameter values).
+//
+// The rules work by initially creating an ActionCombination for each Action found in the model (rules 4a and 4b). Every ActionCombination
+// contains an rdf:List of Actions, which it then expands as it encounters new ones (rules 4c and 4d). To be added to the list, these Actions
+// must not already be contained in it and their Actuators/ConfigurableParameters must not be the same as those of other Actions already
+// in it. Because this method generates permutations (lists of the same Actions in different orders), additional rules (rules 4e and 4f)
+// are necessary to eliminate duplicates and reduce the combinatorial explosion.
+//
+// In the end, all ActionCombinations that are NOT marked with "duplicate" (same combination already exists) or "not final" (the combination
+// contains fewer Actions than it should) are final.
+
+[rule4a:    (?actuationAction rdf:type meta:ActuationAction)
+            (?actuationAction meta:hasActuator ?actuator)
+            makeTemp(?actionCombination)
+            makeTemp(?actionList)
+            makeTemp(?actuatorList)
+            ->  (?actionCombination rdf:type meta:ActionCombination)
+                (?actionCombination meta:hasActions ?actionList)
+                (?actionList rdf:type rdf:List)
+                (?actionList rdf:first ?actuationAction)
+                (?actionList rdf:rest rdf:nil)
+                (?actionCombination meta:hasActuators ?actuatorList)
+                (?actuatorList rdf:type rdf:List)
+                (?actuatorList rdf:first ?actuator)
+                (?actuatorList rdf:rest rdf:nil)
+]
+
+[rule4b:    (?reconfigurationAction rdf:type meta:ReconfigurationAction)
+            (?reconfigurationAction ssn:forProperty ?configurableParameter)
+            makeTemp(?actionCombination)
+            makeTemp(?actionList)
+            makeTemp(?configurableParameterList)
+            ->  (?actionCombination rdf:type meta:ActionCombination)
+                (?actionCombination meta:hasActions ?actionList)
+                (?actionList rdf:type rdf:List)
+                (?actionList rdf:first ?reconfigurationAction)
+                (?actionList rdf:rest rdf:nil)
+                (?actionCombination meta:hasConfigurableParameters ?configurableParameterList)
+                (?configurableParameterList rdf:type rdf:List)
+                (?configurableParameterList rdf:first ?configurableParameter)
+                (?configurableParameterList rdf:rest rdf:nil)
+]
+
+[rule4c:    (?actionCombination rdf:type meta:ActionCombination)
+            (?actionCombination meta:hasActions ?actionList)
+            (?actionCombination meta:hasActuators ?actuatorList)
+            (?actuationAction rdf:type meta:ActuationAction)
+            (?actuationAction meta:hasActuator ?actuator)
+            noValue(?actionCombination rdf:comment "duplicate")
+            listNotContains(?actuatorList, ?actuator)
+            makeTemp(?newActionCombination)
+            makeTemp(?newActionList)
+            makeTemp(?newActuatorList)
+            ->  (?newActionCombination rdf:type meta:ActionCombination)
+                (?newActionCombination meta:hasActions ?newActionList)
+                (?newActionList rdf:type rdf:List)
+                (?newActionList rdf:first ?actuationAction)
+                (?newActionList rdf:rest ?actionList)
+                (?newActionCombination meta:hasActuators ?newActuatorList)
+                (?newActuatorList rdf:type rdf:List)
+                (?newActuatorList rdf:first ?actuator)
+                (?newActuatorList rdf:rest ?actuatorList)
+                (?actionCombination rdf:comment "not final")
+]
+
+[rule4d:    (?actionCombination rdf:type meta:ActionCombination)
+            (?actionCombination meta:hasActions ?actionList)
+            (?actionCombination meta:hasConfigurableParameters ?configurableParameterList)
+            (?reconfigurationAction rdf:type meta:ReconfigurationAction)
+            (?reconfigurationAction meta:forProperty ?configurableParameter)
+            noValue(?actionCombination rdf:comment "duplicate")
+            listNotContains(?configurableParameterList, ?configurableParameter)
+            makeTemp(?newActionCombination)
+            makeTemp(?newActionList)
+            makeTemp(?newConfigurableParameterList)
+            ->  (?newActionCombination rdf:type meta:ActionCombination)
+                (?newActionCombination meta:hasActions ?newActionList)
+                (?newActionList rdf:type rdf:List)
+                (?newActionList rdf:first ?reconfigurationAction)
+                (?newActionList rdf:rest ?actionList)
+                (?newActionCombination meta:hasConfigurableParameters ?newConfigurableParameterList)
+                (?newConfigurableParameterList rdf:type rdf:List)
+                (?newConfigurableParameterList rdf:first ?configurableParameter)
+                (?newConfigurableParameterList rdf:rest ?configurableParameterList)
+                (?actionCombination rdf:comment "not final")
+]
+
+[rule4e:    (?actionCombination1 rdf:type meta:ActionCombination)
+            (?actionCombination1 meta:hasActions ?actionList1)
+            (?actionCombination2 rdf:type meta:ActionCombination)
+            (?actionCombination2 meta:hasActions ?actionList2)
+            notEqual(?actionCombination1, ?actionCombination2)
+            noValue(?actionCombination1 rdf:comment "duplicate")
+            noValue(?actionCombination2 rdf:comment "duplicate")
+            listEqual(?actionList1, ?actionList2)
+            ->  (?actionCombination2 rdf:comment "duplicate")
 ]

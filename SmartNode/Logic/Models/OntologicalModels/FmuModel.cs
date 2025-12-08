@@ -1,8 +1,8 @@
 ﻿namespace Logic.Models.OntologicalModels
 {
-    internal class FmuModel : NamedIndividual
+    public class FmuModel : NamedIndividual
     {
-        public required string FilePath { get; init; }
+        public required string Filepath { get; init; }
 
         public int SimulationFidelitySeconds { get; init; }
     }

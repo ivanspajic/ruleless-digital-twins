@@ -25,5 +25,7 @@ namespace Logic.ValueHandlerInterfaces
         public object GetValueFromSimulationParameter(IInstance fmuInstance, IVariable parameter);
 
         public void WriteValueToSimulationParameter(IInstance fmuInstance, IVariable parameter, object value);
+
+        public string GetValueAsCultureInvariantString(object value);
     }
 }

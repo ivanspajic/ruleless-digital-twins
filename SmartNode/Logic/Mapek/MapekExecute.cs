@@ -17,7 +17,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public void Execute(SimulationConfiguration optimalConfiguration, PropertyCache propertyCache, bool useSimulatedTwinningTarget)
+        public void Execute(SimulationPath optimalConfiguration, PropertyCache propertyCache, bool useSimulatedTwinningTarget)
         {
             _logger.LogInformation("Starting the Execute phase.");
 
@@ -26,37 +26,31 @@ namespace Logic.Mapek
                 return;
             }
 
-            foreach (var simulationTick in optimalConfiguration.SimulationTicks)
+            foreach (var simulationTick in optimalConfiguration.Simulations)
             {
-                foreach (var actuationAction in simulationTick.ActionsToExecute)
+                foreach (var actuationAction in simulationTick.ActuationActions)
                 {
-                    ExecuteActuationAction(actuationAction, simulationTick.TickDurationSeconds);
+                    ExecuteActuationAction(actuationAction);
                 }
 
                 if (!useSimulatedTwinningTarget)
                 {
-                    Thread.Sleep(simulationTick.TickDurationSeconds);
+                    // TODO: add a delay to match the duration of a cycle with the simulated interval.
                 }
-            }
-
-            foreach (var reconfigurationAction in optimalConfiguration.PostTickActions)
-            {
-                ExecuteReconfigurationAction(reconfigurationAction, propertyCache);
             }
 
             LogExpectedPropertyValues(optimalConfiguration);
         }
 
-        private void ExecuteActuationAction(ActuationAction actuationAction, double durationSeconds)
+        private void ExecuteActuationAction(ActuationAction actuationAction)
         {
-            _logger.LogInformation("Actuating actuator {actuator} with state {actuatorState} and duration of {duration} seconds.",
+            _logger.LogInformation("Actuating actuator {actuator} with state {actuatorState}.",
                 actuationAction.Actuator.Name,
-                actuationAction.NewStateValue.ToString(),
-                durationSeconds);
+                actuationAction.NewStateValue.ToString());
 
             var actuator = _factory.GetActuatorDeviceImplementation(actuationAction.Actuator.Name);
 
-            // This cannot be a blocking call to ensure that multiple Actuators in an interval get executed for the same duration.
+            // This cannot be a blocking call to ensure that multiple Actuators in an interval get actuated for the same duration.
             actuator.Actuate(actuationAction.NewStateValue);
         }
 
@@ -69,16 +63,20 @@ namespace Logic.Mapek
             propertyCache.ConfigurableParameters[reconfigurationAction.ConfigurableParameter.Name].Value = reconfigurationAction.NewParameterValue;
         }
 
-        private void LogExpectedPropertyValues(SimulationConfiguration simulationConfiguration)
+        private void LogExpectedPropertyValues(SimulationPath simulationPath)
         {
+            if (!simulationPath.Simulations.Any()) {
+                return;
+            }
+
             _logger.LogInformation("Expected Property values:");
 
-            foreach (var propertyKeyValue in simulationConfiguration.ResultingPropertyCache.Properties)
+            foreach (var propertyKeyValue in simulationPath.Simulations.Last().PropertyCache.Properties)
             {
                 _logger.LogInformation("{propertyName}: {propertyValue}", propertyKeyValue.Key, propertyKeyValue.Value.Value.ToString());
             }
 
-            foreach (var configurableParameterKeyValue in simulationConfiguration.ResultingPropertyCache.ConfigurableParameters)
+            foreach (var configurableParameterKeyValue in simulationPath.Simulations.Last().PropertyCache.ConfigurableParameters)
             {
                 _logger.LogInformation("{configurableParameterName}: {configurableParameterValue}",
                     configurableParameterKeyValue.Key,

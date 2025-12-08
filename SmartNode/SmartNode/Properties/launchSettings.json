@@ -2,11 +2,11 @@
   "profiles": {
     "SmartNode": {
       "commandName": "Project",
-      "commandLineArgs": "$(MSBuildProjectDirectory)/../../models-and-rules/inferred-model-1.ttl $(MSBuildProjectDirectory)/../Implementations/FMUs/ $(MSBuildProjectDirectory)/../../state-data -s"
+      "commandLineArgs": "$(MSBuildProjectDirectory)/../../models-and-rules/ruleless-digital-twins-inference-engine.jar $(MSBuildProjectDirectory)/../../Ontology/ruleless-digital-twins.ttl $(MSBuildProjectDirectory)/../../models-and-rules/instance-model-1.ttl $(MSBuildProjectDirectory)/../../models-and-rules/inference-rules.rules $(MSBuildProjectDirectory)/../../models-and-rules/inferred-model-1.ttl $(MSBuildProjectDirectory)/../Implementations/FMUs/ $(MSBuildProjectDirectory)/../../state-data -s"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",
-      "commandLineArgs": "inferred-model-1.ttl \\SmartNode\\Implementations\\FMUs\\ \\state-data -s"
+      "commandLineArgs": "ruleless-digital-twins-inference-engine.jar ruleless-digital-twins.ttl instance-model-1.ttl inference-rules.rules inferred-model-1.ttl \\SmartNode\\Implementations\\FMUs\\ \\state-data -s" // TODO: check these paths.
     }
   }
 }

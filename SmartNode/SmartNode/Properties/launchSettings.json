@@ -4,6 +4,12 @@
       "commandName": "Project",
       "commandLineArgs": "$(MSBuildProjectDirectory)/../../models-and-rules/ruleless-digital-twins-inference-engine.jar $(MSBuildProjectDirectory)/../../Ontology/ruleless-digital-twins.ttl $(MSBuildProjectDirectory)/../../models-and-rules/instance-model-1.ttl $(MSBuildProjectDirectory)/../../models-and-rules/inference-rules.rules $(MSBuildProjectDirectory)/../../models-and-rules/inferred-model-1.ttl $(MSBuildProjectDirectory)/../Implementations/FMUs/ $(MSBuildProjectDirectory)/../../state-data -s"
     },
+    "NordPool-model": {
+      "commandName": "Project",
+      "commandLineArgs": "$(MSBuildProjectDirectory)/../../models-and-rules/nordpool-out.ttl $(MSBuildProjectDirectory)/../Implementations/FMUs/ /tmp -s"
+      , "environmentVariables": {"LD_PRELOAD": "/usr/lib/x86_64-linux-gnu/libpython3.11.so"}
+    },
+
     "Container (Dockerfile)": {
       "commandName": "Docker",
       "commandLineArgs": "ruleless-digital-twins-inference-engine.jar ruleless-digital-twins.ttl instance-model-1.ttl inference-rules.rules inferred-model-1.ttl \\SmartNode\\Implementations\\FMUs\\ \\state-data -s" // TODO: check these paths.

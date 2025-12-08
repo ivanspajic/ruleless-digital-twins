@@ -1,0 +1,134 @@
+@prefix : <http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97> .
+
+<http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97> rdf:type owl:Ontology ;
+                                                                         owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins> .
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyChange
+:DummyChange rdf:type owl:NamedIndividual ,
+                      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> ;
+             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease> ;
+             <http://www.w3.org/ns/ssn/forProperty> :DummyProperty .
+
+
+###  http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyOptCond
+:DummyOptCond rdf:type owl:NamedIndividual ,
+                       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValueConstraint> ;
+                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                         owl:onDataRange [ rdf:type rdfs:Datatype ;
+                                           owl:onDatatype xsd:double ;
+                                           owl:withRestrictions ( [ xsd:minInclusive "0.0"^^xsd:double
+                                                                  ]
+                                                                )
+                                         ]
+                       ] ;
+              <http://www.w3.org/ns/ssn/forProperty> :DummyProperty .
+
+
+###  http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProcedure
+:DummyProcedure rdf:type owl:NamedIndividual ,
+                         <http://www.w3.org/ns/sosa/Procedure> ;
+                <http://www.w3.org/ns/ssn/hasOutput> :MeasuredOutputProperty .
+
+
+###  http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProperty
+:DummyProperty rdf:type owl:NamedIndividual ,
+                        <http://www.w3.org/ns/sosa/ObservableProperty> ,
+                [ rdf:type owl:Restriction ;
+                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
+                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                  owl:onDataRange xsd:double
+                ] .
+
+
+###  http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummySensor
+:DummySensor rdf:type owl:NamedIndividual ,
+                      <http://www.w3.org/ns/sosa/Sensor> ;
+             <http://www.w3.org/ns/sosa/observes> :DummyProperty ;
+             <http://www.w3.org/ns/ssn/implements> :DummyProcedure .
+
+
+###  http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#MeasuredOutputProperty
+:MeasuredOutputProperty rdf:type owl:NamedIndividual ,
+                                 <http://www.w3.org/ns/ssn/Output> ,
+                                 <http://www.w3.org/ns/ssn/Property> ,
+                                 [ rdf:type owl:Restriction ;
+                                   owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
+                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                   owl:onDataRange xsd:double
+                                 ] .
+
+
+###  http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#NordPoolFMU
+:NordPoolFMU rdf:type owl:NamedIndividual ,
+                      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel> ;
+             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds> "900"^^xsd:int ;
+             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI> "NordPool.fmu"^^xsd:anyURI .
+
+
+###  http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#NordPoolTest
+:NordPoolTest rdf:type owl:NamedIndividual ,
+                       <http://www.w3.org/ns/sosa/Platform> ;
+              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel> :NordPoolFMU .
+
+
+###  http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#PriceMeasure
+:PriceMeasure rdf:type owl:NamedIndividual ,
+                       <http://www.w3.org/ns/ssn/Output> ,
+                       <http://www.w3.org/ns/ssn/Property> ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
+                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                         owl:onDataRange xsd:double
+                       ] .
+
+
+###  http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#PriceProcedure
+:PriceProcedure rdf:type owl:NamedIndividual ,
+                         <http://www.w3.org/ns/sosa/Procedure> ;
+                <http://www.w3.org/ns/ssn/hasOutput> :PriceMeasure ;
+                <http://www.w3.org/ns/ssn/implementedBy> :PriceSensor .
+
+
+###  http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#PriceSensor
+:PriceSensor rdf:type owl:NamedIndividual ,
+                      <http://www.w3.org/ns/sosa/Sensor> ;
+             <http://www.w3.org/ns/sosa/observes> :price .
+
+
+###  http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#UnitActuator
+:UnitActuator rdf:type owl:NamedIndividual ,
+                       <http://www.w3.org/ns/sosa/Actuator> ;
+              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :DummyChange .
+
+
+###  http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#price
+:price rdf:type owl:NamedIndividual ,
+                <http://www.w3.org/ns/sosa/ObservableProperty> ,
+                [ rdf:type owl:Restriction ;
+                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
+                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                  owl:onDataRange xsd:double
+                ] .
+
+###  http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#notFound
+:notFound rdf:type owl:NamedIndividual ,
+                <http://www.w3.org/ns/sosa/ObservableProperty> ,
+                [ rdf:type owl:Restriction ;
+                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ;
+                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                  owl:onDataRange xsd:boolean
+                ] .
+
+###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

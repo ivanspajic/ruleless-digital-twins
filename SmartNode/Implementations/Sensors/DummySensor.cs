@@ -2,17 +2,18 @@
 
 namespace Implementations.Sensors
 {
-    public class DummySensor : ISensorDevice
+    public class DummySensor(string sensorName, string procedureName) : ISensorDevice
     {
-        public DummySensor(string sensorName, string procedureName)
-        {
+        public string SensorName { get; private set; } = sensorName;
 
-        }
+        public string ProcedureName { get; private set; } = procedureName;
 
-        public string SensorName => throw new NotImplementedException();
+        public virtual object ObservePropertyValue(params object[] inputProperties) => throw new NotImplementedException();
+    }
 
-        public string ProcedureName => throw new NotImplementedException();
-
-        public object ObservePropertyValue(params object[] inputProperties) => throw new NotImplementedException();
+    public class ConstantSensor(string sensorName, string procedureName, double value) : DummySensor(sensorName, procedureName)
+    {
+        public double Value { get; private set; } = value;
+        public override object ObservePropertyValue(params object[] inputProperties) => Value;
     }
 }

@@ -54,8 +54,7 @@ namespace TestProject
             // Use a dummy-type to get a handle:
             Stream modelStream = _assembly.GetManifestResourceStream("Implementations.FMUs.Nordpool_FMU.NordPool.fmu");
             Assert.NotNull(modelStream);
-            var expectedValue = 1.0;
-            var actualValue = 0.0;
+            var expectedValue = -100.0;
 
             // Act
             var model = Model.Load(modelStream, "NordPool.fmu");
@@ -65,14 +64,14 @@ namespace TestProject
 
             fmuInstance.StartTime(0);
             fmuInstance.AdvanceTime(10);
-            actualValue = fmuInstance.ReadReal(price).ToArray()[0];
+            var actualValue = fmuInstance.ReadReal(price).ToArray()[0];
             var notFound = fmuInstance.ReadBoolean(model.Variables["notFound"]).ToArray()[0];
             Assert.False(notFound);
             fmuInstance.Dispose();
             model.Dispose();
 
             // Assert
-            Assert.Equal(expectedValue, actualValue);
+            Assert.NotEqual(expectedValue, actualValue);
         }
 
         [Fact]

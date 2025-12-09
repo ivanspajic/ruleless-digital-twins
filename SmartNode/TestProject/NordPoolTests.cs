@@ -4,9 +4,9 @@ using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using System.Reflection;
 using TestProject.Mocks;
-using TestProject.Mocks.EqualityComparers;
 using VDS.RDF;
 using VDS.RDF.Parsing;
+// using VDS.RDF.Query.Paths;
 
 namespace TestProject
 {
@@ -24,7 +24,7 @@ namespace TestProject
             var turtleParser = new TurtleParser();
             turtleParser.Load(instanceModel, modelFilePath);
 
-            var mapekAnalyze = new MapekAnalyze(new ServiceProviderMock());
+            var mapekPlan = new MapekPlan(new ServiceProviderMock());
 
             var simulationGranularity = 4;
 
@@ -81,11 +81,13 @@ namespace TestProject
                 }
             };
 
-            // Act
-            var actualOptimalConditionActionTuple = mapekAnalyze.Analyze(instanceModel, propertyCacheMock, simulationGranularity);
-            var str = actualOptimalConditionActionTuple.Item1
-                .Aggregate(string.Empty, (current, condition) => current + $"{condition}\n");
-            Assert.True(actualOptimalConditionActionTuple.Item1.Count > 0, str);
+            var simulationTree = new SimulationTreeNode {
+                Simulation = new Simulation(propertyCacheMock),
+                Children = []
+            };
+            // Tree gets updated after next call:
+            var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(simulationGranularity, 0, simulationTree, false, true, new List<List<ActuationAction>>());            
+            Assert.Equal(simulationTree.ChildrenCount, simulationGranularity);
         }
     }
 }

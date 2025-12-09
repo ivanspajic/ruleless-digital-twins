@@ -4,11 +4,19 @@ namespace Logic.Models.MapekModels
 {
     public class Simulation
     {
-        public required int Index { get; init; }
+        public Simulation(PropertyCache propertyCache)
+        {
+            PropertyCache = propertyCache;
+            ActuationActions = [];
+            Index = -1;
+            ReconfigurationActions = [];
+        }
 
-        public required IEnumerable<ActuationAction> ActuationActions { get; init; }
+        public int Index { get; init; }
 
-        public required IEnumerable<ReconfigurationAction> ReconfigurationActions { get; init; }
+        public IEnumerable<ActuationAction> ActuationActions { get; init; }
+
+        public IEnumerable<ReconfigurationAction> ReconfigurationActions { get; init; }
 
         public PropertyCache? PropertyCache { get; set; }
     }

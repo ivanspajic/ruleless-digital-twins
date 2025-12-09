@@ -49,13 +49,9 @@ namespace Logic.Mapek
             var optimalConditions = GetAllOptimalConditions(propertyCache);
 
             // Get all combinations of possible simulation configurations for the given number of cycles.
-            var simulationTree = new SimulationTreeNode {
-                Simulation = new Simulation {
-                    ActuationActions = [],
-                    Index = -1,
-                    ReconfigurationActions = [],
-                    PropertyCache = propertyCache
-                },
+            var simulationTree = new SimulationTreeNode
+            {
+                Simulation = new Simulation(propertyCache),
                 Children = []
             };
             var simulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<ActuationAction>>());
@@ -63,10 +59,12 @@ namespace Logic.Mapek
             // Execute the simulations and obtain their results.
             Simulate(simulations);
 
-            if (!simulationTree.Children.Any()) {
+            if (!simulationTree.Children.Any())
+            {
                 _logger.LogInformation("No simulation paths were generated.");
 
-                return new SimulationPath {
+                return new SimulationPath
+                {
                     Simulations = []
                 };
             }
@@ -82,8 +80,9 @@ namespace Logic.Mapek
         }
 
         // TODO: consider making this async in the future.
+        // TODO:
         // The booleans flags are used for performance improvements.
-        private IEnumerable<Simulation> GetSimulationsAndGenerateSimulationTree(int lookAheadCycles,
+        internal IEnumerable<Simulation> GetSimulationsAndGenerateSimulationTree(int lookAheadCycles,
             int currentCycle,
             SimulationTreeNode simulationTreeNode,
             bool unrestrictedInferenceExecuted,
@@ -113,11 +112,10 @@ namespace Logic.Mapek
             var simulationTreeNodeChildren = new List<SimulationTreeNode>();
 
             foreach (var actionCombination in actionCombinations) {
-                var simulation = new Simulation {
+                var simulation = new Simulation(GetPropertyCacheCopy(simulationTreeNode.Simulation.PropertyCache!)) {
                     ActuationActions = actionCombination,
                     Index = currentCycle,
                     ReconfigurationActions = [], // TODO: add support for ReconfigurationActions.
-                    PropertyCache = GetPropertyCacheCopy(simulationTreeNode.Simulation.PropertyCache!)
                 };
 
                 yield return simulation;

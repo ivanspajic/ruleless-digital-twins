@@ -49,8 +49,10 @@ namespace TestProject
         public void Simulation_loads_and_executes_Nordpool_Fmu()
         {
             // Arrange
-            string? s = Environment.GetEnvironmentVariable("LD_PRELOAD");
-            Assert.Equal($"/usr/lib/{_archStr}-linux-gnu/libpython3.11.so", s); // You're not running in Debug-mode!
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+                string? s = Environment.GetEnvironmentVariable("LD_PRELOAD");
+                Assert.Equal($"/usr/lib/{_archStr}-linux-gnu/libpython3.11.so", s); // You're not running in Debug-mode!
+            }
             // Use a dummy-type to get a handle:
             Stream modelStream = _assembly.GetManifestResourceStream("Implementations.FMUs.Nordpool_FMU.NordPool.fmu");
             Assert.NotNull(modelStream);
@@ -78,8 +80,10 @@ namespace TestProject
         public void Simulation_loads_and_executes_Nordpool_Fmu_TooLate()
         {
             // Arrange
-            string? s = Environment.GetEnvironmentVariable("LD_PRELOAD");
-            Assert.Equal($"/usr/lib/{_archStr}-linux-gnu/libpython3.11.so", s); // You're not running in Debug-mode!
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+                string? s = Environment.GetEnvironmentVariable("LD_PRELOAD");
+                Assert.Equal($"/usr/lib/{_archStr}-linux-gnu/libpython3.11.so", s); // You're not running in Debug-mode!
+            }
             Stream modelStream = _assembly.GetManifestResourceStream("Implementations.FMUs.Nordpool_FMU.NordPool.fmu");
             Assert.NotNull(modelStream);
 

@@ -1,12 +1,11 @@
 using Logic.Mapek;
-using Logic.Mapek.Comparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using System.Reflection;
 using TestProject.Mocks;
 using VDS.RDF;
 using VDS.RDF.Parsing;
-// using VDS.RDF.Query.Paths;
+using Xunit.Internal;
 
 namespace TestProject
 {
@@ -19,10 +18,6 @@ namespace TestProject
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}models-and-rules{Path.DirectorySeparatorChar}nordpool-out.ttl");
             modelFilePath = Path.GetFullPath(modelFilePath);
-
-            var instanceModel = new Graph();
-            var turtleParser = new TurtleParser();
-            turtleParser.Load(instanceModel, modelFilePath);
 
             var mapekPlan = new MapekPlan(new ServiceProviderMock());
 
@@ -68,15 +63,6 @@ namespace TestProject
                             OwlType = "double",
                             Value = -1.02
                         }
-                    },
-                    {
-                        "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorMeasuredHumidity",
-                        new Property
-                        {
-                            Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorMeasuredHumidity",
-                            OwlType = "double",
-                            Value = -1.02
-                        }
                     }
                 }
             };
@@ -86,7 +72,10 @@ namespace TestProject
                 Children = []
             };
             // Tree gets updated after next call:
-            var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(simulationGranularity, 0, simulationTree, false, true, new List<List<ActuationAction>>());            
+            var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(simulationGranularity, 0, simulationTree, false, true, new List<List<ActuationAction>>());    
+            // Iterate over the simulation collection to trigger the 'yield return' mechanism.
+            simulations.ForEach(simulation => { });
+
             Assert.Equal(simulationTree.ChildrenCount, simulationGranularity);
         }
     }

@@ -242,7 +242,7 @@ namespace Logic.Mapek
                 GROUP BY ?actionCombination");
 
             // Make sure the updated inferred model is reloaded before querying for ActionCombinations.
-            _mapekKnowledge.LoadModelsFromKnowledgeFromKnowledgeBase();
+            _mapekKnowledge.LoadModelsFromKnowledgeBase();
             
             var actionCombinationQueryResult = _mapekKnowledge.ExecuteQuery(actionCombinationQuery, true);
 

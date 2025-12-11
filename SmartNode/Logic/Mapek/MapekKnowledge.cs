@@ -43,7 +43,7 @@ namespace Logic.Mapek {
             _instanceModel = new Graph();
             _inferredModel = new Graph();
             _turtleParser = new TurtleParser();
-            LoadModelsFromKnowledgeFromKnowledgeBase();
+            LoadModelsFromKnowledgeBase();
             
             // If nothing was loaded, don't start the loop.
             if (_instanceModel.IsEmpty) {
@@ -207,7 +207,7 @@ namespace Logic.Mapek {
             _turtleWriter.Save(_instanceModel, _filepathArguments.InstanceModelFilepath);
         }
 
-        public void LoadModelsFromKnowledgeFromKnowledgeBase() {
+        public void LoadModelsFromKnowledgeBase() {
             _instanceModel.Clear();
             _inferredModel.Clear();
 

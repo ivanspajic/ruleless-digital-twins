@@ -17,7 +17,6 @@ namespace TestProject
         [MemberData(nameof(InferenceTestHelper.TestData), MemberType = typeof(InferenceTestHelper))]
         public void Correct_action_combinations_for_instance_model(string instanceModelFilename, IEnumerable<IEnumerable<ActuationAction>> expectedCombinations) {
             // Arrange
-            var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var workingDirectoryPath = Path.Combine(InferenceTestHelper.SolutionRootDirectory, "models-and-rules");
             var ontologyFilepath = Path.Combine(InferenceTestHelper.SolutionRootDirectory, "Ontology", "ruleless-digital-twins.ttl");
             var inferenceRulesFilepath = Path.Combine(InferenceTestHelper.SolutionRootDirectory, "models-and-rules", "inference-rules.rules");

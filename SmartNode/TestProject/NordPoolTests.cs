@@ -1,10 +1,9 @@
 using Logic.Mapek;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
+using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks;
-using VDS.RDF;
-using VDS.RDF.Parsing;
 using Xunit.Internal;
 
 namespace TestProject
@@ -19,7 +18,7 @@ namespace TestProject
             var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}models-and-rules{Path.DirectorySeparatorChar}nordpool-out.ttl");
             modelFilePath = Path.GetFullPath(modelFilePath);
 
-            var mapekPlan = new MapekPlan(new ServiceProviderMock());
+            var mapekPlan = new MapekPlan(new ServiceProviderMock(), false) ;
 
             var simulationGranularity = 4;
 
@@ -77,6 +76,12 @@ namespace TestProject
             simulations.ForEach(simulation => { });
 
             Assert.Equal(simulationTree.ChildrenCount, simulationGranularity);
+
+            var path = simulationTree.SimulationPaths.First();
+            foreach (var s in path.Simulations)
+            {
+                Trace.WriteLine(string.Join(";", s.ActuationActions.Select(a => a.Name)));
+            }
         }
     }
 }

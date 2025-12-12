@@ -21,7 +21,7 @@ namespace Logic.Mapek
         private readonly Dictionary<string, IModel> _fmuDict = [];
 	    private readonly Dictionary<string, IInstance> _iDict = [];
         // A setting that determines whether the DT operates in the 'reactive' (true) or 'proactive' (false) mode.
-        private readonly bool _restrictToReactiveActionsOnly = true;
+        private readonly bool _restrictToReactiveActionsOnly;
         // Used for performance enhancements.
         private bool _restrictToReactiveActionsOnlyOld = true;
 
@@ -30,8 +30,10 @@ namespace Logic.Mapek
         private readonly IMapekKnowledge _mapekKnowledge;
         private readonly FilepathArguments _filepathArguments;
 
-        public MapekPlan(IServiceProvider serviceProvider)
+        public MapekPlan(IServiceProvider serviceProvider, bool restrictToReactiveActionsOnly = true)
         {
+            _restrictToReactiveActionsOnly = restrictToReactiveActionsOnly;
+            _restrictToReactiveActionsOnlyOld = _restrictToReactiveActionsOnly;
             _logger = serviceProvider.GetRequiredService<ILogger<IMapekPlan>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
             _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
@@ -336,12 +338,9 @@ namespace Logic.Mapek
 
         private void Simulate(IEnumerable<Simulation> simulations)
         {
-            if (!simulations.Any()) {
-                return;
-            }
-
-            // Retrieve the host platform FMU and its simulation fidelity for ActuationAction simulations.
-            var fmuModel = GetHostPlatformFmuModel(simulations.First(), _filepathArguments.FmuDirectory);
+            // if (!simulations.Any()) {
+            //     return;
+            // }
 
             // Measure simulation time.
             var stopwatch = new Stopwatch();
@@ -351,6 +350,9 @@ namespace Logic.Mapek
             // TODO: Parallelize simulations (#13).
             foreach (var simulation in simulations)
             {
+                // Retrieve the host platform FMU and its simulation fidelity for ActuationAction simulations.
+                var fmuModel = GetHostPlatformFmuModel(simulation, _filepathArguments.FmuDirectory);
+
                 _logger.LogInformation("Running simulation #{run}", i++);
 
                 ExecuteActuationActionFmu(fmuModel, simulation);

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace TestProject.Mocks
 {
@@ -16,7 +17,7 @@ namespace TestProject.Mocks
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
-            
+            Debug.WriteLine($"[{logLevel}] {formatter(state, exception)}");
         }
     }
 }

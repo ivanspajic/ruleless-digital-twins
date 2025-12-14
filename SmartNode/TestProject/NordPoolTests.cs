@@ -8,29 +8,27 @@ using Xunit.Internal;
 
 namespace TestProject
 {
-    public class NordPoolTests
-    {
-        [Fact]
-        public void Actions_and_OptimalConditions_for_plan_phase_same_as_expected()
-        {
-            // Arrange
+    public class NordPoolTests {
+        [Theory]
+        [InlineData("nordpool-simple.ttl", 4)]
+        [InlineData("nordpool1.ttl", 4)]
+        public void Actions_and_OptimalConditions_for_plan_phase_same_as_expected(string model, int simulationGranularity) {
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}models-and-rules{Path.DirectorySeparatorChar}nordpool-out.ttl");
+            var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
+                                +$"models-and-rules{Path.DirectorySeparatorChar}{model}");
             modelFilePath = Path.GetFullPath(modelFilePath);
+            var inferredFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
+                                +$"models-and-rules{Path.DirectorySeparatorChar}{model}-inf"); // [TODO] .ttl doesn' really matter here now.
 
-            var mapekPlan = new MapekPlan(new ServiceProviderMock(), false) ;
 
-            var simulationGranularity = 4;
+            var mapekPlan = new MapekPlan(new ServiceProviderMock(modelFilePath, inferredFilePath), false) ;
 
-            var propertyCacheMock = new PropertyCache
-            {
+            var propertyCacheMock = new PropertyCache {
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
-                Properties = new Dictionary<string, Property>
-                {
+                Properties = new Dictionary<string, Property> {
                     {
                         "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#MeasuredOutputProperty",
-                        new Property
-                        {
+                        new Property {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#MeasuredOutputProperty",
                             OwlType = "double",
                             Value = -1.02
@@ -38,8 +36,7 @@ namespace TestProject
                     },
                     {
                         "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProperty",
-                        new Property
-                        {
+                        new Property {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProperty",
                             OwlType = "double",
                             Value = -1.02
@@ -47,8 +44,7 @@ namespace TestProject
                     },
                     {
                         "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#PriceMeasure",
-                        new Property
-                        {
+                        new Property {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#PriceMeasure",
                             OwlType = "double",
                             Value = -1.02
@@ -56,8 +52,7 @@ namespace TestProject
                     },
                     {
                         "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#price",
-                        new Property
-                        {
+                        new Property {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#price",
                             OwlType = "double",
                             Value = -1.02
@@ -78,8 +73,7 @@ namespace TestProject
             Assert.Equal(simulationTree.ChildrenCount, simulationGranularity);
 
             var path = simulationTree.SimulationPaths.First();
-            foreach (var s in path.Simulations)
-            {
+            foreach (var s in path.Simulations) {
                 Trace.WriteLine(string.Join(";", s.ActuationActions.Select(a => a.Name)));
             }
         }

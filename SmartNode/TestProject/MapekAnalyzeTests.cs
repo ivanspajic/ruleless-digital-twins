@@ -17,14 +17,16 @@ namespace TestProject
         {
             // Arrange
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}models-and-rules{Path.DirectorySeparatorChar}inferred-model-1.ttl");
+            var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}models-and-rules{Path.DirectorySeparatorChar}instance-model-1.ttl");
             modelFilePath = Path.GetFullPath(modelFilePath);
+            var inferredPath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}models-and-rules{Path.DirectorySeparatorChar}inferred-model-1.ttl");
+            inferredPath = Path.GetFullPath(inferredPath);
 
             var instanceModel = new Graph();
             var turtleParser = new TurtleParser();
             turtleParser.Load(instanceModel, modelFilePath);
 
-            var mapekAnalyze = new MapekAnalyze(new ServiceProviderMock());
+            var mapekAnalyze = new MapekAnalyze(new ServiceProviderMock(modelFilePath, inferredPath));
 
             var simulationGranularity = 4;
 

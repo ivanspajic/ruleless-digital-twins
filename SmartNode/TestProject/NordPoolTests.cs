@@ -68,11 +68,10 @@ namespace TestProject
                 Children = []
             };
             // Tree gets updated after next call:
-            var simulations = mapekPlan.PlanAll(propertyCacheMock, simulationGranularity);    
-            // Iterate over the simulation collection to trigger the 'yield return' mechanism.
+            var simulations = mapekPlan.PlanAll(propertyCacheMock, simulationGranularity);
+            // We're expecting a single tree...
             Assert.Single(simulationTree.SimulationPaths);
-            // simulations.ForEach(simulation => { });
-
+            // ... of length 4:
             Assert.Equal(simulationTree.ChildrenCount, simulationGranularity);
 
             var path = simulationTree.SimulationPaths.First();

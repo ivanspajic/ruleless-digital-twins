@@ -1,5 +1,6 @@
 from abc import ABC
 import typing
+from typing import Optional
 from rdflib import BNode, Literal, Graph, URIRef
 from rdflib.namespace import Namespace, RDF, OWL, XSD
 from rdflib.term import IdentifiedNode
@@ -81,11 +82,12 @@ class Procedure(Node):
     measure: Measure
     sensor: Sensor
 
-    def __init__(self, g, name, measure: Measure, sensor: Sensor):
+    def __init__(self, g, name, measure: Measure, sensor: Optional[Sensor] = None):
         self.node = name
         self.measure = measure
         self.sensor = sensor
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
         g.add((self.node, RDF["type"], SOSA["Procedure"]))
         g.add((self.node, SSN["hasOutput"], measure.node))
-        g.add((self.node, SSN["implementedBy"], sensor.node))
+        if sensor is not None:
+            g.add((self.node, SSN["implementedBy"], sensor.node))

@@ -3,7 +3,6 @@ using Logic.Mapek;
 using Logic.Models.MapekModels;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
-using TestProject.Utilities;
 
 namespace TestProject.Mocks
 {
@@ -16,8 +15,8 @@ namespace TestProject.Mocks
         public ServiceProviderMock(string model, string inferred) {
             _serviceImplementationMocks = new() {
             { typeof(ILogger<IMapekPlan>), new LoggerMock<IMapekPlan>() },
+            { typeof(ILogger<IMapekKnowledge>), new LoggerMock<IMapekKnowledge>() },
             { typeof(IFactory), new FactoryMock() },
-            { typeof(IMapekKnowledge), new MapekKnowledgeMock()  }, // TODO: document etc.?
             { typeof(FilepathArguments), new FilepathArguments {
                 InferenceEngineFilepath = Path.Combine(_rootDirectoryPath, "models-and-rules", "ruleless-digital-twins-inference-engine.jar"),
                 OntologyFilepath = Path.Combine(_rootDirectoryPath, "Ontology", "ruleless-digital-twins.ttl"),
@@ -26,7 +25,9 @@ namespace TestProject.Mocks
                 InferredModelFilepath = inferred,
                 FmuDirectory = Path.Combine(_rootDirectoryPath, "SmartNode", "Implementations", "FMUs"),
                 DataDirectory = Path.Combine(_rootDirectoryPath, "state-data")
-            } }
+            } },
+            // Not allowed to do that -- but in generally we shouldn't need mocking query results anyway?
+            // { typeof(IMapekKnowledge), new MapekKnowledge(this)  },
             };
         }
 
@@ -38,6 +39,10 @@ namespace TestProject.Mocks
             }
 
             return null;
+        }
+
+        public void Add(System.Type o, IMapekKnowledge k) {
+            _serviceImplementationMocks.Add(o, k);
         }
     }
 }

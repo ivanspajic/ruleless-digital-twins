@@ -4,7 +4,6 @@ using Logic.Models.OntologicalModels;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks;
-using Xunit.Internal;
 
 namespace TestProject
 {
@@ -20,11 +19,14 @@ namespace TestProject
             var inferredFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
                                 +$"models-and-rules{Path.DirectorySeparatorChar}{model}-inf"); // [TODO] .ttl doesn' really matter here now.
 
-
-            var mapekPlan = new MapekPlan(new ServiceProviderMock(modelFilePath, inferredFilePath), false) ;
+            var mock = new ServiceProviderMock(modelFilePath, inferredFilePath);
+            // TODO: not sure anymore if pulling it out was actually necessary in the end:
+            mock.Add(typeof(IMapekKnowledge), new MapekKnowledge(mock));
+            var mapekPlan = new MapekPlan(mock, false) ;
 
             var propertyCacheMock = new PropertyCache {
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
+                // TODO: This test shouldn't need those I think:
                 Properties = new Dictionary<string, Property> {
                     {
                         "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#MeasuredOutputProperty",
@@ -66,9 +68,10 @@ namespace TestProject
                 Children = []
             };
             // Tree gets updated after next call:
-            var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(simulationGranularity, 0, simulationTree, false, true, new List<List<ActuationAction>>());    
+            var simulations = mapekPlan.PlanAll(propertyCacheMock, simulationGranularity);    
             // Iterate over the simulation collection to trigger the 'yield return' mechanism.
-            simulations.ForEach(simulation => { });
+            Assert.Single(simulationTree.SimulationPaths);
+            // simulations.ForEach(simulation => { });
 
             Assert.Equal(simulationTree.ChildrenCount, simulationGranularity);
 

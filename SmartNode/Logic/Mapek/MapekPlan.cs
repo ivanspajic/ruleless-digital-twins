@@ -40,15 +40,13 @@ namespace Logic.Mapek
             _filepathArguments = serviceProvider.GetRequiredService<FilepathArguments>();
         }
 
-        public SimulationPath Plan(PropertyCache propertyCache, int lookAheadCycles)
-        {
-            _logger.LogInformation("Starting the Plan phase.");
-
+        public SimulationTreeNode PlanAll(PropertyCache propertyCache, int lookAheadCycles) {
             _logger.LogInformation("Generating simulations.");
 
+            // TODO: This is now in Plan(), but we may need it here as well later?
             // This is necessary for the fitness function. This might change as we reevaluate how the fitness function should work
             // and how it should be specified.
-            var optimalConditions = GetAllOptimalConditions(propertyCache);
+            // var optimalConditions = GetAllOptimalConditions(propertyCache);
 
             // Get all combinations of possible simulation configurations for the given number of cycles.
             var simulationTree = new SimulationTreeNode
@@ -61,17 +59,18 @@ namespace Logic.Mapek
             // Execute the simulations and obtain their results.
             Simulate(simulations);
 
-            if (!simulationTree.Children.Any())
-            {
-                _logger.LogInformation("No simulation paths were generated.");
-
-                return new SimulationPath
-                {
-                    Simulations = []
-                };
-            }
-
             _logger.LogInformation("Generated a total of {total} simulation paths.", simulationTree.SimulationPaths.Count());
+            return simulationTree;
+        }
+
+        public SimulationPath Plan(PropertyCache propertyCache, int lookAheadCycles) {
+            _logger.LogInformation("Starting the Plan phase.");
+
+            var simulationTree = PlanAll(propertyCache, lookAheadCycles);
+            
+            // This is necessary for the fitness function. This might change as we reevaluate how the fitness function should work
+            // and how it should be specified.
+            var optimalConditions = GetAllOptimalConditions(propertyCache);
 
             // Find the optimal simulation path.
             var optimalSimulationPath = GetOptimalSimulationPath(propertyCache, optimalConditions, simulationTree.SimulationPaths);
@@ -253,14 +252,13 @@ namespace Logic.Mapek
 
                 var combination = new List<ActuationAction>();
 
-                actions.ForEach(action => {
-                    var actionQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState WHERE {
+                var actionQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState WHERE {
                         @action rdf:type meta:ActuationAction .
                         @action meta:hasActuator ?actuator .
                         @action meta:hasActuatorState ?actuatorState . }");
+                actions.ForEach(action => {
 
                     actionQuery.SetUri("action", new Uri(action));
-
                     var actionQueryResult = _mapekKnowledge.ExecuteQuery(actionQuery, true);
 
                     actionQueryResult.Results.ForEach(actionResult => {

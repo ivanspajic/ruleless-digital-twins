@@ -41,7 +41,7 @@ namespace TestProject.Mocks
             return null;
         }
 
-        public void Add(System.Type o, IMapekKnowledge k) {
+        public void Add(System.Type o, object k) { // TODO: Review
             _serviceImplementationMocks.Add(o, k);
         }
     }

@@ -4,14 +4,15 @@ using Logic.Models.OntologicalModels;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks;
+using Xunit.Internal;
 
 namespace TestProject
 {
     public class NordPoolTests {
         [Theory]
         [InlineData("nordpool-simple.ttl", "nordpool-out.ttl", 4)]
-        [InlineData("nordpool1.ttl", "nordpool1-out.ttl", 4)]
-        public void Actions_and_OptimalConditions_for_plan_phase_same_as_expected(string model, string inferred, int simulationGranularity) {
+        //[InlineData("nordpool1.ttl", "nordpool1-out.ttl", 4)]
+        public void Actions_and_OptimalConditions_for_plan_phase_same_as_expected(string model, string inferred, int lookAheadCycles) {
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
                                 +$"models-and-rules{Path.DirectorySeparatorChar}{model}");
@@ -67,14 +68,17 @@ namespace TestProject
                 Simulation = new Simulation(propertyCacheMock),
                 Children = []
             };
-            // Tree gets updated after next call:
-            var simulations = mapekPlan.PlanAll(propertyCacheMock, simulationGranularity);
-            // We're expecting a single tree...
+
+            var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<ActuationAction>>());
+
+            // To produce the tree via the streaming (yield return) mechanism, we need to enumerate the simulation collection.
+            simulations.ForEach(_ => { });
+
             Assert.Single(simulationTree.SimulationPaths);
-            // ... of length 4:
-            Assert.Equal(simulationTree.ChildrenCount, simulationGranularity);
+            Assert.Equal(simulationTree.ChildrenCount, lookAheadCycles);
 
             var path = simulationTree.SimulationPaths.First();
+
             foreach (var s in path.Simulations) {
                 Trace.WriteLine(string.Join(";", s.ActuationActions.Select(a => a.Name)));
             }

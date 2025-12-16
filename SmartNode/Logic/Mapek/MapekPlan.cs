@@ -40,7 +40,9 @@ namespace Logic.Mapek
             _filepathArguments = serviceProvider.GetRequiredService<FilepathArguments>();
         }
 
-        public SimulationTreeNode PlanAll(PropertyCache propertyCache, int lookAheadCycles) {
+        public SimulationPath Plan(PropertyCache propertyCache, int lookAheadCycles) {
+            _logger.LogInformation("Starting the Plan phase.");
+
             _logger.LogInformation("Generating simulations.");
 
             // TODO: This is now in Plan(), but we may need it here as well later?
@@ -49,8 +51,7 @@ namespace Logic.Mapek
             // var optimalConditions = GetAllOptimalConditions(propertyCache);
 
             // Get all combinations of possible simulation configurations for the given number of cycles.
-            var simulationTree = new SimulationTreeNode
-            {
+            var simulationTree = new SimulationTreeNode {
                 Simulation = new Simulation(propertyCache),
                 Children = []
             };
@@ -60,13 +61,6 @@ namespace Logic.Mapek
             Simulate(simulations);
 
             _logger.LogInformation("Generated a total of {total} simulation paths.", simulationTree.SimulationPaths.Count());
-            return simulationTree;
-        }
-
-        public SimulationPath Plan(PropertyCache propertyCache, int lookAheadCycles) {
-            _logger.LogInformation("Starting the Plan phase.");
-
-            var simulationTree = PlanAll(propertyCache, lookAheadCycles);
             
             // This is necessary for the fitness function. This might change as we reevaluate how the fitness function should work
             // and how it should be specified.
@@ -336,10 +330,6 @@ namespace Logic.Mapek
 
         private void Simulate(IEnumerable<Simulation> simulations)
         {
-            // if (!simulations.Any()) {
-            //     return;
-            // }
-
             // Measure simulation time.
             var stopwatch = new Stopwatch();
             stopwatch.Start();

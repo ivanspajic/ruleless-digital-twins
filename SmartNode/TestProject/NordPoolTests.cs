@@ -16,6 +16,7 @@ namespace TestProject
         private readonly Dictionary<string, IValueHandler> _valueHandlers = new() {
             { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
             { "double", new DoubleValueHandler() }, // FIXME
+            { "boolean", new BooleanValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
         };
         public IActuatorDevice GetActuatorDeviceImplementation(string actuatorName)
@@ -88,7 +89,16 @@ namespace TestProject
                             OwlType = "double",
                             Value = -1.02
                         }
+                    },
+                    {
+                        "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#notFound",
+                        new Property {
+                            Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#notFound",
+                            OwlType = "boolean",
+                            Value = true
+                        }
                     }
+
                 }
             };
 

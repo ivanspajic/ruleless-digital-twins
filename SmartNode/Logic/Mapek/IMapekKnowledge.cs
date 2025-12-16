@@ -17,7 +17,7 @@ namespace Logic.Mapek {
 
         public void CommitInMemoryInstanceModelToKnowledgeBase();
 
-        public void LoadModelsFromKnowledgeFromKnowledgeBase();
+        public void LoadModelsFromKnowledgeBase();
 
         public void UpdateModel(SparqlParameterizedString query);
     }

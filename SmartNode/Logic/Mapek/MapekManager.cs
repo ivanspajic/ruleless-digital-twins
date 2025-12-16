@@ -53,7 +53,7 @@ namespace Logic.Mapek {
                 }
 
                 // Reload the instance model for each cycle to ensure dynamic model updates are captured.
-                _mapekKnowledge.LoadModelsFromKnowledgeFromKnowledgeBase(); // This makes sense in theory but won't work without the Factory updating as well.
+                _mapekKnowledge.LoadModelsFromKnowledgeBase(); // This makes sense in theory but won't work without the Factory updating as well.
 
                 // Monitor - Observe all hard and soft Sensor values.
                 var propertyCache = _mapekMonitor.Monitor();

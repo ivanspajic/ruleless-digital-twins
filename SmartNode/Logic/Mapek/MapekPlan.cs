@@ -21,7 +21,7 @@ namespace Logic.Mapek
         private readonly Dictionary<string, IModel> _fmuDict = [];
 	    private readonly Dictionary<string, IInstance> _iDict = [];
         // A setting that determines whether the DT operates in the 'reactive' (true) or 'proactive' (false) mode.
-        private readonly bool _restrictToReactiveActionsOnly = true;
+        private readonly bool _restrictToReactiveActionsOnly;
         // Used for performance enhancements.
         private bool _restrictToReactiveActionsOnlyOld = true;
 
@@ -30,32 +30,29 @@ namespace Logic.Mapek
         private readonly IMapekKnowledge _mapekKnowledge;
         private readonly FilepathArguments _filepathArguments;
 
-        public MapekPlan(IServiceProvider serviceProvider)
+        public MapekPlan(IServiceProvider serviceProvider, bool restrictToReactiveActionsOnly = true)
         {
+            _restrictToReactiveActionsOnly = restrictToReactiveActionsOnly;
+            _restrictToReactiveActionsOnlyOld = _restrictToReactiveActionsOnly;
             _logger = serviceProvider.GetRequiredService<ILogger<IMapekPlan>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
             _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
             _filepathArguments = serviceProvider.GetRequiredService<FilepathArguments>();
         }
 
-        public SimulationPath Plan(PropertyCache propertyCache, int lookAheadCycles)
-        {
+        public SimulationPath Plan(PropertyCache propertyCache, int lookAheadCycles) {
             _logger.LogInformation("Starting the Plan phase.");
 
             _logger.LogInformation("Generating simulations.");
 
+            // TODO: This is now in Plan(), but we may need it here as well later?
             // This is necessary for the fitness function. This might change as we reevaluate how the fitness function should work
             // and how it should be specified.
-            var optimalConditions = GetAllOptimalConditions(propertyCache);
+            // var optimalConditions = GetAllOptimalConditions(propertyCache);
 
             // Get all combinations of possible simulation configurations for the given number of cycles.
             var simulationTree = new SimulationTreeNode {
-                Simulation = new Simulation {
-                    ActuationActions = [],
-                    Index = -1,
-                    ReconfigurationActions = [],
-                    PropertyCache = propertyCache
-                },
+                Simulation = new Simulation(propertyCache),
                 Children = []
             };
             var simulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<ActuationAction>>());
@@ -63,15 +60,11 @@ namespace Logic.Mapek
             // Execute the simulations and obtain their results.
             Simulate(simulations);
 
-            if (!simulationTree.Children.Any()) {
-                _logger.LogInformation("No simulation paths were generated.");
-
-                return new SimulationPath {
-                    Simulations = []
-                };
-            }
-
             _logger.LogInformation("Generated a total of {total} simulation paths.", simulationTree.SimulationPaths.Count());
+            
+            // This is necessary for the fitness function. This might change as we reevaluate how the fitness function should work
+            // and how it should be specified.
+            var optimalConditions = GetAllOptimalConditions(propertyCache);
 
             // Find the optimal simulation path.
             var optimalSimulationPath = GetOptimalSimulationPath(propertyCache, optimalConditions, simulationTree.SimulationPaths);
@@ -82,8 +75,9 @@ namespace Logic.Mapek
         }
 
         // TODO: consider making this async in the future.
+        // TODO:
         // The booleans flags are used for performance improvements.
-        private IEnumerable<Simulation> GetSimulationsAndGenerateSimulationTree(int lookAheadCycles,
+        internal IEnumerable<Simulation> GetSimulationsAndGenerateSimulationTree(int lookAheadCycles,
             int currentCycle,
             SimulationTreeNode simulationTreeNode,
             bool unrestrictedInferenceExecuted,
@@ -113,11 +107,10 @@ namespace Logic.Mapek
             var simulationTreeNodeChildren = new List<SimulationTreeNode>();
 
             foreach (var actionCombination in actionCombinations) {
-                var simulation = new Simulation {
+                var simulation = new Simulation(GetPropertyCacheCopy(simulationTreeNode.Simulation.PropertyCache!)) {
                     ActuationActions = actionCombination,
                     Index = currentCycle,
                     ReconfigurationActions = [], // TODO: add support for ReconfigurationActions.
-                    PropertyCache = GetPropertyCacheCopy(simulationTreeNode.Simulation.PropertyCache!)
                 };
 
                 yield return simulation;
@@ -244,7 +237,7 @@ namespace Logic.Mapek
                 GROUP BY ?actionCombination");
 
             // Make sure the updated inferred model is reloaded before querying for ActionCombinations.
-            _mapekKnowledge.LoadModelsFromKnowledgeFromKnowledgeBase();
+            _mapekKnowledge.LoadModelsFromKnowledgeBase();
             
             var actionCombinationQueryResult = _mapekKnowledge.ExecuteQuery(actionCombinationQuery, true);
 
@@ -253,14 +246,13 @@ namespace Logic.Mapek
 
                 var combination = new List<ActuationAction>();
 
-                actions.ForEach(action => {
-                    var actionQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState WHERE {
+                var actionQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState WHERE {
                         @action rdf:type meta:ActuationAction .
                         @action meta:hasActuator ?actuator .
                         @action meta:hasActuatorState ?actuatorState . }");
+                actions.ForEach(action => {
 
                     actionQuery.SetUri("action", new Uri(action));
-
                     var actionQueryResult = _mapekKnowledge.ExecuteQuery(actionQuery, true);
 
                     actionQueryResult.Results.ForEach(actionResult => {
@@ -336,15 +328,8 @@ namespace Logic.Mapek
             return combinations;
         }
 
-        private void Simulate(IEnumerable<Simulation> simulations)
+        public void Simulate(IEnumerable<Simulation> simulations)
         {
-            if (!simulations.Any()) {
-                return;
-            }
-
-            // Retrieve the host platform FMU and its simulation fidelity for ActuationAction simulations.
-            var fmuModel = GetHostPlatformFmuModel(simulations.First(), _filepathArguments.FmuDirectory);
-
             // Measure simulation time.
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -353,6 +338,9 @@ namespace Logic.Mapek
             // TODO: Parallelize simulations (#13).
             foreach (var simulation in simulations)
             {
+                // Retrieve the host platform FMU and its simulation fidelity for ActuationAction simulations.
+                var fmuModel = GetHostPlatformFmuModel(simulation, _filepathArguments.FmuDirectory);
+
                 _logger.LogInformation("Running simulation #{run}", i++);
 
                 ExecuteActuationActionFmu(fmuModel, simulation);
@@ -494,8 +482,7 @@ namespace Logic.Mapek
             // Get all ObservableProperties and add them to the inputs for the FMU.
             var observableProperties = GetObservablePropertiesFromPropertyCache(simulation.PropertyCache!);
 
-            foreach (var observableProperty in observableProperties)
-            {
+            foreach (var observableProperty in observableProperties) {
                 // Shave off the long name URIs from the instance model.
                 var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
                 fmuActuationInputs.Add((simpleObservablePropertyName, observableProperty.OwlType, observableProperty.Value));
@@ -529,14 +516,14 @@ namespace Logic.Mapek
             AssignPropertyCacheCopyValues(fmuInstance, simulation.PropertyCache!, model.Variables);
         }
 
-        private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs)
-        {
-            foreach (var input in fmuInputs)
-            {
-                var valueHandler = _factory.GetValueHandlerImplementation(input.Item2);
-                var fmuVariable = model.Variables[input.Item1];
-
-                valueHandler.WriteValueToSimulationParameter(fmuInstance, fmuVariable, input.Item3);
+        private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs) {
+            foreach (var input in fmuInputs) {
+                // We filter inputs by those accepted by the actual FMU.
+                // TODO: figure out if we should do this outside of this loop here.
+                if (model.Variables.TryGetValue(input.Item1, out var fmuVariable)){
+                    var valueHandler = _factory.GetValueHandlerImplementation(input.Item2);
+                    valueHandler.WriteValueToSimulationParameter(fmuInstance, fmuVariable, input.Item3);
+                }
             }
         }
 

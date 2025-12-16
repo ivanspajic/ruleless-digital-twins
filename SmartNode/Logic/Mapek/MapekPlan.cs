@@ -328,7 +328,7 @@ namespace Logic.Mapek
             return combinations;
         }
 
-        private void Simulate(IEnumerable<Simulation> simulations)
+        public void Simulate(IEnumerable<Simulation> simulations)
         {
             // Measure simulation time.
             var stopwatch = new Stopwatch();
@@ -482,8 +482,7 @@ namespace Logic.Mapek
             // Get all ObservableProperties and add them to the inputs for the FMU.
             var observableProperties = GetObservablePropertiesFromPropertyCache(simulation.PropertyCache!);
 
-            foreach (var observableProperty in observableProperties)
-            {
+            foreach (var observableProperty in observableProperties) {
                 // Shave off the long name URIs from the instance model.
                 var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
                 fmuActuationInputs.Add((simpleObservablePropertyName, observableProperty.OwlType, observableProperty.Value));
@@ -517,14 +516,14 @@ namespace Logic.Mapek
             AssignPropertyCacheCopyValues(fmuInstance, simulation.PropertyCache!, model.Variables);
         }
 
-        private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs)
-        {
-            foreach (var input in fmuInputs)
-            {
-                var valueHandler = _factory.GetValueHandlerImplementation(input.Item2);
-                var fmuVariable = model.Variables[input.Item1];
-
-                valueHandler.WriteValueToSimulationParameter(fmuInstance, fmuVariable, input.Item3);
+        private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs) {
+            foreach (var input in fmuInputs) {
+                // We filter inputs by those accepted by the actual FMU.
+                // TODO: figure out if we should do this outside of this loop here.
+                if (model.Variables.TryGetValue(input.Item1, out var fmuVariable)){
+                    var valueHandler = _factory.GetValueHandlerImplementation(input.Item2);
+                    valueHandler.WriteValueToSimulationParameter(fmuInstance, fmuVariable, input.Item3);
+                }
             }
         }
 

@@ -12,11 +12,11 @@ namespace TestProject.Mocks
 
         private readonly Dictionary<Type, object?> _serviceImplementationMocks;
         
-        public ServiceProviderMock(string model, string inferred) {
+        public ServiceProviderMock(string model, string inferred, Factory? factory) {
             _serviceImplementationMocks = new() {
             { typeof(ILogger<IMapekPlan>), new LoggerMock<IMapekPlan>() },
             { typeof(ILogger<IMapekKnowledge>), new LoggerMock<IMapekKnowledge>() },
-            { typeof(IFactory), new FactoryMock() },
+            { typeof(IFactory), factory == null ? new FactoryMock() : factory },
             { typeof(FilepathArguments), new FilepathArguments {
                 InferenceEngineFilepath = Path.Combine(_rootDirectoryPath, "models-and-rules", "ruleless-digital-twins-inference-engine.jar"),
                 OntologyFilepath = Path.Combine(_rootDirectoryPath, "Ontology", "ruleless-digital-twins.ttl"),

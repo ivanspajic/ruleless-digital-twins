@@ -26,7 +26,7 @@ namespace TestProject
             var turtleParser = new TurtleParser();
             turtleParser.Load(instanceModel, modelFilePath);
 
-            var mapekAnalyze = new MapekAnalyze(new ServiceProviderMock(modelFilePath, inferredPath));
+            var mapekAnalyze = new MapekAnalyze(new ServiceProviderMock(modelFilePath, inferredPath, null));
 
             var simulationGranularity = 4;
 

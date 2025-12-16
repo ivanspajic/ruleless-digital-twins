@@ -1,6 +1,10 @@
+using Implementations.ValueHandlers;
+using Logic.DeviceInterfaces;
+using Logic.FactoryInterface;
 using Logic.Mapek;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
+using Logic.ValueHandlerInterfaces;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks;
@@ -8,6 +12,30 @@ using Xunit.Internal;
 
 namespace TestProject
 {
+    internal class Factory : IFactory {
+        private readonly Dictionary<string, IValueHandler> _valueHandlers = new() {
+            { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
+            { "double", new DoubleValueHandler() }, // FIXME
+            { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
+        };
+        public IActuatorDevice GetActuatorDeviceImplementation(string actuatorName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ISensorDevice GetSensorDeviceImplementation(string sensorName, string procedureName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IValueHandler GetValueHandlerImplementation(string owlType) {
+            if (_valueHandlers.TryGetValue(owlType, out IValueHandler? sensorValueHandler)) {
+                return sensorValueHandler;
+            }
+            throw new Exception($"No implementation was found for Sensor value handler for OWL type {owlType}.");
+        }
+    }
+
     public class NordPoolTests {
         [Theory]
         [InlineData("nordpool-simple.ttl", "nordpool-out.ttl", 4)]
@@ -20,7 +48,7 @@ namespace TestProject
             var inferredFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
                                 +$"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
 
-            var mock = new ServiceProviderMock(modelFilePath, inferredFilePath);
+            var mock = new ServiceProviderMock(modelFilePath, inferredFilePath, new Factory());
             // TODO: not sure anymore if pulling it out was actually necessary in the end:
             mock.Add(typeof(IMapekKnowledge), new MapekKnowledge(mock));
             var mapekPlan = new MapekPlan(mock, false) ;
@@ -76,12 +104,14 @@ namespace TestProject
 
             Assert.Single(simulationTree.SimulationPaths);
             Assert.Equal(simulationTree.ChildrenCount, lookAheadCycles);
-
+            mapekPlan.Simulate(simulations);
             var path = simulationTree.SimulationPaths.First();
 
-            foreach (var s in path.Simulations) {
+            foreach (var s in path.Simulations)
+            {
                 Trace.WriteLine(string.Join(";", s.ActuationActions.Select(a => a.Name)));
             }
-        }
+            // TODO: assert that in each simulated timepoint ElPriceNF = false.
+        }   
     }
 }

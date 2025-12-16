@@ -8,7 +8,7 @@ namespace Logic.Utilities
 {
     internal static class CsvUtils
     {
-        public static void WritePropertyStatesToCsv(string directoryPath, int roundNumber, PropertyCache propertyCache)
+        public static void WritePropertyStatesToCsv(string directoryPath, int roundNumber, Cache propertyCache)
         {
             foreach (var propertyKeyValuePair in propertyCache.Properties)
             {

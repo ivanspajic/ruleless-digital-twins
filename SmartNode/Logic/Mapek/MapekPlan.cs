@@ -40,7 +40,7 @@ namespace Logic.Mapek
             _filepathArguments = serviceProvider.GetRequiredService<FilepathArguments>();
         }
 
-        public SimulationPath Plan(PropertyCache propertyCache, int lookAheadCycles) {
+        public SimulationPath Plan(Cache propertyCache, int lookAheadCycles) {
             _logger.LogInformation("Starting the Plan phase.");
 
             _logger.LogInformation("Generating simulations.");
@@ -167,7 +167,7 @@ namespace Logic.Mapek
             _mapekKnowledge.CommitInMemoryInstanceModelToKnowledgeBase();
         }
 
-        private void UpdateInstanceModelWithSimulationValues(PropertyCache simulationPropertyCache) {
+        private void UpdateInstanceModelWithSimulationValues(Cache simulationPropertyCache) {
             foreach (var configurableParameterKeyValue in simulationPropertyCache.ConfigurableParameters) {
                 _mapekKnowledge.UpdateConfigurableParameterValue(configurableParameterKeyValue.Value);
             }
@@ -350,9 +350,9 @@ namespace Logic.Mapek
             _logger.LogInformation("Total simulation time (seconds): {elapsedTime}", (double)stopwatch.ElapsedMilliseconds / 1000);
         }
 
-        private static PropertyCache GetPropertyCacheCopy(PropertyCache originalPropertyCache)
+        private static Cache GetPropertyCacheCopy(Cache originalPropertyCache)
         {
-            var propertyCacheCopy = new PropertyCache
+            var propertyCacheCopy = new Cache
             {
                 Properties = new Dictionary<string, Property>(),
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
@@ -381,7 +381,7 @@ namespace Logic.Mapek
             return propertyCacheCopy;
         }
 
-        private List<Property> GetObservablePropertiesFromPropertyCache(PropertyCache propertyCache)
+        private List<Property> GetObservablePropertiesFromPropertyCache(Cache propertyCache)
         {
             var observableProperties = new List<Property>();
 
@@ -528,7 +528,7 @@ namespace Logic.Mapek
             }
         }
 
-        private void AssignPropertyCacheCopyValues(IInstance fmuInstance, PropertyCache propertyCacheCopy, IReadOnlyDictionary<string, IVariable> fmuOutputs)
+        private void AssignPropertyCacheCopyValues(IInstance fmuInstance, Cache propertyCacheCopy, IReadOnlyDictionary<string, IVariable> fmuOutputs)
         {
             // Find the correct Property from the simpler output variable name and assign its value.
             var logMsg = "";
@@ -546,7 +546,7 @@ namespace Logic.Mapek
             _logger.LogInformation(logMsg);   
         }
 
-        private List<OptimalCondition> GetAllOptimalConditions(PropertyCache propertyCache) {
+        private List<OptimalCondition> GetAllOptimalConditions(Cache propertyCache) {
             var optimalConditions = new List<OptimalCondition>();
 
             var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?optimalCondition ?property ?reachedInMaximumSeconds WHERE {
@@ -959,7 +959,7 @@ namespace Logic.Mapek
             };
         }
 
-        private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
+        private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, Cache propertyCache)
         {
             var numberOfSatisfiedOptimalConditions = 0;
 
@@ -996,7 +996,7 @@ namespace Logic.Mapek
             return numberOfSatisfiedOptimalConditions;
         }
 
-        private SimulationPath GetOptimalSimulationPath(PropertyCache propertyCache,
+        private SimulationPath GetOptimalSimulationPath(Cache propertyCache,
             IEnumerable<OptimalCondition> optimalConditions,
             IEnumerable<SimulationPath> simulationPaths)
         {
@@ -1058,7 +1058,7 @@ namespace Logic.Mapek
         }
 
         private List<SimulationPath> GetSimulationPathsWithMostOptimizedProperties(IEnumerable<SimulationPath> simulationPaths,
-            PropertyCache propertyCache)
+            Cache propertyCache)
         {
             var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(propertyCache);
             var valueHandlers = propertyChangesToOptimizeFor.Select(p => _factory.GetValueHandlerImplementation(p.Property.OwlType));
@@ -1073,7 +1073,7 @@ namespace Logic.Mapek
                 .ToList();
         }
 
-        private List<PropertyChange> GetPropertyChangesToOptimizeFor(PropertyCache propertyCache)
+        private List<PropertyChange> GetPropertyChangesToOptimizeFor(Cache propertyCache)
         {
             var propertyChangesToOptimizeFor = new List<PropertyChange>();
 

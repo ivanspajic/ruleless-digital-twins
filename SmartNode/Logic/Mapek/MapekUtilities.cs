@@ -23,7 +23,7 @@ namespace Logic.Mapek
             return simpleName;
         }
 
-        public static Property GetPropertyFromPropertyCacheByName(PropertyCache propertyCache, string propertyName)
+        public static Property GetPropertyFromPropertyCacheByName(Cache propertyCache, string propertyName)
         {
             if (!propertyCache.Properties.TryGetValue(propertyName, out Property? property))
             {

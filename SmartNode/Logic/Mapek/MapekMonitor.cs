@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using VDS.RDF;
+using Logic.DeviceInterfaces;
 
 namespace Logic.Mapek {
     public class MapekMonitor : IMapekMonitor {
@@ -13,25 +14,27 @@ namespace Logic.Mapek {
 
         // Used to keep copies of ConfigurableParameters and other Properties if need be. A second PropertyCache is used to allow
         // for checking of existing/non-existing Properties in the cache every MAPE-K cycle.
-        private PropertyCache _oldPropertyCache;
+        private Cache _oldCache;
 
         public MapekMonitor(IServiceProvider serviceProvider) {
             _logger = serviceProvider.GetRequiredService<ILogger<MapekMonitor>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
             _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
 
-            _oldPropertyCache = new PropertyCache {
+            _oldCache = new Cache {
                 Properties = new Dictionary<string, Property>(),
-                ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
+                ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
+                SoftSensorTree = new SoftSensorTreeNode()
             };
         }
 
-        public PropertyCache Monitor() {
+        public Cache Monitor() {
             _logger.LogInformation("Starting the Monitor phase.");
 
-            var propertyCache = new PropertyCache {
+            var propertyCache = new Cache {
                 Properties = new Dictionary<string, Property>(),
-                ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
+                ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
+                SoftSensorTree = new SoftSensorTreeNode()
             };
 
             // Get all measured Properties (Sensor Outputs) that aren't Inputs to other soft Sensors. Since soft Sensors may use
@@ -48,14 +51,21 @@ namespace Logic.Mapek {
             // cache.
             foreach (var result in queryResult.Results) {
                 var property = result["property"];
-                PopulateInputOutputsAndConfigurableParametersCaches(property, propertyCache);
+
+                var softSensorTreeNode = new SoftSensorTreeNode {
+                    NodeItem = null!,
+                    Children = []
+                };
+                // Make a dictionary to check for already made soft Sensors in the tree.
+                var softSensorDictionary = new Dictionary<string, SoftSensorTreeNode>();
+                PopulateCacheWithPropertiesConfigurableParametersAndSoftSensors(property, propertyCache, softSensorTreeNode, softSensorDictionary);
             }
 
             // Get the values of all ObservableProperties and populate the cache.
             PopulateObservablePropertiesCache(propertyCache);
 
             // Keep a reference for the old cache.
-            _oldPropertyCache = propertyCache;
+            _oldCache = propertyCache;
 
             // Write Property values back to the knowledge base.
             WritePropertyValuesToKnowledgeBase(propertyCache);
@@ -63,13 +73,24 @@ namespace Logic.Mapek {
             return propertyCache;
         }
 
-        private void PopulateInputOutputsAndConfigurableParametersCaches(INode propertyNode, PropertyCache propertyCache) {
+        private void PopulateCacheWithPropertiesConfigurableParametersAndSoftSensors(INode propertyNode,
+            Cache propertyCache,
+            SoftSensorTreeNode softSensorTreeNode,
+            Dictionary<string, SoftSensorTreeNode> softSensorDictionary) {
             var propertyName = propertyNode.ToString();
 
             // Simply return if the current Property already exists in the cache. This is necessary to avoid unnecessary multiple
-            // executions of the same Sensors since a single Property can be an Input to multiple soft Sensors.
+            // executions of the same Sensors since a single Property can be an Input to multiple soft Sensors. This also means a Sensor
+            // for that Property is also in the cache.
             if (propertyCache.Properties.ContainsKey(propertyName) || propertyCache.ConfigurableParameters.ContainsKey(propertyName)) {
-                return;
+                if (softSensorDictionary.TryGetValue(propertyName, out SoftSensorTreeNode? existingSoftSensorTreeNode)) {
+                    softSensorTreeNode = existingSoftSensorTreeNode;
+
+                    return;
+                }
+
+                // Shouldn't happen, but in case it does... :)
+                throw new Exception($"No sensor registered for Output Property {propertyName}.");
             }
 
             // Get the type of the Property.
@@ -97,10 +118,13 @@ namespace Logic.Mapek {
                     @procedure ssn:hasInput ?inputProperty .
                     @sensor ssn:implements @procedure . }");
 
+            var softSensorNodeChildren = new List<SoftSensorTreeNode>();
+
             // Otherwise, for each Procedure, find the Inputs.
             foreach (var result in procedureQueryResult.Results) {
                 var procedureNode = result["procedure"];
                 var sensorNode = result["sensor"];
+
                 // Get an instance of a Sensor from the factory.
                 var sensor = _factory.GetSensorDeviceImplementation(sensorNode.ToString(), procedureNode.ToString());
 
@@ -117,7 +141,7 @@ namespace Logic.Mapek {
                 // for the current Sensor to use on invocation. In case of no Inputs, the inputProperties array remains empty.
                 for (var i = 0; i < innerQueryResult.Results.Count; i++) {
                     var inputProperty = innerQueryResult.Results[i]["inputProperty"];
-                    PopulateInputOutputsAndConfigurableParametersCaches(inputProperty, propertyCache);
+                    PopulateCacheWithPropertiesConfigurableParametersAndSoftSensors(inputProperty, propertyCache);
 
                     if (propertyCache.Properties.ContainsKey(inputProperty.ToString())) {
                         inputProperties[i] = propertyCache.Properties[inputProperty.ToString()].Value;
@@ -142,8 +166,8 @@ namespace Logic.Mapek {
             }
         }
 
-        private void AddConfigurableParameterToCache(string propertyName, string propertyType, PropertyCache propertyCache) {
-            if (_oldPropertyCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? value)) {
+        private void AddConfigurableParameterToCache(string propertyName, string propertyType, Cache propertyCache) {
+            if (_oldCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? value)) {
                 propertyCache.ConfigurableParameters.Add(propertyName, value);
                 return;
             }
@@ -163,7 +187,7 @@ namespace Logic.Mapek {
             _logger.LogInformation("Added ConfigurableParameter {configurableParameter} to the cache.", propertyName);
         }
 
-        private void PopulateObservablePropertiesCache(PropertyCache propertyCache) {
+        private void PopulateObservablePropertiesCache(Cache propertyCache) {
             // Get all ObservableProperties.
             var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty ?valueType WHERE {
                 ?sensor rdf:type sosa:Sensor .
@@ -213,7 +237,7 @@ namespace Logic.Mapek {
             }
         }
 
-        private void WritePropertyValuesToKnowledgeBase(PropertyCache propertyCache) {
+        private void WritePropertyValuesToKnowledgeBase(Cache propertyCache) {
             foreach (var property in propertyCache.Properties.Values) {
                 _mapekKnowledge.UpdatePropertyValue(property);
             }

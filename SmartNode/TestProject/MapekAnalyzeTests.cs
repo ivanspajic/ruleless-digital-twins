@@ -30,7 +30,7 @@ namespace TestProject
 
             var simulationGranularity = 4;
 
-            var propertyCacheMock = new PropertyCache
+            var propertyCacheMock = new Cache
             {
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
                 Properties = new Dictionary<string, Property>

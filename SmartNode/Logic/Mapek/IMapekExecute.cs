@@ -4,6 +4,6 @@ namespace Logic.Mapek
 {
     public interface IMapekExecute
     {
-        public void Execute(SimulationPath simulationPath, PropertyCache propertyCache, bool useSimulatedTwinningTarget);
+        public void Execute(SimulationPath simulationPath, Cache propertyCache, bool useSimulatedTwinningTarget);
     }
 }

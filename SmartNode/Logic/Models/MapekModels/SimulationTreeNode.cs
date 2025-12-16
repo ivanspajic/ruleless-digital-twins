@@ -1,6 +1,6 @@
 ﻿namespace Logic.Models.MapekModels {
-    public class SimulationTreeNode {
-        public Simulation Simulation { get; set; }
+    public class SimulationTreeNode : ITreeNode<Simulation, SimulationTreeNode> {
+        public Simulation NodeItem { get; set; }
 
         public IEnumerable<SimulationTreeNode> Children { get; set; }
 
@@ -22,9 +22,9 @@
                 var simulationPaths = new List<SimulationPath>();
 
                 if (ChildrenCount == 0) {
-                    if (Simulation.Index != -1) {
+                    if (NodeItem.Index != -1) {
                         simulationPaths.Add(new SimulationPath {
-                            Simulations = [Simulation]
+                            Simulations = [NodeItem]
                         });
                     }
 
@@ -35,10 +35,10 @@
                     var innerSimulationPaths = child.SimulationPaths;
 
                     foreach (var innerSimulationPath in innerSimulationPaths) {
-                        if (Simulation.Index != -1) {
+                        if (NodeItem.Index != -1) {
                             var simulationPath = new SimulationPath {
                                 Simulations = new List<Simulation> {
-                                    Simulation
+                                    NodeItem
                                 }.Concat(innerSimulationPath.Simulations)
                             };
 

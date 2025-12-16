@@ -25,7 +25,7 @@ namespace TestProject
             mock.Add(typeof(IMapekKnowledge), new MapekKnowledge(mock));
             var mapekPlan = new MapekPlan(mock, false) ;
 
-            var propertyCacheMock = new PropertyCache {
+            var propertyCacheMock = new Cache {
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
                 // TODO: This test shouldn't need those I think:
                 Properties = new Dictionary<string, Property> {

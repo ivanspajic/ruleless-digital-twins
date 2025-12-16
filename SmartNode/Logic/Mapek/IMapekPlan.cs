@@ -4,6 +4,6 @@ namespace Logic.Mapek
 {
     public interface IMapekPlan
     {
-        public SimulationPath Plan(PropertyCache propertyCache, int lookAheadCycles);
+        public SimulationPath Plan(Cache propertyCache, int lookAheadCycles);
     }
 }

@@ -4,6 +4,6 @@ namespace Logic.Mapek
 {
     public interface IMapekMonitor
     {
-        public PropertyCache Monitor();
+        public Cache Monitor();
     }
 }

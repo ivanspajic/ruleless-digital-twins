@@ -17,7 +17,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public void Execute(SimulationPath optimalConfiguration, PropertyCache propertyCache, bool useSimulatedTwinningTarget)
+        public void Execute(SimulationPath optimalConfiguration, Cache propertyCache, bool useSimulatedTwinningTarget)
         {
             _logger.LogInformation("Starting the Execute phase.");
 
@@ -54,7 +54,7 @@ namespace Logic.Mapek
             actuator.Actuate(actuationAction.NewStateValue);
         }
 
-        private void ExecuteReconfigurationAction(ReconfigurationAction reconfigurationAction, PropertyCache propertyCache)
+        private void ExecuteReconfigurationAction(ReconfigurationAction reconfigurationAction, Cache propertyCache)
         {
             _logger.LogInformation("Reconfiguring property {configurableProperty} with {effect}.",
                 reconfigurationAction.ConfigurableParameter.Name,

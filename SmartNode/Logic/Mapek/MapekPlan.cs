@@ -75,7 +75,6 @@ namespace Logic.Mapek
         }
 
         // TODO: consider making this async in the future.
-        // TODO:
         // The booleans flags are used for performance improvements.
         internal IEnumerable<Simulation> GetSimulationsAndGenerateSimulationTree(int lookAheadCycles,
             int currentCycle,

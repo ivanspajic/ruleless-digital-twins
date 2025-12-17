@@ -40,7 +40,7 @@ namespace Logic.Mapek
             _filepathArguments = serviceProvider.GetRequiredService<FilepathArguments>();
         }
 
-        public SimulationPath Plan(Cache propertyCache, int lookAheadCycles) {
+        public SimulationPath Plan(Cache cache, int lookAheadCycles) {
             _logger.LogInformation("Starting the Plan phase.");
 
             _logger.LogInformation("Generating simulations.");
@@ -52,22 +52,22 @@ namespace Logic.Mapek
 
             // Get all combinations of possible simulation configurations for the given number of cycles.
             var simulationTree = new SimulationTreeNode {
-                Simulation = new Simulation(propertyCache),
+                NodeItem = new Simulation(cache.PropertyCache),
                 Children = []
             };
             var simulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<ActuationAction>>());
 
             // Execute the simulations and obtain their results.
-            Simulate(simulations);
+            Simulate(simulations, cache.SoftSensorTreeNodes);
 
             _logger.LogInformation("Generated a total of {total} simulation paths.", simulationTree.SimulationPaths.Count());
             
             // This is necessary for the fitness function. This might change as we reevaluate how the fitness function should work
             // and how it should be specified.
-            var optimalConditions = GetAllOptimalConditions(propertyCache);
+            var optimalConditions = GetAllOptimalConditions(cache.PropertyCache);
 
             // Find the optimal simulation path.
-            var optimalSimulationPath = GetOptimalSimulationPath(propertyCache, optimalConditions, simulationTree.SimulationPaths);
+            var optimalSimulationPath = GetOptimalSimulationPath(cache.PropertyCache, optimalConditions, simulationTree.SimulationPaths);
 
             LogOptimalSimulationPath(optimalSimulationPath);
 
@@ -75,7 +75,6 @@ namespace Logic.Mapek
         }
 
         // TODO: consider making this async in the future.
-        // TODO:
         // The booleans flags are used for performance improvements.
         internal IEnumerable<Simulation> GetSimulationsAndGenerateSimulationTree(int lookAheadCycles,
             int currentCycle,
@@ -83,45 +82,57 @@ namespace Logic.Mapek
             bool unrestrictedInferenceExecuted,
             bool reloadInferredModel,
             IEnumerable<IEnumerable<ActuationAction>> actionCombinations) {
+            // Update the restriction setting in the instance model to run the inference rules correctly.
             EnsureUpdatedRestrictionSetting();
 
             if (_restrictToReactiveActionsOnly) {
-                if (simulationTreeNode.Simulation.Index != -1) {
-                    UpdateInstanceModelWithSimulationValues(simulationTreeNode.Simulation.PropertyCache!);
+                // If the RDT runs in reactive mode, then write the current simulation's values into the instance model for
+                // dynamic OptimalCondition evaluation and ActionCombination generation.
+                if (simulationTreeNode.NodeItem.Index != -1) {
+                    UpdateInstanceModelWithSimulationValues(simulationTreeNode.NodeItem.PropertyCache!);
                 }
                 InferActionCombinations();
 
+                // Check the performance flags for rerunning the inference engine and reloading the instance model.
                 unrestrictedInferenceExecuted = false;
                 reloadInferredModel = true;
             } else if (!_restrictToReactiveActionsOnly && !unrestrictedInferenceExecuted) {
                 InferActionCombinations();
+                // If the RDT runs in proactive mode, then we don't have to rerun the inference until the setting is changed.
                 unrestrictedInferenceExecuted = true;
             }
 
+            // Only reload the instance model if a new set of ActionCombinations has been inferred.
             if (reloadInferredModel) {
                 actionCombinations = GetActionCombinations();
 
                 reloadInferredModel = false;
             }
 
+            // For every ActionCombination, create a new Simulation, yield return it, and continue the process recursively for all children
+            // as long as there are additional MAPE-K cycles to simulate for.
             var simulationTreeNodeChildren = new List<SimulationTreeNode>();
 
             foreach (var actionCombination in actionCombinations) {
-                var simulation = new Simulation(GetPropertyCacheCopy(simulationTreeNode.Simulation.PropertyCache!)) {
+                var simulation = new Simulation(GetPropertyCacheCopy(simulationTreeNode.NodeItem.PropertyCache!)) {
                     ActuationActions = actionCombination,
                     Index = currentCycle,
                     ReconfigurationActions = [], // TODO: add support for ReconfigurationActions.
                 };
 
+                // Already stream back the newly-created simulation.
                 yield return simulation;
 
+                // Choose whether to keep the current simulation after its property cache values are populated. This allows for dynamic tree
+                // pruning as the tree is being constructed for better performance.
                 var keepSimulation = GetKeepSimulation(simulation);
 
                 var currentSimulationTreeNode = new SimulationTreeNode {
-                    Simulation = simulation,
+                    NodeItem = simulation,
                     Children = []
                 };
 
+                // If there are more cycles to simulate for, and if we're keeping the current simulation, then keep expanding branches on the tree.
                 if (currentCycle < lookAheadCycles - 1 && keepSimulation) {
                     var childSimulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles,
                         currentCycle + 1,
@@ -163,11 +174,12 @@ namespace Logic.Mapek
 
             query.SetLiteral("newValue", _restrictToReactiveActionsOnly);
 
+            // Update the instance model and commit its contents to the disk.
             _mapekKnowledge.UpdateModel(query);
             _mapekKnowledge.CommitInMemoryInstanceModelToKnowledgeBase();
         }
 
-        private void UpdateInstanceModelWithSimulationValues(Cache simulationPropertyCache) {
+        private void UpdateInstanceModelWithSimulationValues(PropertyCache simulationPropertyCache) {
             foreach (var configurableParameterKeyValue in simulationPropertyCache.ConfigurableParameters) {
                 _mapekKnowledge.UpdateConfigurableParameterValue(configurableParameterKeyValue.Value);
             }
@@ -242,6 +254,7 @@ namespace Logic.Mapek
             var actionCombinationQueryResult = _mapekKnowledge.ExecuteQuery(actionCombinationQuery, true);
 
             actionCombinationQueryResult.Results.ForEach(combinationResult => {
+                // ActionCombinations can only be queried through concatenation in the query above, so they must be split.
                 var actions = combinationResult["actions"].ToString().Split('^')[0].Split(' ').ToList();
 
                 var combination = new List<ActuationAction>();
@@ -251,7 +264,7 @@ namespace Logic.Mapek
                         @action meta:hasActuator ?actuator .
                         @action meta:hasActuatorState ?actuatorState . }");
                 actions.ForEach(action => {
-
+                    // For each Action, find the appropriate Actuator and its state.
                     actionQuery.SetUri("action", new Uri(action));
                     var actionQueryResult = _mapekKnowledge.ExecuteQuery(actionQuery, true);
 
@@ -276,7 +289,8 @@ namespace Logic.Mapek
         }
 
         private bool GetKeepSimulation(Simulation simulation) {
-            return true; // Here, we can implement dynamic pruning logic based on the values of the simulation's property cache.
+            // Here, we can implement dynamic pruning logic based on the values of the simulation's property cache.
+            return true;
         }
 
         public static IEnumerable<IEnumerable<T>> GetNaryCartesianProducts<T> (IEnumerable<IEnumerable<T>> sequences)
@@ -328,7 +342,7 @@ namespace Logic.Mapek
             return combinations;
         }
 
-        private void Simulate(IEnumerable<Simulation> simulations)
+        private void Simulate(IEnumerable<Simulation> simulations, IEnumerable<SoftSensorTreeNode> softSensorTreeNodes)
         {
             // Measure simulation time.
             var stopwatch = new Stopwatch();
@@ -343,19 +357,41 @@ namespace Logic.Mapek
 
                 _logger.LogInformation("Running simulation #{run}", i++);
 
+                // Perform the simulation via FMU execution and ensure all the Properties in the simulation's property cache are updated by running all soft sensors
+                // in the correct order.
                 ExecuteActuationActionFmu(fmuModel, simulation);
+                ExecuteSoftSensorsAndUpdateSimulationCache(simulation, softSensorTreeNodes);
             }
 
             stopwatch.Stop();
             _logger.LogInformation("Total simulation time (seconds): {elapsedTime}", (double)stopwatch.ElapsedMilliseconds / 1000);
         }
+        
+        private static void ExecuteSoftSensorsAndUpdateSimulationCache(Simulation simulation, IEnumerable<SoftSensorTreeNode> softSensorTreeNodes) {
+            // Execute the tree of soft sensors in the correct order to ensure all Properties in the simulation's property cache are updated.
+            foreach (var softSensorTreeNode in softSensorTreeNodes) {
+                if (softSensorTreeNode.Children.Any()) {
+                    ExecuteSoftSensorsAndUpdateSimulationCache(simulation, softSensorTreeNode.Children);
 
-        private static Cache GetPropertyCacheCopy(Cache originalPropertyCache)
+                    var inputs = new List<object>();
+                    foreach (var softSensorTreeNodeChild in softSensorTreeNode.Children) {
+                        var inputProperty = simulation.PropertyCache!.Properties[softSensorTreeNodeChild.OutputProperty];
+                        inputs.Add(inputProperty.Value);
+                    }
+
+                    var propertyValue = softSensorTreeNode.NodeItem.ObservePropertyValue(inputs.ToArray());
+                    var property = simulation.PropertyCache!.Properties[softSensorTreeNode.OutputProperty];
+                    property.Value = propertyValue;
+                }
+            }
+        }
+
+        private static PropertyCache GetPropertyCacheCopy(PropertyCache originalPropertyCache)
         {
-            var propertyCacheCopy = new Cache
+            var propertyCacheCopy = new PropertyCache
             {
                 Properties = new Dictionary<string, Property>(),
-                ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
+                ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
             };
 
             foreach (var keyValuePair in originalPropertyCache.Properties)
@@ -381,7 +417,7 @@ namespace Logic.Mapek
             return propertyCacheCopy;
         }
 
-        private List<Property> GetObservablePropertiesFromPropertyCache(Cache propertyCache)
+        private List<Property> GetObservablePropertiesFromPropertyCache(PropertyCache propertyCache)
         {
             var observableProperties = new List<Property>();
 
@@ -528,7 +564,7 @@ namespace Logic.Mapek
             }
         }
 
-        private void AssignPropertyCacheCopyValues(IInstance fmuInstance, Cache propertyCacheCopy, IReadOnlyDictionary<string, IVariable> fmuOutputs)
+        private void AssignPropertyCacheCopyValues(IInstance fmuInstance, PropertyCache propertyCacheCopy, IReadOnlyDictionary<string, IVariable> fmuOutputs)
         {
             // Find the correct Property from the simpler output variable name and assign its value.
             var logMsg = "";
@@ -546,7 +582,7 @@ namespace Logic.Mapek
             _logger.LogInformation(logMsg);   
         }
 
-        private List<OptimalCondition> GetAllOptimalConditions(Cache propertyCache) {
+        private List<OptimalCondition> GetAllOptimalConditions(PropertyCache propertyCache) {
             var optimalConditions = new List<OptimalCondition>();
 
             var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?optimalCondition ?property ?reachedInMaximumSeconds WHERE {
@@ -959,7 +995,7 @@ namespace Logic.Mapek
             };
         }
 
-        private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, Cache propertyCache)
+        private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
         {
             var numberOfSatisfiedOptimalConditions = 0;
 
@@ -996,7 +1032,7 @@ namespace Logic.Mapek
             return numberOfSatisfiedOptimalConditions;
         }
 
-        private SimulationPath GetOptimalSimulationPath(Cache propertyCache,
+        private SimulationPath GetOptimalSimulationPath(PropertyCache propertyCache,
             IEnumerable<OptimalCondition> optimalConditions,
             IEnumerable<SimulationPath> simulationPaths)
         {
@@ -1058,7 +1094,7 @@ namespace Logic.Mapek
         }
 
         private List<SimulationPath> GetSimulationPathsWithMostOptimizedProperties(IEnumerable<SimulationPath> simulationPaths,
-            Cache propertyCache)
+            PropertyCache propertyCache)
         {
             var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(propertyCache);
             var valueHandlers = propertyChangesToOptimizeFor.Select(p => _factory.GetValueHandlerImplementation(p.Property.OwlType));
@@ -1073,7 +1109,7 @@ namespace Logic.Mapek
                 .ToList();
         }
 
-        private List<PropertyChange> GetPropertyChangesToOptimizeFor(Cache propertyCache)
+        private List<PropertyChange> GetPropertyChangesToOptimizeFor(PropertyCache propertyCache)
         {
             var propertyChangesToOptimizeFor = new List<PropertyChange>();
 

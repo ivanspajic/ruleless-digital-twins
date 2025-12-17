@@ -1,6 +1,5 @@
 ﻿using Logic.Models.OntologicalModels;
 using System.Diagnostics;
-using System.Reflection;
 using TestProject.Utilities;
 using VDS.RDF;
 using VDS.RDF.Parsing;
@@ -13,7 +12,7 @@ namespace TestProject
     {
         // TODO: make this work in containers. xUnit allows for skippable tests depending on the platform, so we can have a similar one for containers.
         // This is really an integration test.
-        [Theory(Skip = "This test takes a long time to run. To run it, simply remove this attribute.")]
+        [Theory(Explicit = true)]
         [MemberData(nameof(InferenceTestHelper.TestData), MemberType = typeof(InferenceTestHelper))]
         public void Correct_action_combinations_for_instance_model(string instanceModelFilename, IEnumerable<IEnumerable<ActuationAction>> expectedCombinations) {
             // Arrange

@@ -5,6 +5,7 @@ using Implementations.Actuators;
 using Implementations.Sensors;
 using Implementations.ValueHandlers;
 using Implementations.SimulatedTwinningTargets;
+using Implementations.Sensors.RoomM370;
 
 namespace SmartNode
 {
@@ -83,6 +84,27 @@ namespace SmartNode
                 new ConstantSensor(
                     "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProcedure",
                     "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummySensor", -1)
+            },
+            {
+                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensor",
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensorProcedure"),
+                new IncreaseTemperatureSoftSensor(
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensor",
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensorProcedure")
+            },
+            {
+                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensor",
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensorProcedure"),
+                new DecreaseTemperatureSoftSensor(
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensor",
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensorProcedure")
+            },
+            {
+                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensor",
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensorProcedure"),
+                new AverageTemperatureSoftSensor(
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensor",
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensorProcedure")
             }
         };
 

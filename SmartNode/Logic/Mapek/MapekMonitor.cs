@@ -22,19 +22,23 @@ namespace Logic.Mapek {
             _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
 
             _oldCache = new Cache {
-                Properties = new Dictionary<string, Property>(),
-                ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
-                SoftSensorTree = new SoftSensorTreeNode()
+                PropertyCache = new PropertyCache {
+                    Properties = new Dictionary<string, Property>(),
+                    ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
+                },
+                SoftSensorTreeNodes = new List<SoftSensorTreeNode>()
             };
         }
 
         public Cache Monitor() {
             _logger.LogInformation("Starting the Monitor phase.");
 
-            var propertyCache = new Cache {
-                Properties = new Dictionary<string, Property>(),
-                ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
-                SoftSensorTree = new SoftSensorTreeNode()
+            var cache = new Cache {
+                PropertyCache = new PropertyCache {
+                    Properties = new Dictionary<string, Property>(),
+                    ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
+                },
+                SoftSensorTreeNodes = new List<SoftSensorTreeNode>()
             };
 
             // Get all measured Properties (Sensor Outputs) that aren't Inputs to other soft Sensors. Since soft Sensors may use
@@ -47,34 +51,38 @@ namespace Logic.Mapek {
 
             var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
+            // Make a dictionary to check for already made soft Sensors in the tree.
+            var softSensorDictionary = new Dictionary<string, SoftSensorTreeNode>();
+
             // Get the values of all measured Properties (Sensor Inputs/Outputs and ConfigurableParameters) and populate the
             // cache.
+            var softSensorTreeNodes = new List<SoftSensorTreeNode>();
+
             foreach (var result in queryResult.Results) {
                 var property = result["property"];
+                var softSensorTreeNode = new SoftSensorTreeNode();
+                
+                PopulateCacheWithPropertiesConfigurableParametersAndSoftSensors(property, cache.PropertyCache, softSensorTreeNode, softSensorDictionary);
 
-                var softSensorTreeNode = new SoftSensorTreeNode {
-                    NodeItem = null!,
-                    Children = []
-                };
-                // Make a dictionary to check for already made soft Sensors in the tree.
-                var softSensorDictionary = new Dictionary<string, SoftSensorTreeNode>();
-                PopulateCacheWithPropertiesConfigurableParametersAndSoftSensors(property, propertyCache, softSensorTreeNode, softSensorDictionary);
+                softSensorTreeNodes.Add(softSensorTreeNode);
             }
 
+            cache.SoftSensorTreeNodes = softSensorTreeNodes;
+
             // Get the values of all ObservableProperties and populate the cache.
-            PopulateObservablePropertiesCache(propertyCache);
+            PopulateObservablePropertiesCache(cache.PropertyCache);
 
             // Keep a reference for the old cache.
-            _oldCache = propertyCache;
+            _oldCache = cache;
 
             // Write Property values back to the knowledge base.
-            WritePropertyValuesToKnowledgeBase(propertyCache);
+            WritePropertyValuesToKnowledgeBase(cache.PropertyCache);
 
-            return propertyCache;
+            return cache;
         }
 
         private void PopulateCacheWithPropertiesConfigurableParametersAndSoftSensors(INode propertyNode,
-            Cache propertyCache,
+            PropertyCache propertyCache,
             SoftSensorTreeNode softSensorTreeNode,
             Dictionary<string, SoftSensorTreeNode> softSensorDictionary) {
             var propertyName = propertyNode.ToString();
@@ -84,7 +92,9 @@ namespace Logic.Mapek {
             // for that Property is also in the cache.
             if (propertyCache.Properties.ContainsKey(propertyName) || propertyCache.ConfigurableParameters.ContainsKey(propertyName)) {
                 if (softSensorDictionary.TryGetValue(propertyName, out SoftSensorTreeNode? existingSoftSensorTreeNode)) {
-                    softSensorTreeNode = existingSoftSensorTreeNode;
+                    softSensorTreeNode.OutputProperty = existingSoftSensorTreeNode.OutputProperty;
+                    softSensorTreeNode.Children = existingSoftSensorTreeNode.Children;
+                    softSensorTreeNode.NodeItem = existingSoftSensorTreeNode.NodeItem;
 
                     return;
                 }
@@ -120,54 +130,65 @@ namespace Logic.Mapek {
 
             var softSensorNodeChildren = new List<SoftSensorTreeNode>();
 
-            // Otherwise, for each Procedure, find the Inputs.
-            foreach (var result in procedureQueryResult.Results) {
-                var procedureNode = result["procedure"];
-                var sensorNode = result["sensor"];
+            // Otherwise, find the Inputs. Although there may be multiple results here, the instance models should be configured such that a single soft Sensor
+            // (Procedure) outputs a unique Property. This avoids potential cases of multiple values for the same Property.
+            var procedureNode = procedureQueryResult.Results[0]["procedure"];
+            var sensorNode = procedureQueryResult.Results[0]["sensor"];
 
-                // Get an instance of a Sensor from the factory.
-                var sensor = _factory.GetSensorDeviceImplementation(sensorNode.ToString(), procedureNode.ToString());
+            // Get an instance of a Sensor from the factory.
+            var sensor = _factory.GetSensorDeviceImplementation(sensorNode.ToString(), procedureNode.ToString());
 
-                // Get all measured Properties this Sensor uses as its Inputs.
-                query.SetParameter("procedure", procedureNode);
-                query.SetParameter("sensor", sensorNode);
+            // Get all measured Properties this Sensor uses as its Inputs.
+            query.SetParameter("procedure", procedureNode);
+            query.SetParameter("sensor", sensorNode);
 
-                var innerQueryResult = _mapekKnowledge.ExecuteQuery(query);
+            var innerQueryResult = _mapekKnowledge.ExecuteQuery(query);
 
-                // Construct the required Input Property array.
-                var inputProperties = new object[innerQueryResult.Count];
+            // Construct the required Input Property array.
+            var inputProperties = new object[innerQueryResult.Count];
 
-                // For each Input Property, call this method recursively and record the newly-cached value in inputProperties
-                // for the current Sensor to use on invocation. In case of no Inputs, the inputProperties array remains empty.
-                for (var i = 0; i < innerQueryResult.Results.Count; i++) {
-                    var inputProperty = innerQueryResult.Results[i]["inputProperty"];
-                    PopulateCacheWithPropertiesConfigurableParametersAndSoftSensors(inputProperty, propertyCache);
+            // For each Input Property, call this method recursively and record the newly-cached value in inputProperties
+            // for the current Sensor to use on invocation. In case of no Inputs, the inputProperties array remains empty.
+            for (var i = 0; i < innerQueryResult.Results.Count; i++) {
+                var softSensorTreeChildNode = new SoftSensorTreeNode();
 
-                    if (propertyCache.Properties.ContainsKey(inputProperty.ToString())) {
-                        inputProperties[i] = propertyCache.Properties[inputProperty.ToString()].Value;
-                    } else if (propertyCache.ConfigurableParameters.ContainsKey(inputProperty.ToString())) {
-                        inputProperties[i] = propertyCache.ConfigurableParameters[inputProperty.ToString()].Value;
-                    } else {
-                        throw new Exception($"The Input Property {inputProperty.ToString()} was not found in the respective Property caches.");
-                    }
+                var inputProperty = innerQueryResult.Results[i]["inputProperty"];
+                PopulateCacheWithPropertiesConfigurableParametersAndSoftSensors(inputProperty, propertyCache, softSensorTreeChildNode, softSensorDictionary);
+
+                if (propertyCache.Properties.ContainsKey(inputProperty.ToString())) {
+                    inputProperties[i] = propertyCache.Properties[inputProperty.ToString()].Value;
+                } else if (propertyCache.ConfigurableParameters.ContainsKey(inputProperty.ToString())) {
+                    inputProperties[i] = propertyCache.ConfigurableParameters[inputProperty.ToString()].Value;
+                } else {
+                    throw new Exception($"The Input Property {inputProperty.ToString()} was not found in the respective Property caches.");
                 }
 
-                // Invoke the Sensor with the corresponding Inputs and save the returned value in the map.
-                var propertyValue = sensor.ObservePropertyValue(inputProperties);
-                var property = new Property {
-                    Name = propertyNode.ToString(),
-                    OwlType = propertyType,
-                    Value = propertyValue
-                };
-
-                propertyCache.Properties.Add(property.Name, property);
-
-                _logger.LogInformation("Added computable Property (Input/Output) {property} to the cache.", propertyName);
+                softSensorNodeChildren.Add(softSensorTreeChildNode);
             }
+
+            // Invoke the Sensor with the corresponding Inputs and save the returned value in the map.
+            var propertyValue = sensor.ObservePropertyValue(inputProperties);
+            var property = new Property {
+                Name = propertyNode.ToString(),
+                OwlType = propertyType,
+                Value = propertyValue
+            };
+
+            propertyCache.Properties.Add(property.Name, property);
+
+            // Build the soft sensor node with any potential children.
+            softSensorTreeNode.NodeItem = sensor;
+            softSensorTreeNode.Children = softSensorNodeChildren;
+            softSensorTreeNode.OutputProperty = property.Name;
+
+            // Cache it for easier (and faster) finding.
+            softSensorDictionary.Add(property.Name, softSensorTreeNode);
+
+            _logger.LogInformation("Added computable Property (Input/Output) {property} to the cache.", propertyName);
         }
 
-        private void AddConfigurableParameterToCache(string propertyName, string propertyType, Cache propertyCache) {
-            if (_oldCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? value)) {
+        private void AddConfigurableParameterToCache(string propertyName, string propertyType, PropertyCache propertyCache) {
+            if (_oldCache.PropertyCache.ConfigurableParameters.TryGetValue(propertyName, out ConfigurableParameter? value)) {
                 propertyCache.ConfigurableParameters.Add(propertyName, value);
                 return;
             }
@@ -187,7 +208,7 @@ namespace Logic.Mapek {
             _logger.LogInformation("Added ConfigurableParameter {configurableParameter} to the cache.", propertyName);
         }
 
-        private void PopulateObservablePropertiesCache(Cache propertyCache) {
+        private void PopulateObservablePropertiesCache(PropertyCache propertyCache) {
             // Get all ObservableProperties.
             var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty ?valueType WHERE {
                 ?sensor rdf:type sosa:Sensor .
@@ -237,7 +258,7 @@ namespace Logic.Mapek {
             }
         }
 
-        private void WritePropertyValuesToKnowledgeBase(Cache propertyCache) {
+        private void WritePropertyValuesToKnowledgeBase(PropertyCache propertyCache) {
             foreach (var property in propertyCache.Properties.Values) {
                 _mapekKnowledge.UpdatePropertyValue(property);
             }

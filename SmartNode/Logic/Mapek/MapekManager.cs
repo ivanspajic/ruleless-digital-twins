@@ -56,19 +56,19 @@ namespace Logic.Mapek {
                 _mapekKnowledge.LoadModelsFromKnowledgeBase(); // This makes sense in theory but won't work without the Factory updating as well.
 
                 // Monitor - Observe all hard and soft Sensor values.
-                var propertyCache = _mapekMonitor.Monitor();
+                var cache = _mapekMonitor.Monitor();
 
                 // Analyze - Out of all possible Actions, filter out the irrelevant ones based on current Property values and return
                 // them with all OptimalConditions.
                 // var optimalConditionsAndActions = _mapekAnalyze.Analyze(instanceModel, propertyCache, ConfigurableParameterGranularity);
 
                 // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
-                var optimalSimulationPath = _mapekPlan.Plan(propertyCache, LookAheadCycles);
+                var optimalSimulationPath = _mapekPlan.Plan(cache, LookAheadCycles);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
-                _mapekExecute.Execute(optimalSimulationPath, propertyCache, simulateTwinningTarget);
+                _mapekExecute.Execute(optimalSimulationPath, cache.PropertyCache.ConfigurableParameters, simulateTwinningTarget);
 
                 // Write MAPE-K state to CSV.
-                CsvUtils.WritePropertyStatesToCsv(dataDirectory, currentRound, propertyCache);
+                CsvUtils.WritePropertyStatesToCsv(dataDirectory, currentRound, cache.PropertyCache);
                 CsvUtils.WriteActuatorStatesToCsv(dataDirectory, currentRound, optimalSimulationPath);
 
                 if (maxRound > 0) {

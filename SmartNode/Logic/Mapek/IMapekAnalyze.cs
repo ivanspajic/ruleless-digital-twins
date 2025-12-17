@@ -7,7 +7,7 @@ namespace Logic.Mapek
     public interface IMapekAnalyze
     {
         public Tuple<List<OptimalCondition>, List<Models.OntologicalModels.Action>> Analyze(IGraph instanceModel,
-            Cache propertyCache,
+            PropertyCache propertyCache,
             int configurableParameterGranularity);
     }
 }

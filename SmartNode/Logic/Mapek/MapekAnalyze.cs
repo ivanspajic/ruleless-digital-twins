@@ -23,7 +23,7 @@ namespace Logic.Mapek
         }
 
         public Tuple<List<OptimalCondition>, List<Models.OntologicalModels.Action>> Analyze(IGraph instanceModel,
-            Cache propertyCache,
+            PropertyCache propertyCache,
             int configurableParameterGranularity)
         {
             _logger.LogInformation("Starting the Analyze phase.");
@@ -41,7 +41,7 @@ namespace Logic.Mapek
             return new (optimalConditions, mitigationActions);
         }
 
-        private List<OptimalCondition> GetAllOptimalConditions(IGraph instanceModel, Cache propertyCache)
+        private List<OptimalCondition> GetAllOptimalConditions(IGraph instanceModel, PropertyCache propertyCache)
         {
             var optimalConditions = new List<OptimalCondition>();
 
@@ -98,7 +98,7 @@ namespace Logic.Mapek
             return optimalConditions;
         }
 
-        private List<OptimalCondition> GetAllUnsatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, Cache propertyCache)
+        private List<OptimalCondition> GetAllUnsatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
         {
             var unsatisfiedOptimalConditions = new List<OptimalCondition>();
 
@@ -149,7 +149,7 @@ namespace Logic.Mapek
         }
 
         private List<Models.OntologicalModels.Action> GetOptimizationActions(IGraph instanceModel,
-            Cache propertyCache)
+            PropertyCache propertyCache)
         {
             var actions = new List<Models.OntologicalModels.Action>();
 
@@ -623,7 +623,7 @@ namespace Logic.Mapek
         }
 
         private List<Models.OntologicalModels.Action> GetMitigationActionsFromUnsatisfiedOptimalConditions(IGraph instanceModel,
-            Cache propertyCache,
+            PropertyCache propertyCache,
             IEnumerable<OptimalCondition> optimalConditions)
         {
             var actions = new List<Models.OntologicalModels.Action>();
@@ -746,7 +746,7 @@ namespace Logic.Mapek
 
         private void AddReconfigurationActionsToCollectionFromQueryResult(ISparqlResult result,
             IList<Models.OntologicalModels.Action> actions,
-            Cache propertyCache,
+            PropertyCache propertyCache,
             Effect effect,
             string reconfigurationActionQueryParameter,
             string configurableParameterQueryParameter)

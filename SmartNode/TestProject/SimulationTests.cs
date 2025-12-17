@@ -106,8 +106,9 @@ namespace TestProject
             Assert.NotNull(modelStream);
 
             var roomTemperatureInitialValue = 1.02;
-            var acUnitStateValue = 1;
-            var expectedValue = 11.0965;
+            var heaterStateValue = 1;
+            var expectedValue = 15.402;
+            var tolerance = 0.0001;
             var actualValue = 0.0;
 
             // Act
@@ -115,12 +116,12 @@ namespace TestProject
             var fmuInstance = model.CreateCoSimulationInstance("demo");
 
             var roomTemperature = model.Variables["RoomTemperature"];
-            var acUnitState = model.Variables["AirConditioningUnitState"];
+            var acUnitState = model.Variables["HeaterState"];
 
             fmuInstance.StartTime(0);
 
             fmuInstance.WriteReal((roomTemperature, roomTemperatureInitialValue));
-            fmuInstance.WriteInteger((acUnitState, acUnitStateValue));
+            fmuInstance.WriteInteger((acUnitState, heaterStateValue));
 
             fmuInstance.AdvanceTime(simulationTimeSeconds);
 
@@ -130,7 +131,7 @@ namespace TestProject
             model.Dispose();
 
             // Assert
-            Assert.Equal(expectedValue, actualValue);
+            Assert.Equal(expectedValue, actualValue, tolerance);
         }
     }
 }

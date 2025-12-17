@@ -25,7 +25,7 @@ namespace TestProject
             mock.Add(typeof(IMapekKnowledge), new MapekKnowledge(mock));
             var mapekPlan = new MapekPlan(mock, false) ;
 
-            var propertyCacheMock = new Cache {
+            var propertyCacheMock = new PropertyCache {
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
                 // TODO: This test shouldn't need those I think:
                 Properties = new Dictionary<string, Property> {
@@ -65,7 +65,7 @@ namespace TestProject
             };
 
             var simulationTree = new SimulationTreeNode {
-                Simulation = new Simulation(propertyCacheMock),
+                NodeItem = new Simulation(propertyCacheMock),
                 Children = []
             };
 

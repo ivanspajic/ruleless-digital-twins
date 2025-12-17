@@ -188,26 +188,29 @@ namespace Logic.Mapek
                     $"\"{_filepathArguments.InstanceModelFilepath}\" " +
                     $"\"{_filepathArguments.InferenceRulesFilepath}\" " +
                     $"\"{_filepathArguments.InferredModelFilepath}\"",
-                RedirectStandardOutput = true, // Unfortunately, doesn't seem to work.
-                RedirectStandardError = true, // Unfortunately, doesn't seem to work.
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 WorkingDirectory = Directory.GetParent(_filepathArguments.InstanceModelFilepath)!.FullName
             };
 
-            using var process = Process.Start(processInfo);
-
             _logger.LogInformation("Inferring action combinations.");
+            using var process = Process.Start(processInfo);
+            Debug.Assert(process != null, "Process failed to start.");
 
             process!.OutputDataReceived += (sender, e) => {
                 _logger.LogInformation(e.Data);
             };
 
-            process.ErrorDataReceived += (sender, e) => {
+            process.ErrorDataReceived += (sender, e) =>
+            {
                 _logger.LogInformation(e.Data);
             };
 
             _logger.LogInformation("Process started with ID {processId}.", process.Id);
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
             process.WaitForExit();
 
             if (process.ExitCode != 0) {

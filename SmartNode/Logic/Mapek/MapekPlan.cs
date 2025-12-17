@@ -192,7 +192,7 @@ namespace Logic.Mapek
             _mapekKnowledge.CommitInMemoryInstanceModelToKnowledgeBase();
         }
 
-        private void InferActionCombinations() {
+        protected virtual void InferActionCombinations() {
             // Execute the inference engine as an external process.
             var processInfo = new ProcessStartInfo {
                 FileName = "java", // Assumes JAVA is registered in the PATH environment variable (or equivalent).
@@ -274,12 +274,16 @@ namespace Logic.Mapek
 
                     actionQueryResult.Results.ForEach(actionResult => {
                         var actuatorName = actionResult["actuator"].ToString();
-                        var actuatorState = actionResult["actuatorState"].ToString().Split('^')[0];
+
+                        var split = actionResult["actuatorState"].ToString().Split("^^");
+                        var actuatorState = split[0];
+                        var actuatorType = split[1];
 
                         combination.Add(new ActuationAction {
                             Name = action,
                             Actuator = new Actuator {
-                                Name = actuatorName
+                                Name = actuatorName,
+                                Type = actuatorType
                             },
                             NewStateValue = actuatorState
                         });
@@ -489,7 +493,7 @@ namespace Logic.Mapek
         private void ExecuteActuationActionFmu(FmuModel fmuModel, Simulation simulation)
         {
             // The LogDebug calls here are primarily to keep an eye on crashes in the FMU which are otherwise a tad harder to track down.
-            _logger.LogInformation("Simulation {simulation}", simulation);
+            _logger.LogInformation("Simulation {simulation}", simulation); // XXX Arg useless.
             if (!_fmuDict.TryGetValue(fmuModel.Filepath, out IModel? model))
             {
                 _logger.LogDebug("Loading Model {filePath}", fmuModel.Filepath);
@@ -533,7 +537,7 @@ namespace Logic.Mapek
             {
                 // Shave off the long name URIs from the instance model.
                 var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.Actuator.Name);
-                fmuActuationInputs.Add((simpleActuatorName + "State", "http://www.w3.org/2001/XMLSchema#int", actuationAction.NewStateValue));
+                fmuActuationInputs.Add((simpleActuatorName + "State", actuationAction.Actuator.Type!, actuationAction.NewStateValue));
             }
 
             _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
@@ -563,6 +567,8 @@ namespace Logic.Mapek
                 if (model.Variables.TryGetValue(input.Item1, out var fmuVariable)){
                     var valueHandler = _factory.GetValueHandlerImplementation(input.Item2);
                     valueHandler.WriteValueToSimulationParameter(fmuInstance, fmuVariable, input.Item3);
+                } else {
+                    _logger.LogInformation("FMU variable {variable} not relevant.", input.Item1);
                 }
             }
         }

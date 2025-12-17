@@ -41,7 +41,7 @@ namespace TestProject
         [Theory]
         [InlineData("nordpool-simple.ttl", "nordpool-out.ttl", 4)]
         //[InlineData("nordpool1.ttl", "nordpool1-out.ttl", 4)]
-        public void Actions_and_OptimalConditions_for_plan_phase_same_as_expected(string model, string inferred, int lookAheadCycles) {
+        public void Smallest_model_builds_tree_and_simulates(string model, string inferred, int lookAheadCycles) {
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
                                 +$"models-and-rules{Path.DirectorySeparatorChar}{model}");
@@ -52,7 +52,7 @@ namespace TestProject
             var mock = new ServiceProviderMock(modelFilePath, inferredFilePath, new Factory());
             // TODO: not sure anymore if pulling it out was actually necessary in the end:
             mock.Add(typeof(IMapekKnowledge), new MapekKnowledge(mock));
-            var mapekPlan = new MapekPlan(mock, false) ;
+            var mapekPlan = new MapekPlan(mock, false);
 
             var propertyCacheMock = new PropertyCache {
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),

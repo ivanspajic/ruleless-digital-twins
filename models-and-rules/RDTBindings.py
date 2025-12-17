@@ -59,15 +59,19 @@ class Actuator(Node):
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
         g.add((self.node, RDF["type"], SOSA["Actuator"]))
         g.add((self.node, SOSA["enacts"], enacts.node))
-        g.add((self.node, RDT["hasActuatorState"], Literal("0", datatype=XSD.integer))) # XXX
 
 class Platform(Node):
-    def __init__(self, g, name: IdentifiedNode, gcofoc: bool, hosts : Actuator): # TODO: List
+    def __init__(self, g, name: IdentifiedNode, gcofoc: bool, hosts : Actuator | list[Actuator]):
         self.node = name
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
         g.add((self.node, RDF["type"], SOSA["Platform"]))
-        g.add((self.node, SOSA["hosts"], hosts.node))
         g.add((self.node, RDT["generateCombinationsOnlyFromOptimalConditions"], Literal("true" if gcofoc else "false", datatype=XSD.boolean))) # TODO?
+        if isinstance(hosts, list):
+            for a in hosts:
+                g.add((self.node, SOSA["hosts"], a.node))
+        else:
+            g.add((self.node, SOSA["hosts"], hosts.node))
+
 
     # TODO: eliminate `g`?
     def addFMU(self, g, fmu: FMU):

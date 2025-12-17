@@ -15,7 +15,7 @@ g.add((URIRef(str(MINE)), OWL.imports, URIRef(str(RDT))))
 # dummyActuator = Actuator(g, MINE["UnitActuator"], change)
 # g.add((dummyActuator.node, RDT["hasActuatorState"], Literal("0", datatype=XSD.integer))) # XXX
 
-zoneProperty = ObservableProperty(g, MINE["ZoneProperty"])
+zoneProperty = ObservableProperty(g, MINE["zone"])
 zoneChange = Change(g, MINE["ZoneChange"], zoneProperty)
 zoneActuator = Actuator(g, MINE["ZoneActuator"], zoneChange)
 # Only add the zone you want for now:

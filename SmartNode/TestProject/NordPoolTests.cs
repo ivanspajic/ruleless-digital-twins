@@ -17,6 +17,7 @@ namespace TestProject
             { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
             { "double", new DoubleValueHandler() }, // FIXME
             { "boolean", new BooleanValueHandler() },
+            { "string", new StringValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
         };
         public IActuatorDevice GetActuatorDeviceImplementation(string actuatorName)
@@ -37,6 +38,13 @@ namespace TestProject
         }
     }
 
+    class MyMapekPlan : MapekPlan {
+        public MyMapekPlan(IServiceProvider serviceProvider, bool logSimulations = false) : base(serviceProvider, logSimulations) {
+        }
+        protected override void InferActionCombinations() {
+            // Do not call Java explicitly.
+        }
+    }
 
     public class NordPoolTests {
         [Theory]
@@ -49,37 +57,37 @@ namespace TestProject
             var inferredFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
                                 + $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
             // TODO: Review why file must exist if we're going to overwrite it anyway.
-            File.Create(inferredFilePath).Close();
-                                
+            // File.Create(inferredFilePath).Close();
+
             if (fromPython != null) {
                 var processInfo = new ProcessStartInfo {
-                FileName = "python3",
-                Arguments = $"\"{fromPython}\"",
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = modelFilePath
+                    FileName = "python3",
+                    Arguments = $"\"{fromPython}\"",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = modelFilePath
                 };
                 using var process = Process.Start(processInfo);
                 Debug.Assert(process != null, "Process failed to start.");
                 StreamReader reader = process.StandardOutput;
                 string output = reader.ReadToEnd();
                 var outPath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                +$"models-and-rules{Path.DirectorySeparatorChar}{model}");
+                                + $"models-and-rules{Path.DirectorySeparatorChar}{model}");
                 outPath = Path.GetFullPath(outPath);
                 File.WriteAllText(outPath, output);
                 process.WaitForExit();
                 Assert.Equal(0, process.ExitCode);
             }
-            
+
             modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                +$"models-and-rules{Path.DirectorySeparatorChar}{model}");
+                                + $"models-and-rules{Path.DirectorySeparatorChar}{model}");
             modelFilePath = Path.GetFullPath(modelFilePath);
 
             var mock = new ServiceProviderMock(modelFilePath, inferredFilePath, new Factory());
             // TODO: not sure anymore if pulling it out was actually necessary in the end:
             mock.Add(typeof(IMapekKnowledge), new MapekKnowledge(mock));
-            var mapekPlan = new MapekPlan(mock, false);
+            var mapekPlan = new MyMapekPlan(mock, false);
 
             var propertyCacheMock = new PropertyCache {
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
@@ -92,6 +100,14 @@ namespace TestProject
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProperty",
                             OwlType = "double",
                             Value = -1.02
+                        }
+                    },
+                    {
+                        "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#zone",
+                        new Property {
+                            Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#zone",
+                            OwlType = "string",
+                            Value = "NO1"
                         }
                     },
                     {

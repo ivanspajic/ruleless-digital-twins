@@ -20,5 +20,8 @@ RUN mkdir -p /opt/arm64 && chown vscode:vscode /opt/arm64
 # Docker spells it arm64, but inside it's aarch64, and there's not translation mechanism out here or in devcontainer.json.
 ARG TARGETARCH
 RUN if [ "${TARGETARCH}" = "arm64" ]; then \
-      ln -s /usr/lib/aarch64-linux-gnu /usr/lib/${TARGETARCH}-linux-gnu ; fi
+      ln -s /usr/lib/aarch64-linux-gnu /usr/lib/${TARGETARCH}-linux-gnu ; \
+      elif [ "${TARGETARCH}" = "amd64" ]; then \
+      ln -s /usr/lib/x86_64-linux-gnu /usr/lib/${TARGETARCH}-linux-gnu ; \
+       fi
 ENV LD_PRELOAD=/usr/lib/${TARGETARCH}-linux-gnu/libpython3.11.so

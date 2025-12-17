@@ -201,13 +201,18 @@ _:b5    rdf:type    rdf:List , rdfs:Resource , owl:Thing;
         owl:inverseOf           <http://www.w3.org/ns/ssn/hasInput>;
         owl:sameAs              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/isInputOf> .
 
-xsd:gYear  rdf:type          rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
+xsd:gYear  rdf:type          rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
         rdfs:subClassOf      xsd:gYear , rdfs:Resource;
         owl:equivalentClass  xsd:gYear;
         owl:sameAs           xsd:gYear .
 
+_:b5    rdf:type    rdf:List , rdfs:Resource , owl:Thing;
+        rdf:first   :UnitActuator;
+        rdf:rest    ();
+        owl:sameAs  _:b5 .
+
 owl:InverseFunctionalProperty
-        rdf:type             rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
+        rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
         rdfs:subClassOf      owl:InverseFunctionalProperty , rdfs:Resource , owl:ObjectProperty;
         owl:equivalentClass  owl:InverseFunctionalProperty;
         owl:sameAs           owl:InverseFunctionalProperty .
@@ -441,10 +446,15 @@ rdf:type  rdf:type              rdf:Property , rdfs:Resource , owl:Thing;
         owl:sameAs              rdf:type .
 
 rdfs:ContainerMembershipProperty
-        rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
+        rdf:type             rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
         rdfs:subClassOf      rdfs:ContainerMembershipProperty , rdfs:Resource , rdf:Property;
         owl:equivalentClass  rdfs:ContainerMembershipProperty;
         owl:sameAs           rdfs:ContainerMembershipProperty .
+
+_:b15   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
+        rdf:first   :UnitActuator_0;
+        rdf:rest    ();
+        owl:sameAs  _:b15 .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor>
         rdf:type                owl:ObjectProperty , owl:Property , rdf:Property , rdfs:Resource , owl:Thing;
@@ -545,7 +555,7 @@ xsd:gMonthDay  rdf:type      rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Th
         owl:equivalentClass  xsd:gMonthDay;
         owl:sameAs           xsd:gMonthDay .
 
-rdf:Alt  rdf:type            rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
+rdf:Alt  rdf:type            rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
         rdfs:subClassOf      rdf:Alt , rdfs:Resource , rdfs:Container;
         owl:equivalentClass  rdf:Alt;
         owl:sameAs           rdf:Alt .
@@ -776,7 +786,7 @@ rdf:predicate  rdf:type         rdf:Property , rdfs:Resource , owl:Thing;
         owl:equivalentProperty  rdf:predicate;
         owl:sameAs              rdf:predicate .
 
-xsd:base64Binary  rdf:type   rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Thing , owl:Class;
+xsd:base64Binary  rdf:type   rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
         rdfs:subClassOf      xsd:base64Binary , rdfs:Resource;
         owl:equivalentClass  xsd:base64Binary;
         owl:sameAs           xsd:base64Binary .
@@ -892,6 +902,13 @@ xsd:string  rdf:type         rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Cl
         owl:disjointWith     xsd:nonNegativeInteger , xsd:int , xsd:decimal , xsd:time , xsd:nonPositiveInteger , xsd:short , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:duration , xsd:integer , xsd:byte , xsd:unsignedLong , xsd:long , xsd:unsignedByte , xsd:unsignedShort , xsd:unsignedInt;
         owl:equivalentClass  xsd:string;
         owl:sameAs           xsd:string .
+
+_:b22   rdf:type              rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
+        rdfs:subClassOf       _:b22 , rdfs:Resource;
+        owl:equivalentClass   _:b22;
+        owl:onDatatype        xsd:double;
+        owl:sameAs            _:b22;
+        owl:withRestrictions  _:b23 .
 
 owl:SymmetricProperty
         rdf:type             rdfs:Class , rdfs:Resource , owl:Thing , owl:Class;
@@ -1300,6 +1317,13 @@ _:b37   rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdf
                 :NordPoolFMU;
         owl:sameAs  :NordPoolTest .
 
+_:b23   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
+        rdf:first   [ rdf:comment       "verification mark";
+                      xsd:minInclusive  "0.0"^^xsd:double
+                    ];
+        rdf:rest    ();
+        owl:sameAs  _:b23 .
+
 :PriceSensor  rdf:type  <http://www.w3.org/ns/sosa/Sensor> , owl:NamedIndividual , rdfs:Resource , owl:Thing;
         owl:sameAs  :PriceSensor;
         <http://www.w3.org/ns/sosa/observes>
@@ -1383,6 +1407,11 @@ _:b42   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
         rdf:type    <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Effect> , owl:NamedIndividual , owl:Thing , rdfs:Resource;
         owl:sameAs  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease> .
 
+_:b42   rdf:type    rdf:List , rdfs:Resource , owl:Thing;
+        rdf:first   <http://www.w3.org/ns/sosa/Actuator>;
+        rdf:rest    ();
+        owl:sameAs  _:b42 .
+
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins>
         rdf:type     owl:Ontology , rdfs:Resource , owl:Thing;
         owl:imports  <http://www.w3.org/ns/ssn/>;
@@ -1404,16 +1433,16 @@ _:b39   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
 _:b40   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b40 .
 
-_:b43   rdf:type    owl:Thing , rdfs:Resource;
+_:b43   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b43 .
 
-_:b44   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b44   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b44 .
 
 _:b45   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b45 .
 
-_:b46   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b46   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b46 .
 
 _:b47   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
@@ -1452,16 +1481,16 @@ _:b57   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
 _:b58   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b58 .
 
-_:b59   rdf:type    owl:Thing , rdfs:Resource;
+_:b59   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b59 .
 
 _:b60   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b60 .
 
-_:b61   rdf:type    owl:Thing , rdfs:Resource;
+_:b61   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b61 .
 
-_:b62   rdf:type    owl:Thing , rdfs:Resource;
+_:b62   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b62 .
 
 _:b63   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
@@ -1480,7 +1509,7 @@ _:b65   rdf:type    owl:Thing , rdfs:Resource;
 _:b66   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b66 .
 
-_:b67   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b67   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b67 .
 
 _:b68   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
@@ -1489,10 +1518,10 @@ _:b68   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
 _:b69   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b69 .
 
-_:b70   rdf:type    owl:Thing , rdfs:Resource;
+_:b70   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b70 .
 
-_:b71   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b71   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b71 .
 
 _:b72   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
@@ -1504,7 +1533,7 @@ _:b73   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
 _:b74   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b74 .
 
-_:b75   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
+_:b75   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
         owl:sameAs  _:b75 .
 
 _:b76   rdf:type    owl:Thing , rdfs:Resource;
@@ -1549,10 +1578,10 @@ _:b88   rdf:type    owl:Thing , rdfs:Resource;
 _:b89   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b89 .
 
-_:b90   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b90   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;
         owl:sameAs  _:b90 .
 
-_:b91   rdf:type    owl:Thing , rdfs:Resource , rdfs:Literal;
+_:b91   rdf:type    owl:Thing , rdfs:Resource;
         owl:sameAs  _:b91 .
 
 _:b92   rdf:type    rdfs:Resource , rdfs:Literal , owl:Thing;

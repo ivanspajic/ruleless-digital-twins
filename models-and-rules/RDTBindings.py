@@ -5,10 +5,6 @@ from rdflib import BNode, Literal, Graph, URIRef
 from rdflib.namespace import Namespace, RDF, OWL, XSD
 from rdflib.term import IdentifiedNode
 
-# g.parse("ruleless-digital-twins/models-and-rule s/instance-model-1.ttl")
-SAREF = Namespace("https://saref.etsi.org/core/")
-# OWL =  Namespace("http://www.w3.org/2002/07/owl#")
-# RDF = Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
 RDT = Namespace("http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/")
 SOSA = Namespace("http://www.w3.org/ns/sosa/")
 SSN = Namespace("http://www.w3.org/ns/ssn/")
@@ -18,21 +14,11 @@ class Node(ABC):
     node: BNode
 
 class FMU(Node):
-    def __init__(self, g, name: IdentifiedNode, fidelity):
+    def __init__(self, g, name: IdentifiedNode, fmuPath: str, fidelity):
         self.node = name
         g.add((self.node, RDF["type"], RDT["FmuModel"]))
         g.add((self.node, RDT["hasSimulationFidelitySeconds"], Literal(fidelity, datatype=XSD.integer)))
-        g.add((self.node, RDT["hasUri"], Literal("NordPool.fmu", datatype=XSD.string)))
-
-class Platform(Node):
-    def __init__(self, g, name: IdentifiedNode):
-        self.node = name
-        g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
-        g.add((self.node, RDF["type"], SOSA["Platform"]))
-
-    # TODO: eliminate `g`?
-    def addFMU(self, g, fmu: FMU):
-        g.add((self.node, RDT["hasSimulationModel"], fmu.node))
+        g.add((self.node, RDT["hasURI"], Literal(fmuPath, datatype=XSD.string)))
 
 class Restriction(Node):
     pass
@@ -58,6 +44,34 @@ class ObservableProperty(Node):
             self.restriction = restriction
         g.add((elprice, RDF["type"], self.restriction.node))
         self.node = elprice
+
+class Change(Node):
+    def __init__(self, g, name: IdentifiedNode, affects: ObservableProperty):
+        self.node = name
+        g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
+        g.add((self.node, RDF["type"], RDT["PropertyChangeByActuation"]))
+        g.add((self.node, SSN["forProperty"], affects.node))
+        g.add((self.node, RDT["affectsPropertyWith"], RDT["ValueIncrease"])) # TODO
+
+class Actuator(Node):
+    def __init__(self, g, name: IdentifiedNode, enacts: Change):
+        self.node = name
+        g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
+        g.add((self.node, RDF["type"], SOSA["Actuator"]))
+        g.add((self.node, SOSA["enacts"], enacts.node))
+        g.add((self.node, RDT["hasActuatorState"], Literal("0", datatype=XSD.integer))) # XXX
+
+class Platform(Node):
+    def __init__(self, g, name: IdentifiedNode, gcofoc: bool, hosts : Actuator): # TODO: List
+        self.node = name
+        g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
+        g.add((self.node, RDF["type"], SOSA["Platform"]))
+        g.add((self.node, SOSA["hosts"], hosts.node))
+        g.add((self.node, RDT["generateCombinationsOnlyFromOptimalConditions"], Literal("true" if gcofoc else "false", datatype=XSD.boolean))) # TODO?
+
+    # TODO: eliminate `g`?
+    def addFMU(self, g, fmu: FMU):
+        g.add((self.node, RDT["hasSimulationModel"], fmu.node))
 
 class Measure(Node):
     def __init__(self, g, name, restriction: Restriction):

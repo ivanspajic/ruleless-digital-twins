@@ -11,12 +11,11 @@ namespace TestProject.Mocks
         private static readonly string _rootDirectoryPath = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
 
         private readonly Dictionary<Type, object?> _serviceImplementationMocks;
-        
-        public ServiceProviderMock(string model, string inferred) {
+        public ServiceProviderMock(string model, string inferred, Factory? factory) {
             _serviceImplementationMocks = new() {
             { typeof(ILogger<IMapekPlan>), new LoggerMock<IMapekPlan>() },
             { typeof(ILogger<IMapekKnowledge>), new LoggerMock<IMapekKnowledge>() },
-            { typeof(IFactory), new FactoryMock() },
+            { typeof(IFactory), factory == null ? new FactoryMock() : factory },
             { typeof(FilepathArguments), new FilepathArguments {
                 InferenceEngineFilepath = Path.Combine(_rootDirectoryPath, "models-and-rules", "ruleless-digital-twins-inference-engine.jar"),
                 OntologyFilepath = Path.Combine(_rootDirectoryPath, "Ontology", "ruleless-digital-twins.ttl"),
@@ -26,8 +25,7 @@ namespace TestProject.Mocks
                 FmuDirectory = Path.Combine(_rootDirectoryPath, "SmartNode", "Implementations", "FMUs"),
                 DataDirectory = Path.Combine(_rootDirectoryPath, "state-data")
             } },
-            // Not allowed to do that -- but in generally we shouldn't need mocking query results anyway?
-            // { typeof(IMapekKnowledge), new MapekKnowledge(this)  },
+            // { typeof(IMapekKnowledge), new MapekKnowledge(this) },
             };
         }
 
@@ -41,7 +39,7 @@ namespace TestProject.Mocks
             return null;
         }
 
-        public void Add(System.Type o, IMapekKnowledge k) {
+        public void Add(System.Type o, object k) { // TODO: Review
             _serviceImplementationMocks.Add(o, k);
         }
     }

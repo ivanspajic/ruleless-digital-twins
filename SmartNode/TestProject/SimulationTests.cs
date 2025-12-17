@@ -12,7 +12,7 @@ namespace TestProject
         public SimulationTests()
         {
             var arch = RuntimeInformation.ProcessArchitecture;
-            _archStr = arch == Architecture.Arm64 ? "arm64" : (arch == Architecture.X64 ? "x86_64" : throw new NotSupportedException());
+            _archStr = arch == Architecture.Arm64 ? "arm64" : (arch == Architecture.X64 ? "amd64" : throw new NotSupportedException());
 
             // Use a dummy-type to get a handle:
             _assembly = Assembly.GetAssembly(typeof(Implementations.ValueHandlers.DoubleValueHandler));

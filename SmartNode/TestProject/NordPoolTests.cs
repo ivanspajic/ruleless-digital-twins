@@ -37,17 +37,44 @@ namespace TestProject
         }
     }
 
+
     public class NordPoolTests {
         [Theory]
-        [InlineData("nordpool-simple.ttl", "nordpool-out.ttl", 4)]
-        //[InlineData("nordpool1.ttl", "nordpool1-out.ttl", 4)]
-        public void Smallest_model_builds_tree_and_simulates(string model, string inferred, int lookAheadCycles) {
+        [InlineData(null, "nordpool-simple.ttl", "nordpool-out.ttl", 4)]
+        [InlineData("SimpleNordpool.py", "nordpool1.ttl", "nordpool1-out.ttl", 4)]
+        public void Smallest_model_builds_tree_and_simulates(string? fromPython, string model, string inferred, int lookAheadCycles) {
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
+                                + $"models-and-rules");
+            var inferredFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
+                                + $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
+            // TODO: Review why file must exist if we're going to overwrite it anyway.
+            File.Create(inferredFilePath).Close();
+                                
+            if (fromPython != null) {
+                var processInfo = new ProcessStartInfo {
+                FileName = "python3",
+                Arguments = $"\"{fromPython}\"",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = modelFilePath
+                };
+                using var process = Process.Start(processInfo);
+                Debug.Assert(process != null, "Process failed to start.");
+                StreamReader reader = process.StandardOutput;
+                string output = reader.ReadToEnd();
+                var outPath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
+                                +$"models-and-rules{Path.DirectorySeparatorChar}{model}");
+                outPath = Path.GetFullPath(outPath);
+                File.WriteAllText(outPath, output);
+                process.WaitForExit();
+                Assert.Equal(0, process.ExitCode);
+            }
+            
+            modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
                                 +$"models-and-rules{Path.DirectorySeparatorChar}{model}");
             modelFilePath = Path.GetFullPath(modelFilePath);
-            var inferredFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                +$"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
 
             var mock = new ServiceProviderMock(modelFilePath, inferredFilePath, new Factory());
             // TODO: not sure anymore if pulling it out was actually necessary in the end:
@@ -56,28 +83,13 @@ namespace TestProject
 
             var propertyCacheMock = new PropertyCache {
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
-                // TODO: This test shouldn't need those I think:
+                // TODO: Ideally we wouldn't need those, and either start with `undefined` or use the FMU's values.
+
                 Properties = new Dictionary<string, Property> {
-                    {
-                        "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#MeasuredOutputProperty",
-                        new Property {
-                            Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#MeasuredOutputProperty",
-                            OwlType = "double",
-                            Value = -1.02
-                        }
-                    },
                     {
                         "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProperty",
                         new Property {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProperty",
-                            OwlType = "double",
-                            Value = -1.02
-                        }
-                    },
-                    {
-                        "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#PriceMeasure",
-                        new Property {
-                            Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#PriceMeasure",
                             OwlType = "double",
                             Value = -1.02
                         }
@@ -98,7 +110,6 @@ namespace TestProject
                             Value = true
                         }
                     }
-
                 }
             };
 

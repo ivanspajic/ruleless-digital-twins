@@ -117,7 +117,7 @@ namespace Logic.Mapek
 
             foreach (var actionCombination in actionCombinations) {
                 // TODO: partition more efficiently:
-                // var actionPartition = actionCombination.GroupBy(action => action is FMUParameterAction);
+                // var actionPartition = actionCombination.ToLookup(action => action is FMUParameterAction);
                 var simulation = new Simulation(GetPropertyCacheCopy(simulationTreeNode.NodeItem.PropertyCache!)) {
                     ActuationActions = actionCombination.Where(action => action is not FMUParameterAction).ToList(),
                     InitializationActions = actionCombination.Where(action => action is FMUParameterAction).ToList(),

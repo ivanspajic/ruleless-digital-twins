@@ -131,17 +131,17 @@ namespace TestProject
 
             var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<ActuationAction>>());
 
-            // To produce the tree via the streaming (yield return) mechanism, we need to enumerate the simulation collection.
-            simulations.ForEach(_ => { });
+            mapekPlan.Simulate(simulations, []);
 
-            // Assert.Single(simulationTree.SimulationPaths);
-            // Assert.Equal(simulationTree.ChildrenCount, lookAheadCycles);
-            mapekPlan.Simulate(simulations, new List<SoftSensorTreeNode>());
+            // Only valid AFTER focing evaluation through simulation:
+            Assert.Single(simulationTree.SimulationPaths);
+            Assert.Equal(simulationTree.ChildrenCount, lookAheadCycles);
             var path = simulationTree.SimulationPaths.First();
 
             foreach (var s in path.Simulations)
             {
-                Trace.WriteLine(string.Join(";", s.ActuationActions.Select(a => a.Name)));
+                Trace.WriteLine("Params: " + string.Join(";", s.InitializationActions.Select(a => a.Name).ToList()));
+                Trace.WriteLine("Inputs: " + string.Join(";", s.ActuationActions.Select(a => a.Name).ToList()));
             }
             // TODO: assert that in each simulated timepoint ElPriceNF = false.
         }   

@@ -8,7 +8,6 @@ using Logic.ValueHandlerInterfaces;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks;
-using Xunit.Internal;
 
 namespace TestProject
 {
@@ -17,6 +16,8 @@ namespace TestProject
             { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
             { "double", new DoubleValueHandler() }, // FIXME
             { "boolean", new BooleanValueHandler() },
+            { "string", new StringValueHandler() },
+            { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
         };
         public IActuatorDevice GetActuatorDeviceImplementation(string actuatorName)
@@ -37,6 +38,15 @@ namespace TestProject
         }
     }
 
+    class MyMapekPlan : MapekPlan {
+        public MyMapekPlan(IServiceProvider serviceProvider, bool logSimulations = false) : base(serviceProvider, logSimulations) {}
+        protected override void InferActionCombinations() {
+            // Call Java explicitly?
+            if (true) {
+                base.InferActionCombinations();
+            }
+        }
+    }
 
     public class NordPoolTests {
         [Theory]
@@ -49,37 +59,39 @@ namespace TestProject
             var inferredFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
                                 + $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
             // TODO: Review why file must exist if we're going to overwrite it anyway.
-            File.Create(inferredFilePath).Close();
-                                
+            if (!File.Exists(inferredFilePath)) {
+                File.Create(inferredFilePath).Close();
+            }
+
             if (fromPython != null) {
                 var processInfo = new ProcessStartInfo {
-                FileName = "python3",
-                Arguments = $"\"{fromPython}\"",
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = modelFilePath
+                    FileName = "python3",
+                    Arguments = $"\"{fromPython}\"",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = modelFilePath
                 };
                 using var process = Process.Start(processInfo);
                 Debug.Assert(process != null, "Process failed to start.");
                 StreamReader reader = process.StandardOutput;
                 string output = reader.ReadToEnd();
                 var outPath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                +$"models-and-rules{Path.DirectorySeparatorChar}{model}");
+                                + $"models-and-rules{Path.DirectorySeparatorChar}{model}");
                 outPath = Path.GetFullPath(outPath);
                 File.WriteAllText(outPath, output);
                 process.WaitForExit();
                 Assert.Equal(0, process.ExitCode);
             }
-            
+
             modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                +$"models-and-rules{Path.DirectorySeparatorChar}{model}");
+                                + $"models-and-rules{Path.DirectorySeparatorChar}{model}");
             modelFilePath = Path.GetFullPath(modelFilePath);
 
             var mock = new ServiceProviderMock(modelFilePath, inferredFilePath, new Factory());
             // TODO: not sure anymore if pulling it out was actually necessary in the end:
             mock.Add(typeof(IMapekKnowledge), new MapekKnowledge(mock));
-            var mapekPlan = new MapekPlan(mock, false);
+            var mapekPlan = new MyMapekPlan(mock, false);
 
             var propertyCacheMock = new PropertyCache {
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
@@ -120,17 +132,18 @@ namespace TestProject
 
             var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<Logic.Models.OntologicalModels.Action>>(), propertyCacheMock);
 
-            // To produce the tree via the streaming (yield return) mechanism, we need to enumerate the simulation collection.
-            simulations.ForEach(_ => { });
+            mapekPlan.Simulate(simulations, []);
 
+            // Only valid AFTER focing evaluation through simulation:
             Assert.Single(simulationTree.SimulationPaths);
             Assert.Equal(simulationTree.ChildrenCount, lookAheadCycles);
-            mapekPlan.Simulate(simulations, new List<SoftSensorTreeNode>());
             var path = simulationTree.SimulationPaths.First();
 
             foreach (var s in path.Simulations)
             {
                 Trace.WriteLine(string.Join(";", s.Actions.Select(a => a.Name)));
+                Trace.WriteLine("Params: " + string.Join(";", s.InitializationActions.Select(a => a.Name).ToList()));
+                Trace.WriteLine("Inputs: " + string.Join(";", s.Actions.Select(a => a.Name).ToList()));
             }
             // TODO: assert that in each simulated timepoint ElPriceNF = false.
         }   

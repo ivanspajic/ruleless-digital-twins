@@ -274,7 +274,6 @@ namespace Logic.Mapek
                         OPTIONAL { ?actuator meta:hasActuatorName ?actuatorName } .
                         OPTIONAL { ?actuator meta:isParameter ?isParameter } .
                         @action meta:hasActuatorState ?actuatorState . }");
-                Debug.WriteLine(actionQuery.ToString());
                 actions.ForEach(action => {
                     // For each Action, find the appropriate Actuator and its state.
                     // Ideally magic strings here should really be linked to/into the query-string.

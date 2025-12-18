@@ -60,7 +60,9 @@ namespace TestProject
             var inferredFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
                                 + $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
             // TODO: Review why file must exist if we're going to overwrite it anyway.
-            // File.Create(inferredFilePath).Close();
+            if (!File.Exists(inferredFilePath)) {
+                File.Create(inferredFilePath).Close();
+            }
 
             if (fromPython != null) {
                 var processInfo = new ProcessStartInfo {

@@ -15,7 +15,7 @@ namespace Logic.Mapek
 {
     public class MapekPlan : IMapekPlan
     {
-        private const int MaximumSimulationTimeSeconds = 900;
+        private const int MaximumSimulationTimeSeconds = 900; // XXX parametrize
 
         // Required as fields to preserve caching throughout multiple MAPE-K loop cycles.
         private readonly Dictionary<string, IModel> _fmuDict = [];
@@ -494,8 +494,7 @@ namespace Logic.Mapek
         {
             // The LogDebug calls here are primarily to keep an eye on crashes in the FMU which are otherwise a tad harder to track down.
             _logger.LogInformation("Simulation {simulation}", simulation); // XXX Arg useless.
-            if (!_fmuDict.TryGetValue(fmuModel.Filepath, out IModel? model))
-            {
+            if (!_fmuDict.TryGetValue(fmuModel.Filepath, out IModel? model)) {
                 _logger.LogDebug("Loading Model {filePath}", fmuModel.Filepath);
                 model = Model.Load(fmuModel.Filepath, new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]));
                 _fmuDict.Add(fmuModel.Filepath, model);
@@ -503,22 +502,17 @@ namespace Logic.Mapek
             Debug.Assert(model != null, "Model is null after loading.");
             // We're only using one instance per FMU, so we can just use the path as name.
             var instanceName = fmuModel.Filepath;
-            if (!_iDict.TryGetValue(instanceName, out IInstance? fmuInstance))
-            {
+            if (!_iDict.TryGetValue(instanceName, out IInstance? fmuInstance)) {
                 _logger.LogDebug("Creating instance.");
                 fmuInstance = model.CreateCoSimulationInstance(instanceName);
                 _iDict.Add(instanceName, fmuInstance);
-
-                _logger.LogDebug("Setting time");
-                fmuInstance.StartTime(0);
-            }
-            else
-            {
+            } else {
                 _logger.LogDebug("Resetting.");
                 fmuInstance.Reset();
-                fmuInstance.StartTime(0);
             }
             Debug.Assert(fmuInstance != null, "Instance is null after creation.");
+            _logger.LogDebug("Setting time {t}", simulation.Index * MaximumSimulationTimeSeconds);
+            fmuInstance.StartTime(simulation.Index * MaximumSimulationTimeSeconds);
 
             // Run the simulation by executing ActuationActions.
             var fmuActuationInputs = new List<(string, string, object)>();

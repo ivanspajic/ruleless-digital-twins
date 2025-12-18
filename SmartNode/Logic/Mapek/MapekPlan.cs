@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Reflection.Metadata;
 using System.Text;
 using VDS.RDF;
 using static Femyou.IModel;
@@ -115,8 +116,11 @@ namespace Logic.Mapek
             var simulationTreeNodeChildren = new List<SimulationTreeNode>();
 
             foreach (var actionCombination in actionCombinations) {
+                // TODO: partition more efficiently:
+                // var actionPartition = actionCombination.ToLookup(action => action is FMUParameterAction);
                 var simulation = new Simulation(GetPropertyCacheCopy(simulationTreeNode.NodeItem.PropertyCache!)) {
-                    ActuationActions = actionCombination,
+                    ActuationActions = actionCombination.Where(action => action is not FMUParameterAction).ToList(),
+                    InitializationActions = actionCombination.Where(action => action is FMUParameterAction).ToList(),
                     Index = currentCycle,
                     ReconfigurationActions = [], // TODO: add support for ReconfigurationActions.
                 };
@@ -262,13 +266,17 @@ namespace Logic.Mapek
                 var actions = combinationResult["actions"].ToString().Split('^')[0].Split(' ').ToList();
 
                 var combination = new List<ActuationAction>();
+                var fmuInitActions = new List<ActuationAction>();
 
-                var actionQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState WHERE {
+                var actionQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState ?actuatorName ?isParameter WHERE {
                         @action rdf:type meta:ActuationAction .
                         @action meta:hasActuator ?actuator .
+                        OPTIONAL { ?actuator meta:hasActuatorName ?actuatorName } .
+                        OPTIONAL { ?actuator meta:isParameter ?isParameter } .
                         @action meta:hasActuatorState ?actuatorState . }");
                 actions.ForEach(action => {
                     // For each Action, find the appropriate Actuator and its state.
+                    // Ideally magic strings here should really be linked to/into the query-string.
                     actionQuery.SetUri("action", new Uri(action));
                     var actionQueryResult = _mapekKnowledge.ExecuteQuery(actionQuery, true);
 
@@ -278,15 +286,39 @@ namespace Logic.Mapek
                         var split = actionResult["actuatorState"].ToString().Split("^^");
                         var actuatorState = split[0];
                         var actuatorType = split[1];
+                        string? paramName = null; // Apologies for the confusing attribute name (see `actuatorName` above).
+                        if (actionResult.TryGetValue("actuatorName", out var paramNameNode)) {
+                            paramName = paramNameNode.ToString().Split('^')[0];
+                        }
+                        // Check if we're dealing with initialization of the FMU:
+                        bool isParameter = false;
+                        if (actionResult.TryGetValue("isParameter", out var isParameterNode)) {
+                            string isParamStr = isParameterNode.ToString().Split('^')[0];
+                            isParameter = isParamStr == "true";
+                        }
 
-                        combination.Add(new ActuationAction {
+                        // We'll filter those later:
+                        if (isParameter) {
+                            combination.Add(new FMUParameterAction {
                             Name = action,
                             Actuator = new Actuator {
                                 Name = actuatorName,
+                                ParameterName = paramName,
                                 Type = actuatorType
                             },
                             NewStateValue = actuatorState
-                        });
+                            });
+                        } else {
+                            combination.Add(new ActuationAction {
+                            Name = action,
+                            Actuator = new Actuator {
+                                Name = actuatorName,
+                                ParameterName = paramName,
+                                Type = actuatorType
+                            },
+                            NewStateValue = actuatorState
+                            });
+                        }
                     });
                 });
 
@@ -490,8 +522,14 @@ namespace Logic.Mapek
             };
         }
 
-        private void ExecuteActuationActionFmu(FmuModel fmuModel, Simulation simulation)
-        {
+        // Initialize the FMU between enter/exitInitialization (#42).
+        // TODO: No one is generating those yet ;-)
+        protected virtual bool Initialization(Simulation simulation, IModel model, IInstance fmuInstance) {
+            var actions = simulation.InitializationActions.Select(action => (action.Actuator.ParameterName ?? MapekUtilities.GetSimpleName(action.Name), action.Actuator.Type!, action.NewStateValue)).ToList();
+            AssignSimulationInputsToParameters(model, fmuInstance, actions);
+            return true;
+        }
+        private void ExecuteActuationActionFmu(FmuModel fmuModel, Simulation simulation) {
             // The LogDebug calls here are primarily to keep an eye on crashes in the FMU which are otherwise a tad harder to track down.
             _logger.LogInformation("Simulation {simulation}", simulation); // XXX Arg useless.
             if (!_fmuDict.TryGetValue(fmuModel.Filepath, out IModel? model)) {
@@ -512,7 +550,7 @@ namespace Logic.Mapek
             }
             Debug.Assert(fmuInstance != null, "Instance is null after creation.");
             _logger.LogDebug("Setting time {t}", simulation.Index * MaximumSimulationTimeSeconds);
-            fmuInstance.StartTime(simulation.Index * MaximumSimulationTimeSeconds);
+            fmuInstance.StartTime(simulation.Index * MaximumSimulationTimeSeconds, (i) => Initialization(simulation, model, i));
 
             // Run the simulation by executing ActuationActions.
             var fmuActuationInputs = new List<(string, string, object)>();
@@ -527,11 +565,10 @@ namespace Logic.Mapek
             }
 
             // Add all ActuatorStates to the inputs for the FMU.
-            foreach (var actuationAction in simulation.ActuationActions)
-            {
-                // Shave off the long name URIs from the instance model.
-                var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.Actuator.Name);
-                fmuActuationInputs.Add((simpleActuatorName + "State", actuationAction.Actuator.Type!, actuationAction.NewStateValue));
+            foreach (var actuationAction in simulation.ActuationActions) {
+                // Shave off the long name URIs from the instance model when using default names.
+                string simpleActuatorName = actuationAction.Actuator.ParameterName ?? (MapekUtilities.GetSimpleName(actuationAction.Actuator.Name) + "State");
+                fmuActuationInputs.Add((simpleActuatorName, actuationAction.Actuator.Type!, actuationAction.NewStateValue));
             }
 
             _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));

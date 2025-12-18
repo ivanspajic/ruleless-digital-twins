@@ -15,16 +15,15 @@ g.add((URIRef(str(MINE)), OWL.imports, URIRef(str(RDT))))
 # dummyActuator = Actuator(g, MINE["UnitActuator"], change)
 # g.add((dummyActuator.node, RDT["hasActuatorState"], Literal("0", datatype=XSD.integer))) # XXX
 
-zoneProperty = ObservableProperty(g, MINE["zone"])
+zoneProperty = ObservableProperty(g, MINE["ZoneProperty"])
 zoneChange = Change(g, MINE["ZoneChange"], zoneProperty)
 zoneActuator = Actuator(g, MINE["ZoneActuator"], zoneChange)
+g.add((zoneActuator.node, RDT["hasActuatorName"], Literal("zone", datatype=XSD.string))) # XXX Hack for mapping name to right FMU input/parameter (#41).
 # Only add the zone you want for now:
-g.add((zoneActuator.node, RDT["hasActuatorState"], Literal("NO1", datatype=XSD.string)))
 # g.add((zoneActuator.node, RDT["hasActuatorState"], Literal("NO5", datatype=XSD.string)))
+g.add((zoneActuator.node, RDT["hasActuatorState"], Literal("NO1", datatype=XSD.string)))
+g.add((zoneActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.boolean)))
 
-roomO = Platform(g, MINE["Test"], False, [zoneActuator])
-fmuO = FMU(g, MINE["TestFMU"], "NordPool.fmu", 900) # 15 mins
-roomO.addFMU(g, fmuO)
 
 elprice = ObservableProperty(g, MINE["price"])
 restriction = elprice.restriction
@@ -36,10 +35,14 @@ priceSensor = Sensor(g, MINE["PriceSensor"], [elprice, elpriceNFO])
 
 priceProcedureO = Procedure(g, MINE["PriceProcedure"], priceMeasure, priceSensor)
 
-dummyMeasure = Measure(g, MINE["DummyMeasure"], restriction)
-dummyProcedure = Procedure(g, MINE["DummyProcedure"], dummyMeasure)
-dummyProperty = ObservableProperty(g, MINE["DummyProperty"], restriction)
-dummySensor = Sensor(g, MINE["DummySensor"], dummyProperty)
+# dummyMeasure = Measure(g, MINE["DummyMeasure"], restriction)
+# dummyProcedure = Procedure(g, MINE["DummyProcedure"], dummyMeasure)
+# dummyProperty = ObservableProperty(g, MINE["DummyProperty"], restriction)
+# dummySensor = Sensor(g, MINE["DummySensor"], dummyProperty)
+
+roomO = Platform(g, MINE["Test"], False, [zoneActuator, priceSensor])
+fmuO = FMU(g, MINE["TestFMU"], "NordPool.fmu", 900) # 15 mins
+roomO.addFMU(g, fmuO)
 
 output = g.serialize(destination=None)
 print(output)

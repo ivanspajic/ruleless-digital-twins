@@ -7,6 +7,7 @@ namespace Logic.Models.MapekModels
         public Simulation(PropertyCache propertyCache)
         {
             PropertyCache = propertyCache;
+            InitializationActions = [];
             ActuationActions = [];
             Index = -1;
             ReconfigurationActions = [];
@@ -19,5 +20,6 @@ namespace Logic.Models.MapekModels
         public IEnumerable<ReconfigurationAction> ReconfigurationActions { get; init; }
 
         public PropertyCache? PropertyCache { get; set; }
+        public IEnumerable<ActuationAction> InitializationActions { get; set; }
     }
 }

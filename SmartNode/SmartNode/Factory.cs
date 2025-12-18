@@ -6,6 +6,7 @@ using Implementations.Sensors;
 using Implementations.ValueHandlers;
 using Implementations.SimulatedTwinningTargets;
 using Implementations.Sensors.RoomM370;
+using Implementations.Sensors.CustomPiece;
 
 namespace SmartNode
 {
@@ -105,7 +106,21 @@ namespace SmartNode
                 new AverageTemperatureSoftSensor(
                     "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensor",
                     "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensorProcedure")
-            }
+            },
+            {
+                ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioSoftSensor",
+                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm"),
+                new CompressionRatioSoftSensor(
+                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioSoftSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm")
+            },
+            {
+                ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
+                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceAlgorithm"),
+                new CustomPieceSoftSensor(
+                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceAlgorithm")
+            },
         };
 
         private readonly Dictionary<string, IActuatorDevice> _dummyActuators = new()
@@ -134,7 +149,8 @@ namespace SmartNode
         private readonly Dictionary<string, IValueHandler> _valueHandlers = new()
         {
             { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
-            { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
+            { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() },
+            { "http://www.w3.org/2001/XMLSchema#base64Binary", new Base64BinaryValueHandler() }
         };
 
         // Keep an instance of the simulated TT.

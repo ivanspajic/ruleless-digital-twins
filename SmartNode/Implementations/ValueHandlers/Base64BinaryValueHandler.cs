@@ -1,0 +1,48 @@
+﻿using Femyou;
+using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
+using Logic.ValueHandlerInterfaces;
+
+namespace Implementations.ValueHandlers {
+    public class Base64BinaryValueHandler : IValueHandler {
+        public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues) {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<object> GetPossibleValuesForActuationAction(Actuator actuator) {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, Effect effect) {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression, object propertyValue) {
+            throw new NotImplementedException();
+        }
+
+        public string GetValueAsCultureInvariantString(object value) {
+            return value.ToString()!;
+        }
+
+        public object GetValueFromSimulationParameter(IInstance fmuInstance, IVariable parameter) {
+            throw new NotImplementedException();
+        }
+
+        public int IncreaseComp(object comparingValue, object targetValue) {
+            throw new NotImplementedException();
+        }
+
+        public bool IsGreaterThanOrEqualTo(object comparingValue, object targetValue) {
+            throw new NotImplementedException();
+        }
+
+        public bool IsLessThanOrEqualTo(object comparingValue, object targetValue) {
+            throw new NotImplementedException();
+        }
+
+        public void WriteValueToSimulationParameter(IInstance fmuInstance, IVariable parameter, object value) {
+            throw new NotImplementedException();
+        }
+    }
+}

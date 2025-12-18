@@ -118,7 +118,7 @@ namespace TestProject
                 Children = []
             };
 
-            var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<ActuationAction>>());
+            var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<Logic.Models.OntologicalModels.Action>>(), propertyCacheMock);
 
             // To produce the tree via the streaming (yield return) mechanism, we need to enumerate the simulation collection.
             simulations.ForEach(_ => { });
@@ -130,7 +130,7 @@ namespace TestProject
 
             foreach (var s in path.Simulations)
             {
-                Trace.WriteLine(string.Join(";", s.ActuationActions.Select(a => a.Name)));
+                Trace.WriteLine(string.Join(";", s.Actions.Select(a => a.Name)));
             }
             // TODO: assert that in each simulated timepoint ElPriceNF = false.
         }   

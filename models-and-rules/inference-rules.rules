@@ -7,8 +7,8 @@
 
 
 
-// The following rules cover individuals with one or two value constraints. Once an OptimalCondition constraint
-// has been located, a mark will be placed to allow subsequent rules to match and fire.
+// The following rules cover individuals with one or two value constraints. Once an OptimalCondition constraint has been located,
+// a mark will be placed to allow subsequent rules to match and fire.
 
 [rule1a:    (?platform rdf:type sosa:Platform)
             (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
@@ -33,9 +33,9 @@
             ->  (?restriction rdf:comment ?property)
 ]
 
-// These rules support disjunctive constraint definitions in OptimalConditions. E.g., (>15, <=20) or (>=24, <35).
-// Such definitions cover cases whose Property values might fit in disjoint ranges. Currently, only 2 constraints
-// are supported, but it is naturally possible to support more.
+// These rules support disjunctive constraint definitions in OptimalConditions. E.g., (>15, <=20) or (>=24, <35). Such definitions
+// cover cases whose Property values might fit in disjoint ranges. Currently, only 2 constraints are supported, but it is naturally
+// possible to support more.
 
 [rule1c:    (?platform rdf:type sosa:Platform)
             (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
@@ -95,8 +95,8 @@
 
 
 
-// Upon locating the marks for OptimalCondition constraints or optimization targets, these rules find the
-// relevant PropertyChanges and use them for a temporary mark.
+// Upon locating the marks for OptimalCondition constraints or optimization targets, these rules find the relevant PropertyChanges and use
+// them for a temporary mark.
 
 [rule2a:    (?restriction rdf:comment ?property)
             (?property meta:hasValue ?propertyValue)
@@ -136,10 +136,9 @@
 
 
 
-// The following rules locate PropertyChange marks and generate appropriate Actions, either with Actuators
-// or ConfigurableParameters. URI concatinations are used for generating unique names for unique combinations of
-// elements in an Action. This ensures that no duplicate Actions are generated in cases of, e.g., multiple
-// actuators causing multiple different PropertyChanges.
+// The following rules locate PropertyChange marks and generate appropriate Actions, either with Actuators or ConfigurableParameters. URI
+// concatinations are used for generating unique names for unique combinations of elements in an Action. This ensures that no duplicate Actions
+// are generated in cases of, e.g., multiple actuators causing multiple different PropertyChanges.
 
 [rule3a:   (?thing rdf:comment ?propertyChange)
            (?propertyChange meta:enactedBy ?actuator)
@@ -157,7 +156,7 @@
 [rule3b:   (?thing rdf:comment ?propertyChange)
            (?propertyChange meta:enactedBy ?configurableParameter)
            (?configurableParameter rdf:type meta:ConfigurableParameter)
-           (?configurableParameter meta:hasValue ?configurableParameterValue)
+           (?configurableParameter meta:hasPossibleValue ?configurableParameterValue)
            uriConcat(?configurableParameter, "_", ?configurableParameterValue, ?actionName)
            ->  (?actionName rdf:type meta:ReconfigurationAction)
                (?actionName ssn:forProperty ?configurableParameter)
@@ -186,7 +185,7 @@
 [rule3d:    (?platform rdf:type sosa:Platform)
             (?platform meta:generateCombinationsOnlyFromOptimalConditions "false"^^xsd:boolean)
             (?configurableParameter rdf:type meta:ConfigurableParameter)
-            (?configurableParameter meta:hasValue ?configurableParameterValue)
+            (?configurableParameter meta:hasPossibleValue ?configurableParameterValue)
             uriConcat(?configurableParameter, "_", ?configurableParameterValue, ?actionName)
             ->  (?actionName rdf:type meta:ReconfigurationAction)
                 (?actionName ssn:forProperty ?configurableParameter)
@@ -269,7 +268,7 @@
             (?actionCombination meta:hasActions ?actionList)
             (?actionCombination meta:hasConfigurableParameters ?configurableParameterList)
             (?reconfigurationAction rdf:type meta:ReconfigurationAction)
-            (?reconfigurationAction meta:forProperty ?configurableParameter)
+            (?reconfigurationAction ssn:forProperty ?configurableParameter)
             noValue(?actionCombination rdf:comment "duplicate")
             listNotContains(?configurableParameterList, ?configurableParameter)
             makeTemp(?newActionCombination)

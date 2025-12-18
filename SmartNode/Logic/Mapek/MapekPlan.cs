@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Text;
 using VDS.RDF;
 using static Femyou.IModel;
 
@@ -55,7 +54,7 @@ namespace Logic.Mapek
                 NodeItem = new Simulation(cache.PropertyCache),
                 Children = []
             };
-            var simulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<ActuationAction>>());
+            var simulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<ActuationAction>>(), cache.PropertyCache);
 
             // Execute the simulations and obtain their results.
             Simulate(simulations, cache.SoftSensorTreeNodes);
@@ -81,7 +80,8 @@ namespace Logic.Mapek
             SimulationTreeNode simulationTreeNode,
             bool unrestrictedInferenceExecuted,
             bool reloadInferredModel,
-            IEnumerable<IEnumerable<ActuationAction>> actionCombinations) {
+            IEnumerable<IEnumerable<Models.OntologicalModels.Action>> actionCombinations,
+            PropertyCache propertyCache) {
             // Update the restriction setting in the instance model to run the inference rules correctly.
             EnsureUpdatedRestrictionSetting();
 
@@ -104,7 +104,7 @@ namespace Logic.Mapek
 
             // Only reload the instance model if a new set of ActionCombinations has been inferred.
             if (reloadInferredModel) {
-                actionCombinations = GetActionCombinations();
+                actionCombinations = GetActionCombinations(propertyCache);
 
                 reloadInferredModel = false;
             }
@@ -115,9 +115,8 @@ namespace Logic.Mapek
 
             foreach (var actionCombination in actionCombinations) {
                 var simulation = new Simulation(GetPropertyCacheCopy(simulationTreeNode.NodeItem.PropertyCache!)) {
-                    ActuationActions = actionCombination,
-                    Index = currentCycle,
-                    ReconfigurationActions = [], // TODO: add support for ReconfigurationActions.
+                    Actions = actionCombination,
+                    Index = currentCycle
                 };
 
                 // Already stream back the newly-created simulation.
@@ -139,7 +138,8 @@ namespace Logic.Mapek
                         currentSimulationTreeNode,
                         unrestrictedInferenceExecuted,
                         reloadInferredModel,
-                        actionCombinations);
+                        actionCombinations,
+                        propertyCache);
 
                     foreach (var childSimulation in childSimulations) {
                         yield return childSimulation;
@@ -215,8 +215,7 @@ namespace Logic.Mapek
                 _logger.LogInformation(e.Data);
             };
 
-            process.ErrorDataReceived += (sender, e) =>
-            {
+            process.ErrorDataReceived += (sender, e) => {
                 _logger.LogInformation(e.Data);
             };
 
@@ -233,8 +232,8 @@ namespace Logic.Mapek
         }
 
         // This method currently only supports ActuationActions.
-        private List<List<ActuationAction>> GetActionCombinations() {
-            var actionCombinations = new List<List<ActuationAction>>();
+        private List<List<Models.OntologicalModels.Action>> GetActionCombinations(PropertyCache propertyCache) {
+            var actionCombinations = new List<List<Models.OntologicalModels.Action>>();
 
             var actionCombinationQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actionCombination (GROUP_CONCAT(?action; SEPARATOR="" "") AS ?actions) WHERE {
 	                ?actionCombination rdf:type meta:ActionCombination .
@@ -260,22 +259,24 @@ namespace Logic.Mapek
                 // ActionCombinations can only be queried through concatenation in the query above, so they must be split.
                 var actions = combinationResult["actions"].ToString().Split('^')[0].Split(' ').ToList();
 
-                var combination = new List<ActuationAction>();
+                var actionCombination = new List<Models.OntologicalModels.Action>();
 
-                var actionQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState WHERE {
+                // Query for ActuationAction contents.
+
+                var actuationActionQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState WHERE {
                         @action rdf:type meta:ActuationAction .
                         @action meta:hasActuator ?actuator .
                         @action meta:hasActuatorState ?actuatorState . }");
                 actions.ForEach(action => {
                     // For each Action, find the appropriate Actuator and its state.
-                    actionQuery.SetUri("action", new Uri(action));
-                    var actionQueryResult = _mapekKnowledge.ExecuteQuery(actionQuery, true);
+                    actuationActionQuery.SetUri("action", new Uri(action));
+                    var actuationActionQueryResult = _mapekKnowledge.ExecuteQuery(actuationActionQuery, true);
 
-                    actionQueryResult.Results.ForEach(actionResult => {
+                    actuationActionQueryResult.Results.ForEach(actionResult => {
                         var actuatorName = actionResult["actuator"].ToString();
                         var actuatorState = actionResult["actuatorState"].ToString().Split('^')[0];
 
-                        combination.Add(new ActuationAction {
+                        actionCombination.Add(new ActuationAction {
                             Name = action,
                             Actuator = new Actuator {
                                 Name = actuatorName
@@ -285,7 +286,29 @@ namespace Logic.Mapek
                     });
                 });
 
-                actionCombinations.Add(combination);
+                // Query for ReconfigurationAction contents.
+                var reconfigurationActionQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?configurableParameter ?newValue WHERE {
+                        @action rdf:type meta:ReconfigurationAction .
+                        @action ssn:forProperty ?configurableParameter .
+                        @action meta:hasValue ?newValue . }");
+                actions.ForEach(action => {
+                    // For each Action, find the appropriate ConfigurableParameter and its value.
+                    reconfigurationActionQuery.SetUri("action", new Uri(action));
+                    var reconfigurationActionQueryResult = _mapekKnowledge.ExecuteQuery(reconfigurationActionQuery, true);
+
+                    reconfigurationActionQueryResult.Results.ForEach(actionResult => {
+                        var configurableParameterName = actionResult["configurableParameter"].ToString();
+                        var newValue = actionResult["newValue"].ToString().Split('^')[0];
+
+                        actionCombination.Add(new ReconfigurationAction {
+                            ConfigurableParameter = propertyCache.ConfigurableParameters[configurableParameterName],
+                            Name = action,
+                            NewParameterValue = newValue
+                        });
+                    });
+                });
+
+                actionCombinations.Add(actionCombination);
             });
 
             return actionCombinations;
@@ -448,26 +471,11 @@ namespace Logic.Mapek
         }
 
         public FmuModel GetHostPlatformFmuModel(Simulation simulation, string fmuDirectory) {
-            // Retrieve all Actuators to be used in the simulations and ensure that they belong to the same host Platform such that the Platform's
-            // FMU will contain all of their relevant input/output variables.
-            var actuatorNames = new HashSet<string>();
-            var clauseBuilder = new StringBuilder();
-
-            foreach (var actuationAction in simulation.ActuationActions) {
-                if (!actuatorNames.Contains(actuationAction.Actuator.Name)) {
-                    actuatorNames.Add(actuationAction.Actuator.Name);
-
-                    // Add the Actuator name to the query filter.
-                    clauseBuilder.AppendLine("?platform sosa:hosts <" + actuationAction.Actuator.Name + "> .");
-                }
-            }
-
-            var clause = clauseBuilder.ToString();
+            // Retrieve the Platform (TT) FMU to be used for Actuators and/or ConfigurableParameters.
 
             var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?fmuModel ?fmuFilePath ?simulationFidelitySeconds WHERE {
-                ?platform rdf:type sosa:Platform . " +
-                clause +
-                @"?platform meta:hasSimulationModel ?fmuModel .
+                ?platform rdf:type sosa:Platform .
+                ?platform meta:hasSimulationModel ?fmuModel .
                 ?fmuModel rdf:type meta:FmuModel .
                 ?fmuModel meta:hasURI ?fmuFilePath .
                 ?fmuModel meta:hasSimulationFidelitySeconds ?simulationFidelitySeconds . }");
@@ -528,11 +536,25 @@ namespace Logic.Mapek
             }
 
             // Add all ActuatorStates to the inputs for the FMU.
-            foreach (var actuationAction in simulation.ActuationActions)
+            foreach (var action in simulation.Actions)
             {
+                string name;
+                string type;
+                object value;
+                if (action is ActuationAction actuationAction) {
+                    name = actuationAction.Actuator.Name;
+                    type = "http://www.w3.org/2001/XMLSchema#int";
+                    value = actuationAction.NewStateValue;
+                } else {
+                    var reconfigurationAction = (ReconfigurationAction)action;
+                    name = reconfigurationAction.ConfigurableParameter.Name;
+                    type = reconfigurationAction.ConfigurableParameter.OwlType;
+                    value = reconfigurationAction.NewParameterValue;
+                }
+
                 // Shave off the long name URIs from the instance model.
-                var simpleActuatorName = MapekUtilities.GetSimpleName(actuationAction.Actuator.Name);
-                fmuActuationInputs.Add((simpleActuatorName + "State", "http://www.w3.org/2001/XMLSchema#int", actuationAction.NewStateValue));
+                var simpleName = MapekUtilities.GetSimpleName(name);
+                fmuActuationInputs.Add((simpleName, type, value));
             }
 
             _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
@@ -1170,9 +1192,14 @@ namespace Logic.Mapek
             {
                 logMsg += $"Interval {i + 1}:\n";
 
-                foreach (var action in simulationList[i].ActuationActions)
+                foreach (var action in simulationList[i].Actions)
                 {
-                    logMsg += $"Actuator: {action.Actuator.Name}, Actuator state: {action.NewStateValue.ToString()}\n";
+                    if (action is ActuationAction actuationAction) {
+                        logMsg += $"Actuator: {actuationAction.Actuator.Name}, Actuator state: {actuationAction.NewStateValue.ToString()}.\n";
+                    } else {
+                        var reconfigurationAction = (ReconfigurationAction)action;
+                        logMsg += $"ConfigurableParameter: {reconfigurationAction.ConfigurableParameter.Name}, ConfigurableParameter value: {reconfigurationAction.NewParameterValue.ToString()}.\n";
+                    }
                 }
             }
 

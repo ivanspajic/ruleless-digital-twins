@@ -2,6 +2,7 @@
 using CsvHelper.Configuration;
 using Logic.Mapek;
 using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
 using System.Globalization;
 
 namespace Logic.Utilities
@@ -25,25 +26,27 @@ namespace Logic.Utilities
             }
         }
 
-        public static void WriteActuatorStatesToCsv(string directoryPath, int roundNumber, SimulationPath simulationPath)
-        {
-            var actuatorValues = new Dictionary<string, List<object>>();
+        public static void WriteActuatorStatesToCsv(string directoryPath, int roundNumber, SimulationPath simulationPath) {
+            var actuatorConfigurableParameterValues = new Dictionary<string, List<object>>();
 
-            foreach (var simulationTick in simulationPath.Simulations)
-            {
-                foreach (var action in simulationTick.ActuationActions)
-                {
-                    var simpleName = MapekUtilities.GetSimpleName(action.Actuator.Name);
-
-                    if (actuatorValues.TryGetValue(simpleName, out List<object>? value))
-                    {
-                        value.Add(action.NewStateValue);
+            foreach (var simulationTick in simulationPath.Simulations) {
+                foreach (var action in simulationTick.Actions) {
+                    string simpleName;
+                    object newStateOrValue;
+                    if (action is ActuationAction actuationAction) {
+                        simpleName = MapekUtilities.GetSimpleName(actuationAction.Actuator.Name);
+                        newStateOrValue = actuationAction.NewStateValue;
+                    } else {
+                        var reconfigurationAction = (ReconfigurationAction)action;
+                        simpleName = MapekUtilities.GetSimpleName(reconfigurationAction.ConfigurableParameter.Name);
+                        newStateOrValue = reconfigurationAction.NewParameterValue;
                     }
-                    else
-                    {
-                        actuatorValues.Add(simpleName, new List<object>
-                        {
-                            action.NewStateValue
+
+                    if (actuatorConfigurableParameterValues.TryGetValue(simpleName, out List<object>? value)) {
+                        value.Add(newStateOrValue);
+                    } else {
+                        actuatorConfigurableParameterValues.Add(simpleName, new List<object> {
+                            newStateOrValue
                         });
                     }
                 }
@@ -51,7 +54,7 @@ namespace Logic.Utilities
 
             CsvWriter csvWriter;
 
-            foreach (var keyValuePair in actuatorValues)
+            foreach (var keyValuePair in actuatorConfigurableParameterValues)
             {
                 var filePath = Path.Combine(directoryPath, keyValuePair.Key + ".csv");
 

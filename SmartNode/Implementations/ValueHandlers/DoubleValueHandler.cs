@@ -25,24 +25,12 @@ namespace Implementations.ValueHandlers
             { ConstraintType.Or, EvaluateOr }
         };
 
-        // In case of new Effects being added, this could be used to register new delegates.
-        private static readonly Dictionary<Effect, Func<double, double, double>> _amountChangeDelegateMap = new()
-        {
-            { Effect.ValueIncrease, IncreaseValueByAmount },
-            { Effect.ValueDecrease, DecreaseValueByAmount }
-        };
-
         // When calculating possible reconfiguration values for ConfigurableParameters, some parameters may need specific logic to do so. For example,
         // it may be inaccurate to simply take the min-max value range and divide it by the simulation granularity in a completely linear way. For this
         // reason, the user may register custom logic delegates and map them to specific ConfigurableParameter names.
         private static readonly Dictionary<string, Func<object, Effect, IEnumerable<object>>> _configurableParameterPossibleValuesMap = new()
         {
             { "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/Epsilon", GetPossibleEpsilonValues }
-        };
-
-        private static readonly Dictionary<string, object> _initialConfigurableParameterValues = new()
-        {
-            { "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/Epsilon", 2.3 }
         };
 
         public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression, object propertyValue)
@@ -114,11 +102,13 @@ namespace Implementations.ValueHandlers
             return measuredPropertyDoubleValues.Sum() / measuredPropertyDoubleValues.Length;
         }
 
+        // This can be removed. It's only being referenced by obsolete MapekAnalyze.
         public IEnumerable<object> GetPossibleValuesForActuationAction(Actuator actuator)
         {
             throw new NotImplementedException();
         }
 
+        // This can be removed. It's only being referenced by obsolete MapekAnalyze.
         public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, Effect effect)
         {
             if (_configurableParameterPossibleValuesMap.TryGetValue(configurableParameter.Name, out Func<object, Effect, IEnumerable<object>>? configurableParameterLogic))
@@ -128,18 +118,6 @@ namespace Implementations.ValueHandlers
             else
             {
                 throw new ArgumentException($"ConfigurableParameter {configurableParameter.Name} has no implementation for possible values.");
-            }
-        }
-
-        public object GetInitialValueForConfigurableParameter(string configurableParameter)
-        {
-            if (_initialConfigurableParameterValues.TryGetValue(configurableParameter, out object? initialValue))
-            {
-                return initialValue;
-            }
-            else
-            {
-                throw new ArgumentException($"ConfigurableParameter {configurableParameter} has no added initial value.");
             }
         }
 
@@ -251,16 +229,6 @@ namespace Implementations.ValueHandlers
         private static bool EvaluateOr(bool left, bool right)
         {
             return left || right;
-        }
-
-        private static double IncreaseValueByAmount(double value, double amountToIncreaseBy)
-        {
-            return value + amountToIncreaseBy;
-        }
-
-        private static double DecreaseValueByAmount(double value, double amountToDecreaseBy)
-        {
-            return value - amountToDecreaseBy;
         }
 
         private static IEnumerable<object> GetPossibleEpsilonValues(object currentValue, Effect effect)

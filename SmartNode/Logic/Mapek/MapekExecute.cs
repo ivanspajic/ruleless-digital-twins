@@ -28,9 +28,13 @@ namespace Logic.Mapek
 
             foreach (var simulationTick in optimalConfiguration.Simulations)
             {
-                foreach (var actuationAction in simulationTick.ActuationActions)
+                foreach (var action in simulationTick.Actions)
                 {
-                    ExecuteActuationAction(actuationAction);
+                    if (action is ActuationAction actuationAction) {
+                        ExecuteActuationAction(actuationAction);
+                    } else {
+                        ExecuteReconfigurationAction((ReconfigurationAction)action);
+                    }
                 }
 
                 if (!useSimulatedTwinningTarget)
@@ -54,13 +58,14 @@ namespace Logic.Mapek
             actuator.Actuate(actuationAction.NewStateValue);
         }
 
-        private void ExecuteReconfigurationAction(ReconfigurationAction reconfigurationAction, IDictionary<string, ConfigurableParameter> configurableParameters)
+        private void ExecuteReconfigurationAction(ReconfigurationAction reconfigurationAction)
         {
             _logger.LogInformation("Reconfiguring property {configurableProperty} with {effect}.",
                 reconfigurationAction.ConfigurableParameter.Name,
                 reconfigurationAction.NewParameterValue);
 
-            configurableParameters[reconfigurationAction.ConfigurableParameter.Name].Value = reconfigurationAction.NewParameterValue;
+            // TODO: figure out what this looks like. The best thing to do is probably to keep the symmetry between Actuators and ConfigurableParameters.
+            // This will, however, probably need some form of "submit" action to ensure all Properties get sent to the cyber system simultaneously.
         }
 
         private void LogExpectedPropertyValues(SimulationPath simulationPath)

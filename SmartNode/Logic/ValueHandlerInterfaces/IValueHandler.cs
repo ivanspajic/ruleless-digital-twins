@@ -14,8 +14,6 @@ namespace Logic.ValueHandlerInterfaces
 
         public IEnumerable<object> GetPossibleValuesForActuationAction(Actuator actuator);
 
-        public object GetInitialValueForConfigurableParameter(string configurableParameter);
-
         public int IncreaseComp(object comparingValue, object targetValue);
 
         public bool IsGreaterThanOrEqualTo(object comparingValue, object targetValue);

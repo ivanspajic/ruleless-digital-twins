@@ -19,7 +19,9 @@ namespace Logic.Mapek
         // Required as fields to preserve caching throughout multiple MAPE-K loop cycles.
         private readonly Dictionary<string, IModel> _fmuDict = [];
 	    private readonly Dictionary<string, IInstance> _iDict = [];
-        // A setting that determines whether the DT operates in the 'reactive' (true) or 'proactive' (false) mode.
+        // A setting that determines whether the DT operates in the 'reactive' (true) or 'proactive' (false) mode. The reactive mode generates only those Actions that will
+        // act as mitigations against violated OptimalConditions. The proactive mode generates all possible Actions from all Actuators and/or ConfigurableParameters in the
+        // instance model.
         private readonly bool _restrictToReactiveActionsOnly;
         // Used for performance enhancements.
         private bool _restrictToReactiveActionsOnlyOld = true;
@@ -74,7 +76,7 @@ namespace Logic.Mapek
         }
 
         // TODO: consider making this async in the future.
-        // The booleans flags are used for performance improvements.
+        // The boolean flags are used for performance improvements.
         internal IEnumerable<Simulation> GetSimulationsAndGenerateSimulationTree(int lookAheadCycles,
             int currentCycle,
             SimulationTreeNode simulationTreeNode,
@@ -348,7 +350,7 @@ namespace Logic.Mapek
         }
 
         private bool GetKeepSimulation(Simulation simulation) {
-            // Here, we can implement dynamic pruning logic based on the values of the simulation's property cache.
+            // Here we can implement dynamic pruning logic based on the values of the simulation's property cache.
             return true;
         }
 

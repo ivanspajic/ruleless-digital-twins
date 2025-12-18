@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using VDS.RDF;
-using Logic.DeviceInterfaces;
 
 namespace Logic.Mapek {
     public class MapekMonitor : IMapekMonitor {

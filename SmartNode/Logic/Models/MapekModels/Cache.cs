@@ -1,5 +1,4 @@
-﻿
-namespace Logic.Models.MapekModels {
+﻿namespace Logic.Models.MapekModels {
     public class Cache {
         public required PropertyCache PropertyCache { get; set; }
 

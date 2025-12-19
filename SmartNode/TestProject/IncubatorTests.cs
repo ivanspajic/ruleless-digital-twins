@@ -11,52 +11,21 @@ using TestProject.Mocks;
 
 namespace TestProject
 {
-    internal class Factory : IFactory {
-        private readonly Dictionary<string, IValueHandler> _valueHandlers = new() {
-            { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
-            { "double", new DoubleValueHandler() }, // FIXME
-            { "boolean", new BooleanValueHandler() },
-            { "string", new StringValueHandler() },
-            { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
-            { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
-        };
-        public IActuator GetActuatorDeviceImplementation(string actuatorName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IConfigurableParameter GetConfigurableParameterImplementation(string configurableParameterName) {
-            throw new NotImplementedException();
-        }
-
-        public ISensor GetSensorDeviceImplementation(string sensorName, string procedureName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IValueHandler GetValueHandlerImplementation(string owlType) {
-            if (_valueHandlers.TryGetValue(owlType, out IValueHandler? sensorValueHandler)) {
-                return sensorValueHandler;
-            }
-            throw new Exception($"No implementation was found for Sensor value handler for OWL type {owlType}.");
-        }
-    }
-
-    class MyMapekPlan : MapekPlan {
-        public MyMapekPlan(IServiceProvider serviceProvider, bool logSimulations = false) : base(serviceProvider, logSimulations) {}
-        protected override void InferActionCombinations() {
-            // Call Java explicitly?
-            if (true) {
-                base.InferActionCombinations();
+    public class IncubatorTests
+    {
+        private class MyMapekPlan : MapekPlan {
+            public MyMapekPlan(IServiceProvider serviceProvider, bool logSimulations = false) : base(serviceProvider, logSimulations) { }
+            protected override void InferActionCombinations() {
+                // Call Java explicitly?
+                if (true) {
+                    base.InferActionCombinations();
+                }
             }
         }
-    }
 
-    public class NordPoolTests {
         [Theory]
-        [InlineData(null, "nordpool-simple.ttl", "nordpool-out.ttl", 4)]
-        [InlineData("SimpleNordpool.py", "nordpool1.ttl", "nordpool1-out.ttl", 4)]
-        public void Smallest_model_builds_tree_and_simulates(string? fromPython, string model, string inferred, int lookAheadCycles) {
+        [InlineData("Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
+        public void Simulate(string? fromPython, string model, string inferred, int lookAheadCycles) {
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
                                 + $"models-and-rules");
@@ -103,27 +72,11 @@ namespace TestProject
 
                 Properties = new Dictionary<string, Property> {
                     {
-                        "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProperty",
+                        "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#in_room_temperature",
                         new Property {
-                            Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProperty",
+                            Name = "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#in_room_temperature",
                             OwlType = "double",
-                            Value = -1.02
-                        }
-                    },
-                    {
-                        "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#price",
-                        new Property {
-                            Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#price",
-                            OwlType = "double",
-                            Value = -1.02
-                        }
-                    },
-                    {
-                        "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#notFound",
-                        new Property {
-                            Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#notFound",
-                            OwlType = "boolean",
-                            Value = true
+                            Value = 10.0 // from FMU
                         }
                     }
                 }
@@ -139,8 +92,8 @@ namespace TestProject
             mapekPlan.Simulate(simulations, []);
 
             // Only valid AFTER focing evaluation through simulation:
-            Assert.Single(simulationTree.SimulationPaths);
-            Assert.Equal(simulationTree.ChildrenCount, lookAheadCycles);
+            Assert.Equal(Math.Pow(2, lookAheadCycles), simulationTree.SimulationPaths.Count());
+            Assert.Equal(30, simulationTree.ChildrenCount);
             var path = simulationTree.SimulationPaths.First();
 
             foreach (var s in path.Simulations)
@@ -149,7 +102,37 @@ namespace TestProject
                 Trace.WriteLine("Params: " + string.Join(";", s.InitializationActions.Select(a => a.Name).ToList()));
                 Trace.WriteLine("Inputs: " + string.Join(";", s.Actions.Select(a => a.Name).ToList()));
             }
-            // TODO: assert that in each simulated timepoint ElPriceNF = false.
-        }   
+        }
+        internal class Factory : IFactory {
+        private readonly Dictionary<string, IValueHandler> _valueHandlers = new() {
+            { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
+            { "double", new DoubleValueHandler() }, // FIXME
+            { "boolean", new BooleanValueHandler() },
+            { "string", new StringValueHandler() },
+            { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
+            { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
+        };
+        public IActuator GetActuatorDeviceImplementation(string actuatorName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IConfigurableParameter GetConfigurableParameterImplementation(string configurableParameterName) {
+            throw new NotImplementedException();
+        }
+
+        public ISensor GetSensorDeviceImplementation(string sensorName, string procedureName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IValueHandler GetValueHandlerImplementation(string owlType) {
+            if (_valueHandlers.TryGetValue(owlType, out IValueHandler? sensorValueHandler)) {
+                return sensorValueHandler;
+            }
+            throw new Exception($"No implementation was found for Sensor value handler for OWL type {owlType}.");
+        }
+    }
+
     }
 }

@@ -24,14 +24,11 @@ g.add((zoneActuator.node, RDT["hasActuatorName"], Literal("zone", datatype=XSD.s
 g.add((zoneActuator.node, RDT["hasActuatorState"],  Literal("NO1", datatype=XSD.string)))
 g.add((zoneActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.boolean)))
 
-
 elprice = ObservableProperty(g, MINE["price"])
-restriction = elprice.restriction
+elpriceNF = ObservableProperty(g, MINE["notFound"])
 
-elpriceNFO = ObservableProperty(g, MINE["notFound"], restriction) # TODO: better implicit sharing?
-
-priceMeasure = Measure(g, MINE["PriceMeasure"], restriction)
-priceSensor = Sensor(g, MINE["PriceSensor"], [elprice, elpriceNFO])
+priceMeasure = Measure(g, MINE["PriceMeasure"])
+priceSensor = Sensor(g, MINE["PriceSensor"], [elprice, elpriceNF])
 
 priceProcedureO = Procedure(g, MINE["PriceProcedure"], priceMeasure, priceSensor)
 

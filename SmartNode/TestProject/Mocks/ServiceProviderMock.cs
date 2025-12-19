@@ -11,7 +11,7 @@ namespace TestProject.Mocks
         private static readonly string _rootDirectoryPath = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
 
         private readonly Dictionary<Type, object?> _serviceImplementationMocks;
-        public ServiceProviderMock(string model, string inferred, Factory? factory) {
+        public ServiceProviderMock(string model, string inferred, IFactory? factory) {
             _serviceImplementationMocks = new() {
             { typeof(ILogger<IMapekPlan>), new LoggerMock<IMapekPlan>() },
             { typeof(ILogger<IMapekKnowledge>), new LoggerMock<IMapekKnowledge>() },

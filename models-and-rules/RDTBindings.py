@@ -78,12 +78,12 @@ class Platform(Node):
         g.add((self.node, RDT["hasSimulationModel"], fmu.node))
 
 class Measure(Node):
-    def __init__(self, g, name, restriction: Restriction):
+    def __init__(self, g, name):
         self.node = name
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
         g.add((self.node, RDF["type"], SSN["Output"]))
         g.add((self.node, RDF["type"], SSN["Property"]))
-        g.add((self.node, RDF["type"], restriction.node))
+        g.add((self.node, RDF["type"], RestrictionL1D(g).node))
 
 class Sensor(Node):
     def __init__(self, g, name, observes: ObservableProperty | list[ObservableProperty]):        

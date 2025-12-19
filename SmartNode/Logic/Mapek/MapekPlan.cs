@@ -539,11 +539,12 @@ namespace Logic.Mapek
                 string type;
                 object value;
                 if (action is ActuationAction actuationAction) {
-                    name = actuationAction.Actuator.Name;
+                    name = actuationAction.Actuator.ParameterName ?? actuationAction.Actuator.Name;
                     type = actuationAction.Actuator.Type!;
                     value = actuationAction.NewStateValue;
                 } else {
                     var reconfigurationAction = (ReconfigurationAction)action;
+                    // TODO: override here as well?
                     name = reconfigurationAction.ConfigurableParameter.Name;
                     type = reconfigurationAction.ConfigurableParameter.OwlType;
                     value = reconfigurationAction.NewParameterValue;

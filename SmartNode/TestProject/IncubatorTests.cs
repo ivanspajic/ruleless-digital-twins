@@ -76,9 +76,26 @@ namespace TestProject
                         new Property {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#in_room_temperature",
                             OwlType = "double",
-                            Value = 10.0 // from FMU
+                            Value = 10.0
+                        }
+                    },
+                   {
+                        "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#T",
+                        new Property {
+                            Name = "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#T",
+                            OwlType = "double",
+                            Value = 10.0
+                        }
+                    },
+                   {
+                        "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#T_heater",
+                        new Property {
+                            Name = "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#T_heater",
+                            OwlType = "double",
+                            Value = 10.0
                         }
                     }
+
                 }
             };
 

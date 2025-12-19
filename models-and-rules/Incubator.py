@@ -29,14 +29,22 @@ gheaterChange = Change(g, MINE["GHeaterChange"], gheaterProperty)
 gheaterActuator = Actuator(g, MINE["G_heater"], gheaterChange)
 g.add((gheaterActuator.node, RDT["hasActuatorName"], Literal("G_heater", datatype=XSD.string)))
 g.add((gheaterActuator.node, RDT["hasActuatorState"], Literal("5.0", datatype=XSD.double)))
-g.add((gheaterActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.string)))
+g.add((gheaterActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.boolean)))
 
-temp = ObservableProperty(g, MINE["in_room_temperature"])
+rtemp = ObservableProperty(g, MINE["in_room_temperature"])
+rtempActuator = Actuator(g, MINE["TempActuator"], Change(g, MINE["TempChange"], rtemp))
+g.add((rtempActuator.node, RDT["hasActuatorName"], Literal("in_room_temperature", datatype=XSD.string)))
+# TODO: Absence triggers a runtime error
+g.add((rtempActuator.node, RDT["hasActuatorState"], Literal("10.0", datatype=XSD.double)))
+g.add((rtempActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.boolean)))
+
+temp = ObservableProperty(g, MINE["T"])
+t_heater = ObservableProperty(g, MINE["T_heater"])
 tempMeasure = Measure(g, MINE["TempMeasure"])
-tempSensor = Sensor(g, MINE["TempSensor"], [temp])
-
+tempSensor = Sensor(g, MINE["TempSensor"], [temp, t_heater])
 tempProcedure = Procedure(g, MINE["TempProcedure"], tempMeasure, tempSensor)
-room = Platform(g, MINE["IncubatorTest"], False, [heaterActuator, cheaterActuator, tempSensor])
+
+room = Platform(g, MINE["IncubatorTest"], False, [heaterActuator, cheaterActuator, rtempActuator, tempSensor])
 fmu = FMU(g, MINE["Incubator_FMU"], "Source/au_incubator.fmu", 30) # 3s
 room.addFMU(g, fmu)
 

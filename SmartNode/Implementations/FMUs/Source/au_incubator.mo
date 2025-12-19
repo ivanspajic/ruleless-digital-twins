@@ -2,12 +2,12 @@ model au_incubator
   input Integer in_heater_state(start = 0);
   input Real in_heater_voltage(start = 11.416531);
   input Real in_heater_current(start = 1.42706637);
-  input Real in_room_temperature(start = 10); // This has a start value, but I'm not sure where it's from.
   input Real G_box(start = 0.49605615);
   input Real C_air(start = 64.2171870); // This value is actually listed as 6.42171870e+02, which is over 640 degrees C. Not sure if this is a typo or if this means something else.
   
   parameter Real C_heater(fixed = false); // This has a start value, but I'm not sure where it's from.
   parameter Real G_heater(fixed = false); // This has a start value, but I'm not sure where it's from.
+  parameter Real in_room_temperature(start = 10); // This has a start value, but I'm not sure where it's from.
   
   Real T;
   Real power_out_box;
@@ -30,8 +30,8 @@ algorithm
 end GetPowerIn;
 
 initial equation
-  T = 0; // This has a start value, but I'm not sure where it's from.
-  T_heater = 0; // This has a start value, but I'm not sure where it's from.
+  T = in_room_temperature; // This has a start value, but I'm not sure where it's from.
+  T_heater = in_room_temperature; // This has a start value, but I'm not sure where it's from.
 equation
   power_out_box = G_box * (T - in_room_temperature);
   power_transfer_heat = G_heater * (T_heater - T);

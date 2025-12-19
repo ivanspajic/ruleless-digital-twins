@@ -1,0 +1,69 @@
+@prefix ns1: <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ssn: <http://www.w3.org/ns/ssn/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#> owl:imports ns1: .
+
+<http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#PriceProcedure> a owl:NamedIndividual,
+        sosa:Procedure ;
+    ssn:hasOutput <http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#PriceMeasure> ;
+    ssn:implementedBy <http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#PriceSensor> .
+
+<http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#Test> a owl:NamedIndividual,
+        sosa:Platform ;
+    ns1:generateCombinationsOnlyFromOptimalConditions false ;
+    ns1:hasSimulationModel <http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#TestFMU> ;
+    sosa:hosts <http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#PriceSensor>,
+        <http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#ZoneActuator> .
+
+<http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#PriceMeasure> a _:Ned3130503cc44a18bc20104c1343f1bf,
+        owl:NamedIndividual,
+        ssn:Output,
+        ssn:Property .
+
+<http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#TestFMU> a ns1:FmuModel ;
+    ns1:hasSimulationFidelitySeconds 900 ;
+    ns1:hasURI "NordPool.fmu"^^xsd:string .
+
+<http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#ZoneActuator> a owl:NamedIndividual,
+        sosa:Actuator ;
+    ns1:hasActuatorName "zone"^^xsd:string ;
+    ns1:hasActuatorState "NO1"^^xsd:string ;
+    ns1:isParameter true ;
+    sosa:enacts <http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#ZoneChange> .
+
+<http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#ZoneChange> a ns1:PropertyChangeByActuation,
+        owl:NamedIndividual ;
+    ns1:affectsPropertyWith ns1:ValueIncrease ;
+    ssn:forProperty <http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#ZoneProperty> .
+
+<http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#ZoneProperty> a [ a owl:Restriction ;
+            owl:onDataRange xsd:double ;
+            owl:onProperty ns1:hasValue ;
+            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ],
+        owl:NamedIndividual,
+        sosa:ObservableProperty .
+
+<http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#notFound> a _:Ned3130503cc44a18bc20104c1343f1bf,
+        owl:NamedIndividual,
+        sosa:ObservableProperty .
+
+<http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#price> a _:Ned3130503cc44a18bc20104c1343f1bf,
+        owl:NamedIndividual,
+        sosa:ObservableProperty .
+
+"NO1"^^xsd:string ns1:VS true .
+
+<http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#PriceSensor> a owl:NamedIndividual,
+        sosa:Sensor ;
+    sosa:observes <http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#notFound>,
+        <http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#price> .
+
+_:Ned3130503cc44a18bc20104c1343f1bf a owl:Restriction ;
+    owl:onDataRange xsd:double ;
+    owl:onProperty ns1:hasValue ;
+    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger .
+
+

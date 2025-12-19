@@ -21,16 +21,9 @@ namespace TestProject
                 new object[] { 1, 2 }
             };
 
-            var actual = MapekPlan.OldGetNaryCartesianProducts(inputs);
+            var actual = MapekPlan.GetNaryCartesianProducts(inputs);
 
             var expected = new List<IEnumerable<object>>
-            {
-                new object[] { 1, 3 },
-                new object[] { 1, 4 },
-                new object[] { 2, 3 },
-                new object[] { 2, 4 }
-            };
-            var expected2 = new List<IEnumerable<object>>
             {
                 new object[] { 3, 1 },
                 new object[] { 4, 1 },
@@ -38,10 +31,8 @@ namespace TestProject
                 new object[] { 4, 2 }
             };
 
-
-            AssertCombinationsEqual(expected, actual);
             // TODO: reduce visibility again
-            AssertCombinationsEqual(expected2, MapekPlan.GetNaryCartesianProducts(inputs));
+            AssertCombinationsEqual(expected, actual);
         }
 
         [Fact]
@@ -52,7 +43,7 @@ namespace TestProject
                 new object[] { "a", "b", "c" }
             };
 
-            var actual = MapekPlan.OldGetNaryCartesianProducts(inputs);
+            var actual = MapekPlan.GetNaryCartesianProducts(inputs);
 
             var expected = new List<IEnumerable<object>>
             {
@@ -62,7 +53,6 @@ namespace TestProject
             };
 
             AssertCombinationsEqual(expected, actual);
-            AssertCombinationsEqual(expected, MapekPlan.GetNaryCartesianProducts(inputs));
         }
 
         [Fact]
@@ -75,9 +65,8 @@ namespace TestProject
                 new object[] { 5 }
             };
 
-            var actual = MapekPlan.OldGetNaryCartesianProducts(inputs);
-            Assert.True(actual.Count == 0);
-            Assert.False(MapekPlan.GetNaryCartesianProducts(inputs).Any());
+            var actual = MapekPlan.GetNaryCartesianProducts(inputs);
+            Assert.False(actual.Any());
         }
 
         [Fact]
@@ -90,20 +79,11 @@ namespace TestProject
                 new object[] { "x" }
             };
 
-            var actual = MapekPlan.OldGetNaryCartesianProducts(inputs);
+            var actual = MapekPlan.GetNaryCartesianProducts(inputs);
 
             // Expect 1 * 3 * 2 = 6 combinations
-            Assert.Equal(6, actual.Count);
+            Assert.Equal(6, actual.Count());
 
-            var expected = new List<IEnumerable<object>>
-            {
-                new object[] { "x", 10, true },
-                new object[] { "x", 10, false },
-                new object[] { "x", 20, true },
-                new object[] { "x", 20, false },
-                new object[] { "x", 30, true },
-                new object[] { "x", 30, false }
-            };
             var expected2 = new List<IEnumerable<object>>
             {
                 new object[] { true, 10, "x" },
@@ -114,9 +94,7 @@ namespace TestProject
                 new object[] { false, 30, "x"}
             };
 
-
-            AssertCombinationsEqual(expected, actual);
-            AssertCombinationsEqual(expected2, MapekPlan.GetNaryCartesianProducts(inputs));
+            AssertCombinationsEqual(expected2, actual);
         }
     }
 }

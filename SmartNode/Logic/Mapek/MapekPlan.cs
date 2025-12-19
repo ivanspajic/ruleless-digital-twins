@@ -364,44 +364,6 @@ namespace Logic.Mapek
                 from item in sequence
                 select accseq.Concat(new[] { item }));
         }
- 
-        internal static HashSet<HashSet<T>> OldGetNaryCartesianProducts<T>(IEnumerable<IEnumerable<T>> originalCollectionOfCollections)
-        {
-            // This method gets the n-ary Cartesian product of multiple collections.
-            var combinations = new HashSet<HashSet<T>>(new SetEqualityComparer<T>());
-
-            foreach (var currentCollection in originalCollectionOfCollections)
-            {
-                // Get all remaining collections.
-                var collectionOfRemainingCollections = originalCollectionOfCollections.Where(collection => collection != currentCollection);
-
-                foreach (var element in currentCollection)
-                {
-                    if (!collectionOfRemainingCollections.Any())
-                    {
-                        // If there are no remaining collections, simply make a set of the current element.
-                        var singleElementCombination = new HashSet<T>() { element };
-
-                        combinations.Add(singleElementCombination);
-                    }
-                    else
-                    {
-                        // If there are remaining collections, get their n-ary Cartesian product and add the current element to all sets returned.
-                        var remainingCombinations = OldGetNaryCartesianProducts(collectionOfRemainingCollections);
-
-                        foreach (var remainingCombination in remainingCombinations)
-                        {
-                            remainingCombination.Add(element);
-                        }
-
-                        // Add the remaining n-ary Cartesian product to the set of sets.
-                        combinations.UnionWith(remainingCombinations);
-                    }
-                }
-            }
-
-            return combinations;
-        }
 
         internal void Simulate(IEnumerable<Simulation> simulations, IEnumerable<SoftSensorTreeNode> softSensorTreeNodes)
         {

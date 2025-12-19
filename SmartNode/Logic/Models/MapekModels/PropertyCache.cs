@@ -1,5 +1,4 @@
-﻿using Logic.DeviceInterfaces;
-using Logic.Models.OntologicalModels;
+﻿using Logic.Models.OntologicalModels;
 
 namespace Logic.Models.MapekModels
 {

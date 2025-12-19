@@ -8,18 +8,16 @@ namespace Logic.Models.MapekModels
         {
             PropertyCache = propertyCache;
             InitializationActions = [];
-            ActuationActions = [];
+            Actions = [];
             Index = -1;
-            ReconfigurationActions = [];
         }
 
         public int Index { get; init; }
 
-        public IEnumerable<ActuationAction> ActuationActions { get; init; }
-
-        public IEnumerable<ReconfigurationAction> ReconfigurationActions { get; init; }
+        public IEnumerable<OntologicalModels.Action> Actions { get; init; }
 
         public PropertyCache? PropertyCache { get; set; }
-        public IEnumerable<ActuationAction> InitializationActions { get; set; }
+
+        public IEnumerable<FMUParameterAction> InitializationActions { get; set; }
     }
 }

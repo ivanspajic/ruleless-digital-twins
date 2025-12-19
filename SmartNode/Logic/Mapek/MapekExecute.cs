@@ -28,14 +28,19 @@ namespace Logic.Mapek
 
             foreach (var simulationTick in optimalConfiguration.Simulations)
             {
-                foreach (var actuationAction in simulationTick.ActuationActions)
+                foreach (var action in simulationTick.Actions)
                 {
-                    ExecuteActuationAction(actuationAction);
+                    if (action is ActuationAction actuationAction) {
+                        ExecuteActuationAction(actuationAction);
+                    } else {
+                        ExecuteReconfigurationAction((ReconfigurationAction)action);
+                    }
                 }
 
                 if (!useSimulatedTwinningTarget)
                 {
-                    // TODO: add a delay to match the duration of a cycle with the simulated interval.
+                    // TODO: add a delay to match the duration of a cycle with the simulated interval. This is especially important in multi-cycle (look-ahead)
+                    // simulations.
                 }
             }
 
@@ -54,13 +59,14 @@ namespace Logic.Mapek
             actuator.Actuate(actuationAction.NewStateValue);
         }
 
-        private void ExecuteReconfigurationAction(ReconfigurationAction reconfigurationAction, IDictionary<string, ConfigurableParameter> configurableParameters)
+        private void ExecuteReconfigurationAction(ReconfigurationAction reconfigurationAction)
         {
             _logger.LogInformation("Reconfiguring property {configurableProperty} with {effect}.",
                 reconfigurationAction.ConfigurableParameter.Name,
                 reconfigurationAction.NewParameterValue);
 
-            configurableParameters[reconfigurationAction.ConfigurableParameter.Name].Value = reconfigurationAction.NewParameterValue;
+            var configurableParameterImplementation = _factory.GetConfigurableParameterImplementation(reconfigurationAction.ConfigurableParameter.Name);
+            configurableParameterImplementation.UpdateConfigurableParameter(reconfigurationAction.ConfigurableParameter.Name, reconfigurationAction.NewParameterValue);
         }
 
         private void LogExpectedPropertyValues(SimulationPath simulationPath)

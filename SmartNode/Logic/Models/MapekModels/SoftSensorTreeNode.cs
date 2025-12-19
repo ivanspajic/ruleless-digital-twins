@@ -1,9 +1,8 @@
-﻿using Logic.DeviceInterfaces;
-using Logic.Models.OntologicalModels;
+﻿using Logic.TTComponentInterfaces;
 
 namespace Logic.Models.MapekModels {
-    public class SoftSensorTreeNode : ITreeNode<ISensorDevice, SoftSensorTreeNode> {
-        public ISensorDevice NodeItem { get; set; }
+    public class SoftSensorTreeNode : ITreeNode<ISensor, SoftSensorTreeNode> {
+        public ISensor NodeItem { get; set; }
 
         public IEnumerable<SoftSensorTreeNode> Children { get; set; }
 

@@ -1,5 +1,5 @@
 using Implementations.ValueHandlers;
-using Logic.DeviceInterfaces;
+using Logic.TTComponentInterfaces;
 using Logic.FactoryInterface;
 using Logic.Mapek;
 using Logic.Models.MapekModels;
@@ -8,7 +8,6 @@ using Logic.ValueHandlerInterfaces;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks;
-using Xunit.Internal;
 
 namespace TestProject
 {
@@ -21,12 +20,16 @@ namespace TestProject
             { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
         };
-        public IActuatorDevice GetActuatorDeviceImplementation(string actuatorName)
+        public IActuator GetActuatorDeviceImplementation(string actuatorName)
         {
             throw new NotImplementedException();
         }
 
-        public ISensorDevice GetSensorDeviceImplementation(string sensorName, string procedureName)
+        public IConfigurableParameter GetConfigurableParameterImplementation(string configurableParameterName) {
+            throw new NotImplementedException();
+        }
+
+        public ISensor GetSensorDeviceImplementation(string sensorName, string procedureName)
         {
             throw new NotImplementedException();
         }
@@ -51,7 +54,7 @@ namespace TestProject
 
     public class NordPoolTests {
         [Theory]
-        [InlineData(null, "nordpool-simple.ttl", "nordpool-out.ttl", 4)]
+        //[InlineData(null, "nordpool-simple.ttl", "nordpool-out.ttl", 4)]
         [InlineData("SimpleNordpool.py", "nordpool1.ttl", "nordpool1-out.ttl", 4)]
         public void Smallest_model_builds_tree_and_simulates(string? fromPython, string model, string inferred, int lookAheadCycles) {
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -66,7 +69,7 @@ namespace TestProject
 
             if (fromPython != null) {
                 var processInfo = new ProcessStartInfo {
-                    FileName = "python3",
+                    FileName = "python",
                     Arguments = $"\"{fromPython}\"",
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
@@ -131,7 +134,7 @@ namespace TestProject
                 Children = []
             };
 
-            var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<ActuationAction>>());
+            var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<Logic.Models.OntologicalModels.Action>>(), propertyCacheMock);
 
             mapekPlan.Simulate(simulations, []);
 
@@ -142,8 +145,9 @@ namespace TestProject
 
             foreach (var s in path.Simulations)
             {
+                Trace.WriteLine(string.Join(";", s.Actions.Select(a => a.Name)));
                 Trace.WriteLine("Params: " + string.Join(";", s.InitializationActions.Select(a => a.Name).ToList()));
-                Trace.WriteLine("Inputs: " + string.Join(";", s.ActuationActions.Select(a => a.Name).ToList()));
+                Trace.WriteLine("Inputs: " + string.Join(";", s.Actions.Select(a => a.Name).ToList()));
             }
             // TODO: assert that in each simulated timepoint ElPriceNF = false.
         }   

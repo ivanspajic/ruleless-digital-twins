@@ -17,11 +17,6 @@ namespace Implementations.ValueHandlers
             { "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/BucketSize", GetPossibleBucketSizeValues }
         };
 
-        private static readonly Dictionary<string, object> _initialConfigurableParameterValues = new()
-        {
-            { "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/BucketSize", 7 }
-        };
-
         private static readonly Dictionary<string, IEnumerable<object>> _actuatorStatePossibleValues = new()
         {
             { "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit", new List<object>
@@ -45,6 +40,7 @@ namespace Implementations.ValueHandlers
             throw new NotImplementedException();
         }
 
+        // This can be removed. It's only being referenced by obsolete MapekAnalyze.
         public IEnumerable<object> GetPossibleValuesForActuationAction(Actuator actuator)
         {
             if (_actuatorStatePossibleValues.TryGetValue(actuator.Name, out IEnumerable<object>? possibleValues))
@@ -57,6 +53,7 @@ namespace Implementations.ValueHandlers
             }
         }
 
+        // This can be removed. It's only being referenced by obsolete MapekAnalyze.
         public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, Effect effect)
         {
             if (_configurableParameterPossibleValuesMap.TryGetValue(configurableParameter.Name, out Func<object, Effect, IEnumerable<object>>? configurableParameterLogic))
@@ -66,18 +63,6 @@ namespace Implementations.ValueHandlers
             else
             {
                 throw new ArgumentException($"ConfigurableParameter {configurableParameter} has no implementation for possible values.");
-            }
-        }
-
-        public object GetInitialValueForConfigurableParameter(string configurableParameter)
-        {
-            if (_initialConfigurableParameterValues.TryGetValue(configurableParameter, out object? initialValue))
-            {
-                return initialValue;
-            }
-            else
-            {
-                throw new ArgumentException($"ConfigurableParameter {configurableParameter} has no added initial value.");
             }
         }
 
@@ -154,7 +139,21 @@ namespace Implementations.ValueHandlers
 
         public int IncreaseComp(object comparingValue, object targetValue)
         {
-            throw new NotImplementedException();
+            if (comparingValue is not int) {
+                comparingValue = int.Parse(comparingValue.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            if (targetValue is not int) {
+                targetValue = int.Parse(targetValue.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            if ((int)comparingValue > (int)targetValue) {
+                return 1;
+            } else if ((int)comparingValue < (int)targetValue) {
+                return -1;
+            } else {
+                return 0;
+            }
         }
     }
 }

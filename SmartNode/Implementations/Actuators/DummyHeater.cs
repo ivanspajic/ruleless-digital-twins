@@ -1,10 +1,10 @@
 ﻿using Implementations.SimulatedTwinningTargets;
-using Logic.DeviceInterfaces;
+using Logic.TTComponentInterfaces;
 using System.Globalization;
 
 namespace Implementations.Actuators
 {
-    public class DummyHeater : IActuatorDevice
+    public class DummyHeater : IActuator
     {
         private int _actuatorState = 0;
         private readonly DummyRoomM370 _dummyRoomM370;

@@ -1,8 +1,8 @@
-﻿using Logic.DeviceInterfaces;
+﻿using Logic.TTComponentInterfaces;
 using System.Globalization;
 
 namespace Implementations.Sensors.RoomM370 {
-    public class DecreaseTemperatureSoftSensor : ISensorDevice {
+    public class DecreaseTemperatureSoftSensor : ISensor {
         public DecreaseTemperatureSoftSensor(string sensorName, string procedureName) {
             SensorName = sensorName;
             ProcedureName = procedureName;

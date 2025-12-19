@@ -106,6 +106,14 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Data properties
 #################################################################
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#hasPossibleValue
+:hasPossibleValue rdf:type owl:DatatypeProperty ;
+                  rdfs:domain :ConfigurableParameter ;
+                  rdfs:range rdfs:Literal ;
+                  rdfs:comment "Represents one value that a ConfigurableParameter can have."@en ;
+                  rdfs:label "hasPossibleValue"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromOptimalConditions
 :generateCombinationsOnlyFromOptimalConditions rdf:type owl:DatatypeProperty ;
                                                rdfs:domain <http://www.w3.org/ns/sosa/Platform> ;
@@ -194,22 +202,6 @@ xsd:duration rdf:type rdfs:Datatype .
                    rdfs:label "ActionCombination"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionValueGenerator
-:ActionValueGenerator rdf:type owl:Class ;
-                      rdfs:subClassOf <http://www.w3.org/ns/sosa/Procedure> ,
-                                      [ rdf:type owl:Restriction ;
-                                        owl:onProperty <http://www.w3.org/ns/ssn/hasInput> ;
-                                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                        owl:onClass :Effect
-                                      ] ,
-                                      [ rdf:type owl:Restriction ;
-                                        owl:onProperty <http://www.w3.org/ns/ssn/hasOutput> ;
-                                        owl:cardinality "1"^^xsd:nonNegativeInteger
-                                      ] ;
-                      rdfs:comment "Represents a specific Procedure that generates concrete Action values. For example, the number of ActuatorStates might be unknown for a certain Actuator, so a Procedure should specify them for concrete ActuationActions. Likewise, ConfigurableParameter values should be specified for concrete ReconfigurationActions."@en ;
-                      rdfs:label "ActionValueGenerator"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction
 :ActuationAction rdf:type owl:Class ;
                  rdfs:subClassOf :Action ,
@@ -227,16 +219,6 @@ xsd:duration rdf:type rdfs:Datatype .
                  rdfs:label "ActuationAction"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationValueGenerator
-:ActuationValueGenerator rdf:type owl:Class ;
-                         rdfs:subClassOf :ActionValueGenerator ,
-                                         [ rdf:type owl:Restriction ;
-                                           owl:onProperty <http://www.w3.org/ns/ssn/hasInput> ;
-                                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                           owl:onClass <http://www.w3.org/ns/sosa/Actuator>
-                                         ] .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter
 :ConfigurableParameter rdf:type owl:Class ;
                        rdfs:subClassOf <http://www.w3.org/ns/ssn/Input> ,
@@ -245,6 +227,10 @@ xsd:duration rdf:type rdfs:Datatype .
                                          owl:onProperty :enacts ;
                                          owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                          owl:onClass :PropertyChangeByReconfiguration
+                                       ] ,
+                                       [ rdf:type owl:Restriction ;
+                                         owl:onProperty :hasValue ;
+                                         owl:minCardinality "1"^^xsd:nonNegativeInteger
                                        ] ;
                        rdfs:comment "A parameter not directly observable or actuatable but rather used for configuring an an Input to a System or Procedure."@en ;
                        rdfs:label "ConfigurableParameter"@en .
@@ -353,16 +339,6 @@ xsd:duration rdf:type rdfs:Datatype .
                                        ] ;
                        rdfs:comment "Represents a single system Action with a parameter reconfiguration, either for optimization or regaining optimal conditions."@en ;
                        rdfs:label "ReconfigurationAction"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationValueGenerator
-:ReconfigurationValueGenerator rdf:type owl:Class ;
-                               rdfs:subClassOf :ActionValueGenerator ,
-                                               [ rdf:type owl:Restriction ;
-                                                 owl:onProperty <http://www.w3.org/ns/ssn/hasInput> ;
-                                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                 owl:onClass :ConfigurableParameter
-                                               ] .
 
 
 ###  http://www.w3.org/ns/sosa/Actuator

@@ -1,7 +1,7 @@
 model roomM370
-  input Integer HeaterState(start = 0);
-  input Integer FloorHeatingState(start = 0);
-  input Integer DehumidifierState(start = 0);
+  input Integer Heater(start = 0);
+  input Integer FloorHeating(start = 0);
+  input Integer Dehumidifier(start = 0);
   Real RoomTemperature;
   Real RoomHumidity;
   Real EnergyConsumption;
@@ -13,26 +13,26 @@ model roomM370
   input Real EnergyConsumptionInitial(start = 0);
  
 function GetRoomTemperatureLimit
-  input Integer HeaterState;
-  input Integer FloorHeatingState;
+  input Integer Heater;
+  input Integer FloorHeating;
   output Integer RoomTemperatureLimit;
 algorithm
   RoomTemperatureLimit := 12;
-  if HeaterState == 2 then
+  if Heater == 2 then
     RoomTemperatureLimit := RoomTemperatureLimit + 10;
-  elseif HeaterState == 1 then
+  elseif Heater == 1 then
     RoomTemperatureLimit := RoomTemperatureLimit + 5;
   end if;
-  if FloorHeatingState == 1 then
+  if FloorHeating == 1 then
     RoomTemperatureLimit := RoomTemperatureLimit + 7;
   end if;
 end GetRoomTemperatureLimit;
 
 function GetRoomHumidityLimit
-  input Integer DehumidifierState;
+  input Integer Dehumidifier;
   output Integer RoomHumidityLimit;
 algorithm
-  if DehumidifierState == 1 then
+  if Dehumidifier == 1 then
     RoomHumidityLimit := 2;
   else
     RoomHumidityLimit := 10;
@@ -40,21 +40,21 @@ algorithm
 end GetRoomHumidityLimit;
 
 function GetEnergyConsumptionRate
-  input Integer HeaterState;
-  input Integer FloorHeatingState;
-  input Integer DehumidifierState;
+  input Integer Heater;
+  input Integer FloorHeating;
+  input Integer Dehumidifier;
   output Real EnergyConsumptionRate;
 algorithm
   EnergyConsumptionRate := 0;
-  if HeaterState == 2 then
+  if Heater == 2 then
     EnergyConsumptionRate := EnergyConsumptionRate + 0.025;
-  elseif HeaterState == 1 then
+  elseif Heater == 1 then
     EnergyConsumptionRate := EnergyConsumptionRate + 0.01;
   end if;
-  if FloorHeatingState == 1 then
+  if FloorHeating == 1 then
     EnergyConsumptionRate := EnergyConsumptionRate + 0.02;
   end if;
-  if DehumidifierState == 1 then
+  if Dehumidifier == 1 then
     EnergyConsumptionRate := EnergyConsumptionRate + 0.03;
   end if;
 end GetEnergyConsumptionRate;
@@ -65,9 +65,9 @@ initial equation
   RoomHumidity = RoomHumidityInitial;
   EnergyConsumption = EnergyConsumptionInitial;
 equation  
-  der(RoomTemperature) = (GetRoomTemperatureLimit(HeaterState, FloorHeatingState) - RoomTemperature) / slowdownValue;
-  der(RoomHumidity) = (GetRoomHumidityLimit(DehumidifierState) - RoomHumidity) / slowdownValue;
-  der(EnergyConsumption) = GetEnergyConsumptionRate(HeaterState, FloorHeatingState, DehumidifierState);
+  der(RoomTemperature) = (GetRoomTemperatureLimit(Heater, FloorHeating) - RoomTemperature) / slowdownValue;
+  der(RoomHumidity) = (GetRoomHumidityLimit(Dehumidifier) - RoomHumidity) / slowdownValue;
+  der(EnergyConsumption) = GetEnergyConsumptionRate(Heater, FloorHeating, Dehumidifier);
   
 annotation(
     experiment(StartTime = 0, StopTime = 8000, Tolerance = 1e-06, Interval = 1));

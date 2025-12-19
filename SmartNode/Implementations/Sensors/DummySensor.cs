@@ -1,8 +1,8 @@
-﻿using Logic.DeviceInterfaces;
+﻿using Logic.TTComponentInterfaces;
 
 namespace Implementations.Sensors
 {
-    public class DummySensor(string sensorName, string procedureName) : ISensorDevice
+    public class DummySensor(string sensorName, string procedureName) : ISensor
     {
         public string SensorName { get; private set; } = sensorName;
 

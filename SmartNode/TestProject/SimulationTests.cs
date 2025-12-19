@@ -120,7 +120,7 @@ namespace TestProject
             var fmuInstance = model.CreateCoSimulationInstance("demo");
 
             var roomTemperature = model.Variables["RoomTemperature"];
-            var acUnitState = model.Variables["HeaterState"];
+            var acUnitState = model.Variables["Heater"];
 
             fmuInstance.StartTime(0);
 

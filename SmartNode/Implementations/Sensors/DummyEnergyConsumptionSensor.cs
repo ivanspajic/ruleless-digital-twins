@@ -1,9 +1,9 @@
 ﻿using Implementations.SimulatedTwinningTargets;
-using Logic.DeviceInterfaces;
+using Logic.TTComponentInterfaces;
 
 namespace Implementations.Sensors
 {
-    public class DummyEnergyConsumptionSensor : ISensorDevice
+    public class DummyEnergyConsumptionSensor : ISensor
     {
         private readonly DummyRoomM370 _dummyRoomM370;
 

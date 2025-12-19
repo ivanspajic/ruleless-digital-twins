@@ -4,14 +4,15 @@
 "version": "2.0.0",
 "tasks": [
     {
-        "label": "Run OMC",
+        "label": "(Re)Build all OMC FMUs",
         "type": "shell",
-        "command": "cd SmartNode/Implementations/FMUs/Source && omc -d=gendebugsymbols doit.mos && cp roomM370.fmu ..",
+        // We're leaving the Incubator FMU in place for now.
+        "command": "cd SmartNode/Implementations/FMUs/Source && make clean all && cp roomM370.fmu ..",
         "problemMatcher": [],
         "group": "build"
     },
     {
-        "label": "Build Python FMUs",
+        "label": "Build all Python FMUs",
         "type": "shell",
         "command": "(cd SmartNode/Implementations/FMUs/Nordpool-FMU && make clean all && cp NordPool.fmu .. ) ; (cd SmartNode/Implementations/FMUs/Yr-Weather-FMU && make clean all && cp YrWeather.fmu .. )",
         "problemMatcher": [],

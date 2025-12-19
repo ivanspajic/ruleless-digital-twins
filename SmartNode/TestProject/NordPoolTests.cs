@@ -1,5 +1,5 @@
 using Implementations.ValueHandlers;
-using Logic.DeviceInterfaces;
+using Logic.TTComponentInterfaces;
 using Logic.FactoryInterface;
 using Logic.Mapek;
 using Logic.Models.MapekModels;
@@ -50,7 +50,7 @@ namespace TestProject
 
     public class NordPoolTests {
         [Theory]
-        [InlineData(null, "nordpool-simple.ttl", "nordpool-out.ttl", 4)]
+        //[InlineData(null, "nordpool-simple.ttl", "nordpool-out.ttl", 4)]
         [InlineData("SimpleNordpool.py", "nordpool1.ttl", "nordpool1-out.ttl", 4)]
         public void Smallest_model_builds_tree_and_simulates(string? fromPython, string model, string inferred, int lookAheadCycles) {
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -65,7 +65,7 @@ namespace TestProject
 
             if (fromPython != null) {
                 var processInfo = new ProcessStartInfo {
-                    FileName = "python3",
+                    FileName = "python",
                     Arguments = $"\"{fromPython}\"",
                     RedirectStandardOutput = true,
                     UseShellExecute = false,

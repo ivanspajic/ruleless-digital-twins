@@ -1,4 +1,4 @@
-﻿using Logic.DeviceInterfaces;
+﻿using Logic.TTComponentInterfaces;
 using System.Globalization;
 
 namespace Implementations.Sensors.RoomM370 {

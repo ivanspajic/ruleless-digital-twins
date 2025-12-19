@@ -1,4 +1,4 @@
-﻿using Logic.DeviceInterfaces;
+﻿using Logic.TTComponentInterfaces;
 using Logic.FactoryInterface;
 using Logic.ValueHandlerInterfaces;
 using Implementations.Actuators;

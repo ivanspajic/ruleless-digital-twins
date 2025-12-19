@@ -1,4 +1,4 @@
-﻿using Logic.DeviceInterfaces;
+﻿using Logic.TTComponentInterfaces;
 using Logic.ValueHandlerInterfaces;
 
 namespace Logic.FactoryInterface

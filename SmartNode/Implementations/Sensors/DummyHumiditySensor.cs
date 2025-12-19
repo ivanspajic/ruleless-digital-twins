@@ -1,5 +1,5 @@
 ﻿using Implementations.SimulatedTwinningTargets;
-using Logic.DeviceInterfaces;
+using Logic.TTComponentInterfaces;
 
 namespace Implementations.Sensors
 {

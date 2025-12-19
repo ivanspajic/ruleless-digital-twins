@@ -1,4 +1,4 @@
-﻿using Logic.DeviceInterfaces;
+﻿using Logic.TTComponentInterfaces;
 
 namespace Logic.Models.MapekModels {
     public class SoftSensorTreeNode : ITreeNode<ISensorDevice, SoftSensorTreeNode> {

@@ -1,4 +1,4 @@
-﻿namespace Logic.DeviceInterfaces
+﻿namespace Logic.TTComponentInterfaces
 {
     public interface IActuatorDevice
     {

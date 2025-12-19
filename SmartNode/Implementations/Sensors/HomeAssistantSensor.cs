@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Logic.DeviceInterfaces;
+using Logic.TTComponentInterfaces;
 
 namespace Implementations.Sensors {
     

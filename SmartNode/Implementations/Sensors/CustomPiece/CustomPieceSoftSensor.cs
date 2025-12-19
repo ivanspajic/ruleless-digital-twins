@@ -1,4 +1,4 @@
-﻿using Logic.DeviceInterfaces;
+﻿using Logic.TTComponentInterfaces;
 
 namespace Implementations.Sensors.CustomPiece {
     public class CustomPieceSoftSensor : ISensorDevice {

@@ -21,8 +21,7 @@ zoneActuator = Actuator(g, MINE["ZoneActuator"], zoneChange)
 g.add((zoneActuator.node, RDT["hasActuatorName"], Literal("zone", datatype=XSD.string))) # XXX Hack for mapping name to right FMU input/parameter (#41).
 # Only add the zone you want for now:
 # g.add((zoneActuator.node, RDT["hasActuatorState"], Literal("NO5", datatype=XSD.string)))
-g.add(l := (zoneActuator.node, RDT["hasActuatorState"],  Literal("NO1", datatype=XSD.string)))
-g.add((l, RDT["VS"], Literal("true", datatype=XSD.boolean) ))
+g.add((zoneActuator.node, RDT["hasActuatorState"],  Literal("NO1", datatype=XSD.string)))
 g.add((zoneActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.boolean)))
 
 

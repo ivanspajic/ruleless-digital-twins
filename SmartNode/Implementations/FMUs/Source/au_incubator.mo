@@ -6,8 +6,8 @@ model au_incubator
   input Real G_box(start = 0.49605615);
   input Real C_air(start = 64.2171870); // This value is actually listed as 6.42171870e+02, which is over 640 degrees C. Not sure if this is a typo or if this means something else.
   
-  parameter Real C_heater(fixed = false, start = 5); // This has a start value, but I'm not sure where it's from.
-  parameter Real G_heater(fixed = false, start = 5); // This has a start value, but I'm not sure where it's from.
+  parameter Real C_heater(fixed = false); // This has a start value, but I'm not sure where it's from.
+  parameter Real G_heater(fixed = false); // This has a start value, but I'm not sure where it's from.
   
   Real T;
   Real power_out_box;

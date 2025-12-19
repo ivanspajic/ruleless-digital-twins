@@ -3,7 +3,7 @@ using Logic.TTComponentInterfaces;
 
 namespace Implementations.Sensors
 {
-    public class DummyHumiditySensor : ISensorDevice
+    public class DummyHumiditySensor : ISensor
     {
         private readonly DummyRoomM370 _dummyRoomM370;
 

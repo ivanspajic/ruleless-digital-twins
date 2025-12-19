@@ -39,7 +39,8 @@ namespace Logic.Mapek
 
                 if (!useSimulatedTwinningTarget)
                 {
-                    // TODO: add a delay to match the duration of a cycle with the simulated interval.
+                    // TODO: add a delay to match the duration of a cycle with the simulated interval. This is especially important in multi-cycle (look-ahead)
+                    // simulations.
                 }
             }
 
@@ -64,8 +65,8 @@ namespace Logic.Mapek
                 reconfigurationAction.ConfigurableParameter.Name,
                 reconfigurationAction.NewParameterValue);
 
-            // TODO: figure out what this looks like. The best thing to do is probably to keep the symmetry between Actuators and ConfigurableParameters.
-            // This will, however, probably need some form of "submit" action to ensure all Properties get sent to the cyber system simultaneously.
+            var configurableParameterImplementation = _factory.GetConfigurableParameterImplementation(reconfigurationAction.ConfigurableParameter.Name);
+            configurableParameterImplementation.UpdateConfigurableParameter(reconfigurationAction.ConfigurableParameter.Name, reconfigurationAction.NewParameterValue);
         }
 
         private void LogExpectedPropertyValues(SimulationPath simulationPath)

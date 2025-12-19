@@ -2,7 +2,7 @@
 using Logic.TTComponentInterfaces;
 
 namespace Implementations.Actuators {
-    public class DummyFloorHeating : IActuatorDevice {
+    public class DummyFloorHeating : IActuator {
         private int _actuatorState = 0;
         private readonly DummyRoomM370 _dummyRoomM370;
 

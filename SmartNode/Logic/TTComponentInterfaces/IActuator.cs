@@ -1,6 +1,6 @@
 ﻿namespace Logic.TTComponentInterfaces
 {
-    public interface IActuatorDevice
+    public interface IActuator
     {
         public string ActuatorName { get; }
 

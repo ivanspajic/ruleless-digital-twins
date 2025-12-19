@@ -16,99 +16,99 @@
                                                                    owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins>.
 :Austevoll <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromOptimalConditions> false;
            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel> :CustomPieceFMU;
-           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor> :EpsilonDecrease,
-                                                                                                  :BucketSizeDecrease;
-           a <http://www.w3.org/ns/sosa/Platform>,
-             owl:NamedIndividual;
-           <http://www.w3.org/ns/sosa/hosts> :Epsilon,
-                                             :BucketSize.
-:BucketSize <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :CompressionRatioIncrease,
-                                                                                             :CompressionRatioDecrease;
-            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasPossibleValue> "14"^^xsd:int,
-                                                                                                       "13"^^xsd:int,
-                                                                                                       "12"^^xsd:int,
+           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor> :BucketSizeDecrease,
+                                                                                                  :EpsilonDecrease;
+           a owl:NamedIndividual,
+             <http://www.w3.org/ns/sosa/Platform>;
+           <http://www.w3.org/ns/sosa/hosts> :BucketSize,
+                                             :Epsilon.
+:BucketSize <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :CompressionRatioDecrease,
+                                                                                             :CompressionRatioIncrease;
+            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasPossibleValue> "10"^^xsd:int,
                                                                                                        "11"^^xsd:int,
-                                                                                                       "10"^^xsd:int;
-            a [a owl:Restriction ; 
-               owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
-               owl:hasValue "12"^^xsd:int],
+                                                                                                       "12"^^xsd:int,
+                                                                                                       "13"^^xsd:int,
+                                                                                                       "14"^^xsd:int;
+            a owl:NamedIndividual,
               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter>,
-              owl:NamedIndividual.
+              [a owl:Restriction ; 
+               owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
+               owl:hasValue "12"^^xsd:int].
 :BucketSizeDecrease <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
-                    a <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>,
-                      owl:NamedIndividual;
+                    a owl:NamedIndividual,
+                      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>;
                     <http://www.w3.org/ns/ssn/forProperty> :BucketSize.
-:CompressedTimeSeries a [a owl:Restriction ; 
-                         owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
-                         owl:hasValue "1"^^xsd:base64Binary],
-                        <http://www.w3.org/ns/ssn/Property>,
-                        <http://www.w3.org/ns/ssn/Output>,
+:CompressedTimeSeries a owl:NamedIndividual,
                         <http://www.w3.org/ns/ssn/Input>,
-                        owl:NamedIndividual.
-:CompressionRatio a [a owl:Restriction ; 
-                     owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
-                     owl:hasValue "1"^^xsd:double],
-                    <http://www.w3.org/ns/ssn/Property>,
+                        <http://www.w3.org/ns/ssn/Output>,
+                        <http://www.w3.org/ns/ssn/Property>,
+                        [a owl:Restriction ; 
+                         owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
+                         owl:hasValue "1"^^xsd:base64Binary].
+:CompressionRatio a owl:NamedIndividual,
                     <http://www.w3.org/ns/ssn/Output>,
-                    owl:NamedIndividual.
-:CompressionRatioAlgorithm a <http://www.w3.org/ns/sosa/Procedure>,
-                             owl:NamedIndividual;
-                           <http://www.w3.org/ns/ssn/hasInput> :CompressedTimeSeries,
-                                                               :BucketSize;
+                    <http://www.w3.org/ns/ssn/Property>,
+                    [a owl:Restriction ; 
+                     owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
+                     owl:hasValue "1"^^xsd:double].
+:CompressionRatioAlgorithm a owl:NamedIndividual,
+                             <http://www.w3.org/ns/sosa/Procedure>;
+                           <http://www.w3.org/ns/ssn/hasInput> :BucketSize,
+                                                               :CompressedTimeSeries;
                            <http://www.w3.org/ns/ssn/hasOutput> :CompressionRatio.
 :CompressionRatioDecrease <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
                           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/alteredBy> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
-                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enactedBy> :Epsilon,
-                                                                                                              :BucketSize;
-                          a <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration>,
-                            owl:NamedIndividual;
+                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enactedBy> :BucketSize,
+                                                                                                              :Epsilon;
+                          a owl:NamedIndividual,
+                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration>;
                           <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio.
 :CompressionRatioIncrease <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease>;
                           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/alteredBy> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease>;
-                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enactedBy> :Epsilon,
-                                                                                                              :BucketSize;
-                          a <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration>,
-                            owl:NamedIndividual;
+                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enactedBy> :BucketSize,
+                                                                                                              :Epsilon;
+                          a owl:NamedIndividual,
+                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration>;
                           <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio.
-:CompressionRatioSoftSensor a <http://www.w3.org/ns/sosa/Sensor>,
-                              owl:NamedIndividual;
+:CompressionRatioSoftSensor a owl:NamedIndividual,
+                              <http://www.w3.org/ns/sosa/Sensor>;
                             <http://www.w3.org/ns/ssn/implements> :CompressionRatioAlgorithm.
-:CustomPieceAlgorithm a <http://www.w3.org/ns/sosa/Procedure>,
-                        owl:NamedIndividual;
-                      <http://www.w3.org/ns/ssn/hasInput> :Epsilon,
-                                                          :BucketSize;
+:CustomPieceAlgorithm a owl:NamedIndividual,
+                        <http://www.w3.org/ns/sosa/Procedure>;
+                      <http://www.w3.org/ns/ssn/hasInput> :BucketSize,
+                                                          :Epsilon;
                       <http://www.w3.org/ns/ssn/hasOutput> :CompressedTimeSeries.
 :CustomPieceFMU <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds> "900"^^xsd:int;
                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI> "customPiece.fmu"^^xsd:anyURI;
-                a <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel>,
-                  owl:NamedIndividual.
-:CustomPieceSoftSensor a <http://www.w3.org/ns/sosa/Sensor>,
-                         owl:NamedIndividual;
+                a owl:NamedIndividual,
+                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel>.
+:CustomPieceSoftSensor a owl:NamedIndividual,
+                         <http://www.w3.org/ns/sosa/Sensor>;
                        <http://www.w3.org/ns/ssn/implements> :CustomPieceAlgorithm.
-:Epsilon <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :CompressionRatioIncrease,
-                                                                                          :CompressionRatioDecrease;
-         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasPossibleValue> "6.5"^^xsd:double,
-                                                                                                    "6.0"^^xsd:double,
+:Epsilon <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :CompressionRatioDecrease,
+                                                                                          :CompressionRatioIncrease;
+         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasPossibleValue> "5.0"^^xsd:double,
                                                                                                     "5.5"^^xsd:double,
-                                                                                                    "5.0"^^xsd:double;
-         a [a owl:Restriction ; 
-            owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
-            owl:hasValue "6.5"^^xsd:double],
+                                                                                                    "6.0"^^xsd:double,
+                                                                                                    "6.5"^^xsd:double;
+         a owl:NamedIndividual,
            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter>,
-           owl:NamedIndividual.
+           [a owl:Restriction ; 
+            owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
+            owl:hasValue "6.5"^^xsd:double].
 :EpsilonDecrease <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
-                 a <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>,
-                   owl:NamedIndividual;
+                 a owl:NamedIndividual,
+                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>;
                  <http://www.w3.org/ns/ssn/forProperty> :Epsilon.
 :OptimalCompressionRatio <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> "3600"^^xsd:int;
-                         a [a owl:Restriction ; 
+                         a owl:NamedIndividual,
+                           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>,
+                           [a owl:Restriction ; 
                             owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValueConstraint> ; 
                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
                             owl:onDataRange [a rdfs:Datatype ; 
                                              owl:onDatatype xsd:double ; 
-                                             owl:withRestrictions ([xsd:minInclusive "1.1"^^xsd:double])]],
-                           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>,
-                           owl:NamedIndividual;
+                                             owl:withRestrictions ([xsd:minInclusive "1.1"^^xsd:double])]];
                          <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio.
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasLowerLimitValue> a owl:AnnotationProperty.
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasReconfigurationValueGenerator> a owl:AnnotationProperty.

@@ -1,6 +1,6 @@
 ﻿namespace Logic.TTComponentInterfaces
 {
-    public interface ISensorDevice
+    public interface ISensor
     {
         public string SensorName { get; }
 

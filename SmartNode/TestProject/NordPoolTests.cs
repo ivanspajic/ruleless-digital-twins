@@ -20,12 +20,16 @@ namespace TestProject
             { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
         };
-        public IActuatorDevice GetActuatorDeviceImplementation(string actuatorName)
+        public IActuator GetActuatorDeviceImplementation(string actuatorName)
         {
             throw new NotImplementedException();
         }
 
-        public ISensorDevice GetSensorDeviceImplementation(string sensorName, string procedureName)
+        public IConfigurableParameter GetConfigurableParameterImplementation(string configurableParameterName) {
+            throw new NotImplementedException();
+        }
+
+        public ISensor GetSensorDeviceImplementation(string sensorName, string procedureName)
         {
             throw new NotImplementedException();
         }

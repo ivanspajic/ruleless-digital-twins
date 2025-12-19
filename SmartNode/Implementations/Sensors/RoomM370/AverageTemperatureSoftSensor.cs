@@ -2,7 +2,7 @@
 using System.Globalization;
 
 namespace Implementations.Sensors.RoomM370 {
-    public class AverageTemperatureSoftSensor : ISensorDevice {
+    public class AverageTemperatureSoftSensor : ISensor {
         public AverageTemperatureSoftSensor(string sensorName, string procedureName) {
             SensorName = sensorName;
             ProcedureName = procedureName;

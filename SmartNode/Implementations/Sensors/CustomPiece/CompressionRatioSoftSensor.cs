@@ -1,7 +1,7 @@
 ﻿using Logic.TTComponentInterfaces;
 
 namespace Implementations.Sensors.CustomPiece {
-    public class CompressionRatioSoftSensor : ISensorDevice {
+    public class CompressionRatioSoftSensor : ISensor {
         public CompressionRatioSoftSensor(string sensorName, string procedureName) {
             SensorName = sensorName;
             ProcedureName = procedureName;

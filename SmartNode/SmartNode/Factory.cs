@@ -7,6 +7,7 @@ using Implementations.ValueHandlers;
 using Implementations.SimulatedTwinningTargets;
 using Implementations.Sensors.RoomM370;
 using Implementations.Sensors.CustomPiece;
+using Implementations.SoftwareComponents;
 
 namespace SmartNode
 {
@@ -15,7 +16,7 @@ namespace SmartNode
         private readonly bool _useDummyDevices;
 
         // New implementations can simply be added to the factory collections.
-        private readonly Dictionary<(string, string), ISensorDevice> _dummySensors = new()
+        private readonly Dictionary<(string, string), ISensor> _dummySensors = new()
         {
             {
                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1",
@@ -123,7 +124,7 @@ namespace SmartNode
             },
         };
 
-        private readonly Dictionary<string, IActuatorDevice> _dummyActuators = new()
+        private readonly Dictionary<string, IActuator> _dummyActuators = new()
         {
             {
                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater",
@@ -145,6 +146,17 @@ namespace SmartNode
             }
         };
 
+        private readonly Dictionary<string, IConfigurableParameter> _dummyConfigurableParameters = new() {
+            {
+                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/BucketSize",
+                new DummyConfigurableParameter("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/BucketSize")
+            },
+            {
+                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/Epsilon",
+                new DummyConfigurableParameter("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/Epsilon")
+            }
+        };
+
         // The keys represent the OWL (RDF/XSD) types supported by Protege, and the values are user implementations.
         private readonly Dictionary<string, IValueHandler> _valueHandlers = new()
         {
@@ -161,11 +173,11 @@ namespace SmartNode
             _useDummyDevices = useDummyDevices;
         }
 
-        public ISensorDevice GetSensorDeviceImplementation(string sensorName, string procedureName)
+        public ISensor GetSensorDeviceImplementation(string sensorName, string procedureName)
         {
             if (_useDummyDevices)
             {
-                if (_dummySensors.TryGetValue((sensorName, procedureName), out ISensorDevice? sensor))
+                if (_dummySensors.TryGetValue((sensorName, procedureName), out ISensor? sensor))
                 {
                     return sensor;
                 }
@@ -178,11 +190,11 @@ namespace SmartNode
             throw new Exception($"No implementation was found for Sensor {sensorName} with Procedure {procedureName}.");
         }
 
-        public IActuatorDevice GetActuatorDeviceImplementation(string actuatorName)
+        public IActuator GetActuatorDeviceImplementation(string actuatorName)
         {
             if (_useDummyDevices)
             {
-                if (_dummyActuators.TryGetValue(actuatorName, out IActuatorDevice? actuator))
+                if (_dummyActuators.TryGetValue(actuatorName, out IActuator? actuator))
                 {
                     return actuator;
                 }
@@ -193,6 +205,18 @@ namespace SmartNode
             }
 
             throw new Exception($"No implementation was found for Actuator {actuatorName}.");
+        }
+
+        public IConfigurableParameter GetConfigurableParameterImplementation(string configurableParameterName) {
+            if (_useDummyDevices) {
+                if (_dummyConfigurableParameters.TryGetValue(configurableParameterName, out IConfigurableParameter? configurableParameter)) {
+                    return configurableParameter;
+                }
+            } else {
+                // Reserved for real implementations.
+            }
+
+            throw new Exception($"No implementation was found for software component {configurableParameterName}.");
         }
 
         public IValueHandler GetValueHandlerImplementation(string owlType)

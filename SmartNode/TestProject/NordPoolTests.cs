@@ -69,7 +69,7 @@ namespace TestProject
 
             if (fromPython != null) {
                 var processInfo = new ProcessStartInfo {
-                    FileName = "python",
+                    FileName = "python3",
                     Arguments = $"\"{fromPython}\"",
                     RedirectStandardOutput = true,
                     UseShellExecute = false,

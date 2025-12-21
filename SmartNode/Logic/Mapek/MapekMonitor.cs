@@ -7,7 +7,7 @@ using VDS.RDF;
 
 namespace Logic.Mapek {
     public class MapekMonitor : IMapekMonitor {
-        private readonly ILogger<MapekMonitor> _logger;
+        private readonly ILogger<IMapekMonitor> _logger;
         private readonly IFactory _factory;
         private readonly IMapekKnowledge _mapekKnowledge;
 
@@ -16,7 +16,7 @@ namespace Logic.Mapek {
         private Cache _oldCache;
 
         public MapekMonitor(IServiceProvider serviceProvider) {
-            _logger = serviceProvider.GetRequiredService<ILogger<MapekMonitor>>();
+            _logger = serviceProvider.GetRequiredService<ILogger<IMapekMonitor>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
             _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
 

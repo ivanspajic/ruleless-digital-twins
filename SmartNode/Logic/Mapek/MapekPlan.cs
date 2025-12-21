@@ -14,7 +14,7 @@ namespace Logic.Mapek
 {
     public class MapekPlan : IMapekPlan
     {
-        private const int MaximumSimulationTimeSeconds = 900; // XXX parametrize
+        protected int MaximumSimulationTimeSeconds = 900; // XXX parametrize
 
         // Required as fields to preserve caching throughout multiple MAPE-K loop cycles.
         private readonly Dictionary<string, IModel> _fmuDict = [];
@@ -107,7 +107,6 @@ namespace Logic.Mapek
             // Only reload the instance model if a new set of ActionCombinations has been inferred.
             if (reloadInferredModel) {
                 actionCombinations = GetActionCombinations(propertyCache);
-
                 reloadInferredModel = false;
             }
 
@@ -491,18 +490,24 @@ namespace Logic.Mapek
         }
 
         // Initialize the FMU between enter/exitInitialization (#42).
-        // TODO: No one is generating those yet ;-)
         protected virtual bool Initialization(Simulation simulation, IModel model, IInstance fmuInstance) {
             var actions = simulation.InitializationActions.Select(action => (action.Actuator.ParameterName ?? MapekUtilities.GetSimpleName(action.Name), action.Actuator.Type!, action.NewStateValue)).ToList();
             AssignSimulationInputsToParameters(model, fmuInstance, actions);
             return true;
         }
+
+        // In case an FMU does not contain those functions, they can be marked as unsupported here.
+        // We're listing fmi2SetTime here as a) we don't need it, and b) the Python FMUs don't provide it.
+        protected virtual Collection<UnsupportedFunctions> GetUnsupportedFMUFunctions() {
+            return new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]);
+        }
+
         private void ExecuteActuationActionFmu(FmuModel fmuModel, Simulation simulation) {
             // The LogDebug calls here are primarily to keep an eye on crashes in the FMU which are otherwise a tad harder to track down.
             _logger.LogInformation("Simulation {simulation}", simulation); // XXX Arg useless.
             if (!_fmuDict.TryGetValue(fmuModel.Filepath, out IModel? model)) {
                 _logger.LogDebug("Loading Model {filePath}", fmuModel.Filepath);
-                model = Model.Load(fmuModel.Filepath, new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]));
+                model = Model.Load(fmuModel.Filepath, GetUnsupportedFMUFunctions());
                 _fmuDict.Add(fmuModel.Filepath, model);
             }
             Debug.Assert(model != null, "Model is null after loading.");
@@ -599,11 +604,11 @@ namespace Logic.Mapek
                         var valueHandler = _factory.GetValueHandlerImplementation(propertyCacheCopy.Properties[propertyName].OwlType);
                         var value = valueHandler.GetValueFromSimulationParameter(fmuInstance, fmuOutput.Value);
 
-                        logMsg += $"New value for {propertyName}: {value}\n";
+                        logMsg += $"{propertyName}: {value}\n";
                         propertyCacheCopy.Properties[propertyName].Value = value;
                 }
             }
-            _logger.LogInformation(logMsg);   
+            _logger.LogInformation("New values:\n{vals}", logMsg);   
         }
 
         private List<OptimalCondition> GetAllOptimalConditions(PropertyCache propertyCache) {

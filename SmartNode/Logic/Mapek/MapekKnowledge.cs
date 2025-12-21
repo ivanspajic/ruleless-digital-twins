@@ -1,4 +1,5 @@
-﻿using Logic.FactoryInterface;
+﻿using System.Diagnostics;
+using Logic.FactoryInterface;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -222,6 +223,28 @@ namespace Logic.Mapek {
             var commandSet = sparqlUpdateParser.ParseFromString(query);
 
             processor.ProcessCommandSet(commandSet);
+        }
+
+        internal void Validate(PropertyCache? pc)
+        {
+            // Check every Actuator has at least a single state?
+            // Check every Observable from a Sensor is in the cache
+            // TODO: not actually parametrized...
+            // TODO: provide list of diagnostics instead of stopping on the first one.
+            var query = GetParameterizedStringQuery(@"SELECT ?sensor ?property WHERE {
+                ?sensor rdf:type sosa:Sensor .
+                OPTIONAL { ?sensor sosa:observes ?property } .
+                }");
+            var result = ExecuteQuery(query);
+            foreach(var r in result) {
+                if (!r.TryGetValue("property", out var p)) {
+                    Debug.Fail($"Sensor without Property: {r["sensor"].ToString()}");
+                } else {
+                    if (!pc!.Properties.ContainsKey(p.ToString())) {
+                        Debug.Fail($"PropertyCache without value for Property: {p.ToString()}");
+                    }
+                }
+            }
         }
     }
 }

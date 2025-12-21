@@ -40,8 +40,10 @@ g.add((rtempActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.bool
 
 temp = ObservableProperty(g, MINE["T"])
 t_heater = ObservableProperty(g, MINE["T_heater"])
+# Technically a user-interactable element. It doesn't make sense to fiddle with it in simulation for now:
+g_box = ObservableProperty(g, MINE["G_box"]) # initially closed
+tempSensor = Sensor(g, MINE["TempSensor"], [temp, t_heater, g_box])
 tempMeasure = Measure(g, MINE["TempMeasure"])
-tempSensor = Sensor(g, MINE["TempSensor"], [temp, t_heater])
 tempProcedure = Procedure(g, MINE["TempProcedure"], tempMeasure, tempSensor)
 
 room = Platform(g, MINE["IncubatorTest"], False, [heaterActuator, cheaterActuator, rtempActuator, tempSensor])

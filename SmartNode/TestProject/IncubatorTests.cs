@@ -8,13 +8,21 @@ using Logic.ValueHandlerInterfaces;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks;
+using System.Collections.ObjectModel;
+using static Femyou.IModel;
 
 namespace TestProject
 {
     public class IncubatorTests
     {
         private class MyMapekPlan : MapekPlan {
-            public MyMapekPlan(IServiceProvider serviceProvider, bool logSimulations = false) : base(serviceProvider, logSimulations) { }
+
+            public MyMapekPlan(IServiceProvider serviceProvider, bool logSimulations = false) : base(serviceProvider, logSimulations) {
+                // TODO: If the simulation runs overboard and the FMU throws LOG_ASSERT,
+                // FMI calls with fail ungracefully.
+                MaximumSimulationTimeSeconds = 10;
+            }
+
             protected override void InferActionCombinations() {
                 // Call Java explicitly?
                 if (true) {
@@ -63,8 +71,18 @@ namespace TestProject
 
             var mock = new ServiceProviderMock(modelFilePath, inferredFilePath, new Factory());
             // TODO: not sure anymore if pulling it out was actually necessary in the end:
-            mock.Add(typeof(IMapekKnowledge), new MapekKnowledge(mock));
+            var mpk = new MapekKnowledge(mock);
+            mock.Add(typeof(IMapekKnowledge), mpk);
             var mapekPlan = new MyMapekPlan(mock, false);
+
+            // TODO: Prototype populate cache from FMU.
+            // If we're going to do this, we have to check that we correctly override with values from model.
+            var fmu = Femyou.Model.Load("../../../../Implementations/FMUs/Source/au_incubator.fmu"); // TODO: grab from model
+            var (SvType, SvValue) = fmu.Variables["G_box"]!.StartValue;
+            Assert.Equal("Real", SvType);
+            double gbox = double.Parse(SvValue);
+            fmu.Dispose(); // Don't forget this or you'll get segfaults when loading the FMU "again" later.
+            // END Prototype
 
             var propertyCacheMock = new PropertyCache {
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
@@ -94,10 +112,19 @@ namespace TestProject
                             OwlType = "double",
                             Value = 10.0
                         }
+                    },
+                   {
+                        "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#G_box",
+                        new Property {
+                            Name = "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#G_box",
+                            OwlType = "double",
+                            Value = gbox
+                        }
                     }
-
                 }
             };
+
+            mpk.Validate(propertyCacheMock);
 
             var simulationTree = new SimulationTreeNode {
                 NodeItem = new Simulation(propertyCacheMock),

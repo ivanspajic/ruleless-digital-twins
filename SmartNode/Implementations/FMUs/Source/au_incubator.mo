@@ -37,7 +37,7 @@ equation
   power_transfer_heat = G_heater * (T_heater - T);
   total_power_heater = GetPowerIn(in_heater_state, in_heater_voltage, in_heater_current) - power_transfer_heat;
   total_power_box = power_transfer_heat - power_out_box;
-  der(T) = 1 / C_air * total_power_box;
-  der(T_heater) = 1 / C_heater * total_power_heater;
+  der(T) = (1 / C_air) * total_power_box;
+  der(T_heater) = (1 / C_heater) * total_power_heater;
 
 end au_incubator;

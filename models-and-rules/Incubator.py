@@ -22,13 +22,13 @@ cheaterChange = Change(g, MINE["CHeaterChange"], cheaterProperty)
 cheaterActuator = Actuator(g, MINE["C_heater"], cheaterChange)
 # TODO: setting the name explicitly shouldn't be necessary here, but the generated name contains the value?!
 g.add((cheaterActuator.node, RDT["hasActuatorName"], Literal("C_heater", datatype=XSD.string)))
-g.add((cheaterActuator.node, RDT["hasActuatorState"], Literal("5", datatype=XSD.double)))
+g.add((cheaterActuator.node, RDT["hasActuatorState"], Literal("1", datatype=XSD.double)))
 g.add((cheaterActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.string)))
 gheaterProperty = ObservableProperty(g, MINE["GHeaterProperty"])
 gheaterChange = Change(g, MINE["GHeaterChange"], gheaterProperty)
 gheaterActuator = Actuator(g, MINE["G_heater"], gheaterChange)
 g.add((gheaterActuator.node, RDT["hasActuatorName"], Literal("G_heater", datatype=XSD.string)))
-g.add((gheaterActuator.node, RDT["hasActuatorState"], Literal("5.0", datatype=XSD.double)))
+g.add((gheaterActuator.node, RDT["hasActuatorState"], Literal("1.0", datatype=XSD.double)))
 g.add((gheaterActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.boolean)))
 
 rtemp = ObservableProperty(g, MINE["in_room_temperature"])
@@ -39,11 +39,19 @@ g.add((rtempActuator.node, RDT["hasActuatorState"], Literal("10.0", datatype=XSD
 g.add((rtempActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.boolean)))
 
 temp = ObservableProperty(g, MINE["T"])
+node = BNode()
+g.add((node, RDF["type"], OWL["Restriction"]))
+g.add((node, OWL["onProperty"], RDT["hasValue"]))
+g.add((node, OWL["hasValue"], Literal("20.0", datatype=XSD.double)))
+g.add((temp.node, RDF["type"], node))
+
 t_heater = ObservableProperty(g, MINE["T_heater"])
 # Technically a user-interactable element. It doesn't make sense to fiddle with it in simulation for now:
-g_box = ObservableProperty(g, MINE["G_box"]) # initially closed
-tempSensor = Sensor(g, MINE["TempSensor"], [temp, t_heater, g_box])
+# g_box = ObservableProperty(g, MINE["G_box"]) # initially closed
+# tempSensor = Sensor(g, MINE["TempSensor"], [temp, t_heater, g_box])
+tempSensor = Sensor(g, MINE["TempSensor"], [temp])
 tempMeasure = Measure(g, MINE["TempMeasure"])
+
 tempProcedure = Procedure(g, MINE["TempProcedure"], tempMeasure, tempSensor)
 
 room = Platform(g, MINE["IncubatorTest"], False, [heaterActuator, cheaterActuator, rtempActuator, tempSensor])

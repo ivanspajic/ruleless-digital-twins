@@ -15,6 +15,7 @@ namespace TestProject.Mocks
             _serviceImplementationMocks = new() {
             { typeof(ILogger<IMapekPlan>), new LoggerMock<IMapekPlan>() },
             { typeof(ILogger<IMapekKnowledge>), new LoggerMock<IMapekKnowledge>() },
+            { typeof(ILogger<IMapekMonitor>), new LoggerMock<IMapekMonitor>() },
             { typeof(IFactory), factory == null ? new FactoryMock() : factory },
             { typeof(FilepathArguments), new FilepathArguments {
                 InferenceEngineFilepath = Path.Combine(_rootDirectoryPath, "models-and-rules", "ruleless-digital-twins-inference-engine.jar"),

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using VDS.RDF;
+using System.Diagnostics;
 
 namespace Logic.Mapek {
     public class MapekMonitor : IMapekMonitor {
@@ -187,7 +188,6 @@ namespace Logic.Mapek {
                 softSensorNodeChildren.Add(softSensorTreeChildNode);
             }
 
-            // Invoke the Sensor with the corresponding Inputs and save the returned value in the map.
             var propertyValue = sensor.ObservePropertyValue(inputProperties);
             var property = new Property {
                 Name = propertyNode.ToString(),
@@ -210,7 +210,7 @@ namespace Logic.Mapek {
 
         private void PopulateObservablePropertiesCache(PropertyCache propertyCache) {
             // Get all ObservableProperties.
-            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty ?valueType WHERE {
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?sensor ?observableProperty ?valueType WHERE {
                 ?sensor rdf:type sosa:Sensor .
                 ?sensor sosa:observes ?observableProperty . 
                 ?observableProperty rdf:type sosa:ObservableProperty . }");
@@ -232,6 +232,8 @@ namespace Logic.Mapek {
                 var innerQueryResult = _mapekKnowledge.ExecuteQuery(innerQuery);
 
                 var measuredPropertyValues = new object[innerQueryResult.Results.Count];
+                // XXX WF
+                Debug.Assert(innerQueryResult.Results.Count > 0, $"ObservableProperty {result["sensor"].ToString()}/{observablePropertyName} without measured Properties.");
 
                 // Populate the input value array with measured Property values.
                 for (var i = 0; i < measuredPropertyValues.Length; i++) {

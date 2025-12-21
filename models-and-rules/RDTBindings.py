@@ -81,9 +81,14 @@ class Measure(Node):
     def __init__(self, g, name):
         self.node = name
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
+        g.add((self.node, RDF["type"], SSN["Input"]))
         g.add((self.node, RDF["type"], SSN["Output"]))
         g.add((self.node, RDF["type"], SSN["Property"]))
-        g.add((self.node, RDF["type"], RestrictionL1D(g).node))
+        node = BNode()
+        g.add((node, RDF["type"], OWL["Restriction"]))
+        g.add((node, OWL["onProperty"], RDT["hasValue"]))
+        g.add((node, OWL["hasValue"], Literal("0.0", datatype=XSD.double)))
+        g.add((self.node, RDF["type"], node))
 
 class Sensor(Node):
     def __init__(self, g, name, observes: ObservableProperty | list[ObservableProperty]):        
@@ -108,4 +113,4 @@ class Procedure(Node):
         g.add((self.node, RDF["type"], SOSA["Procedure"]))
         g.add((self.node, SSN["hasOutput"], measure.node))
         if sensor is not None:
-            g.add((self.node, SSN["implementedBy"], sensor.node))
+            g.add((sensor.node, SSN["implements"], self.node))

@@ -236,7 +236,7 @@ namespace Logic.Mapek
                 throw new Exception($"The inference engine encountered an error. Process {process.Id} exited with code {process.ExitCode}.");
             }
 
-            Debug.Assert(!error);
+            Debug.Assert(!error, "Inconsistencies detected.");
             _logger.LogInformation("Process {processId} exited with code {processExitCode}.", process.Id, process.ExitCode);
         }
 

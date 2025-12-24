@@ -30,6 +30,7 @@ namespace Logic.Mapek
         private readonly IFactory _factory;
         private readonly IMapekKnowledge _mapekKnowledge;
         private readonly FilepathArguments _filepathArguments;
+        private bool error = false; // Used to track async errors from Java invocation.
 
         public MapekPlan(IServiceProvider serviceProvider, bool restrictToReactiveActionsOnly = true)
         {
@@ -217,6 +218,9 @@ namespace Logic.Mapek
 
             process!.OutputDataReceived += (sender, e) => {
                 _logger.LogInformation(e.Data);
+                if (e.Data != null && e.Data.Contains("Inconsistencies detected")) {
+                    SetError(); // Async was here
+                }
             };
 
             process.ErrorDataReceived += (sender, e) => {
@@ -232,7 +236,12 @@ namespace Logic.Mapek
                 throw new Exception($"The inference engine encountered an error. Process {process.Id} exited with code {process.ExitCode}.");
             }
 
+            Debug.Assert(!error);
             _logger.LogInformation("Process {processId} exited with code {processExitCode}.", process.Id, process.ExitCode);
+        }
+
+        private void SetError() {
+            error = true;
         }
 
         // This method currently only supports ActuationActions.

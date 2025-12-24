@@ -38,7 +38,7 @@ g.add((rtempActuator.node, RDT["hasActuatorName"], Literal("in_room_temperature"
 g.add((rtempActuator.node, RDT["hasActuatorState"], Literal("10.0", datatype=XSD.double)))
 g.add((rtempActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.boolean)))
 
-temp = ObservableProperty(g, MINE["T"])
+temp = ObservableProperty(g, MINE["T"], None)
 node = BNode()
 g.add((node, RDF["type"], OWL["Restriction"]))
 g.add((node, OWL["onProperty"], RDT["hasValue"]))

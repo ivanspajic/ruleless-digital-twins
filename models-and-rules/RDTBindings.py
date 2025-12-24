@@ -18,7 +18,7 @@ class FMU(Node):
         self.node = name
         g.add((self.node, RDF["type"], RDT["FmuModel"]))
         g.add((self.node, RDT["hasSimulationFidelitySeconds"], Literal(fidelity, datatype=XSD.integer)))
-        g.add((self.node, RDT["hasURI"], Literal(fmuPath, datatype=XSD.string)))
+        g.add((self.node, RDT["hasURI"], Literal(fmuPath, datatype=XSD.anyURI)))
 
 class Restriction(Node):
     pass
@@ -81,7 +81,7 @@ class Measure(Node):
     def __init__(self, g, name):
         self.node = name
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
-        g.add((self.node, RDF["type"], SSN["Input"]))
+        # g.add((self.node, RDF["type"], SSN["Input"]))
         g.add((self.node, RDF["type"], SSN["Output"]))
         g.add((self.node, RDF["type"], SSN["Property"]))
         node = BNode()

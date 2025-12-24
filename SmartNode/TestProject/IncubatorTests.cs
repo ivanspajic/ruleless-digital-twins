@@ -8,15 +8,13 @@ using Logic.ValueHandlerInterfaces;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks;
-using System.Collections.ObjectModel;
-using static Femyou.IModel;
 using Implementations.Sensors;
 
 namespace TestProject
 {
     public class IncubatorTests
     {
-        static Boolean runInference = true;
+        static Boolean runInference = false; // `false` can be overriden by logic below.
         static IncubatorAdapter i;
 
         private class MyMapekPlan : MapekPlan {
@@ -114,6 +112,8 @@ namespace TestProject
 
             mpk.Validate(propertyCacheMock);
 
+            // TODO: Assert that there's at least one actuator that's not a parameter.
+
             var simulationTree = new SimulationTreeNode
             {
                 NodeItem = new Simulation(propertyCacheMock),
@@ -172,7 +172,8 @@ namespace TestProject
             fmu.Dispose(); // Don't forget this or you'll get segfaults when loading the FMU "again" later.
             // END Prototype
 
-            i = new IncubatorAdapter("172.20.0.3", TestContext.Current.CancellationToken);
+            // IP is coming from "docket network create // inspect -> rabbitmq-ip"
+            i = new IncubatorAdapter("172.20.0.2", TestContext.Current.CancellationToken);
             await i.Connect();
             var consumerTag = await i.Setup();
             IncubatorFields? myData = null;
@@ -209,8 +210,11 @@ namespace TestProject
                 var outPath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
                                 + $"models-and-rules{Path.DirectorySeparatorChar}{model}");
                 outPath = Path.GetFullPath(outPath);
-                if (runInference || !File.Exists(outPath) || File.GetLastWriteTime(fromPython) > File.GetLastWriteTime(outPath)) {
+                Assert.True(File.Exists(Path.Combine(modelFilePath, fromPython)));
+                Assert.True(File.Exists(Path.Combine(modelFilePath, "RDTBindings.py")));
+                if (runInference || !File.Exists(outPath) || File.GetLastWriteTime(Path.Combine(modelFilePath, fromPython)) > File.GetLastWriteTime(outPath) || File.GetLastWriteTime(Path.Combine(modelFilePath, "RDTBindings.py")) > File.GetLastWriteTime(outPath)) {
                     runInference = true;
+                    Trace.WriteLine("Regenerating model...");
                     var processInfo = new ProcessStartInfo {
                         FileName = "python3",
                         Arguments = $"\"{fromPython}\"",

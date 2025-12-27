@@ -14,15 +14,15 @@ namespace TestProject
 {
     public class IncubatorTests
     {
-        static Boolean runInference = false; // `false` can be overriden by logic below.
+        static bool runInference = false; // `false` can be overriden by logic below.
         static IncubatorAdapter i;
 
         private class MyMapekPlan : MapekPlan {
 
-            public MyMapekPlan(IServiceProvider serviceProvider, bool logSimulations = false) : base(serviceProvider, logSimulations) {
+            public MyMapekPlan(IServiceProvider serviceProvider, bool logSimulations = false) : base(serviceProvider) {
                 // TODO: If the simulation runs overboard and the FMU throws LOG_ASSERT,
                 // FMI calls with fail ungracefully.
-                MaximumSimulationTimeSeconds = 10;
+                //MaximumSimulationTimeSeconds = 10;
             }
 
             protected override void InferActionCombinations() {

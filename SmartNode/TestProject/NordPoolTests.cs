@@ -43,7 +43,7 @@ namespace TestProject
     }
 
     class MyMapekPlan : MapekPlan {
-        public MyMapekPlan(IServiceProvider serviceProvider, bool logSimulations = false) : base(serviceProvider, logSimulations) {}
+        public MyMapekPlan(IServiceProvider serviceProvider, bool logSimulations = false) : base(serviceProvider) {}
         protected override void InferActionCombinations() {
             // Call Java explicitly?
             if (true) {

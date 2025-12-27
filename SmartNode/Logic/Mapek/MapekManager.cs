@@ -1,4 +1,5 @@
-﻿using Logic.Utilities;
+﻿using Logic.Models.MapekModels;
+using Logic.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
@@ -11,13 +12,11 @@ namespace Logic.Mapek {
         // Decides on the number of MAPE-K cycles to look ahead for and thus the number of simulation steps to run. For example,
         // setting this value to 1 means only simulating for the current cycle, while setting it to 4 means simulating for the next
         // 4 cycles.
-        private const int LookAheadCycles = 4;
-        // Decides on the granularity of steps in increasing/decreasing ConfigurableParameter values.
-        private const int ConfigurableParameterGranularity = 7;
-
+        private readonly FilepathArguments _filepathArguments;
+        private readonly CoordinatorSettings _coordinatorSettings;
         private readonly ILogger<IMapekManager> _logger;
         private readonly IMapekMonitor _mapekMonitor;
-        private readonly IMapekAnalyze _mapekAnalyze;
+        //private readonly IMapekAnalyze _mapekAnalyze;
         private readonly IMapekPlan _mapekPlan;
         private readonly IMapekExecute _mapekExecute;
         private readonly IMapekKnowledge _mapekKnowledge;
@@ -25,31 +24,33 @@ namespace Logic.Mapek {
         private bool _isLoopActive = false;
 
         public MapekManager(IServiceProvider serviceProvider) {
+            _filepathArguments = serviceProvider.GetRequiredService<FilepathArguments>();
+            _coordinatorSettings = serviceProvider.GetRequiredService<CoordinatorSettings>();
             _logger = serviceProvider.GetRequiredService<ILogger<IMapekManager>>();
             _mapekMonitor = serviceProvider.GetRequiredService<IMapekMonitor>();
-            _mapekAnalyze = serviceProvider.GetRequiredService<IMapekAnalyze>();
+            //_mapekAnalyze = serviceProvider.GetRequiredService<IMapekAnalyze>();
             _mapekPlan = serviceProvider.GetRequiredService<IMapekPlan>();
             _mapekExecute = serviceProvider.GetRequiredService<IMapekExecute>();
             _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
         }
 
-        public void StartLoop(string instanceModelFilePath, string fmuDirectory, string dataDirectory, int maxRound = -1, bool simulateTwinningTarget = false) {
+        public void StartLoop() {
             _isLoopActive = true;
-            RunMapekLoop(instanceModelFilePath, fmuDirectory, dataDirectory, maxRound, simulateTwinningTarget);
+            RunMapekLoop();
         }
 
         public void StopLoop() {
             _isLoopActive = false;
         }
 
-        private void RunMapekLoop(string instanceModelFilePath, string fmuDirectory, string dataDirectory, int maxRound = -1, bool simulateTwinningTarget = false) {
-            _logger.LogInformation("Starting the MAPE-K loop. (maxRounds= {maxRound})", maxRound);
+        private void RunMapekLoop() {
+            _logger.LogInformation("Starting the MAPE-K loop. (maxRounds= {maxRound})", _coordinatorSettings.MaximumMapekRounds);
 
             var currentRound = 0;
 
             while (_isLoopActive) {
-                if (maxRound > -1) {
-                    _logger.LogInformation("MAPE-K rounds left: {maxRound})", maxRound);
+                if (_coordinatorSettings.MaximumMapekRounds > -1) {
+                    _logger.LogInformation("MAPE-K rounds left: {maxRound})", _coordinatorSettings.MaximumMapekRounds);
                 }
 
                 // Reload the instance model for each cycle to ensure dynamic model updates are captured.
@@ -63,18 +64,18 @@ namespace Logic.Mapek {
                 // var optimalConditionsAndActions = _mapekAnalyze.Analyze(instanceModel, propertyCache, ConfigurableParameterGranularity);
 
                 // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
-                var optimalSimulationPath = _mapekPlan.Plan(cache, LookAheadCycles);
+                var optimalSimulationPath = _mapekPlan.Plan(cache, _coordinatorSettings.LookAheadMapekCycles);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
-                _mapekExecute.Execute(optimalSimulationPath, cache.PropertyCache.ConfigurableParameters, simulateTwinningTarget);
+                _mapekExecute.Execute(optimalSimulationPath, cache.PropertyCache.ConfigurableParameters, _coordinatorSettings.UseSimulatedEnvironment);
 
                 // Write MAPE-K state to CSV.
-                CsvUtils.WritePropertyStatesToCsv(dataDirectory, currentRound, cache.PropertyCache);
-                CsvUtils.WriteActuatorStatesToCsv(dataDirectory, currentRound, optimalSimulationPath);
+                CsvUtils.WritePropertyStatesToCsv(_filepathArguments.DataDirectory, currentRound, cache.PropertyCache);
+                CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentRound, optimalSimulationPath);
 
-                if (maxRound > 0) {
-                    maxRound--;
+                if (_coordinatorSettings.MaximumMapekRounds > 0) {
+                    _coordinatorSettings.MaximumMapekRounds--;
                 }
-                if (maxRound == 0) {
+                if (_coordinatorSettings.MaximumMapekRounds == 0) {
                     _isLoopActive = false;
                     break; // We can sleep when we're dead.
                 }

@@ -58,10 +58,8 @@ namespace TestProject
         [InlineData("SimpleNordpool.py", "nordpool1.ttl", "nordpool1-out.ttl", 4)]
         public void Smallest_model_builds_tree_and_simulates(string? fromPython, string model, string inferred, int lookAheadCycles) {
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules");
-            var inferredFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
+            var modelFilePath = Path.Combine(executingAssemblyPath!, "ModelsAndRules");
+            var inferredFilePath = Path.Combine(executingAssemblyPath!, $"ModelsAndRules{Path.DirectorySeparatorChar}{inferred}");
             // TODO: Review why file must exist if we're going to overwrite it anyway.
             if (!File.Exists(inferredFilePath)) {
                 File.Create(inferredFilePath).Close();
@@ -80,19 +78,33 @@ namespace TestProject
                 Debug.Assert(process != null, "Process failed to start.");
                 StreamReader reader = process.StandardOutput;
                 string output = reader.ReadToEnd();
-                var outPath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules{Path.DirectorySeparatorChar}{model}");
+                var outPath = Path.Combine(executingAssemblyPath!, $"ModelsAndRules{Path.DirectorySeparatorChar}{model}");
                 outPath = Path.GetFullPath(outPath);
                 File.WriteAllText(outPath, output);
                 process.WaitForExit();
                 Assert.Equal(0, process.ExitCode);
             }
 
-            modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules{Path.DirectorySeparatorChar}{model}");
+            modelFilePath = Path.Combine(executingAssemblyPath!, $"ModelsAndRules{Path.DirectorySeparatorChar}{model}");
             modelFilePath = Path.GetFullPath(modelFilePath);
 
-            var mock = new ServiceProviderMock(modelFilePath, inferredFilePath, new Factory());
+            var mock = new ServiceProviderMock(new Factory());
+            mock.Add(typeof(FilepathArguments), new FilepathArguments {
+                InstanceModelFilepath = modelFilePath,
+                InferredModelFilepath = inferredFilePath,
+                InferenceEngineFilepath = Path.Combine(executingAssemblyPath!, "ModelsAndRules", "ruleless-digital-twins-inference-engine.jar"),
+                InferenceRulesFilepath = Path.Combine(executingAssemblyPath!, "ModelsAndRules", "inference-rules.rules"),
+                OntologyFilepath = Path.Combine(executingAssemblyPath!, "Ontology", "ruleless-digital-twins.ttl"),
+                DataDirectory = Path.Combine(executingAssemblyPath!, "StateData"),
+                FmuDirectory = Path.Combine(executingAssemblyPath!, "FMUs")
+            });
+            mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings {
+                LookAheadMapekCycles = 4,
+                MaximumMapekRounds = 4,
+                ReactiveMode = false,
+                SimulationTimeSeconds = 10,
+                UseSimulatedEnvironment = true
+            });
             // TODO: not sure anymore if pulling it out was actually necessary in the end:
             mock.Add(typeof(IMapekKnowledge), new MapekKnowledge(mock));
             var mapekPlan = new MyMapekPlan(mock, false);

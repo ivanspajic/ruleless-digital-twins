@@ -117,6 +117,11 @@ namespace Logic.Utilities
 
         private static CsvWriter GetCsvWriterFromFileMode(string filePath, FileMode fileMode)
         {
+            var directoryPath = Path.GetDirectoryName(filePath);
+            if (!Directory.Exists(directoryPath)) {
+                Directory.CreateDirectory(directoryPath!);
+            }
+
             var stream = File.Open(filePath, fileMode);
             var streamWriter = new StreamWriter(stream);
             var csvHelperConfiguration = new CsvConfiguration(CultureInfo.InvariantCulture)

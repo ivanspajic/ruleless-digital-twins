@@ -38,24 +38,37 @@ namespace TestProject
         public void Simulate(string? fromPython, string model, string inferred, int lookAheadCycles)
         {
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules");
-            var inferredFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
+            var modelFilePath = Path.Combine(executingAssemblyPath!, "ModelsAndRules");
+            var inferredFilePath = Path.Combine(executingAssemblyPath!, $"ModelsAndRules{Path.DirectorySeparatorChar}{inferred}");
             // TODO: Review why file must exist if we're going to overwrite it anyway.
             if (!File.Exists(inferredFilePath))
             {
                 File.Create(inferredFilePath).Close();
             }
 
-            GenerateFromPython(fromPython, model, executingAssemblyPath, modelFilePath);
+            GenerateFromPython(fromPython, model, executingAssemblyPath!, modelFilePath);
 
-            modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules{Path.DirectorySeparatorChar}{model}");
+            modelFilePath = Path.Combine(executingAssemblyPath!, $"ModelsAndRules{Path.DirectorySeparatorChar}{model}");
             modelFilePath = Path.GetFullPath(modelFilePath);
 
-            var mock = new ServiceProviderMock(modelFilePath, inferredFilePath, new Factory());
+            var mock = new ServiceProviderMock(new Factory());
             // TODO: not sure anymore if pulling it out was actually necessary in the end:
+            mock.Add(typeof(FilepathArguments), new FilepathArguments {
+                InstanceModelFilepath = modelFilePath,
+                InferredModelFilepath = inferredFilePath,
+                InferenceEngineFilepath = Path.Combine(executingAssemblyPath!, "ModelsAndRules", "ruleless-digital-twins-inference-engine.jar"),
+                InferenceRulesFilepath = Path.Combine(executingAssemblyPath!, "ModelsAndRules", "inference-rules.rules"),
+                OntologyFilepath = Path.Combine(executingAssemblyPath!, "Ontology", "ruleless-digital-twins.ttl"),
+                DataDirectory = Path.Combine(executingAssemblyPath!, "StateData"),
+                FmuDirectory = Path.Combine(executingAssemblyPath!, "FMUs")
+            });
+            mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings {
+                LookAheadMapekCycles = 4,
+                MaximumMapekRounds = 4,
+                ReactiveMode = false,
+                SimulationTimeSeconds = 10,
+                UseSimulatedEnvironment = true
+            });
             var mpk = new MapekKnowledge(mock);
             mock.Add(typeof(IMapekKnowledge), mpk);
             var mapekPlan = new MyMapekPlan(mock, false);
@@ -141,24 +154,37 @@ namespace TestProject
         [InlineData("Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
         public async Task FetchFromAMQ(string? fromPython, string model, string inferred, int lookAheadCycles) {
             var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules");
-            var inferredFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
+            var modelFilePath = Path.Combine(executingAssemblyPath!, "ModelsAndRules");
+            var inferredFilePath = Path.Combine(executingAssemblyPath!, $"ModelsAndRules{Path.DirectorySeparatorChar}{inferred}");
             // TODO: Review why file must exist if we're going to overwrite it anyway.
-            if (!File.Exists(inferredFilePath))
-            {
+            if (!File.Exists(inferredFilePath)) {
                 File.Create(inferredFilePath).Close();
             }
 
-            GenerateFromPython(fromPython, model, executingAssemblyPath, modelFilePath);
+            GenerateFromPython(fromPython, model, executingAssemblyPath!, modelFilePath);
 
-            modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules{Path.DirectorySeparatorChar}{model}");
+            modelFilePath = Path.Combine(executingAssemblyPath!, $"ModelsAndRules{Path.DirectorySeparatorChar}{model}");
             modelFilePath = Path.GetFullPath(modelFilePath);
 
-            var mock = new ServiceProviderMock(modelFilePath, inferredFilePath, new Factory());
+            var mock = new ServiceProviderMock(new Factory());
             // TODO: not sure anymore if pulling it out was actually necessary in the end:
+            var filepathArguments = new FilepathArguments {
+                InstanceModelFilepath = modelFilePath,
+                InferredModelFilepath = inferredFilePath,
+                InferenceEngineFilepath = Path.Combine(executingAssemblyPath!, "ModelsAndRules", "ruleless-digital-twins-inference-engine.jar"),
+                InferenceRulesFilepath = Path.Combine(executingAssemblyPath!, "ModelsAndRules", "inference-rules.rules"),
+                OntologyFilepath = Path.Combine(executingAssemblyPath!, "Ontology", "ruleless-digital-twins.ttl"),
+                DataDirectory = Path.Combine(executingAssemblyPath!, "StateData"),
+                FmuDirectory = Path.Combine(executingAssemblyPath!, "FMUs")
+            };
+            mock.Add(typeof(FilepathArguments), filepathArguments);
+            mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings {
+                LookAheadMapekCycles = 4,
+                MaximumMapekRounds = 4,
+                ReactiveMode = false,
+                SimulationTimeSeconds = 10,
+                UseSimulatedEnvironment = true
+            });
             var mpk = new MapekKnowledge(mock);
             mock.Add(typeof(IMapekKnowledge), mpk);
             var mapekPlan = new MyMapekPlan(mock, false);
@@ -207,8 +233,7 @@ namespace TestProject
 
         private static void GenerateFromPython(string? fromPython, string model, string executingAssemblyPath, string modelFilePath) {
             if (fromPython != null) {
-                var outPath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules{Path.DirectorySeparatorChar}{model}");
+                var outPath = Path.Combine(executingAssemblyPath!, $"ModelsAndRules{Path.DirectorySeparatorChar}{model}");
                 outPath = Path.GetFullPath(outPath);
                 Assert.True(File.Exists(Path.Combine(modelFilePath, fromPython)));
                 Assert.True(File.Exists(Path.Combine(modelFilePath, "RDTBindings.py")));

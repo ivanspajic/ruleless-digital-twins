@@ -1,11 +1,7 @@
 ﻿using Logic.Models.OntologicalModels;
-using System.Reflection;
 
 namespace TestProject.Utilities {
     internal static class InferenceTestHelper {
-        public static readonly string SolutionRootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
-        public static readonly string TestFileDirectory = Path.Combine(SolutionRootDirectory, "SmartNode", "TestProject", "TestFiles");
-
         public static TheoryData<string, IEnumerable<IEnumerable<ActuationAction>>> TestData =>
             new() {
                 {

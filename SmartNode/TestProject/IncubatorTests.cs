@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks;
 using Implementations.Sensors;
+using Logic.Models.DatabaseModels;
 
 namespace TestProject
 {
@@ -65,8 +66,8 @@ namespace TestProject
             mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings {
                 LookAheadMapekCycles = 4,
                 MaximumMapekRounds = 4,
-                ReactiveMode = false,
-                SimulationTimeSeconds = 10,
+                StartInReactiveMode = false,
+                SimulationDurationSeconds = 10,
                 UseSimulatedEnvironment = true
             });
             var mpk = new MapekKnowledge(mock);
@@ -181,8 +182,8 @@ namespace TestProject
             mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings {
                 LookAheadMapekCycles = 4,
                 MaximumMapekRounds = 4,
-                ReactiveMode = false,
-                SimulationTimeSeconds = 10,
+                StartInReactiveMode = false,
+                SimulationDurationSeconds = 10,
                 UseSimulatedEnvironment = true
             });
             var mpk = new MapekKnowledge(mock);

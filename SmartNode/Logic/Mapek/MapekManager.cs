@@ -1,4 +1,5 @@
-﻿using Logic.Models.MapekModels;
+﻿using Logic.Models.DatabaseModels;
+using Logic.Models.MapekModels;
 using Logic.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

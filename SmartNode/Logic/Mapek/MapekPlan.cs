@@ -1,6 +1,7 @@
 ﻿using Femyou;
 using Logic.FactoryInterface;
 using Logic.Mapek.Comparers;
+using Logic.Models.DatabaseModels;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,7 +35,7 @@ namespace Logic.Mapek
         public MapekPlan(IServiceProvider serviceProvider)
         {
             _coordinatorSettings = serviceProvider.GetRequiredService<CoordinatorSettings>();
-            _restrictToReactiveActionsOnly = _coordinatorSettings.ReactiveMode;
+            _restrictToReactiveActionsOnly = _coordinatorSettings.StartInReactiveMode;
             _restrictToReactiveActionsOnlyOld = _restrictToReactiveActionsOnly;
             _logger = serviceProvider.GetRequiredService<ILogger<IMapekPlan>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
@@ -531,8 +532,8 @@ namespace Logic.Mapek
                 fmuInstance.Reset();
             }
             Debug.Assert(fmuInstance != null, "Instance is null after creation.");
-            _logger.LogDebug("Setting time {t}", simulation.Index * _coordinatorSettings.SimulationTimeSeconds);
-            fmuInstance.StartTime(simulation.Index * _coordinatorSettings.SimulationTimeSeconds, (i) => Initialization(simulation, model, i));
+            _logger.LogDebug("Setting time {t}", simulation.Index * _coordinatorSettings.SimulationDurationSeconds);
+            fmuInstance.StartTime(simulation.Index * _coordinatorSettings.SimulationDurationSeconds, (i) => Initialization(simulation, model, i));
 
             // Run the simulation by executing ActuationActions.
             var fmuActuationInputs = new List<(string, string, object)>();
@@ -574,7 +575,7 @@ namespace Logic.Mapek
 
             _logger.LogDebug("Tick");
             // Advance the FMU time for the duration of the simulation tick in steps of simulation fidelity.
-            var maximumSteps = (double)_coordinatorSettings.SimulationTimeSeconds / fmuModel.SimulationFidelitySeconds;
+            var maximumSteps = (double)_coordinatorSettings.SimulationDurationSeconds / fmuModel.SimulationFidelitySeconds;
             var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
             var difference = maximumSteps - maximumStepsRoundedDown;
 

@@ -17,34 +17,26 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public void Execute(SimulationPath optimalConfiguration, IDictionary<string, ConfigurableParameter> configurableParameters, bool useSimulatedTwinningTarget)
+        public void Execute(Simulation simulation, bool useSimulatedTwinningTarget)
         {
             _logger.LogInformation("Starting the Execute phase.");
 
-            if (optimalConfiguration == null)
+            foreach (var action in simulation.Actions)
             {
-                return;
-            }
-
-            foreach (var simulationTick in optimalConfiguration.Simulations)
-            {
-                foreach (var action in simulationTick.Actions)
-                {
-                    if (action is ActuationAction actuationAction) {
-                        ExecuteActuationAction(actuationAction);
-                    } else {
-                        ExecuteReconfigurationAction((ReconfigurationAction)action);
-                    }
-                }
-
-                if (!useSimulatedTwinningTarget)
-                {
-                    // TODO: add a delay to match the duration of a cycle with the simulated interval. This is especially important in multi-cycle (look-ahead)
-                    // simulations.
+                if (action is ActuationAction actuationAction) {
+                    ExecuteActuationAction(actuationAction);
+                } else {
+                    ExecuteReconfigurationAction((ReconfigurationAction)action);
                 }
             }
 
-            LogExpectedPropertyValues(optimalConfiguration);
+            if (!useSimulatedTwinningTarget)
+            {
+                // TODO: add a delay to match the duration of a cycle with the simulated interval. This is especially important in multi-cycle (look-ahead)
+                // simulations.
+            }
+
+            LogExpectedPropertyValues(simulation);
         }
 
         private void ExecuteActuationAction(ActuationAction actuationAction)
@@ -61,7 +53,7 @@ namespace Logic.Mapek
 
         private void ExecuteReconfigurationAction(ReconfigurationAction reconfigurationAction)
         {
-            _logger.LogInformation("Reconfiguring property {configurableProperty} with {effect}.",
+            _logger.LogInformation("Reconfiguring property {configurableProperty} with {effect}.",  
                 reconfigurationAction.ConfigurableParameter.Name,
                 reconfigurationAction.NewParameterValue);
 
@@ -69,20 +61,16 @@ namespace Logic.Mapek
             configurableParameterImplementation.UpdateConfigurableParameter(reconfigurationAction.ConfigurableParameter.Name, reconfigurationAction.NewParameterValue);
         }
 
-        private void LogExpectedPropertyValues(SimulationPath simulationPath)
+        private void LogExpectedPropertyValues(Simulation simulation)
         {
-            if (!simulationPath.Simulations.Any()) {
-                return;
-            }
-
             _logger.LogInformation("Expected Property values:");
 
-            foreach (var propertyKeyValue in simulationPath.Simulations.Last().PropertyCache.Properties)
+            foreach (var propertyKeyValue in simulation.PropertyCache!.Properties)
             {
                 _logger.LogInformation("{propertyName}: {propertyValue}", propertyKeyValue.Key, propertyKeyValue.Value.Value.ToString());
             }
 
-            foreach (var configurableParameterKeyValue in simulationPath.Simulations.Last().PropertyCache.ConfigurableParameters)
+            foreach (var configurableParameterKeyValue in simulation.PropertyCache.ConfigurableParameters)
             {
                 _logger.LogInformation("{configurableParameterName}: {configurableParameterValue}",
                     configurableParameterKeyValue.Key,

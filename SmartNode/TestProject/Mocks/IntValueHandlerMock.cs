@@ -33,23 +33,6 @@ namespace TestProject.Mocks
             throw new NotImplementedException();
         }
 
-        public IEnumerable<object> GetPossibleValuesForActuationAction(Actuator actuator)
-        {
-            if (_actuatorStatePossibleValues.TryGetValue(actuator.Name, out IEnumerable<object>? possibleValues))
-            {
-                return possibleValues;
-            }
-            else
-            {
-                throw new ArgumentException($"Actuator {actuator.Name} has no implementation for possible values.");
-            }
-        }
-
-        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, Effect effect)
-        {
-            throw new NotImplementedException();
-        }
-
         public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression, object propertyValue)
         {
             throw new NotImplementedException();

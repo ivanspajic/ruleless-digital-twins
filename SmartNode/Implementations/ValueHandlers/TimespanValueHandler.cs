@@ -1,33 +1,12 @@
 ﻿using Femyou;
 using Logic.Models.MapekModels;
-using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 
 namespace Implementations.ValueHandlers
 {
     public class TimespanValueHandler : IValueHandler
     {
-        public object GetInitialValueForConfigurableParameter(string configurableParameter)
-        {
-            throw new NotImplementedException();
-        }
-
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<object> GetPossibleValuesForActuationAction(Actuator actuator)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, int simulationGranularity, Effect effect)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, Effect effect)
         {
             throw new NotImplementedException();
         }
@@ -65,6 +44,10 @@ namespace Implementations.ValueHandlers
         }
 
         public string GetValueAsCultureInvariantString(object value) {
+            throw new NotImplementedException();
+        }
+
+        public object GetQuantizedValue(object value, double fuzziness) {
             throw new NotImplementedException();
         }
     }

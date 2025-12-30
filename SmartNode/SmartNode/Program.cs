@@ -1,4 +1,4 @@
-﻿using Logic.CaseDatabaseRepository;
+﻿using Logic.CaseRepository;
 using Logic.FactoryInterface;
 using Logic.Mapek;
 using Logic.Models.DatabaseModels;
@@ -41,7 +41,7 @@ namespace SmartNode
             builder.Services.AddSingleton(coordinatorSettings!);
             builder.Services.AddSingleton(databaseSettings!);
             // Register a factory to allow for dynamic constructor argument passing through DI.
-            builder.Services.AddSingleton<ICaseDatabaseRepository, CaseDatabaseRepository>(serviceProvider => new CaseDatabaseRepository(databaseSettings!));
+            builder.Services.AddSingleton<ICaseRepository, CaseRepository>(serviceProvider => new CaseRepository(databaseSettings!));
             builder.Services.AddSingleton<IFactory, Factory>(serviceProvider => new Factory(coordinatorSettings!.UseSimulatedEnvironment));
             builder.Services.AddSingleton<IMapekMonitor, MapekMonitor>(serviceProvider => new MapekMonitor(serviceProvider));
             builder.Services.AddSingleton<IMapekAnalyze, MapekAnalyze>(serviceProvider => new MapekAnalyze(serviceProvider));

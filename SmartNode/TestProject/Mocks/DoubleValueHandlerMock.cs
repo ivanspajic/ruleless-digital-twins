@@ -72,16 +72,6 @@ namespace TestProject.Mocks
             throw new NotImplementedException();
         }
 
-        public IEnumerable<object> GetPossibleValuesForActuationAction(Actuator actuator)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, Effect effect)
-        {
-            throw new NotImplementedException();
-        }
-
         public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression, object propertyValue)
         {
             if (_unsatisfiedConstraints.TryGetValue((constraintExpression, propertyValue), out IEnumerable<AtomicConstraintExpression> unsatisfiedConstraints))

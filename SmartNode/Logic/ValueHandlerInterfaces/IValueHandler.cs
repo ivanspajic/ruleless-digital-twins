@@ -1,6 +1,5 @@
 ﻿using Femyou;
 using Logic.Models.MapekModels;
-using Logic.Models.OntologicalModels;
 
 namespace Logic.ValueHandlerInterfaces
 {
@@ -9,10 +8,6 @@ namespace Logic.ValueHandlerInterfaces
         public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression, object propertyValue);
 
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues);
-
-        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, Effect effect);
-
-        public IEnumerable<object> GetPossibleValuesForActuationAction(Actuator actuator);
 
         public int IncreaseComp(object comparingValue, object targetValue);
 
@@ -25,5 +20,7 @@ namespace Logic.ValueHandlerInterfaces
         public void WriteValueToSimulationParameter(IInstance fmuInstance, IVariable parameter, object value);
 
         public string GetValueAsCultureInvariantString(object value);
+
+        public object GetQuantizedValue(object value, double fuzziness);
     }
 }

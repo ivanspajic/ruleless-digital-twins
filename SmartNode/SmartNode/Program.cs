@@ -23,14 +23,16 @@ namespace SmartNode
             var coordinatorSettings = builder.Configuration.GetSection("CoordinatorSettings").Get<CoordinatorSettings>();
             var databaseSettings = builder.Configuration.GetSection("DatabaseSettings").Get<DatabaseSettings>();
 
+            var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
+
             // Fix full paths.
-            filepathArguments!.OntologyFilepath = Path.GetFullPath(Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.FullName, filepathArguments.OntologyFilepath));
-            filepathArguments.FmuDirectory = Path.GetFullPath(Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.FullName, filepathArguments.FmuDirectory));
-            filepathArguments.DataDirectory = Path.GetFullPath(Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.FullName, filepathArguments.DataDirectory));
-            filepathArguments.InferenceRulesFilepath = Path.GetFullPath(Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.FullName, filepathArguments.InferenceRulesFilepath));
-            filepathArguments.InstanceModelFilepath = Path.GetFullPath(Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.FullName, filepathArguments.InstanceModelFilepath));
-            filepathArguments.InferredModelFilepath = Path.GetFullPath(Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.FullName, filepathArguments.InferredModelFilepath));
-            filepathArguments.InferenceEngineFilepath = Path.GetFullPath(Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.FullName, filepathArguments.InferenceEngineFilepath));
+            filepathArguments!.OntologyFilepath = Path.GetFullPath(Path.Combine(rootDirectory, filepathArguments.OntologyFilepath));
+            filepathArguments.FmuDirectory = Path.GetFullPath(Path.Combine(rootDirectory, filepathArguments.FmuDirectory));
+            filepathArguments.DataDirectory = Path.GetFullPath(Path.Combine(rootDirectory, filepathArguments.DataDirectory));
+            filepathArguments.InferenceRulesFilepath = Path.GetFullPath(Path.Combine(rootDirectory, filepathArguments.InferenceRulesFilepath));
+            filepathArguments.InstanceModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, filepathArguments.InstanceModelFilepath));
+            filepathArguments.InferredModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, filepathArguments.InferredModelFilepath));
+            filepathArguments.InferenceEngineFilepath = Path.GetFullPath(Path.Combine(rootDirectory, filepathArguments.InferenceEngineFilepath));
 
             // Register services here.
             builder.Services.AddLogging(loggingBuilder =>

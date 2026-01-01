@@ -37,18 +37,18 @@ namespace TestProject
         [InlineData("Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
         public void Simulate(string? fromPython, string model, string inferred, int lookAheadCycles)
         {
-            var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var modelFilePath = Path.Combine(executingAssemblyPath!, "ModelsAndRules");
-            var inferredFilePath = Path.Combine(executingAssemblyPath!, $"ModelsAndRules{Path.DirectorySeparatorChar}{inferred}");
+            var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
+            var modelFilePath = Path.Combine(rootDirectory, "models-and-rules");
+            var inferredFilePath = Path.Combine(rootDirectory, $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
             // TODO: Review why file must exist if we're going to overwrite it anyway.
             if (!File.Exists(inferredFilePath))
             {
                 File.Create(inferredFilePath).Close();
             }
 
-            GenerateFromPython(fromPython, model, executingAssemblyPath!, modelFilePath);
+            GenerateFromPython(fromPython, model, rootDirectory, modelFilePath);
 
-            modelFilePath = Path.Combine(executingAssemblyPath!, $"ModelsAndRules{Path.DirectorySeparatorChar}{model}");
+            modelFilePath = Path.Combine(rootDirectory, $"models-and-rules{Path.DirectorySeparatorChar}{model}");
             modelFilePath = Path.GetFullPath(modelFilePath);
 
             var mock = new ServiceProviderMock(new Factory());
@@ -56,11 +56,11 @@ namespace TestProject
             mock.Add(typeof(FilepathArguments), new FilepathArguments {
                 InstanceModelFilepath = modelFilePath,
                 InferredModelFilepath = inferredFilePath,
-                InferenceEngineFilepath = Path.Combine(executingAssemblyPath!, "ModelsAndRules", "ruleless-digital-twins-inference-engine.jar"),
-                InferenceRulesFilepath = Path.Combine(executingAssemblyPath!, "ModelsAndRules", "inference-rules.rules"),
-                OntologyFilepath = Path.Combine(executingAssemblyPath!, "Ontology", "ruleless-digital-twins.ttl"),
-                DataDirectory = Path.Combine(executingAssemblyPath!, "StateData"),
-                FmuDirectory = Path.Combine(executingAssemblyPath!, "FMUs")
+                InferenceEngineFilepath = Path.Combine(rootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar"),
+                InferenceRulesFilepath = Path.Combine(rootDirectory, "models-and-rules", "inference-rules.rules"),
+                OntologyFilepath = Path.Combine(rootDirectory, "ontology", "ruleless-digital-twins.ttl"),
+                DataDirectory = Path.Combine(rootDirectory, "state-data"),
+                FmuDirectory = Path.Combine(rootDirectory, "SmartNode", "Implementations", "FMUs")
             });
             mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings {
                 LookAheadMapekCycles = 4,
@@ -153,17 +153,17 @@ namespace TestProject
         [Theory]
         [InlineData("Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
         public async Task FetchFromAMQ(string? fromPython, string model, string inferred, int lookAheadCycles) {
-            var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var modelFilePath = Path.Combine(executingAssemblyPath!, "ModelsAndRules");
-            var inferredFilePath = Path.Combine(executingAssemblyPath!, $"ModelsAndRules{Path.DirectorySeparatorChar}{inferred}");
+            var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
+            var modelFilePath = Path.Combine(rootDirectory, "models-and-rules");
+            var inferredFilePath = Path.Combine(rootDirectory, $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
             // TODO: Review why file must exist if we're going to overwrite it anyway.
             if (!File.Exists(inferredFilePath)) {
                 File.Create(inferredFilePath).Close();
             }
 
-            GenerateFromPython(fromPython, model, executingAssemblyPath!, modelFilePath);
+            GenerateFromPython(fromPython, model, rootDirectory, modelFilePath);
 
-            modelFilePath = Path.Combine(executingAssemblyPath!, $"ModelsAndRules{Path.DirectorySeparatorChar}{model}");
+            modelFilePath = Path.Combine(rootDirectory, $"models-and-rules{Path.DirectorySeparatorChar}{model}");
             modelFilePath = Path.GetFullPath(modelFilePath);
 
             var mock = new ServiceProviderMock(new Factory());
@@ -171,11 +171,11 @@ namespace TestProject
             var filepathArguments = new FilepathArguments {
                 InstanceModelFilepath = modelFilePath,
                 InferredModelFilepath = inferredFilePath,
-                InferenceEngineFilepath = Path.Combine(executingAssemblyPath!, "ModelsAndRules", "ruleless-digital-twins-inference-engine.jar"),
-                InferenceRulesFilepath = Path.Combine(executingAssemblyPath!, "ModelsAndRules", "inference-rules.rules"),
-                OntologyFilepath = Path.Combine(executingAssemblyPath!, "Ontology", "ruleless-digital-twins.ttl"),
-                DataDirectory = Path.Combine(executingAssemblyPath!, "StateData"),
-                FmuDirectory = Path.Combine(executingAssemblyPath!, "FMUs")
+                InferenceEngineFilepath = Path.Combine(rootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar"),
+                InferenceRulesFilepath = Path.Combine(rootDirectory, "models-and-rules", "inference-rules.rules"),
+                OntologyFilepath = Path.Combine(rootDirectory, "ontology", "ruleless-digital-twins.ttl"),
+                DataDirectory = Path.Combine(rootDirectory, "state-data"),
+                FmuDirectory = Path.Combine(rootDirectory, "SmartNode", "Implementations", "FMUs")
             };
             mock.Add(typeof(FilepathArguments), filepathArguments);
             mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings {
@@ -191,7 +191,7 @@ namespace TestProject
 
             // TODO: Prototype populate cache from FMU.
             // If we're going to do this, we have to check that we correctly override with values from model.
-            var fmu = Femyou.Model.Load("../../../../Implementations/FMUs/Source/au_incubator.fmu"); // TODO: grab from model
+            var fmu = Femyou.Model.Load("../../../../Implementations/FMUs/au_incubator.fmu"); // TODO: grab from model
             var (SvType, SvValue) = fmu.Variables["G_box"]!.StartValue;
             Assert.Equal("Real", SvType);
             double gbox = double.Parse(SvValue);
@@ -233,7 +233,7 @@ namespace TestProject
 
         private static void GenerateFromPython(string? fromPython, string model, string executingAssemblyPath, string modelFilePath) {
             if (fromPython != null) {
-                var outPath = Path.Combine(executingAssemblyPath!, $"ModelsAndRules{Path.DirectorySeparatorChar}{model}");
+                var outPath = Path.Combine(executingAssemblyPath!, $"models-and-rules{Path.DirectorySeparatorChar}{model}");
                 outPath = Path.GetFullPath(outPath);
                 Assert.True(File.Exists(Path.Combine(modelFilePath, fromPython)));
                 Assert.True(File.Exists(Path.Combine(modelFilePath, "RDTBindings.py")));

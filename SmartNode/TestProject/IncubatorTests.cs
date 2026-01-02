@@ -122,6 +122,7 @@ namespace TestProject
 
             await i.Connect();
             var consumerTag = await i.Setup();
+            Thread.Sleep(3); // Let's get a value.
 
             var monitor = new MapekMonitor(mock);
             var cache = monitor.Monitor();
@@ -156,6 +157,7 @@ namespace TestProject
             var inferredFilePath = Path.Combine(modelDirPath, inferred);
             var modelFilePath = Path.Combine(modelDirPath, model);
             modelFilePath = Path.GetFullPath(modelFilePath);
+            GenerateFromPython(fromPython, modelFilePath, rootDirectory);
             // TODO: Review why file must exist if we're going to overwrite it anyway.
             if (!File.Exists(inferredFilePath)) {
                 File.Create(inferredFilePath).Close();
@@ -164,8 +166,6 @@ namespace TestProject
                 DateTime x,y;
                 runInference = !((x = File.GetLastWriteTime(inferredFilePath)) > (y = File.GetLastWriteTime(modelFilePath)));
             }
-
-            GenerateFromPython(fromPython, model, rootDirectory);
 
             mock = new ServiceProviderMock(new Factory());
             filepathArguments = new FilepathArguments
@@ -192,10 +192,8 @@ namespace TestProject
             mapekPlan = new MyMapekPlan(mock, false);
         }
 
-        private static void GenerateFromPython(string fromPython, string model, string executingAssemblyPath) {
+        private static void GenerateFromPython(string fromPython, string outPath, string executingAssemblyPath) {
             var modelDirPath = Path.Combine(executingAssemblyPath, "models-and-rules");
-            var outPath = Path.Combine(modelDirPath, model);
-            outPath = Path.GetFullPath(outPath);
             Assert.True(File.Exists(Path.Combine(modelDirPath, fromPython)));
             Assert.True(File.Exists(Path.Combine(modelDirPath, "RDTBindings.py")));
             if (runInference || !File.Exists(outPath) || File.GetLastWriteTime(Path.Combine(modelDirPath, fromPython)) > File.GetLastWriteTime(outPath) || File.GetLastWriteTime(Path.Combine(modelDirPath, "RDTBindings.py")) > File.GetLastWriteTime(outPath)) {

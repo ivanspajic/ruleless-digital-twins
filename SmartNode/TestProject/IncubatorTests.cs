@@ -1,4 +1,5 @@
 using Implementations.ValueHandlers;
+using Implementations.Sensors;
 using Logic.TTComponentInterfaces;
 using Logic.FactoryInterface;
 using Logic.Mapek;
@@ -8,14 +9,15 @@ using Logic.ValueHandlerInterfaces;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks;
-using Implementations.Sensors;
 
 namespace TestProject
 {
     public class IncubatorTests
     {
         static bool runInference = false; // `false` can be overriden by logic below.
-        static IncubatorAdapter i;
+        // IP is coming from "docket network create // inspect" -> rabbitmq-ip or variations thereof:
+        static IncubatorAdapter i = new("172.20.0.2", TestContext.Current.CancellationToken);
+        static Factory.AMQSensor AMQTempSensor = new("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor", "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure", ((d) => d.average_temperature));
 
         private class MyMapekPlan : MapekPlan {
 
@@ -37,45 +39,11 @@ namespace TestProject
         [InlineData("Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
         public void Simulate(string? fromPython, string model, string inferred, int lookAheadCycles)
         {
-            var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
-            var modelFilePath = Path.Combine(rootDirectory, "models-and-rules");
-            var inferredFilePath = Path.Combine(rootDirectory, $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
-            // TODO: Review why file must exist if we're going to overwrite it anyway.
-            if (!File.Exists(inferredFilePath))
-            {
-                File.Create(inferredFilePath).Close();
-            }
-
-            GenerateFromPython(fromPython, model, rootDirectory, modelFilePath);
-
-            modelFilePath = Path.Combine(rootDirectory, $"models-and-rules{Path.DirectorySeparatorChar}{model}");
-            modelFilePath = Path.GetFullPath(modelFilePath);
-
-            var mock = new ServiceProviderMock(new Factory());
-            // TODO: not sure anymore if pulling it out was actually necessary in the end:
-            mock.Add(typeof(FilepathArguments), new FilepathArguments {
-                InstanceModelFilepath = modelFilePath,
-                InferredModelFilepath = inferredFilePath,
-                InferenceEngineFilepath = Path.Combine(rootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar"),
-                InferenceRulesFilepath = Path.Combine(rootDirectory, "models-and-rules", "inference-rules.rules"),
-                OntologyFilepath = Path.Combine(rootDirectory, "ontology", "ruleless-digital-twins.ttl"),
-                DataDirectory = Path.Combine(rootDirectory, "state-data"),
-                FmuDirectory = Path.Combine(rootDirectory, "SmartNode", "Implementations", "FMUs")
-            });
-            mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings {
-                LookAheadMapekCycles = 4,
-                MaximumMapekRounds = 4,
-                ReactiveMode = false,
-                SimulationTimeSeconds = 10,
-                UseSimulatedEnvironment = true
-            });
-            var mpk = new MapekKnowledge(mock);
-            mock.Add(typeof(IMapekKnowledge), mpk);
-            var mapekPlan = new MyMapekPlan(mock, false);
+            SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
 
             // TODO: Prototype populate cache from FMU.
             // If we're going to do this, we have to check that we correctly override with values from model.
-            var fmu = Femyou.Model.Load("../../../../Implementations/FMUs/Source/au_incubator.fmu"); // TODO: grab from model
+            var fmu = Femyou.Model.Load(Path.Combine(filepathArguments.FmuDirectory, "au_incubator.fmu")); // TODO: grab from model
             var (SvType, SvValue) = fmu.Variables["G_box"]!.StartValue;
             Assert.Equal("Real", SvType);
             double gbox = double.Parse(SvValue);
@@ -123,7 +91,7 @@ namespace TestProject
                 }
             };
 
-            mpk.Validate(propertyCacheMock);
+            mapekKnowledge.Validate(propertyCacheMock);
 
             // TODO: Assert that there's at least one actuator that's not a parameter.
 
@@ -152,58 +120,21 @@ namespace TestProject
 
         [Theory]
         [InlineData("Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
-        public async Task FetchFromAMQ(string? fromPython, string model, string inferred, int lookAheadCycles) {
-            var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
-            var modelFilePath = Path.Combine(rootDirectory, "models-and-rules");
-            var inferredFilePath = Path.Combine(rootDirectory, $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
-            // TODO: Review why file must exist if we're going to overwrite it anyway.
-            if (!File.Exists(inferredFilePath)) {
-                File.Create(inferredFilePath).Close();
-            }
-
-            GenerateFromPython(fromPython, model, rootDirectory, modelFilePath);
-
-            modelFilePath = Path.Combine(rootDirectory, $"models-and-rules{Path.DirectorySeparatorChar}{model}");
-            modelFilePath = Path.GetFullPath(modelFilePath);
-
-            var mock = new ServiceProviderMock(new Factory());
-            // TODO: not sure anymore if pulling it out was actually necessary in the end:
-            var filepathArguments = new FilepathArguments {
-                InstanceModelFilepath = modelFilePath,
-                InferredModelFilepath = inferredFilePath,
-                InferenceEngineFilepath = Path.Combine(rootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar"),
-                InferenceRulesFilepath = Path.Combine(rootDirectory, "models-and-rules", "inference-rules.rules"),
-                OntologyFilepath = Path.Combine(rootDirectory, "ontology", "ruleless-digital-twins.ttl"),
-                DataDirectory = Path.Combine(rootDirectory, "state-data"),
-                FmuDirectory = Path.Combine(rootDirectory, "SmartNode", "Implementations", "FMUs")
-            };
-            mock.Add(typeof(FilepathArguments), filepathArguments);
-            mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings {
-                LookAheadMapekCycles = 4,
-                MaximumMapekRounds = 4,
-                ReactiveMode = false,
-                SimulationTimeSeconds = 10,
-                UseSimulatedEnvironment = true
-            });
-            var mpk = new MapekKnowledge(mock);
-            mock.Add(typeof(IMapekKnowledge), mpk);
-            var mapekPlan = new MyMapekPlan(mock, false);
+        public async Task FetchFromAMQ(string? fromPython, string model, string inferred, int lookAheadCycles)
+        {
+            SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
 
             // TODO: Prototype populate cache from FMU.
             // If we're going to do this, we have to check that we correctly override with values from model.
-            var fmu = Femyou.Model.Load("../../../../Implementations/FMUs/au_incubator.fmu"); // TODO: grab from model
+            var fmu = Femyou.Model.Load(Path.Combine(filepathArguments.FmuDirectory, "au_incubator.fmu")); // TODO: grab from model
             var (SvType, SvValue) = fmu.Variables["G_box"]!.StartValue;
             Assert.Equal("Real", SvType);
             double gbox = double.Parse(SvValue);
             fmu.Dispose(); // Don't forget this or you'll get segfaults when loading the FMU "again" later.
             // END Prototype
 
-            // IP is coming from "docket network create // inspect -> rabbitmq-ip"
-            i = new IncubatorAdapter("172.20.0.2", TestContext.Current.CancellationToken);
             await i.Connect();
             var consumerTag = await i.Setup();
-            IncubatorFields? myData = null;
-
 
             var monitor = new MapekMonitor(mock);
             var cache = monitor.Monitor();
@@ -229,6 +160,47 @@ namespace TestProject
                 Trace.WriteLine("Params: " + string.Join(";", s.InitializationActions.Select(a => a.Name).ToList()));
                 Trace.WriteLine("Inputs: " + string.Join(";", s.Actions.Select(a => a.Name).ToList()));
             }
+        }
+
+        private static void SetupFiles(string? fromPython, string model, string inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan)
+        {
+            var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
+            var modelFilePath = Path.Combine(rootDirectory, "models-and-rules");
+            var inferredFilePath = Path.Combine(rootDirectory, $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
+            // TODO: Review why file must exist if we're going to overwrite it anyway.
+            if (!File.Exists(inferredFilePath))
+            {
+                File.Create(inferredFilePath).Close();
+            }
+
+            GenerateFromPython(fromPython, model, rootDirectory, modelFilePath);
+
+            modelFilePath = Path.Combine(rootDirectory, $"models-and-rules{Path.DirectorySeparatorChar}{model}");
+            modelFilePath = Path.GetFullPath(modelFilePath);
+
+            mock = new ServiceProviderMock(new Factory());
+            filepathArguments = new FilepathArguments
+            {
+                InstanceModelFilepath = modelFilePath,
+                InferredModelFilepath = inferredFilePath,
+                InferenceEngineFilepath = Path.Combine(rootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar"),
+                InferenceRulesFilepath = Path.Combine(rootDirectory, "models-and-rules", "inference-rules.rules"),
+                OntologyFilepath = Path.Combine(rootDirectory, "ontology", "ruleless-digital-twins.ttl"),
+                DataDirectory = Path.Combine(rootDirectory, "state-data"),
+                FmuDirectory = Path.Combine(rootDirectory, "SmartNode", "Implementations", "FMUs")
+            };
+            mock.Add(typeof(FilepathArguments), filepathArguments);
+            mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings
+            {
+                LookAheadMapekCycles = 4,
+                MaximumMapekRounds = 4,
+                ReactiveMode = false,
+                SimulationTimeSeconds = 10,
+                UseSimulatedEnvironment = true
+            });
+            mapekKnowledge = new MapekKnowledge(mock);
+            mock.Add(typeof(IMapekKnowledge), mapekKnowledge);
+            mapekPlan = new MyMapekPlan(mock, false);
         }
 
         private static void GenerateFromPython(string? fromPython, string model, string executingAssemblyPath, string modelFilePath) {
@@ -279,7 +251,7 @@ namespace TestProject
                 throw new NotImplementedException();
             }
 
-            class AMQSensor(string sensorName, string procedureName) : ISensor
+            public class AMQSensor(string sensorName, string procedureName, Func<IncubatorFields, double> f) : ISensor
             {
                 public string SensorName { get; private init; } = sensorName;
 
@@ -293,17 +265,14 @@ namespace TestProject
                     myData = i.Data;
                     Monitor.Exit(i);
                     Debug.Assert(myData != null, "No data received from Incubator AMQP.");
-                    return myData.average_temperature;
+                    return f(myData);
                 }
             }
 
-            public ISensor GetSensorDeviceImplementation(string sensorName, string procedureName)
-            {
-                if (sensorName == "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor")
-                {
-                    if (procedureName == "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure")
-                    {
-                        return new AMQSensor(sensorName, procedureName);
+            public ISensor GetSensorDeviceImplementation(string sensorName, string procedureName) {
+                if (sensorName == "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor") {
+                    if (procedureName == "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure") {
+                        return AMQTempSensor;
                     }
                 }
                 throw new NotImplementedException($"{sensorName}/{procedureName}");

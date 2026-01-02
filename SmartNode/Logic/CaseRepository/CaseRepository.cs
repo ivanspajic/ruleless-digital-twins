@@ -1,16 +1,21 @@
 ﻿using Logic.Mapek.Comparers;
 using Logic.Models.DatabaseModels;
 using Logic.Models.OntologicalModels;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Logic.CaseRepository {
     public class CaseRepository : ICaseRepository {
         private readonly IMongoCollection<Case> _caseCollection;
+        private readonly ILogger<ICaseRepository> _logger;
 
-        public CaseRepository(DatabaseSettings databaseSettings) {
+        public CaseRepository(IServiceProvider serviceProvider) {
+            _logger = serviceProvider.GetRequiredService<ILogger<CaseRepository>>();
+
+            var databaseSettings = serviceProvider.GetRequiredService<DatabaseSettings>();
             var mongoClient = new MongoClient(databaseSettings.ConnectionString);
             var mongoDatabase = mongoClient.GetDatabase(databaseSettings.DatabaseName);
-
             _caseCollection = mongoDatabase.GetCollection<Case>(databaseSettings.CollectionName);
         }
 
@@ -19,16 +24,28 @@ namespace Logic.CaseRepository {
             int lookAheadCycles,
             int simulationDurationSeconds,
             int index) {
-            return _caseCollection.Find(element =>
-                element.QuantizedProperties.SequenceEqual(quantizedProperties, new PropertyComparer()) &&
-                element.QuantizedOptimalConditions.SequenceEqual(quantizedOptimalConditions, new OptimalConditionComparer()) &&
+            var potentialMatches = _caseCollection.Find(element =>
                 element.LookAheadCycles == lookAheadCycles &&
                 element.SimulationDurationSeconds == simulationDurationSeconds &&
                 element.Index == index)
-                .FirstOrDefault();
+                .ToEnumerable();
+
+            var match = potentialMatches.Where(element => element.QuantizedProperties!.SequenceEqual(quantizedProperties, new PropertyComparer()) &&
+                element.QuantizedOptimalConditions!.SequenceEqual(quantizedOptimalConditions, new OptimalConditionComparer()))
+                .FirstOrDefault()!;
+
+            if (match is not null) {
+                _logger.LogInformation("Matching case found.");
+            } else {
+                _logger.LogInformation("No matching case found.");
+            }
+
+            return match!;
         }
 
         public void CreateCase(Case caseToCreate) {
+            _logger.LogInformation("Saving a new case."); // This should probably include some information from the case. What exactly?
+
             _caseCollection.InsertOne(caseToCreate);
         }
     }

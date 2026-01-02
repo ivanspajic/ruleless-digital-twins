@@ -1,6 +1,5 @@
 ﻿using Femyou;
 using Logic.Models.MapekModels;
-using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 using TestProject.Mocks.EqualityComparers;
 
@@ -69,6 +68,10 @@ namespace TestProject.Mocks
 
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues)
         {
+            throw new NotImplementedException();
+        }
+
+        public object GetQuantizedValue(object value, double fuzziness) {
             throw new NotImplementedException();
         }
 

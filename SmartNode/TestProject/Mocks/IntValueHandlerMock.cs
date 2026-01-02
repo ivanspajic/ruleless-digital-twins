@@ -1,28 +1,11 @@
 ﻿using Femyou;
 using Logic.Models.MapekModels;
-using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 
 namespace TestProject.Mocks
 {
     internal class IntValueHandlerMock : IValueHandler
     {
-        private static readonly Dictionary<string, IEnumerable<object>> _actuatorStatePossibleValues = new()
-        {
-            { "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AirConditioningUnit", new List<object>
-                {
-                    1,
-                    2,
-                    3
-                }
-            },
-            { "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier", new List<object>
-                {
-                    1
-                }
-            }
-        };
-
         public object GetInitialValueForConfigurableParameter(string configurableParameter)
         {
             throw new NotImplementedException();
@@ -30,6 +13,10 @@ namespace TestProject.Mocks
 
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues)
         {
+            throw new NotImplementedException();
+        }
+
+        public object GetQuantizedValue(object value, double fuzziness) {
             throw new NotImplementedException();
         }
 

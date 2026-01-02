@@ -77,9 +77,9 @@ namespace Implementations.ValueHandlers
             var halfFuzziness = fuzziness / 2;
 
             if (remainder > halfFuzziness) {
-                return (int)(factor * fuzziness);
+                return Math.Ceiling(factor) * fuzziness;
             } else {
-                return (int)(factor * (fuzziness + 1));
+                return Math.Floor(factor) * fuzziness;
             }
         }
     }

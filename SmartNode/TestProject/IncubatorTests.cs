@@ -21,7 +21,7 @@ namespace TestProject
 
         private class MyMapekPlan : MapekPlan {
 
-            public MyMapekPlan(IServiceProvider serviceProvider, bool logSimulations = false) : base(serviceProvider) {}
+            public MyMapekPlan(IServiceProvider serviceProvider) : base(serviceProvider) {}
 
             protected override void InferActionCombinations() {
                 // Call Java explicitly?
@@ -125,6 +125,7 @@ namespace TestProject
             Thread.Sleep(3); // Let's get a value.
 
             var monitor = new MapekMonitor(mock);
+            Assert.True(AMQTempSensor._onceOnly);
             var cache = monitor.Monitor();
 
             var simulationTree = new SimulationTreeNode
@@ -134,8 +135,8 @@ namespace TestProject
             };
 
             var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<Logic.Models.OntologicalModels.Action>>(), cache.PropertyCache);
-
             mapekPlan.Simulate(simulations, []);
+            Assert.False(AMQTempSensor._onceOnly); // Must've been used.
 
             // Only valid AFTER focing evaluation through simulation:
             Assert.Equal(Math.Pow(2, lookAheadCycles), simulationTree.SimulationPaths.Count());
@@ -165,6 +166,9 @@ namespace TestProject
             } else {
                 DateTime x,y;
                 runInference = !((x = File.GetLastWriteTime(inferredFilePath)) > (y = File.GetLastWriteTime(modelFilePath)));
+                if (runInference) {
+                    Trace.WriteLine($"Will regenerate inferred model because {inferredFilePath} ({x}) is older than {modelFilePath} ({y})");
+                }
             }
 
             mock = new ServiceProviderMock(new Factory());
@@ -189,7 +193,7 @@ namespace TestProject
             });
             mapekKnowledge = new MapekKnowledge(mock);
             mock.Add(typeof(IMapekKnowledge), mapekKnowledge);
-            mapekPlan = new MyMapekPlan(mock, false);
+            mapekPlan = new MyMapekPlan(mock);
         }
 
         private static void GenerateFromPython(string fromPython, string outPath, string executingAssemblyPath) {
@@ -200,7 +204,7 @@ namespace TestProject
                 runInference = true;
                 Trace.WriteLine("Regenerating model...");
                 var processInfo = new ProcessStartInfo {
-                    FileName = "python3",
+                    FileName = "python3", // TODO: Pick up from environment, might be just "python" for others.
                     Arguments = Path.Combine(modelDirPath, fromPython),
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
@@ -238,7 +242,7 @@ namespace TestProject
 
             public class AMQSensor(string sensorName, string procedureName, Func<IncubatorFields, double> f) : ISensor
             {
-                private bool _onceOnly = true;
+                public bool _onceOnly = true;
 
                 public string SensorName { get; private init; } = sensorName;
 

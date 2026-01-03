@@ -14,8 +14,6 @@ namespace Logic.Mapek
 {
     public class MapekPlan : IMapekPlan
     {
-        protected int MaximumSimulationTimeSeconds = 900; // XXX parametrize
-
         // Required as fields to preserve caching throughout multiple MAPE-K loop cycles.
         private readonly Dictionary<string, IModel> _fmuDict = [];
 	    private readonly Dictionary<string, IInstance> _iDict = [];
@@ -24,17 +22,19 @@ namespace Logic.Mapek
         // instance model.
         private readonly bool _restrictToReactiveActionsOnly;
         // Used for performance enhancements.
-        private bool _restrictToReactiveActionsOnlyOld = true;
+        private bool _restrictToReactiveActionsOnlyOld;
 
+        private readonly CoordinatorSettings _coordinatorSettings;
         private readonly ILogger<IMapekPlan> _logger;
         private readonly IFactory _factory;
         private readonly IMapekKnowledge _mapekKnowledge;
         private readonly FilepathArguments _filepathArguments;
-        private bool error = false; // Used to track async errors from Java invocation.
+        private bool javaInvocationAsyncError = false; // Used to track async errors from Java invocation.
 
-        public MapekPlan(IServiceProvider serviceProvider, bool restrictToReactiveActionsOnly = true)
+        public MapekPlan(IServiceProvider serviceProvider)
         {
-            _restrictToReactiveActionsOnly = restrictToReactiveActionsOnly;
+            _coordinatorSettings = serviceProvider.GetRequiredService<CoordinatorSettings>();
+            _restrictToReactiveActionsOnly = _coordinatorSettings.ReactiveMode;
             _restrictToReactiveActionsOnlyOld = _restrictToReactiveActionsOnly;
             _logger = serviceProvider.GetRequiredService<ILogger<IMapekPlan>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
@@ -218,7 +218,7 @@ namespace Logic.Mapek
 
             process!.OutputDataReceived += (sender, e) => {
                 _logger.LogInformation(e.Data);
-                if (e.Data != null && e.Data.Contains("Inconsistencies detected")) {
+                if (e.Data != null && (e.Data.Contains("Conflicting optimizations detected!") || e.Data.Contains("Conflicting conditions detected!"))) {
                     SetError(); // Async was here
                 }
             };
@@ -236,12 +236,12 @@ namespace Logic.Mapek
                 throw new Exception($"The inference engine encountered an error. Process {process.Id} exited with code {process.ExitCode}.");
             }
 
-            Debug.Assert(!error, "Inconsistencies detected.");
+            Debug.Assert(!javaInvocationAsyncError, "Inconsistencies detected.");
             _logger.LogInformation("Process {processId} exited with code {processExitCode}.", process.Id, process.ExitCode);
         }
 
         private void SetError() {
-            error = true;
+            javaInvocationAsyncError = true;
         }
 
         // This method currently only supports ActuationActions.
@@ -307,23 +307,23 @@ namespace Logic.Mapek
                         // We'll filter those later:
                         if (isParameter) {
                             actionCombination.Add(new FMUParameterAction {
-                            Name = action,
-                            Actuator = new Actuator {
-                                Name = actuatorName,
-                                ParameterName = paramName,
-                                Type = actuatorType
-                            },
-                            NewStateValue = actuatorState
+                                Name = action,
+                                Actuator = new Actuator {
+                                    Name = actuatorName,
+                                    ParameterName = paramName,
+                                    Type = actuatorType
+                                },
+                                NewStateValue = actuatorState
                             });
                         } else {
                             actionCombination.Add(new ActuationAction {
-                            Name = action,
-                            Actuator = new Actuator {
-                                Name = actuatorName,
-                                ParameterName = paramName,
-                                Type = actuatorType
-                            },
-                            NewStateValue = actuatorState
+                                Name = action,
+                                Actuator = new Actuator {
+                                    Name = actuatorName,
+                                    ParameterName = paramName,
+                                    Type = actuatorType
+                                },
+                                NewStateValue = actuatorState
                             });
                         }
                     });
@@ -390,7 +390,7 @@ namespace Logic.Mapek
 
                 // Perform the simulation via FMU execution and ensure all the Properties in the simulation's property cache are updated by running all soft sensors
                 // in the correct order.
-                ExecuteActuationActionFmu(fmuModel, simulation);
+                ExecuteFmu(fmuModel, simulation);
                 ExecuteSoftSensorsAndUpdateSimulationCache(simulation, softSensorTreeNodes);
             }
 
@@ -511,7 +511,7 @@ namespace Logic.Mapek
             return new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]);
         }
 
-        private void ExecuteActuationActionFmu(FmuModel fmuModel, Simulation simulation) {
+        private void ExecuteFmu(FmuModel fmuModel, Simulation simulation) {
             // The LogDebug calls here are primarily to keep an eye on crashes in the FMU which are otherwise a tad harder to track down.
             _logger.LogInformation("Simulation {simulation}", simulation); // XXX Arg useless.
             if (!_fmuDict.TryGetValue(fmuModel.Filepath, out IModel? model)) {
@@ -531,8 +531,8 @@ namespace Logic.Mapek
                 fmuInstance.Reset();
             }
             Debug.Assert(fmuInstance != null, "Instance is null after creation.");
-            _logger.LogDebug("Setting time {t}", simulation.Index * MaximumSimulationTimeSeconds);
-            fmuInstance.StartTime(simulation.Index * MaximumSimulationTimeSeconds, (i) => Initialization(simulation, model, i));
+            _logger.LogDebug("Setting time {t}", simulation.Index * _coordinatorSettings.SimulationTimeSeconds);
+            fmuInstance.StartTime(simulation.Index * _coordinatorSettings.SimulationTimeSeconds, (i) => Initialization(simulation, model, i));
 
             // Run the simulation by executing ActuationActions.
             var fmuActuationInputs = new List<(string, string, object)>();
@@ -574,7 +574,7 @@ namespace Logic.Mapek
 
             _logger.LogDebug("Tick");
             // Advance the FMU time for the duration of the simulation tick in steps of simulation fidelity.
-            var maximumSteps = (double)MaximumSimulationTimeSeconds / fmuModel.SimulationFidelitySeconds;
+            var maximumSteps = (double)_coordinatorSettings.SimulationTimeSeconds / fmuModel.SimulationFidelitySeconds;
             var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
             var difference = maximumSteps - maximumStepsRoundedDown;
 

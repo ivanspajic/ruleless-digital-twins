@@ -15,11 +15,25 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="FMUs/roomM370.fmu" />
+    <EmbeddedResource Include="FMUs/roomM370.fmu">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="FMUs/Nordpool-FMU/NordPool.fmu" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="RabbitMQ.Client" Version="7.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="FMUs\au_incubator.fmu">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="FMUs\customPiece.fmu">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="FMUs\NordPool.fmu">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

@@ -12,22 +12,10 @@ namespace Logic.Mapek {
         private readonly IFactory _factory;
         private readonly IMapekKnowledge _mapekKnowledge;
 
-        // Used to keep copies of ConfigurableParameters and other Properties if need be. A second PropertyCache is used to allow
-        // for checking of existing/non-existing Properties in the cache every MAPE-K cycle.
-        private Cache _oldCache;
-
         public MapekMonitor(IServiceProvider serviceProvider) {
             _logger = serviceProvider.GetRequiredService<ILogger<IMapekMonitor>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
             _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
-
-            _oldCache = new Cache {
-                PropertyCache = new PropertyCache {
-                    Properties = new Dictionary<string, Property>(),
-                    ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
-                },
-                SoftSensorTreeNodes = new List<SoftSensorTreeNode>()
-            };
         }
 
         public Cache Monitor() {
@@ -74,9 +62,6 @@ namespace Logic.Mapek {
 
             // Get the values of all ObservableProperties and populate the cache.
             PopulateObservablePropertiesCache(cache.PropertyCache);
-
-            // Keep a reference for the old cache.
-            _oldCache = cache;
 
             // Write Property values back to the knowledge base.
             WritePropertyValuesToKnowledgeBase(cache.PropertyCache);
@@ -210,12 +195,13 @@ namespace Logic.Mapek {
 
         private void PopulateObservablePropertiesCache(PropertyCache propertyCache) {
             // Get all ObservableProperties.
-            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?sensor ?observableProperty ?valueType WHERE {
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty WHERE {
                 ?sensor rdf:type sosa:Sensor .
                 ?sensor sosa:observes ?observableProperty . 
                 ?observableProperty rdf:type sosa:ObservableProperty . }");
 
             var queryResult = _mapekKnowledge.ExecuteQuery(query);
+
             // Get all measured Properties that are results of observing ObservableProperties.
             var innerQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?outputProperty WHERE {
                     ?sensor sosa:observes @observableProperty .

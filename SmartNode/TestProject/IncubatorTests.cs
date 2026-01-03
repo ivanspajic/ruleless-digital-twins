@@ -1,4 +1,5 @@
 using Implementations.ValueHandlers;
+using Implementations.Sensors;
 using Logic.TTComponentInterfaces;
 using Logic.FactoryInterface;
 using Logic.Mapek;
@@ -8,22 +9,19 @@ using Logic.ValueHandlerInterfaces;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks;
-using Implementations.Sensors;
 
 namespace TestProject
 {
     public class IncubatorTests
     {
-        static Boolean runInference = false; // `false` can be overriden by logic below.
-        static IncubatorAdapter i;
+        static bool runInference = false; // `false` can be overriden by logic below.
+        // IP is coming from "docket network create // inspect" -> rabbitmq-ip or variations thereof:
+        static IncubatorAdapter i = new("172.20.0.2", TestContext.Current.CancellationToken);
+        static Factory.AMQSensor AMQTempSensor = new("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor", "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure", ((d) => d.average_temperature));
 
         private class MyMapekPlan : MapekPlan {
 
-            public MyMapekPlan(IServiceProvider serviceProvider, bool logSimulations = false) : base(serviceProvider, logSimulations) {
-                // TODO: If the simulation runs overboard and the FMU throws LOG_ASSERT,
-                // FMI calls with fail ungracefully.
-                MaximumSimulationTimeSeconds = 10;
-            }
+            public MyMapekPlan(IServiceProvider serviceProvider) : base(serviceProvider) {}
 
             protected override void InferActionCombinations() {
                 // Call Java explicitly?
@@ -35,34 +33,13 @@ namespace TestProject
 
         [Theory]
         [InlineData("Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
-        public void Simulate(string? fromPython, string model, string inferred, int lookAheadCycles)
+        public void SimulateFMUOnly(string fromPython, string model, string inferred, int lookAheadCycles)
         {
-            var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules");
-            var inferredFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
-            // TODO: Review why file must exist if we're going to overwrite it anyway.
-            if (!File.Exists(inferredFilePath))
-            {
-                File.Create(inferredFilePath).Close();
-            }
-
-            GenerateFromPython(fromPython, model, executingAssemblyPath, modelFilePath);
-
-            modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules{Path.DirectorySeparatorChar}{model}");
-            modelFilePath = Path.GetFullPath(modelFilePath);
-
-            var mock = new ServiceProviderMock(modelFilePath, inferredFilePath, new Factory());
-            // TODO: not sure anymore if pulling it out was actually necessary in the end:
-            var mpk = new MapekKnowledge(mock);
-            mock.Add(typeof(IMapekKnowledge), mpk);
-            var mapekPlan = new MyMapekPlan(mock, false);
+            SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
 
             // TODO: Prototype populate cache from FMU.
             // If we're going to do this, we have to check that we correctly override with values from model.
-            var fmu = Femyou.Model.Load("../../../../Implementations/FMUs/Source/au_incubator.fmu"); // TODO: grab from model
+            var fmu = Femyou.Model.Load(Path.Combine(filepathArguments.FmuDirectory, "au_incubator.fmu")); // TODO: grab from model
             var (SvType, SvValue) = fmu.Variables["G_box"]!.StartValue;
             Assert.Equal("Real", SvType);
             double gbox = double.Parse(SvValue);
@@ -110,7 +87,7 @@ namespace TestProject
                 }
             };
 
-            mpk.Validate(propertyCacheMock);
+            mapekKnowledge.Validate(propertyCacheMock);
 
             // TODO: Assert that there's at least one actuator that's not a parameter.
 
@@ -139,47 +116,16 @@ namespace TestProject
 
         [Theory]
         [InlineData("Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
-        public async Task FetchFromAMQ(string? fromPython, string model, string inferred, int lookAheadCycles) {
-            var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules");
-            var inferredFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
-            // TODO: Review why file must exist if we're going to overwrite it anyway.
-            if (!File.Exists(inferredFilePath))
-            {
-                File.Create(inferredFilePath).Close();
-            }
+        public async Task SimulateFromAMQ(string fromPython, string model, string inferred, int lookAheadCycles)
+        {
+            SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
 
-            GenerateFromPython(fromPython, model, executingAssemblyPath, modelFilePath);
-
-            modelFilePath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules{Path.DirectorySeparatorChar}{model}");
-            modelFilePath = Path.GetFullPath(modelFilePath);
-
-            var mock = new ServiceProviderMock(modelFilePath, inferredFilePath, new Factory());
-            // TODO: not sure anymore if pulling it out was actually necessary in the end:
-            var mpk = new MapekKnowledge(mock);
-            mock.Add(typeof(IMapekKnowledge), mpk);
-            var mapekPlan = new MyMapekPlan(mock, false);
-
-            // TODO: Prototype populate cache from FMU.
-            // If we're going to do this, we have to check that we correctly override with values from model.
-            var fmu = Femyou.Model.Load("../../../../Implementations/FMUs/Source/au_incubator.fmu"); // TODO: grab from model
-            var (SvType, SvValue) = fmu.Variables["G_box"]!.StartValue;
-            Assert.Equal("Real", SvType);
-            double gbox = double.Parse(SvValue);
-            fmu.Dispose(); // Don't forget this or you'll get segfaults when loading the FMU "again" later.
-            // END Prototype
-
-            // IP is coming from "docket network create // inspect -> rabbitmq-ip"
-            i = new IncubatorAdapter("172.20.0.2", TestContext.Current.CancellationToken);
             await i.Connect();
             var consumerTag = await i.Setup();
-            IncubatorFields? myData = null;
-
+            Thread.Sleep(3); // Let's get a value.
 
             var monitor = new MapekMonitor(mock);
+            Assert.True(AMQTempSensor._onceOnly);
             var cache = monitor.Monitor();
 
             var simulationTree = new SimulationTreeNode
@@ -189,8 +135,8 @@ namespace TestProject
             };
 
             var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<Logic.Models.OntologicalModels.Action>>(), cache.PropertyCache);
-
             mapekPlan.Simulate(simulations, []);
+            Assert.False(AMQTempSensor._onceOnly); // Must've been used.
 
             // Only valid AFTER focing evaluation through simulation:
             Assert.Equal(Math.Pow(2, lookAheadCycles), simulationTree.SimulationPaths.Count());
@@ -205,32 +151,72 @@ namespace TestProject
             }
         }
 
-        private static void GenerateFromPython(string? fromPython, string model, string executingAssemblyPath, string modelFilePath) {
-            if (fromPython != null) {
-                var outPath = Path.Combine(executingAssemblyPath!, $"..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}"
-                                + $"models-and-rules{Path.DirectorySeparatorChar}{model}");
-                outPath = Path.GetFullPath(outPath);
-                Assert.True(File.Exists(Path.Combine(modelFilePath, fromPython)));
-                Assert.True(File.Exists(Path.Combine(modelFilePath, "RDTBindings.py")));
-                if (runInference || !File.Exists(outPath) || File.GetLastWriteTime(Path.Combine(modelFilePath, fromPython)) > File.GetLastWriteTime(outPath) || File.GetLastWriteTime(Path.Combine(modelFilePath, "RDTBindings.py")) > File.GetLastWriteTime(outPath)) {
-                    runInference = true;
-                    Trace.WriteLine("Regenerating model...");
-                    var processInfo = new ProcessStartInfo {
-                        FileName = "python3",
-                        Arguments = $"\"{fromPython}\"",
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        WorkingDirectory = modelFilePath
-                    };
-                    using var process = Process.Start(processInfo);
-                    Debug.Assert(process != null, "Process failed to start.");
-                    StreamReader reader = process.StandardOutput;
-                    string output = reader.ReadToEnd();
-                    File.WriteAllText(outPath, output);
-                    process.WaitForExit();
-                    Assert.Equal(0, process.ExitCode);
+        private static void SetupFiles(string fromPython, string model, string inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan)
+        {
+            var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
+            var modelDirPath = Path.Combine(rootDirectory, "models-and-rules");
+            var inferredFilePath = Path.Combine(modelDirPath, inferred);
+            var modelFilePath = Path.Combine(modelDirPath, model);
+            modelFilePath = Path.GetFullPath(modelFilePath);
+            GenerateFromPython(fromPython, modelFilePath, rootDirectory);
+            // TODO: Review why file must exist if we're going to overwrite it anyway.
+            if (!File.Exists(inferredFilePath)) {
+                File.Create(inferredFilePath).Close();
+                runInference = true;
+            } else {
+                DateTime x,y;
+                runInference = !((x = File.GetLastWriteTime(inferredFilePath)) > (y = File.GetLastWriteTime(modelFilePath)));
+                if (runInference) {
+                    Trace.WriteLine($"Will regenerate inferred model because {inferredFilePath} ({x}) is older than {modelFilePath} ({y})");
                 }
+            }
+
+            mock = new ServiceProviderMock(new Factory());
+            filepathArguments = new FilepathArguments
+            {
+                InstanceModelFilepath = modelFilePath,
+                InferredModelFilepath = inferredFilePath,
+                InferenceEngineFilepath = Path.Combine(rootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar"),
+                InferenceRulesFilepath = Path.Combine(rootDirectory, "models-and-rules", "inference-rules.rules"),
+                OntologyFilepath = Path.Combine(rootDirectory, "ontology", "ruleless-digital-twins.ttl"),
+                DataDirectory = Path.Combine(rootDirectory, "state-data"),
+                FmuDirectory = Path.Combine(rootDirectory, "SmartNode", "Implementations", "FMUs")
+            };
+            mock.Add(typeof(FilepathArguments), filepathArguments);
+            mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings
+            {
+                LookAheadMapekCycles = 4,
+                MaximumMapekRounds = 4,
+                ReactiveMode = false,
+                SimulationTimeSeconds = 10,
+                UseSimulatedEnvironment = true
+            });
+            mapekKnowledge = new MapekKnowledge(mock);
+            mock.Add(typeof(IMapekKnowledge), mapekKnowledge);
+            mapekPlan = new MyMapekPlan(mock);
+        }
+
+        private static void GenerateFromPython(string fromPython, string outPath, string executingAssemblyPath) {
+            var modelDirPath = Path.Combine(executingAssemblyPath, "models-and-rules");
+            Assert.True(File.Exists(Path.Combine(modelDirPath, fromPython)));
+            Assert.True(File.Exists(Path.Combine(modelDirPath, "RDTBindings.py")));
+            if (runInference || !File.Exists(outPath) || File.GetLastWriteTime(Path.Combine(modelDirPath, fromPython)) > File.GetLastWriteTime(outPath) || File.GetLastWriteTime(Path.Combine(modelDirPath, "RDTBindings.py")) > File.GetLastWriteTime(outPath)) {
+                runInference = true;
+                Trace.WriteLine("Regenerating model...");
+                var processInfo = new ProcessStartInfo {
+                    FileName = "python3", // TODO: Pick up from environment, might be just "python" for others.
+                    Arguments = Path.Combine(modelDirPath, fromPython),
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                using var process = Process.Start(processInfo);
+                Debug.Assert(process != null, "Process failed to start.");
+                StreamReader reader = process.StandardOutput;
+                string output = reader.ReadToEnd();
+                File.WriteAllText(outPath, output);
+                process.WaitForExit();
+                Assert.Equal(0, process.ExitCode);
             }
         }
 
@@ -254,31 +240,31 @@ namespace TestProject
                 throw new NotImplementedException();
             }
 
-            class AMQSensor(string sensorName, string procedureName) : ISensor
+            public class AMQSensor(string sensorName, string procedureName, Func<IncubatorFields, double> f) : ISensor
             {
+                public bool _onceOnly = true;
+
                 public string SensorName { get; private init; } = sensorName;
 
                 public string ProcedureName { get; private init; } = procedureName;
 
                 public object ObservePropertyValue(params object[] inputProperties)
                 {
-                    // Console.WriteLine("Observing AMQ Sensor Value: " + inputProperties[0]);
+                    Assert.True(_onceOnly, "Really just expecting it to be called once here.");
                     IncubatorFields? myData = null;
                     Monitor.Enter(i);
                     myData = i.Data;
                     Monitor.Exit(i);
                     Debug.Assert(myData != null, "No data received from Incubator AMQP.");
-                    return myData.average_temperature;
+                    _onceOnly = false;
+                    return f(myData);
                 }
             }
 
-            public ISensor GetSensorDeviceImplementation(string sensorName, string procedureName)
-            {
-                if (sensorName == "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor")
-                {
-                    if (procedureName == "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure")
-                    {
-                        return new AMQSensor(sensorName, procedureName);
+            public ISensor GetSensorDeviceImplementation(string sensorName, string procedureName) {
+                if (sensorName == "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor") {
+                    if (procedureName == "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure") {
+                        return AMQTempSensor;
                     }
                 }
                 throw new NotImplementedException($"{sensorName}/{procedureName}");

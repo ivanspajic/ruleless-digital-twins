@@ -1,5 +1,6 @@
 ﻿using Logic.Models.OntologicalModels;
 using System.Diagnostics;
+using System.Reflection;
 using TestProject.Utilities;
 using VDS.RDF;
 using VDS.RDF.Parsing;
@@ -16,17 +17,19 @@ namespace TestProject
         [MemberData(nameof(InferenceTestHelper.TestData), MemberType = typeof(InferenceTestHelper))]
         public void Correct_action_combinations_for_instance_model(string instanceModelFilename, IEnumerable<IEnumerable<ActuationAction>> expectedCombinations) {
             // Arrange
-            var workingDirectoryPath = Path.Combine(InferenceTestHelper.SolutionRootDirectory, "models-and-rules");
-            var ontologyFilepath = Path.Combine(InferenceTestHelper.SolutionRootDirectory, "Ontology", "ruleless-digital-twins.ttl");
-            var inferenceRulesFilepath = Path.Combine(InferenceTestHelper.SolutionRootDirectory, "models-and-rules", "inference-rules.rules");
-            var instanceModelFilepath = Path.Combine(InferenceTestHelper.TestFileDirectory, instanceModelFilename);
-            var inferredInstanceModelFilepath = Path.Combine(InferenceTestHelper.TestFileDirectory, instanceModelFilename.Split('.')[0] + "Inferred.ttl");
+            var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            var workingDirectoryPath = Path.Combine(executingAssemblyPath!, "ModelsAndRules");
+            var ontologyFilepath = Path.Combine(executingAssemblyPath!, "Ontology", "ruleless-digital-twins.ttl");
+            var inferenceRulesFilepath = Path.Combine(executingAssemblyPath!, "ModelsAndRules", "inference-rules.rules");
+            var instanceModelFilepath = Path.Combine(executingAssemblyPath!, "TestFiles", instanceModelFilename);
+            var inferredInstanceModelFilepath = Path.Combine(executingAssemblyPath!, "TestFiles", instanceModelFilename.Split('.')[0] + "Inferred.ttl");
 
             var inferredModel = new Graph();
             var turtleParser = new TurtleParser();
 
             // Act
-            ExecuteJarFile($"\"{Path.Combine(InferenceTestHelper.SolutionRootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar")}\"",
+            ExecuteJarFile($"\"{Path.Combine(executingAssemblyPath!, "ModelsAndRules", "ruleless-digital-twins-inference-engine.jar")}\"",
                 [$"\"{ontologyFilepath}\"", $"\"{instanceModelFilepath}\"", $"\"{inferenceRulesFilepath}\"", $"\"{inferredInstanceModelFilepath}\""],
                 workingDirectoryPath);
 

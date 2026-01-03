@@ -64,7 +64,7 @@ namespace Logic.Mapek {
                 // var optimalConditionsAndActions = _mapekAnalyze.Analyze(instanceModel, propertyCache, ConfigurableParameterGranularity);
 
                 // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
-                var optimalSimulationPath = _mapekPlan.Plan(cache, _coordinatorSettings.LookAheadMapekCycles);
+                var (_, _, optimalSimulationPath) = _mapekPlan.Plan(cache, _coordinatorSettings.LookAheadMapekCycles);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
                 _mapekExecute.Execute(optimalSimulationPath, cache.PropertyCache.ConfigurableParameters, _coordinatorSettings.UseSimulatedEnvironment);
 

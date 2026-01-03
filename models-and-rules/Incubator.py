@@ -32,6 +32,7 @@ g.add((gheaterActuator.node, RDT["hasActuatorState"], Literal("1.0", datatype=XS
 g.add((gheaterActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.boolean)))
 
 rtemp = ObservableProperty(g, MINE["in_room_temperature"])
+oc_rtemp = OptimalConditionDouble(g, MINE["oc_temp"], rtemp, 3600, (30, False), (35, False))
 rtempActuator = Actuator(g, MINE["TempActuator"], Change(g, MINE["TempChange"], rtemp))
 g.add((rtempActuator.node, RDT["hasActuatorName"], Literal("in_room_temperature", datatype=XSD.string)))
 # TODO: Absence triggers a runtime error
@@ -54,7 +55,7 @@ tempMeasure = Measure(g, MINE["TempMeasure"])
 
 tempProcedure = Procedure(g, MINE["TempProcedure"], tempMeasure, tempSensor)
 
-room = Platform(g, MINE["IncubatorTest"], False, [heaterActuator, cheaterActuator, rtempActuator, tempSensor])
+room = Platform(g, MINE["IncubatorTest"], False, [heaterActuator, cheaterActuator, rtempActuator, tempSensor], implements=[oc_rtemp])
 fmu = FMU(g, MINE["Incubator_FMU"], "Source/au_incubator.fmu", 30) # 3s
 room.addFMU(g, fmu)
 

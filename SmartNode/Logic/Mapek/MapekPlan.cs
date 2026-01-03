@@ -42,7 +42,7 @@ namespace Logic.Mapek
             _filepathArguments = serviceProvider.GetRequiredService<FilepathArguments>();
         }
 
-        public SimulationPath Plan(Cache cache, int lookAheadCycles) {
+        public (SimulationTreeNode, IEnumerable<Simulation>, SimulationPath) Plan(Cache cache, int lookAheadCycles) {
             _logger.LogInformation("Starting the Plan phase.");
 
             _logger.LogInformation("Generating simulations.");
@@ -73,7 +73,7 @@ namespace Logic.Mapek
 
             LogOptimalSimulationPath(optimalSimulationPath);
 
-            return optimalSimulationPath!;
+            return (simulationTree, simulations, optimalSimulationPath!);
         }
 
         // TODO: consider making this async in the future.
@@ -1195,7 +1195,7 @@ namespace Logic.Mapek
             return propertyChangesToOptimizeFor;
         }
 
-        private void LogOptimalSimulationPath(SimulationPath optimalSimulationPath)
+        public void LogOptimalSimulationPath(SimulationPath optimalSimulationPath)
         {
             var logMsg = "Chosen optimal path, Actuation actions:\n";
 

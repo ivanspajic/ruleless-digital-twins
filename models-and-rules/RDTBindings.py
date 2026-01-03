@@ -2,7 +2,7 @@ from abc import ABC
 import typing
 from typing import Optional
 from rdflib import BNode, Literal, Graph, URIRef
-from rdflib.namespace import Namespace, RDF, OWL, XSD
+from rdflib.namespace import Namespace, RDF, RDFS, OWL, XSD
 from rdflib.term import IdentifiedNode
 
 RDT = Namespace("http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/")
@@ -23,7 +23,7 @@ class FMU(Node):
 class Restriction(Node):
     pass
 
-class RestrictionL1D(Restriction):
+class RestrictionL1D(Restriction): # probably not right.
     def __init__(self, g):
         self.node = BNode()
         g.add((self.node, RDF["type"], OWL["Restriction"]))
@@ -60,17 +60,50 @@ class Actuator(Node):
         g.add((self.node, RDF["type"], SOSA["Actuator"]))
         g.add((self.node, SOSA["enacts"], enacts.node))
 
-class Platform(Node):
-    def __init__(self, g, name: IdentifiedNode, gcofoc: bool, hosts : Actuator | list[Actuator]):
+class OptimalCondition(Node):
+    pass
+
+class OptimalConditionDouble(OptimalCondition):
+    def __init__(self, g, name: IdentifiedNode, onProperty: ObservableProperty, reachedInMaximumSeconds: int, minT: tuple[float,bool], maxT: tuple[float,bool]):
         self.node = name
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
-        g.add((self.node, RDF["type"], SOSA["Platform"]))
-        g.add((self.node, RDT["generateCombinationsOnlyFromOptimalConditions"], Literal("true" if gcofoc else "false", datatype=XSD.boolean))) # TODO?
+        g.add((self.node, RDF["type"], RDT["OptimalCondition"]))
+        g.add((self.node, SSN["forProperty"], onProperty.node))
+        res = BNode()
+        g.add((res, RDF["type"], OWL["Restriction"]))
+        g.add((res, OWL["onProperty"], RDT["hasValueConstraint"]))
+        g.add((res, OWL["qualifiedCardinality"], Literal(1, datatype=XSD.nonNegativeInteger)))
+        minmax = BNode()
+        g.add((minmax, RDF["type"], RDFS["Datatype"]))
+        g.add((minmax, OWL["onDatatype"], XSD.double))
+        reslist = BNode()
+        fNode = BNode()
+        rNode = BNode()
+        (min, minIncl) = minT
+        (max, maxIncl) = maxT
+        g.add((fNode, XSD["minInclusive" if minIncl else "minExclusive"], Literal(min, datatype=XSD.double)))
+        g.add((rNode, XSD["maxInclusive" if maxIncl else "maxExclusive"], Literal(max, datatype=XSD.double)))        
+        g.add((reslist, RDF["first"], fNode))
+        g.add((reslist, RDF["rest"], rNode))
+        g.add((minmax, OWL.withRestrictions, reslist))
+        g.add((res, OWL["onDataRange"], minmax))
+
+        g.add((self.node, RDF["type"], res))
+
+
+class Platform(Node):
+    def __init__(self, g, name: IdentifiedNode, gcofoc: bool, hosts: Actuator | list[Actuator], implements = []):
+        self.node = name
+        g.add((self.node, RDF.type, OWL.NamedIndividual))
+        g.add((self.node, RDF.type, SOSA.Platform))
+        g.add((self.node, RDT.generateCombinationsOnlyFromOptimalConditions, Literal("true" if gcofoc else "false", datatype=XSD.boolean))) # TODO?
         if isinstance(hosts, list):
             for a in hosts:
-                g.add((self.node, SOSA["hosts"], a.node))
+                g.add((self.node, SOSA.hosts, a.node))
         else:
-            g.add((self.node, SOSA["hosts"], hosts.node))
+            g.add((self.node, SOSA.hosts, hosts.node))
+        for i in implements:
+            g.add((self.node, SSN.implements, i.node))
 
 
     # TODO: eliminate `g`?

@@ -12,7 +12,7 @@ using TestProject.Mocks;
 
 namespace TestProject
 {
-    public class IncubatorTests
+    public class IncubatorTests : IDisposable
     {
         static bool runInference = false; // `false` can be overriden by logic below.
         // IP is coming from "docket network create // inspect" -> rabbitmq-ip or variations thereof:
@@ -90,16 +90,7 @@ namespace TestProject
             mapekKnowledge.Validate(propertyCacheMock);
 
             // TODO: Assert that there's at least one actuator that's not a parameter.
-
-            var simulationTree = new SimulationTreeNode
-            {
-                NodeItem = new Simulation(propertyCacheMock),
-                Children = []
-            };
-
-            var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<Logic.Models.OntologicalModels.Action>>(), propertyCacheMock);
-
-            mapekPlan.Simulate(simulations, []);
+            var (simulationTree, simulations, optimalSimulationPath) = mapekPlan.Plan(new Cache(){PropertyCache = propertyCacheMock, SoftSensorTreeNodes=[]}, lookAheadCycles);
 
             // Only valid AFTER focing evaluation through simulation:
             Assert.Equal(Math.Pow(2, lookAheadCycles), simulationTree.SimulationPaths.Count());
@@ -112,6 +103,12 @@ namespace TestProject
                 Trace.WriteLine("Params: " + string.Join(";", s.InitializationActions.Select(a => a.Name).ToList()));
                 Trace.WriteLine("Inputs: " + string.Join(";", s.Actions.Select(a => a.Name).ToList()));
             }
+
+            // Cold room, assert that the optimal path is heading in the right direction:
+            Assert.Equal(4, optimalSimulationPath.Simulations.Count());
+            foreach (var s in optimalSimulationPath.Simulations) {
+                Assert.True(s.Actions.All(a => "1" == ((ActuationAction) a).NewStateValue.ToString()));
+            }
         }
 
         [Theory]
@@ -122,20 +119,12 @@ namespace TestProject
 
             await i.Connect();
             var consumerTag = await i.Setup();
-            Thread.Sleep(3); // Let's get a value.
 
             var monitor = new MapekMonitor(mock);
             Assert.True(AMQTempSensor._onceOnly);
             var cache = monitor.Monitor();
 
-            var simulationTree = new SimulationTreeNode
-            {
-                NodeItem = new Simulation(cache.PropertyCache),
-                Children = []
-            };
-
-            var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<Logic.Models.OntologicalModels.Action>>(), cache.PropertyCache);
-            mapekPlan.Simulate(simulations, []);
+            var (simulationTree, simulations, optimalSimulationPath) = mapekPlan.Plan(cache, lookAheadCycles);
             Assert.False(AMQTempSensor._onceOnly); // Must've been used.
 
             // Only valid AFTER focing evaluation through simulation:
@@ -218,6 +207,11 @@ namespace TestProject
                 process.WaitForExit();
                 Assert.Equal(0, process.ExitCode);
             }
+        }
+
+        public void Dispose() {
+            // Marker in output because sometimes FMU-crashes confuse the testing framework:
+            Trace.WriteLine("We didn't crash, yay!");
         }
 
         internal class Factory : IFactory

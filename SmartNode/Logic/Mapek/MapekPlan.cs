@@ -357,7 +357,7 @@ namespace Logic.Mapek
             return true;
         }
 
-        public static IEnumerable<IEnumerable<T>> GetNaryCartesianProducts<T> (IEnumerable<IEnumerable<T>> sequences)
+        internal static IEnumerable<IEnumerable<T>> GetNaryCartesianProducts<T> (IEnumerable<IEnumerable<T>> sequences)
         {
             IEnumerable<IEnumerable<T>> emptyProduct = new[] { Enumerable.Empty<T>() };
             return sequences.Aggregate(
@@ -470,9 +470,8 @@ namespace Logic.Mapek
             return observableProperties;
         }
 
-        public FmuModel GetHostPlatformFmuModel(Simulation simulation, string fmuDirectory) {
+        private FmuModel GetHostPlatformFmuModel(Simulation simulation, string fmuDirectory) {
             // Retrieve the Platform (TT) FMU to be used for Actuators and/or ConfigurableParameters.
-
             var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?fmuModel ?fmuFilePath ?simulationFidelitySeconds WHERE {
                 ?platform rdf:type sosa:Platform .
                 ?platform meta:hasSimulationModel ?fmuModel .
@@ -777,7 +776,7 @@ namespace Logic.Mapek
             return propertyChangesToOptimizeFor;
         }
 
-        public void LogOptimalSimulationPath(SimulationPath optimalSimulationPath)
+        internal void LogOptimalSimulationPath(SimulationPath optimalSimulationPath)
         {
             var logMsg = "Chosen optimal path, Actuation actions:\n";
 

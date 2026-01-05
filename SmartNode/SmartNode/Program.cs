@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using System.Reflection;
 
 namespace SmartNode
@@ -43,6 +44,7 @@ namespace SmartNode
             builder.Services.AddSingleton(coordinatorSettings!);
             builder.Services.AddSingleton(databaseSettings!);
             // Register a factory to allow for dynamic constructor argument passing through DI.
+            builder.Services.AddSingleton(serviceProvider => new MongoClient(databaseSettings!.ConnectionString));
             builder.Services.AddSingleton<ICaseRepository, CaseRepository>(serviceProvider => new CaseRepository(serviceProvider));
             builder.Services.AddSingleton<IFactory, Factory>(serviceProvider => new Factory(coordinatorSettings!.UseSimulatedEnvironment));
             builder.Services.AddSingleton<IMapekMonitor, MapekMonitor>(serviceProvider => new MapekMonitor(serviceProvider));

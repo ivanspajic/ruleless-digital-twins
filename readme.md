@@ -49,7 +49,8 @@ The codebase uses a `appsettings.json` in the `SmartNode/Properties` directory a
 2. Coordinator settings:
   - `MaximumMapekRounds`: the maximum number of MAPE-K cycles to run before termination. Setting this value to -1 runs the solution indefinitely.
   - `UseSimulatedEnvironment`: a boolean value for using the preconfigured simulated environment or a real one.
-  - `SimulationDurationSeconds`: sets the duration of FMU simulations in seconds.
+  - `SaveMapekData`: a boolean for saving MAPE-K cycle data to the disk.
+  - `SimulationDurationSeconds`: sets the duration of simulations in FMU time (not real-world time).
   - `LookAheadMapekCycles`: the number of cycles to simulate the future for. Simulating further ahead can yield more optimal decisions in the long run, but more cycles generally means less prediction accuracy and more performance overhead.
   - `StartInReactiveMode`: a boolean for setting the starting mode of the coordinator. Running it in reactive mode means the system will only simulate corrective actions given the respective system actuators to mitigate the current optimal condition violations. In case of no violations of optimal conditions, the system will not simulate actions. In proactive mode, the system takes a proactive approach and simulates regardless of optimal condition status, subsequently including all existing system actuators. As a result, the proactive approach checks for potential violations of optimal conditions before they happen. Conversely, the reactive approach requires less simulating and is thus more performant.
   - `PropertyValueFuzziness`: to match encountered conditions with potentially preexisting solutions, a quantization technique is applied to enable matching against (virtually) infinite numbers of property values.

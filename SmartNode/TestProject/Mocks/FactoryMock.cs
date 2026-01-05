@@ -35,5 +35,9 @@ namespace TestProject.Mocks
 
             return null!;
         }
+
+        public void AddValueHandlerImplementation(string owlType, IValueHandler valueHandler) {
+            _valueHandlerImplementations.Add(owlType, valueHandler);
+        }
     }
 }

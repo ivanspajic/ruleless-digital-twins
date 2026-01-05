@@ -162,8 +162,8 @@ namespace TestProject {
                 DataDirectory = Path.Combine(rootDirectory, "state-data"),
                 FmuDirectory = Path.Combine(rootDirectory, "SmartNode", "Implementations", "FMUs")
             };
-            mock.Add(typeof(FilepathArguments), filepathArguments);
-            mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings {
+            mock.Add(filepathArguments);
+            mock.Add(new CoordinatorSettings {
                 LookAheadMapekCycles = 4,
                 MaximumMapekRounds = 4,
                 StartInReactiveMode = false,
@@ -171,7 +171,7 @@ namespace TestProject {
                 UseSimulatedEnvironment = true
             });
             mapekKnowledge = new MapekKnowledge(mock);
-            mock.Add(typeof(IMapekKnowledge), mapekKnowledge);
+            mock.Add(mapekKnowledge);
             mapekPlan = new MyMapekPlan(mock);
         }
 

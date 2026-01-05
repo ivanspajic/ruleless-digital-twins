@@ -14,7 +14,7 @@ namespace Logic.CaseRepository {
             _logger = serviceProvider.GetRequiredService<ILogger<CaseRepository>>();
 
             var databaseSettings = serviceProvider.GetRequiredService<DatabaseSettings>();
-            var mongoClient = new MongoClient(databaseSettings.ConnectionString);
+            var mongoClient = serviceProvider.GetRequiredService<MongoClient>();
             var mongoDatabase = mongoClient.GetDatabase(databaseSettings.DatabaseName);
             _caseCollection = mongoDatabase.GetCollection<Case>(databaseSettings.CollectionName);
         }

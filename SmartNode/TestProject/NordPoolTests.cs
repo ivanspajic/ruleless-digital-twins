@@ -90,7 +90,7 @@ namespace TestProject
             modelFilePath = Path.GetFullPath(modelFilePath);
 
             var mock = new ServiceProviderMock(new Factory());
-            mock.Add(typeof(FilepathArguments), new FilepathArguments {
+            mock.Add(new FilepathArguments {
                 InstanceModelFilepath = modelFilePath,
                 InferredModelFilepath = inferredFilePath,
                 InferenceEngineFilepath = Path.Combine(rootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar"),
@@ -99,7 +99,7 @@ namespace TestProject
                 DataDirectory = Path.Combine(rootDirectory, "state-data"),
                 FmuDirectory = Path.Combine(rootDirectory, "SmartNode", "Implementations", "FMUs")
             });
-            mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings {
+            mock.Add(new CoordinatorSettings {
                 LookAheadMapekCycles = 4,
                 MaximumMapekRounds = 4,
                 StartInReactiveMode = false,
@@ -107,7 +107,7 @@ namespace TestProject
                 UseSimulatedEnvironment = true
             });
             // TODO: not sure anymore if pulling it out was actually necessary in the end:
-            mock.Add(typeof(IMapekKnowledge), new MapekKnowledge(mock));
+            mock.Add(new MapekKnowledge(mock));
             var mapekPlan = new MyMapekPlan(mock, false);
 
             var propertyCacheMock = new PropertyCache {

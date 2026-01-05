@@ -106,6 +106,7 @@ namespace Logic.Mapek {
 
                     if (string.IsNullOrEmpty(potentialCase?.ID)) {
                         // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
+                        // TODO: use the simulation tree for visualization.
                         var (simulationTree, optimalSimulationPath) = _mapekPlan.Plan(cache, _coordinatorSettings.LookAheadMapekCycles);
 
                         // Build and assign the potential cases for the next cycle from the simulation results.
@@ -117,9 +118,11 @@ namespace Logic.Mapek {
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
                 _mapekExecute.Execute(potentialCase.Simulation!, _coordinatorSettings.UseSimulatedEnvironment);
 
-                // Write MAPE-K state to CSV.
-                CsvUtils.WritePropertyStatesToCsv(_filepathArguments.DataDirectory, currentRound, cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
-                CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentRound, potentialCase.Simulation!);
+                // If configured, write MAPE-K state to CSV.
+                if (_coordinatorSettings.SaveMapekCycleData) {
+                    CsvUtils.WritePropertyStatesToCsv(_filepathArguments.DataDirectory, currentRound, cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
+                    CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentRound, potentialCase.Simulation!);
+                }
 
                 if (_coordinatorSettings.MaximumMapekRounds > 0) {
                     _coordinatorSettings.MaximumMapekRounds--;

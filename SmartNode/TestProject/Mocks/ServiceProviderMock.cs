@@ -8,7 +8,7 @@ namespace TestProject.Mocks
     {
         private readonly Dictionary<Type, object?> _serviceImplementationMocks;
 
-        public ServiceProviderMock(IFactory? factory) {
+        public ServiceProviderMock(IFactory factory = null!) {
             _serviceImplementationMocks = new() {
                 { typeof(ILogger<IMapekPlan>), new LoggerMock<IMapekPlan>() },
                 { typeof(ILogger<IMapekKnowledge>), new LoggerMock<IMapekKnowledge>() },
@@ -27,8 +27,8 @@ namespace TestProject.Mocks
             return null;
         }
 
-        public void Add(Type o, object k) { // TODO: Review
-            _serviceImplementationMocks.Add(o, k);
+        public void Add<T>(T t) { // TODO: Review
+            _serviceImplementationMocks.Add(typeof(T), t);
         }
     }
 }

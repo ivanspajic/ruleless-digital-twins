@@ -1,5 +1,4 @@
-﻿using Logic.FactoryInterface;
-using Logic.Mapek;
+﻿using Logic.Mapek;
 using Microsoft.Extensions.Logging;
 
 namespace TestProject.Mocks
@@ -8,12 +7,12 @@ namespace TestProject.Mocks
     {
         private readonly Dictionary<Type, object?> _serviceImplementationMocks;
 
-        public ServiceProviderMock(IFactory factory = null!) {
+        public ServiceProviderMock() {
             _serviceImplementationMocks = new() {
                 { typeof(ILogger<IMapekPlan>), new LoggerMock<IMapekPlan>() },
                 { typeof(ILogger<IMapekKnowledge>), new LoggerMock<IMapekKnowledge>() },
                 { typeof(ILogger<IMapekMonitor>), new LoggerMock<IMapekMonitor>() },
-                { typeof(IFactory), factory ?? new FactoryMock() }
+                { typeof(ILogger<IMapekManager>), new LoggerMock<IMapekManager>() }
             };
         }
 
@@ -27,7 +26,7 @@ namespace TestProject.Mocks
             return null;
         }
 
-        public void Add<T>(T t) { // TODO: Review
+        public void Add<T>(T t) {
             _serviceImplementationMocks.Add(typeof(T), t);
         }
     }

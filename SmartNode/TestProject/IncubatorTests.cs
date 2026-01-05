@@ -152,7 +152,8 @@ namespace TestProject {
                 }
             }
 
-            mock = new ServiceProviderMock(new Factory());
+            mock = new ServiceProviderMock();
+            mock.Add<IFactory>(new Factory());
             filepathArguments = new FilepathArguments {
                 InstanceModelFilepath = modelFilePath,
                 InferredModelFilepath = inferredFilePath,

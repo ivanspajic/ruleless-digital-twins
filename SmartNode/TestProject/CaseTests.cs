@@ -1,5 +1,9 @@
-﻿using Implementations.ValueHandlers;
+﻿using CsvHelper;
+using Implementations.ValueHandlers;
+using Logic.CaseRepository;
+using Logic.FactoryInterface;
 using Logic.Mapek;
+using Logic.Mapek.Comparers;
 using Logic.Models.DatabaseModels;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
@@ -22,7 +26,7 @@ namespace TestProject {
         [Fact]
         public void Successful_case_saved() {
             // Arrange
-            // Make a FilepathArguments POCO for MapekManager, but don't include any real paths as these won't be necessary.
+            // Set up all the DTOs.
             var observedCacheMock = new Cache {
                 OptimalConditions = new List<OptimalCondition> {
                     new OptimalCondition {
@@ -142,6 +146,7 @@ namespace TestProject {
                 }
             };
 
+            // Make FilepathArguments and DatabaseSettings POCOs for MapekManager, but don't include any real content as it won't be necessary.
             var filepathArguments = new FilepathArguments {
                 DataDirectory = "",
                 FmuDirectory = "",
@@ -150,6 +155,11 @@ namespace TestProject {
                 InferredModelFilepath = "",
                 InstanceModelFilepath = "",
                 OntologyFilepath = ""
+            };
+            var databaseSettings = new DatabaseSettings {
+                CollectionName = "",
+                ConnectionString = "",
+                DatabaseName = ""
             };
             var coordinatorSettings = new CoordinatorSettings {
                 LookAheadMapekCycles = 2,
@@ -160,36 +170,90 @@ namespace TestProject {
                 StartInReactiveMode = false,
                 UseSimulatedEnvironment = true
             };
-            var databaseSettings = new DatabaseSettings {
-                CollectionName = "",
-                ConnectionString = "",
-                DatabaseName = ""
-            };
             var serviceProviderMock = new ServiceProviderMock();
             serviceProviderMock.Add(filepathArguments);
             serviceProviderMock.Add(databaseSettings);
             serviceProviderMock.Add(coordinatorSettings);
 
+            // Set up all the services.
             var doubleValueHandler = new DoubleValueHandler();
             var factoryMock = new FactoryMock();
             factoryMock.AddValueHandlerImplementation("http://www.w3.org/2001/XMLSchema#double", doubleValueHandler);
-            serviceProviderMock.Add(factoryMock);
+            serviceProviderMock.Add<Logic.FactoryInterface.IFactory>(factoryMock);
 
             var caseRepositoryMock = new CaseRepositoryMock();
+            var mapekKnowledgeMock = new MapekKnowledgeMock();
             var mapekMonitorMock = new MapekMonitorMock(observedCacheMock);
             var mapekPlanMock = new MapekPlanMock((simulationTreeNode, simulationPath));
             var mapekExecuteMock = new MapekExecuteMock();
-            serviceProviderMock.Add(caseRepositoryMock);
-            serviceProviderMock.Add(mapekMonitorMock);
-            serviceProviderMock.Add(mapekPlanMock);
-            serviceProviderMock.Add(mapekExecuteMock);
+            serviceProviderMock.Add<ICaseRepository>(caseRepositoryMock);
+            serviceProviderMock.Add<IMapekKnowledge>(mapekKnowledgeMock);
+            serviceProviderMock.Add<IMapekMonitor>(mapekMonitorMock);
+            serviceProviderMock.Add<IMapekPlan>(mapekPlanMock);
+            serviceProviderMock.Add<IMapekExecute>(mapekExecuteMock);
             var mapekManager = new MapekManager(serviceProviderMock);
+
+            // Make the expected case containing the same properties as in the observed cache but with quantized values.
+            var expectedCase = new Case {
+                ID = null,
+                Index = 0,
+                LookAheadCycles = 2,
+                SimulationDurationSeconds = 100,
+                Simulation = simulationPath.Simulations.First(),
+                QuantizedOptimalConditions = new List<OptimalCondition> {
+                    new OptimalCondition {
+                        Name = "FakeOptimalCondition1",
+                        ReachedInMaximumSeconds = 0,
+                        Property = "FakeProperty1",
+                        ConstraintValueType = "http://www.w3.org/2001/XMLSchema#double",
+                        UnsatisfiedAtomicConstraints = [],
+                        Constraints = new List<ConstraintExpression> {
+                            new AtomicConstraintExpression {
+                                ConstraintType = ConstraintType.GreaterThan,
+                                Right = 22.5
+                            }
+                        }
+                    },
+                    new OptimalCondition {
+                        Name = "FakeOptimalCondition2",
+                        ReachedInMaximumSeconds = 0,
+                        Property = "FakeProperty2",
+                        ConstraintValueType = "http://www.w3.org/2001/XMLSchema#double",
+                        UnsatisfiedAtomicConstraints = [],
+                        Constraints = new List<ConstraintExpression> {
+                            new AtomicConstraintExpression {
+                                ConstraintType = ConstraintType.LessThanOrEqualTo,
+                                Right = 12.25
+                            }
+                        }
+                    }
+                },
+                QuantizedProperties = new List<Property> {
+                    new Property {
+                        Name = "FakeProperty1",
+                        OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                        Value = 22.75
+                    },
+                    new Property {
+                        Name = "FakeProperty2",
+                        OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                        Value = 12
+                    }
+                }
+            };
 
             // Act
             mapekManager.StartLoop();
 
+            var actualCase = caseRepositoryMock.Cases[0];
+
             // Assert
-            // TODO: make sure the case saved in the mock is the same as expected
+            Assert.Equal(expectedCase.Index, actualCase.Index);
+            Assert.Equal(expectedCase.LookAheadCycles, actualCase.LookAheadCycles);
+            Assert.Equal(expectedCase.Simulation.Index, actualCase.Simulation!.Index);
+            Assert.Equal(expectedCase.Simulation.Actions, actualCase.Simulation.Actions, new ActionEqualityComparer());
+            Assert.Equal(expectedCase.QuantizedProperties, actualCase.QuantizedProperties, new PropertyComparer());
+            Assert.Equal(expectedCase.QuantizedOptimalConditions, actualCase.QuantizedOptimalConditions, new OptimalConditionComparer());
         }
     }
 }

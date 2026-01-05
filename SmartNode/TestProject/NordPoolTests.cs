@@ -89,7 +89,8 @@ namespace TestProject
             modelFilePath = Path.Combine(rootDirectory, $"models-and-rules{Path.DirectorySeparatorChar}{model}");
             modelFilePath = Path.GetFullPath(modelFilePath);
 
-            var mock = new ServiceProviderMock(new Factory());
+            var mock = new ServiceProviderMock();
+            mock.Add<IFactory>(new Factory());
             mock.Add(new FilepathArguments {
                 InstanceModelFilepath = modelFilePath,
                 InferredModelFilepath = inferredFilePath,
@@ -107,7 +108,7 @@ namespace TestProject
                 UseSimulatedEnvironment = true
             });
             // TODO: not sure anymore if pulling it out was actually necessary in the end:
-            mock.Add(new MapekKnowledge(mock));
+            mock.Add<IMapekKnowledge>(new MapekKnowledge(mock));
             var mapekPlan = new MyMapekPlan(mock, false);
 
             var propertyCacheMock = new PropertyCache {

@@ -8,6 +8,7 @@ using Logic.ValueHandlerInterfaces;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks;
+using Logic.Models.DatabaseModels;
 
 namespace TestProject
 {
@@ -101,8 +102,8 @@ namespace TestProject
             mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings {
                 LookAheadMapekCycles = 4,
                 MaximumMapekRounds = 4,
-                ReactiveMode = false,
-                SimulationTimeSeconds = 10,
+                StartInReactiveMode = false,
+                SimulationDurationSeconds = 10,
                 UseSimulatedEnvironment = true
             });
             // TODO: not sure anymore if pulling it out was actually necessary in the end:

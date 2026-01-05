@@ -4,10 +4,12 @@
 
         public bool UseSimulatedEnvironment { get; set; }
 
-        public int SimulationTimeSeconds { get; set; }
+        public int SimulationDurationSeconds { get; set; }
 
         public int LookAheadMapekCycles { get; set; }
 
-        public bool ReactiveMode { get; set; }
+        public bool StartInReactiveMode { get; set; }
+
+        public double PropertyValueFuzziness { get; set; }
     }
 }

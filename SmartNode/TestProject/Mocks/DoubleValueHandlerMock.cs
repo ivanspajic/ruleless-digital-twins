@@ -1,6 +1,5 @@
 ﻿using Femyou;
 using Logic.Models.MapekModels;
-using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 using TestProject.Mocks.EqualityComparers;
 
@@ -72,13 +71,7 @@ namespace TestProject.Mocks
             throw new NotImplementedException();
         }
 
-        public IEnumerable<object> GetPossibleValuesForActuationAction(Actuator actuator)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, Effect effect)
-        {
+        public object GetQuantizedValue(object value, double fuzziness) {
             throw new NotImplementedException();
         }
 

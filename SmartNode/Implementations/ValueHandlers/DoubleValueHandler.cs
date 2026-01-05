@@ -1,4 +1,5 @@
-﻿using Femyou;
+﻿using CsvHelper;
+using Femyou;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
@@ -23,14 +24,6 @@ namespace Implementations.ValueHandlers
         {
             { ConstraintType.And, EvaluateAnd },
             { ConstraintType.Or, EvaluateOr }
-        };
-
-        // When calculating possible reconfiguration values for ConfigurableParameters, some parameters may need specific logic to do so. For example,
-        // it may be inaccurate to simply take the min-max value range and divide it by the simulation granularity in a completely linear way. For this
-        // reason, the user may register custom logic delegates and map them to specific ConfigurableParameter names.
-        private static readonly Dictionary<string, Func<object, Effect, IEnumerable<object>>> _configurableParameterPossibleValuesMap = new()
-        {
-            { "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/Epsilon", GetPossibleEpsilonValues }
         };
 
         public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression, object propertyValue)
@@ -106,19 +99,6 @@ namespace Implementations.ValueHandlers
         public IEnumerable<object> GetPossibleValuesForActuationAction(Actuator actuator)
         {
             throw new NotImplementedException();
-        }
-
-        // This can be removed. It's only being referenced by obsolete MapekAnalyze.
-        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, Effect effect)
-        {
-            if (_configurableParameterPossibleValuesMap.TryGetValue(configurableParameter.Name, out Func<object, Effect, IEnumerable<object>>? configurableParameterLogic))
-            {
-                return configurableParameterLogic(configurableParameter.Value, effect);
-            }
-            else
-            {
-                throw new ArgumentException($"ConfigurableParameter {configurableParameter.Name} has no implementation for possible values.");
-            }
         }
 
         public int IncreaseComp(object comparingValue, object targetValue)
@@ -201,6 +181,22 @@ namespace Implementations.ValueHandlers
             return ((double)value).ToString(CultureInfo.InvariantCulture);
         }
 
+        public object GetQuantizedValue(object value, double fuzziness) {
+            if (value is not double) {
+                value = double.Parse(value.ToString()!, CultureInfo.InvariantCulture);
+            }
+
+            var factor = (double)value / fuzziness;
+            var remainder = (double)value % fuzziness;
+            var halfFuzziness = fuzziness / 2;
+
+            if (remainder > halfFuzziness) {
+                return Math.Ceiling(factor) * fuzziness;
+            } else {
+                return Math.Floor(factor) * fuzziness;
+            }
+        }
+
         private static bool EvaluateGreaterThan(double sensorValue, double optimalConditionValue)
         {
             return sensorValue > optimalConditionValue;
@@ -229,39 +225,6 @@ namespace Implementations.ValueHandlers
         private static bool EvaluateOr(bool left, bool right)
         {
             return left || right;
-        }
-
-        private static IEnumerable<object> GetPossibleEpsilonValues(object currentValue, Effect effect)
-        {
-            var rangeGranularity = 10;
-
-            if (currentValue is not double)
-            {
-                currentValue = double.Parse(currentValue.ToString()!, CultureInfo.InvariantCulture);
-            }
-
-            var currentValueDouble = (double)currentValue;
-
-            var minimumValue = 0.0;
-            var maximumValue = 12.0;
-
-            var possibleValues = new List<object>
-            {
-                currentValueDouble
-            };
-
-            var valueRange = maximumValue - minimumValue;
-            var intervalSize = valueRange / (rangeGranularity - 1);
-
-            for (var i = minimumValue; i < maximumValue; i += intervalSize)
-            {
-                if ((effect == Effect.ValueIncrease && i > currentValueDouble) || (effect == Effect.ValueDecrease && i < currentValueDouble))
-                {
-                    possibleValues.Add(i);
-                }
-            }
-
-            return possibleValues;
         }
     }
 }

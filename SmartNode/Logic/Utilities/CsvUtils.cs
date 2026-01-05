@@ -9,16 +9,19 @@ namespace Logic.Utilities
 {
     internal static class CsvUtils
     {
-        public static void WritePropertyStatesToCsv(string directoryPath, int roundNumber, PropertyCache propertyCache)
+        public static void WritePropertyStatesToCsv(string directoryPath,
+            int roundNumber,
+            IDictionary<string, ConfigurableParameter> configurableParameterKeyValuePairs,
+            IDictionary<string, Property> propertyKeyValuePairs)
         {
-            foreach (var propertyKeyValuePair in propertyCache.Properties)
+            foreach (var propertyKeyValuePair in propertyKeyValuePairs)
             {
                 var simpleName = MapekUtilities.GetSimpleName(propertyKeyValuePair.Key);
                 var filePath = Path.Combine(directoryPath, simpleName + ".csv");
                 CsvUtils.WritePropertyState(filePath, roundNumber, simpleName, propertyKeyValuePair.Value.Value);
             }
 
-            foreach (var configurableParameterKeyValuePair in propertyCache.ConfigurableParameters)
+            foreach (var configurableParameterKeyValuePair in configurableParameterKeyValuePairs)
             {
                 var simpleName = MapekUtilities.GetSimpleName(configurableParameterKeyValuePair.Key);
                 var filePath = Path.Combine(directoryPath, simpleName + ".csv");
@@ -26,29 +29,27 @@ namespace Logic.Utilities
             }
         }
 
-        public static void WriteActuatorStatesToCsv(string directoryPath, int roundNumber, SimulationPath simulationPath) {
+        public static void WriteActuatorStatesToCsv(string directoryPath, int roundNumber, Simulation simulation) {
             var actuatorConfigurableParameterValues = new Dictionary<string, List<object>>();
 
-            foreach (var simulationTick in simulationPath.Simulations) {
-                foreach (var action in simulationTick.Actions) {
-                    string simpleName;
-                    object newStateOrValue;
-                    if (action is ActuationAction actuationAction) {
-                        simpleName = MapekUtilities.GetSimpleName(actuationAction.Actuator.Name);
-                        newStateOrValue = actuationAction.NewStateValue;
-                    } else {
-                        var reconfigurationAction = (ReconfigurationAction)action;
-                        simpleName = MapekUtilities.GetSimpleName(reconfigurationAction.ConfigurableParameter.Name);
-                        newStateOrValue = reconfigurationAction.NewParameterValue;
-                    }
+            foreach (var action in simulation.Actions) {
+                string simpleName;
+                object newStateOrValue;
+                if (action is ActuationAction actuationAction) {
+                    simpleName = MapekUtilities.GetSimpleName(actuationAction.Actuator.Name);
+                    newStateOrValue = actuationAction.NewStateValue;
+                } else {
+                    var reconfigurationAction = (ReconfigurationAction)action;
+                    simpleName = MapekUtilities.GetSimpleName(reconfigurationAction.ConfigurableParameter.Name);
+                    newStateOrValue = reconfigurationAction.NewParameterValue;
+                }
 
-                    if (actuatorConfigurableParameterValues.TryGetValue(simpleName, out List<object>? value)) {
-                        value.Add(newStateOrValue);
-                    } else {
-                        actuatorConfigurableParameterValues.Add(simpleName, new List<object> {
-                            newStateOrValue
-                        });
-                    }
+                if (actuatorConfigurableParameterValues.TryGetValue(simpleName, out List<object>? value)) {
+                    value.Add(newStateOrValue);
+                } else {
+                    actuatorConfigurableParameterValues.Add(simpleName, new List<object> {
+                        newStateOrValue
+                    });
                 }
             }
 

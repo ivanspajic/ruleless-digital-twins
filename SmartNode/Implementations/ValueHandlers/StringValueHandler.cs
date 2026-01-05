@@ -1,6 +1,5 @@
 ﻿using Femyou;
 using Logic.Models.MapekModels;
-using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 using System.Globalization;
 
@@ -11,14 +10,6 @@ namespace Implementations.ValueHandlers
     
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues){
             throw new NotImplementedException();
-        }
-
-        public IEnumerable<object> GetPossibleValuesForActuationAction(Actuator actuator) {
-            throw new ArgumentException($"Actuator {actuator.Name} has no implementation for possible values.");
-        }
-
-        public IEnumerable<object> GetPossibleValuesForReconfigurationAction(ConfigurableParameter configurableParameter, Effect effect) {
-            throw new ArgumentException($"ConfigurableParameter {configurableParameter} has no implementation for possible values.");
         }
 
         public object GetInitialValueForConfigurableParameter(string configurableParameter) {
@@ -57,6 +48,10 @@ namespace Implementations.ValueHandlers
         }
 
         public int IncreaseComp(object comparingValue, object targetValue) {
+            throw new NotImplementedException();
+        }
+
+        public object GetQuantizedValue(object value, double fuzziness) {
             throw new NotImplementedException();
         }
     }

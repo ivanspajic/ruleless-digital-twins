@@ -10,10 +10,8 @@ using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks;
 
-namespace TestProject
-{
-    public class IncubatorTests : IDisposable
-    {
+namespace TestProject {
+    public class IncubatorTests : IDisposable {
         static bool runInference = false; // `false` can be overriden by logic below.
         // IP is coming from "docket network create // inspect" -> rabbitmq-ip or variations thereof:
         static IncubatorAdapter i = new("172.20.0.2", TestContext.Current.CancellationToken);
@@ -21,7 +19,7 @@ namespace TestProject
 
         private class MyMapekPlan : MapekPlan {
 
-            public MyMapekPlan(IServiceProvider serviceProvider) : base(serviceProvider) {}
+            public MyMapekPlan(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
             protected override void InferActionCombinations() {
                 // Call Java explicitly?
@@ -33,8 +31,7 @@ namespace TestProject
 
         [Theory]
         [InlineData("Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
-        public void SimulateFMUOnly(string fromPython, string model, string inferred, int lookAheadCycles)
-        {
+        public void SimulateFMUOnly(string fromPython, string model, string inferred, int lookAheadCycles) {
             SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
 
             // TODO: Prototype populate cache from FMU.
@@ -46,8 +43,7 @@ namespace TestProject
             fmu.Dispose(); // Don't forget this or you'll get segfaults when loading the FMU "again" later.
             // END Prototype
 
-            var propertyCacheMock = new PropertyCache
-            {
+            var propertyCacheMock = new PropertyCache {
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter>(),
                 // TODO: Ideally we wouldn't need those, and either start with `undefined` or use the FMU's values.
 
@@ -90,15 +86,14 @@ namespace TestProject
             mapekKnowledge.Validate(propertyCacheMock);
 
             // TODO: Assert that there's at least one actuator that's not a parameter.
-            var (simulationTree, simulations, optimalSimulationPath) = mapekPlan.Plan(new Cache(){PropertyCache = propertyCacheMock, SoftSensorTreeNodes=[]}, lookAheadCycles);
+            var (simulationTree, optimalSimulationPath) = mapekPlan.Plan(new Cache() { PropertyCache = propertyCacheMock, OptimalConditions = [], SoftSensorTreeNodes = [] }, lookAheadCycles);
 
             // Only valid AFTER focing evaluation through simulation:
             Assert.Equal(Math.Pow(2, lookAheadCycles), simulationTree.SimulationPaths.Count());
             Assert.Equal(30, simulationTree.ChildrenCount);
             var path = simulationTree.SimulationPaths.First();
 
-            foreach (var s in path.Simulations)
-            {
+            foreach (var s in path.Simulations) {
                 Trace.WriteLine(string.Join(";", s.Actions.Select(a => a.Name)));
                 Trace.WriteLine("Params: " + string.Join(";", s.InitializationActions.Select(a => a.Name).ToList()));
                 Trace.WriteLine("Inputs: " + string.Join(";", s.Actions.Select(a => a.Name).ToList()));
@@ -107,14 +102,13 @@ namespace TestProject
             // Cold room, assert that the optimal path is heading in the right direction:
             Assert.Equal(4, optimalSimulationPath.Simulations.Count());
             foreach (var s in optimalSimulationPath.Simulations) {
-                Assert.True(s.Actions.All(a => "1" == ((ActuationAction) a).NewStateValue.ToString()));
+                Assert.True(s.Actions.All(a => "1" == ((ActuationAction)a).NewStateValue.ToString()));
             }
         }
 
         [Theory]
         [InlineData("Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
-        public async Task SimulateFromAMQ(string fromPython, string model, string inferred, int lookAheadCycles)
-        {
+        public async Task SimulateFromAMQ(string fromPython, string model, string inferred, int lookAheadCycles) {
             SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
 
             await i.Connect();
@@ -124,7 +118,7 @@ namespace TestProject
             Assert.True(AMQTempSensor._onceOnly);
             var cache = monitor.Monitor();
 
-            var (simulationTree, simulations, optimalSimulationPath) = mapekPlan.Plan(cache, lookAheadCycles);
+            var (simulationTree, optimalSimulationPath) = mapekPlan.Plan(cache, lookAheadCycles);
             Assert.False(AMQTempSensor._onceOnly); // Must've been used.
 
             // Only valid AFTER focing evaluation through simulation:
@@ -132,16 +126,14 @@ namespace TestProject
             Assert.Equal(30, simulationTree.ChildrenCount);
             var path = simulationTree.SimulationPaths.First();
 
-            foreach (var s in path.Simulations)
-            {
+            foreach (var s in path.Simulations) {
                 Trace.WriteLine(string.Join(";", s.Actions.Select(a => a.Name)));
                 Trace.WriteLine("Params: " + string.Join(";", s.InitializationActions.Select(a => a.Name).ToList()));
                 Trace.WriteLine("Inputs: " + string.Join(";", s.Actions.Select(a => a.Name).ToList()));
             }
         }
 
-        private static void SetupFiles(string fromPython, string model, string inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan)
-        {
+        private static void SetupFiles(string fromPython, string model, string inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan) {
             var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
             var modelDirPath = Path.Combine(rootDirectory, "models-and-rules");
             var inferredFilePath = Path.Combine(modelDirPath, inferred);
@@ -153,7 +145,7 @@ namespace TestProject
                 File.Create(inferredFilePath).Close();
                 runInference = true;
             } else {
-                DateTime x,y;
+                DateTime x, y;
                 runInference = !((x = File.GetLastWriteTime(inferredFilePath)) > (y = File.GetLastWriteTime(modelFilePath)));
                 if (runInference) {
                     Trace.WriteLine($"Will regenerate inferred model because {inferredFilePath} ({x}) is older than {modelFilePath} ({y})");
@@ -161,8 +153,7 @@ namespace TestProject
             }
 
             mock = new ServiceProviderMock(new Factory());
-            filepathArguments = new FilepathArguments
-            {
+            filepathArguments = new FilepathArguments {
                 InstanceModelFilepath = modelFilePath,
                 InferredModelFilepath = inferredFilePath,
                 InferenceEngineFilepath = Path.Combine(rootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar"),
@@ -172,12 +163,11 @@ namespace TestProject
                 FmuDirectory = Path.Combine(rootDirectory, "SmartNode", "Implementations", "FMUs")
             };
             mock.Add(typeof(FilepathArguments), filepathArguments);
-            mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings
-            {
+            mock.Add(typeof(CoordinatorSettings), new CoordinatorSettings {
                 LookAheadMapekCycles = 4,
                 MaximumMapekRounds = 4,
-                ReactiveMode = false,
-                SimulationTimeSeconds = 10,
+                StartInReactiveMode = false,
+                SimulationDurationSeconds = 10,
                 UseSimulatedEnvironment = true
             });
             mapekKnowledge = new MapekKnowledge(mock);
@@ -214,8 +204,7 @@ namespace TestProject
             Trace.WriteLine("We didn't crash, yay!");
         }
 
-        internal class Factory : IFactory
-        {
+        internal class Factory : IFactory {
             private readonly Dictionary<string, IValueHandler> _valueHandlers = new() {
             { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
             { "double", new DoubleValueHandler() }, // FIXME
@@ -224,26 +213,22 @@ namespace TestProject
             { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
         };
-            public IActuator GetActuatorDeviceImplementation(string actuatorName)
-            {
+            public IActuator GetActuatorDeviceImplementation(string actuatorName) {
                 throw new NotImplementedException();
             }
 
-            public IConfigurableParameter GetConfigurableParameterImplementation(string configurableParameterName)
-            {
+            public IConfigurableParameter GetConfigurableParameterImplementation(string configurableParameterName) {
                 throw new NotImplementedException();
             }
 
-            public class AMQSensor(string sensorName, string procedureName, Func<IncubatorFields, double> f) : ISensor
-            {
+            public class AMQSensor(string sensorName, string procedureName, Func<IncubatorFields, double> f) : ISensor {
                 public bool _onceOnly = true;
 
                 public string SensorName { get; private init; } = sensorName;
 
                 public string ProcedureName { get; private init; } = procedureName;
 
-                public object ObservePropertyValue(params object[] inputProperties)
-                {
+                public object ObservePropertyValue(params object[] inputProperties) {
                     Assert.True(_onceOnly, "Really just expecting it to be called once here.");
                     IncubatorFields? myData = null;
                     Monitor.Enter(i);
@@ -264,10 +249,8 @@ namespace TestProject
                 throw new NotImplementedException($"{sensorName}/{procedureName}");
             }
 
-            public IValueHandler GetValueHandlerImplementation(string owlType)
-            {
-                if (_valueHandlers.TryGetValue(owlType, out IValueHandler? sensorValueHandler))
-                {
+            public IValueHandler GetValueHandlerImplementation(string owlType) {
+                if (_valueHandlers.TryGetValue(owlType, out IValueHandler? sensorValueHandler)) {
                     return sensorValueHandler;
                 }
                 throw new Exception($"No implementation was found for Sensor value handler for OWL type {owlType}.");

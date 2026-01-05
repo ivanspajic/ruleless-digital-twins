@@ -1,5 +1,7 @@
-﻿using Logic.FactoryInterface;
+﻿using Logic.CaseRepository;
+using Logic.FactoryInterface;
 using Logic.Mapek;
+using Logic.Models.DatabaseModels;
 using Logic.Models.MapekModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +21,7 @@ namespace SmartNode
 
             var filepathArguments = builder.Configuration.GetSection("FilepathArguments").Get<FilepathArguments>();
             var coordinatorSettings = builder.Configuration.GetSection("CoordinatorSettings").Get<CoordinatorSettings>();
+            var databaseSettings = builder.Configuration.GetSection("DatabaseSettings").Get<DatabaseSettings>();
 
             var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
 
@@ -38,10 +41,11 @@ namespace SmartNode
             });
             builder.Services.AddSingleton(filepathArguments);
             builder.Services.AddSingleton(coordinatorSettings!);
+            builder.Services.AddSingleton(databaseSettings!);
             // Register a factory to allow for dynamic constructor argument passing through DI.
+            builder.Services.AddSingleton<ICaseRepository, CaseRepository>(serviceProvider => new CaseRepository(serviceProvider));
             builder.Services.AddSingleton<IFactory, Factory>(serviceProvider => new Factory(coordinatorSettings!.UseSimulatedEnvironment));
             builder.Services.AddSingleton<IMapekMonitor, MapekMonitor>(serviceProvider => new MapekMonitor(serviceProvider));
-            builder.Services.AddSingleton<IMapekAnalyze, MapekAnalyze>(serviceProvider => new MapekAnalyze(serviceProvider));
             builder.Services.AddSingleton<IMapekPlan, MapekPlan>(serviceProvider => new MapekPlan(serviceProvider));
             builder.Services.AddSingleton<IMapekExecute, MapekExecute>(serviceProvider => new MapekExecute(serviceProvider));
             builder.Services.AddSingleton<IMapekKnowledge, MapekKnowledge>(serviceProvider => new MapekKnowledge(serviceProvider));

@@ -2,14 +2,14 @@
 using System.Diagnostics.CodeAnalysis;
 
 namespace Logic.Mapek.Comparers {
-    internal class OptimalConditionComparer : IEqualityComparer<OptimalCondition> {
+    internal class OptimalConditionEqualityComparer : IEqualityComparer<OptimalCondition> {
         public bool Equals(OptimalCondition? x, OptimalCondition? y) {
             return x!.Name.Equals(y!.Name) &&
                 x.Property.Equals(y.Property) &&
                 x.ConstraintValueType.Equals(y.ConstraintValueType) &&
                 x.ReachedInMaximumSeconds == y.ReachedInMaximumSeconds &&
-                x.UnsatisfiedAtomicConstraints.SequenceEqual(y.UnsatisfiedAtomicConstraints, new ConstraintExpressionComparer()) &&
-                x.Constraints.SequenceEqual(y.Constraints, new ConstraintExpressionComparer());
+                x.UnsatisfiedAtomicConstraints.SequenceEqual(y.UnsatisfiedAtomicConstraints, new ConstraintExpressionEqualityComparer()) &&
+                x.Constraints.SequenceEqual(y.Constraints, new ConstraintExpressionEqualityComparer());
         }
 
         public int GetHashCode([DisallowNull] OptimalCondition obj) {

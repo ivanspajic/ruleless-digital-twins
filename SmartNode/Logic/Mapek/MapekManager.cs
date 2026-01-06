@@ -141,8 +141,8 @@ namespace Logic.Mapek {
         private static bool CheckIfCaseResultMatchesObservedParameters(Case potentialCaseToSave,
             IEnumerable<Property> quantizedObservedProperties,
             IEnumerable<OptimalCondition> observedQuantizedOptimalConditions) {
-            return potentialCaseToSave.QuantizedProperties!.SequenceEqual(quantizedObservedProperties, new PropertyComparer()) &&
-                potentialCaseToSave.QuantizedOptimalConditions!.SequenceEqual(observedQuantizedOptimalConditions, new OptimalConditionComparer());
+            return potentialCaseToSave.QuantizedProperties!.SequenceEqual(quantizedObservedProperties, new PropertyEqualityComparer()) &&
+                potentialCaseToSave.QuantizedOptimalConditions!.SequenceEqual(observedQuantizedOptimalConditions, new OptimalConditionEqualityComparer());
         }
 
         private (IEnumerable<Property>, IEnumerable<OptimalCondition>) GetQuantizedPropertiesAndOptimalConditions(IDictionary<string, ConfigurableParameter> configurableParameters,

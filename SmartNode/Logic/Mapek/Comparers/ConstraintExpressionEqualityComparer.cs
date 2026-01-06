@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 
 namespace Logic.Mapek.Comparers {
-    internal class ConstraintExpressionComparer : IEqualityComparer<ConstraintExpression> {
+    internal class ConstraintExpressionEqualityComparer : IEqualityComparer<ConstraintExpression> {
         public bool Equals(ConstraintExpression? x, ConstraintExpression? y) {
             if (x is NestedConstraintExpression nestedX && y is NestedConstraintExpression nestedY) {
                 return nestedX.ConstraintType == nestedY.ConstraintType &&
@@ -12,7 +12,7 @@ namespace Logic.Mapek.Comparers {
                 var atomicY = (AtomicConstraintExpression)y!;
 
                 return atomicX.ConstraintType == atomicY.ConstraintType &&
-                    atomicX.Right.Equals(atomicY.Right);
+                    atomicX.Right.ToString()!.Equals(atomicY.Right.ToString());
             }
         }
 

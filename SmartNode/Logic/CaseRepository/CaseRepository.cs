@@ -30,8 +30,8 @@ namespace Logic.CaseRepository {
                 element.Index == index)
                 .ToEnumerable();
 
-            var match = potentialMatches.Where(element => element.QuantizedProperties!.SequenceEqual(quantizedProperties, new PropertyComparer()) &&
-                element.QuantizedOptimalConditions!.SequenceEqual(quantizedOptimalConditions, new OptimalConditionComparer()))
+            var match = potentialMatches.Where(element => element.QuantizedProperties!.SequenceEqual(quantizedProperties, new PropertyEqualityComparer()) &&
+                element.QuantizedOptimalConditions!.SequenceEqual(quantizedOptimalConditions, new OptimalConditionEqualityComparer()))
                 .FirstOrDefault()!;
 
             if (match is not null) {

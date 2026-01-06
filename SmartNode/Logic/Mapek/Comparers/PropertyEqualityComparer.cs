@@ -2,10 +2,10 @@
 using System.Diagnostics.CodeAnalysis;
 
 namespace Logic.Mapek.Comparers {
-    internal class PropertyComparer : IEqualityComparer<Property> {
+    internal class PropertyEqualityComparer : IEqualityComparer<Property> {
         public bool Equals(Property? x, Property? y) {
             return x!.Name.Equals(y!.Name) &&
-                x.Value.Equals(y.Value) &&
+                x.Value.ToString()!.Equals(y.Value.ToString()) &&
                 x.OwlType.Equals(y.OwlType);
         }
 

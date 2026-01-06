@@ -252,8 +252,8 @@ namespace TestProject {
             Assert.Equal(expectedCase.LookAheadCycles, actualCase.LookAheadCycles);
             Assert.Equal(expectedCase.Simulation.Index, actualCase.Simulation!.Index);
             Assert.Equal(expectedCase.Simulation.Actions, actualCase.Simulation.Actions, new ActionEqualityComparer());
-            Assert.Equal(expectedCase.QuantizedProperties, actualCase.QuantizedProperties, new PropertyComparer());
-            Assert.Equal(expectedCase.QuantizedOptimalConditions, actualCase.QuantizedOptimalConditions, new OptimalConditionComparer());
+            Assert.Equal(expectedCase.QuantizedProperties, actualCase.QuantizedProperties, new PropertyEqualityComparer());
+            Assert.Equal(expectedCase.QuantizedOptimalConditions, actualCase.QuantizedOptimalConditions, new OptimalConditionEqualityComparer());
         }
     }
 }

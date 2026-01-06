@@ -98,7 +98,7 @@ namespace Logic.Mapek {
                 // If there is no potential case from a sequence of cases, try finding a match for the current conditions in the database. In case of no match, run the Plan phase and
                 // simulate future cycles.
                 if (potentialCase is null) {
-                    potentialCase = _caseRepository.GetCase(quantizedPropertyCacheOptimalConditionTuple.Item1,
+                    potentialCase = _caseRepository.ReadCase(quantizedPropertyCacheOptimalConditionTuple.Item1,
                         quantizedPropertyCacheOptimalConditionTuple.Item2,
                         _coordinatorSettings.LookAheadMapekCycles,
                         _coordinatorSettings.SimulationDurationSeconds,

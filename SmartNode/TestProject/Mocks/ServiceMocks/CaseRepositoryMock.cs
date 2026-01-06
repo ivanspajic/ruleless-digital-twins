@@ -2,7 +2,7 @@
 using Logic.Models.DatabaseModels;
 using Logic.Models.OntologicalModels;
 
-namespace TestProject.Mocks {
+namespace TestProject.Mocks.ServiceMocks {
     public class CaseRepositoryMock : ICaseRepository {
         public CaseRepositoryMock() {
             Cases = [];
@@ -14,7 +14,7 @@ namespace TestProject.Mocks {
             Cases.Add(caseToCreate);
         }
 
-        public Case GetCase(IEnumerable<Property> quantizedProperties,
+        public Case ReadCase(IEnumerable<Property> quantizedProperties,
             IEnumerable<OptimalCondition> quantizedOptimalConditions,
             int lookAheadCycles,
             int simulationDurationSeconds,

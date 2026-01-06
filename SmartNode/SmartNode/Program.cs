@@ -44,7 +44,7 @@ namespace SmartNode
             builder.Services.AddSingleton(coordinatorSettings!);
             builder.Services.AddSingleton(databaseSettings!);
             // Register a factory to allow for dynamic constructor argument passing through DI.
-            builder.Services.AddSingleton(serviceProvider => new MongoClient(databaseSettings!.ConnectionString));
+            builder.Services.AddSingleton<IMongoClient, MongoClient>(serviceProvider => new MongoClient(databaseSettings!.ConnectionString));
             builder.Services.AddSingleton<ICaseRepository, CaseRepository>(serviceProvider => new CaseRepository(serviceProvider));
             builder.Services.AddSingleton<IFactory, Factory>(serviceProvider => new Factory(coordinatorSettings!.UseSimulatedEnvironment));
             builder.Services.AddSingleton<IMapekMonitor, MapekMonitor>(serviceProvider => new MapekMonitor(serviceProvider));

@@ -11,23 +11,23 @@ namespace Logic.CaseRepository {
         private readonly ILogger<ICaseRepository> _logger;
 
         public CaseRepository(IServiceProvider serviceProvider) {
-            _logger = serviceProvider.GetRequiredService<ILogger<CaseRepository>>();
+            _logger = serviceProvider.GetRequiredService<ILogger<ICaseRepository>>();
 
             var databaseSettings = serviceProvider.GetRequiredService<DatabaseSettings>();
-            var mongoClient = serviceProvider.GetRequiredService<MongoClient>();
+            var mongoClient = serviceProvider.GetRequiredService<IMongoClient>();
             var mongoDatabase = mongoClient.GetDatabase(databaseSettings.DatabaseName);
             _caseCollection = mongoDatabase.GetCollection<Case>(databaseSettings.CollectionName);
         }
 
-        public Case GetCase(IEnumerable<Property> quantizedProperties,
+        public Case ReadCase(IEnumerable<Property> quantizedProperties,
             IEnumerable<OptimalCondition> quantizedOptimalConditions,
             int lookAheadCycles,
             int simulationDurationSeconds,
-            int index) {
+            int caseIndex) {
             var potentialMatches = _caseCollection.Find(element =>
                 element.LookAheadCycles == lookAheadCycles &&
                 element.SimulationDurationSeconds == simulationDurationSeconds &&
-                element.Index == index)
+                element.Index == caseIndex)
                 .ToEnumerable();
 
             var match = potentialMatches.Where(element => element.QuantizedProperties!.SequenceEqual(quantizedProperties, new PropertyEqualityComparer()) &&

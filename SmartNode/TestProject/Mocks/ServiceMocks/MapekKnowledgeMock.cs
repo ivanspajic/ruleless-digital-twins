@@ -1,9 +1,10 @@
 ﻿using Logic.Mapek;
 using Logic.Models.OntologicalModels;
+using TestProject.Mocks.Sparql;
 using VDS.RDF;
 using VDS.RDF.Query;
 
-namespace TestProject.Mocks {
+namespace TestProject.Mocks.ServiceMocks {
     internal class MapekKnowledgeMock : IMapekKnowledge {
         private readonly Dictionary<string, SparqlResultSet> _queryResults = new() {
             { 

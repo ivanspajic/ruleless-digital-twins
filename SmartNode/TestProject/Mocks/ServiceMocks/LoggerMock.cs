@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
-namespace TestProject.Mocks
+namespace TestProject.Mocks.ServiceMocks
 {
     internal class LoggerMock<T> : ILogger<T>
     {

@@ -2,7 +2,7 @@
 using Logic.Models.MapekModels;
 using Logic.ValueHandlerInterfaces;
 
-namespace TestProject.Mocks
+namespace TestProject.Mocks.ValueHandlerMocks
 {
     internal class IntValueHandlerMock : IValueHandler
     {

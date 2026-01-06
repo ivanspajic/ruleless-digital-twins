@@ -3,7 +3,7 @@ using Logic.Models.MapekModels;
 using Logic.ValueHandlerInterfaces;
 using TestProject.Mocks.EqualityComparers;
 
-namespace TestProject.Mocks
+namespace TestProject.Mocks.ValueHandlerMocks
 {
     internal class DoubleValueHandlerMock : IValueHandler
     {

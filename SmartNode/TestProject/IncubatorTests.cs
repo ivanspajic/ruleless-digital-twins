@@ -8,7 +8,7 @@ using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 using System.Diagnostics;
 using System.Reflection;
-using TestProject.Mocks;
+using TestProject.Mocks.ServiceMocks;
 
 namespace TestProject {
     public class IncubatorTests : IDisposable {
@@ -172,7 +172,7 @@ namespace TestProject {
                 UseSimulatedEnvironment = true
             });
             mapekKnowledge = new MapekKnowledge(mock);
-            mock.Add(mapekKnowledge);
+            mock.Add<IMapekKnowledge>(mapekKnowledge);
             mapekPlan = new MyMapekPlan(mock);
         }
 

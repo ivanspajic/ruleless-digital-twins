@@ -1,7 +1,7 @@
 ﻿using Logic.Mapek;
 using Logic.Models.MapekModels;
 
-namespace TestProject.Mocks {
+namespace TestProject.Mocks.ServiceMocks {
     internal class MapekMonitorMock : IMapekMonitor {
         private readonly Cache _cache;
 

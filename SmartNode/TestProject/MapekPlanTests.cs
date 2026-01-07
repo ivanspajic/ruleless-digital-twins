@@ -2,7 +2,7 @@ using Logic.Mapek;
 
 namespace TestProject
 {
-    public class MapekPlanTestsTest
+    public class MapekPlanTests
     {
 
         private static void AssertCombinationsEqual(IEnumerable<IEnumerable<object>> expected, IEnumerable<IEnumerable<object>> actual)

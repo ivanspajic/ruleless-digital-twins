@@ -382,13 +382,14 @@ namespace TestProject {
             };
             // Set up the coordinator to only perform 2 MAPE-K cycles, which should be enough for this test.
             var coordinatorSettings = new CoordinatorSettings {
+                UseSimulatedEnvironment = true,
+                SaveMapekCycleData = false,
+                StartInReactiveMode = false,
+                UseCaseBasedFunctionality = true,
                 LookAheadMapekCycles = 2,
                 MaximumMapekRounds = 2,
                 PropertyValueFuzziness = 0.25,
-                SaveMapekCycleData = false,
-                SimulationDurationSeconds = 100,
-                StartInReactiveMode = false,
-                UseSimulatedEnvironment = true
+                SimulationDurationSeconds = 100
             };
             var serviceProviderMock = new ServiceProviderMock();
             serviceProviderMock.Add(filepathArguments);

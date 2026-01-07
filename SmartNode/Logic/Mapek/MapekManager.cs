@@ -54,7 +54,9 @@ namespace Logic.Mapek {
 
             var currentRound = 0;
             Case potentialCase = null!;
-            List<Case> potentialCases = null!;
+            List<Case> remainingPotentialCases = null!;
+            SimulationTreeNode currentSimulationTree = null!;
+            SimulationPath currentOptimalSimulationPath = null!;
 
             while (_isLoopActive) {
                 if (_coordinatorSettings.MaximumMapekRounds > -1) {
@@ -67,56 +69,15 @@ namespace Logic.Mapek {
                 // Monitor - Observe all hard and soft Sensor values, construct soft Sensor trees, and collect OptimalConditions.
                 var cache = _mapekMonitor.Monitor();
 
-                // If there is a potential case from the previous cycle to be saved, check if all the required parameters match. Most importantly, check that the quantized values of
-                // the observed Properties from this cycle match with the predicted quantized values from the simulation of the last cycle. If so, the previously-created case is valid
-                // and can be saved to the database.
-                var quantizedPropertyCacheOptimalConditionTuple = GetQuantizedPropertiesAndOptimalConditions(cache.PropertyCache.ConfigurableParameters,
-                        cache.PropertyCache.Properties,
-                        cache.OptimalConditions);
-
-                if (potentialCase is not null) {
-                    var caseMatches = CheckIfCaseResultMatchesObservedParameters(potentialCase,
-                        quantizedPropertyCacheOptimalConditionTuple.Item1,
-                        quantizedPropertyCacheOptimalConditionTuple.Item2);
-
-                    // If the case matches with this cycle's observed parameters, save it. If the case cannot be saved, the remainder of any sequence of cases (SimulationPath) it
-                    // belongs to must also be discarded.
-                    if (caseMatches) {
-                        _caseRepository.CreateCase(potentialCase);
-                    } else {
-                        potentialCases = [];
-                    }
-
-                    // If there is a sequence of cases to execute, get the next potential case from it.
-                    if (potentialCases.Count > 0) {
-                        potentialCase = GetPotentialCaseAndRemoveItFromCollection(potentialCases);
-                    } else {
-                        potentialCase = null!;
-                    }
-                }
-
-                // If there is no potential case from a sequence of cases, try finding a match for the current conditions in the database. In case of no match, run the Plan phase and
-                // simulate future cycles.
-                if (potentialCase is null) {
-                    potentialCase = _caseRepository.ReadCase(quantizedPropertyCacheOptimalConditionTuple.Item1,
-                        quantizedPropertyCacheOptimalConditionTuple.Item2,
-                        _coordinatorSettings.LookAheadMapekCycles,
-                        _coordinatorSettings.SimulationDurationSeconds,
-                        0);
-
-                    if (string.IsNullOrEmpty(potentialCase?.ID)) {
-                        // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
-                        // TODO: use the simulation tree for visualization.
-                        var (simulationTree, optimalSimulationPath) = _mapekPlan.Plan(cache, _coordinatorSettings.LookAheadMapekCycles);
-
-                        // Build and assign the potential cases for the next cycle from the simulation results.
-                        potentialCases = GetPotentialCasesFromSimulationPath(quantizedPropertyCacheOptimalConditionTuple.Item1, quantizedPropertyCacheOptimalConditionTuple.Item2, optimalSimulationPath);
-                        potentialCase = GetPotentialCaseAndRemoveItFromCollection(potentialCases);
-                    }
-                }
+                // Potentially execute the Plan phase or use preexisting cases for deciding on what to execute.
+                (var simulationToExecute, potentialCase, remainingPotentialCases, currentSimulationTree, currentOptimalSimulationPath) = ManageCasesAndPotentiallyPlan(cache,
+                    potentialCase,
+                    remainingPotentialCases,
+                    currentSimulationTree,
+                    currentOptimalSimulationPath);
 
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
-                _mapekExecute.Execute(potentialCase.Simulation!, _coordinatorSettings.UseSimulatedEnvironment);
+                _mapekExecute.Execute(simulationToExecute, _coordinatorSettings.UseSimulatedEnvironment);
 
                 // If configured, write MAPE-K state to CSV.
                 if (_coordinatorSettings.SaveMapekCycleData) {
@@ -136,6 +97,79 @@ namespace Logic.Mapek {
 
                 // Thread.Sleep(SleepyTimeMilliseconds);
             }
+        }
+
+        private (Simulation, Case, List<Case>, SimulationTreeNode, SimulationPath) ManageCasesAndPotentiallyPlan(Cache cache,
+            Case potentialCase,
+            List<Case> remainingPotentialCases,
+            SimulationTreeNode currentSimulationTree,
+            SimulationPath currentOptimalSimulationPath) {
+            Simulation simulationToExecute = null!;
+
+            // In case the case-based functionality should not be used, simply execute the Plan phase every time.
+            if (!_coordinatorSettings.UseCaseBasedFunctionality) {
+                // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
+                // TODO: use the simulation tree for visualization.
+                (currentSimulationTree, currentOptimalSimulationPath) = _mapekPlan.Plan(cache, _coordinatorSettings.LookAheadMapekCycles);
+                simulationToExecute = currentOptimalSimulationPath.Simulations.First();
+
+                return (simulationToExecute, potentialCase, remainingPotentialCases, currentSimulationTree, currentOptimalSimulationPath);
+            }
+
+            // If there is a potential case from the previous cycle to be saved, check if all the required parameters match. Most importantly, check that the quantized values of
+            // the observed Properties from this cycle match with the predicted quantized values from the simulation of the last cycle. If so, the previously-created case is valid
+            // and can be saved to the database.
+            var quantizedPropertyCacheOptimalConditionTuple = GetQuantizedPropertiesAndOptimalConditions(cache.PropertyCache.ConfigurableParameters,
+                    cache.PropertyCache.Properties,
+                    cache.OptimalConditions);
+
+            if (potentialCase is not null) {
+                var caseMatches = CheckIfCaseResultMatchesObservedParameters(potentialCase,
+                    quantizedPropertyCacheOptimalConditionTuple.Item1,
+                    quantizedPropertyCacheOptimalConditionTuple.Item2);
+
+                // If the case matches with this cycle's observed parameters, save it. If the case cannot be saved, the remainder of any sequence of cases (SimulationPath) it
+                // belongs to must also be discarded.
+                if (caseMatches) {
+                    _caseRepository.CreateCase(potentialCase);
+                } else {
+                    remainingPotentialCases = [];
+                }
+
+                // If there is a sequence of cases to execute, get the next potential case from it.
+                if (remainingPotentialCases.Count > 0) {
+                    potentialCase = GetPotentialCaseAndRemoveItFromCollection(remainingPotentialCases);
+                    simulationToExecute = potentialCase.Simulation!;
+                } else {
+                    potentialCase = null!;
+                }
+            }
+
+            // If there is no potential case from a sequence of cases, try finding a match for the current conditions in the database. In case of no match, run the Plan phase and
+            // simulate future cycles.
+            if (potentialCase is null) {
+                potentialCase = _caseRepository.ReadCase(quantizedPropertyCacheOptimalConditionTuple.Item1,
+                    quantizedPropertyCacheOptimalConditionTuple.Item2,
+                    _coordinatorSettings.LookAheadMapekCycles,
+                    _coordinatorSettings.SimulationDurationSeconds,
+                    0);
+
+                if (string.IsNullOrEmpty(potentialCase?.ID)) {
+                    // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
+                    // TODO: use the simulation tree for visualization.
+                    (currentSimulationTree, currentOptimalSimulationPath) = _mapekPlan.Plan(cache, _coordinatorSettings.LookAheadMapekCycles);
+
+                    // Build and assign the potential cases for the next cycle from the simulation results.
+                    remainingPotentialCases = GetPotentialCasesFromSimulationPath(quantizedPropertyCacheOptimalConditionTuple.Item1,
+                        quantizedPropertyCacheOptimalConditionTuple.Item2,
+                        currentOptimalSimulationPath);
+                    potentialCase = GetPotentialCaseAndRemoveItFromCollection(remainingPotentialCases);
+                }
+
+                simulationToExecute = potentialCase.Simulation!;
+            }
+
+            return (simulationToExecute, potentialCase, remainingPotentialCases, currentSimulationTree, currentOptimalSimulationPath);
         }
 
         private static bool CheckIfCaseResultMatchesObservedParameters(Case potentialCaseToSave,
@@ -234,9 +268,9 @@ namespace Logic.Mapek {
             return potentialCases;
         }
 
-        private static Case GetPotentialCaseAndRemoveItFromCollection(List<Case> potentialCases) {
-            var potentialCase = potentialCases[0];
-            potentialCases.Remove(potentialCase);
+        private static Case GetPotentialCaseAndRemoveItFromCollection(List<Case> remainingPotentialCases) {
+            var potentialCase = remainingPotentialCases[0];
+            remainingPotentialCases.Remove(potentialCase);
 
             return potentialCase;
         }

@@ -34,6 +34,10 @@ latest: Pulling from volkers/smartnode
 % docker run --rm --platform linux/amd64 -v `pwd`/models-and-rules:/app/models volkers/smartnode /app/models/inferred-model-1.ttl
 ```
 
+### MongoDB in Docker
+Since MongoDB is required to use the case-based functionality, there are some setup steps required to make it run (and persist) in Docker:
+
+
 ## Running the Control Loop Coordinator (SmartNode)
 The codebase is a .NET 8 solution consisting of multiple projects: `Logic` (MAPE-K and models), `Implementations` (for user-provided sensor/actuator implementations), `SmartNode` (startup and configuration project), and `TestProject` (unit and integration tests). We also include our own fork of [Femyou](https://github.com/Oaz/Femyou) for the logic that loads and executes our FMUs. Users may choose between running the solution natively or containerized.
 

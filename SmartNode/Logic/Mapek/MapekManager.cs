@@ -106,23 +106,23 @@ namespace Logic.Mapek {
             // If there is a potential case from the previous cycle to be saved, check if all the required parameters match. Most importantly, check that the quantized values of
             // the observed Properties from this cycle match with the predicted quantized values from the simulation of the last cycle. If so, the previously-created case is valid
             // and can be saved to the database.
-            if (_coordinatorSettings.UseCaseBasedFunctionality && potentialCase is not null) {
-                var quantizedPropertyCacheOptimalConditionTuple = GetQuantizedPropertiesAndOptimalConditions(cache.PropertyCache.ConfigurableParameters,
+            var quantizedPropertyCacheOptimalConditionTuple = GetQuantizedPropertiesAndOptimalConditions(cache.PropertyCache.ConfigurableParameters,
                     cache.PropertyCache.Properties,
                     cache.OptimalConditions);
 
-                var caseMatches = CheckIfCaseResultMatchesObservedParameters(potentialCase,
-                    quantizedPropertyCacheOptimalConditionTuple.Item1,
-                    quantizedPropertyCacheOptimalConditionTuple.Item2);
+            var simulationMatches = CheckIfExecutedSimulationMatchesObservedParameters(potentialCase,
+                quantizedPropertyCacheOptimalConditionTuple.Item1,
+                quantizedPropertyCacheOptimalConditionTuple.Item2);
 
-                // If the case matches with this cycle's observed parameters, save it. If the case cannot be saved, the remainder of any simulations in the simulation path it
-                // comes from must also be discarded.
-                if (caseMatches) {
-                    _caseRepository.CreateCase(potentialCase);
-                } else {
-                    currentOptimalSimulationPath = null!;
-                }
+            // If the case matches with this cycle's observed parameters, save it. If the case cannot be saved, the remainder of any simulations in the simulation path it
+            // comes from must also be discarded.
+            if (caseMatches) {
+                _caseRepository.CreateCase(potentialCase);
+            } else {
+                currentOptimalSimulationPath = null!;
+            }
 
+            if (_coordinatorSettings.UseCaseBasedFunctionality && potentialCase is not null) {
                 // If there are still remaining simulations in the simulation path, get the next potential case from it. Otherwise, try to look for it in the database.
                 if (currentOptimalSimulationPath is not null && currentOptimalSimulationPath.Simulations.Any()) {
                     potentialCase = GetPotentialCaseFromSimulationPath(quantizedPropertyCacheOptimalConditionTuple.Item1,
@@ -151,10 +151,6 @@ namespace Logic.Mapek {
 
                 // If case-based functionality is used, get the potential case from the new simulation path.
                 if (_coordinatorSettings.UseCaseBasedFunctionality) {
-                    var quantizedPropertyCacheOptimalConditionTuple = GetQuantizedPropertiesAndOptimalConditions(cache.PropertyCache.ConfigurableParameters,
-                    cache.PropertyCache.Properties,
-                    cache.OptimalConditions);
-
                     potentialCase = GetPotentialCaseFromSimulationPath(quantizedPropertyCacheOptimalConditionTuple.Item1,
                         quantizedPropertyCacheOptimalConditionTuple.Item2,
                         currentOptimalSimulationPath);
@@ -169,7 +165,7 @@ namespace Logic.Mapek {
             return (simulationToExecute, potentialCase, currentSimulationTree, currentOptimalSimulationPath)!;
         }
 
-        private static bool CheckIfCaseResultMatchesObservedParameters(Case potentialCaseToSave,
+        private static bool CheckIfExecutedSimulationMatchesObservedParameters(Simulation simulation,
             IEnumerable<Property> quantizedObservedProperties,
             IEnumerable<OptimalCondition> observedQuantizedOptimalConditions) {
             return potentialCaseToSave.QuantizedProperties!.SequenceEqual(quantizedObservedProperties, new PropertyEqualityComparer()) &&

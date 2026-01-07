@@ -53,6 +53,7 @@ namespace Logic.Mapek {
             _logger.LogInformation("Starting the MAPE-K loop. (maxRounds= {maxRound})", _coordinatorSettings.MaximumMapekRounds);
 
             var currentRound = 0;
+            Simulation simulationToExecute = null!;
             Case potentialCase = null!;
             SimulationTreeNode currentSimulationTree = null!;
             SimulationPath currentOptimalSimulationPath = null!;
@@ -68,9 +69,13 @@ namespace Logic.Mapek {
                 // Monitor - Observe all hard and soft Sensor values, construct soft Sensor trees, and collect OptimalConditions.
                 var cache = _mapekMonitor.Monitor();
 
-                // Check for previously-constructed simulation paths to pick the next simulation configuration to execute. If case-based functionality is enabled, check for preexisting
-                // cases and save new ones when applicable.
-                (var simulationToExecute, potentialCase, currentSimulationTree, currentOptimalSimulationPath) = ManageSimulationsAndCasesAndPotentiallyPlan(cache,
+                // Check for previously constructed simulation paths to pick the next simulation configuration to execute. If case-based functionality is enabled, check for preexisting
+                // cases and save new ones when applicable. For simplicity, the look-ahead approach and the case-based functionality effectively keep state based on the configuration at
+                // the time of making a sequence of simulations/cases to execute. This means if settings values are changed midway through a full simulation path execution (e.g., 2/4),
+                // the system will continue executing as if it followed the old ones for the remainder of the simulation path. Dynamic settings changes thus take effect after the execution
+                // of a full simulation path or in case it is deliberately rejected early by the system due to deviation from its previously predicted Property values.
+                (simulationToExecute, potentialCase, currentSimulationTree, currentOptimalSimulationPath) = ManageSimulationsAndCasesAndPotentiallyPlan(cache,
+                    simulationToExecute,
                     potentialCase,
                     currentSimulationTree,
                     currentOptimalSimulationPath);
@@ -81,7 +86,7 @@ namespace Logic.Mapek {
                 // If configured, write MAPE-K state to CSV.
                 if (_coordinatorSettings.SaveMapekCycleData) {
                     CsvUtils.WritePropertyStatesToCsv(_filepathArguments.DataDirectory, currentRound, cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
-                    CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentRound, potentialCase.Simulation!);
+                    CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentRound, potentialCase.Simulation);
                 }
 
                 if (_coordinatorSettings.MaximumMapekRounds > 0) {
@@ -99,50 +104,56 @@ namespace Logic.Mapek {
         }
 
         private (Simulation, Case, SimulationTreeNode, SimulationPath) ManageSimulationsAndCasesAndPotentiallyPlan(Cache cache,
+            Simulation simulationToExecute,
             Case potentialCase,
             SimulationTreeNode currentSimulationTree,
             SimulationPath currentOptimalSimulationPath) {
-            Simulation simulationToExecute = null!;
-            // If there is a potential case from the previous cycle to be saved, check if all the required parameters match. Most importantly, check that the quantized values of
-            // the observed Properties from this cycle match with the predicted quantized values from the simulation of the last cycle. If so, the previously-created case is valid
-            // and can be saved to the database.
-            var quantizedPropertyCacheOptimalConditionTuple = GetQuantizedPropertiesAndOptimalConditions(cache.PropertyCache.ConfigurableParameters,
-                    cache.PropertyCache.Properties,
-                    cache.OptimalConditions);
+            var quantizedObservedProperties = GetQuantizedProperties(cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
 
-            var simulationMatches = CheckIfExecutedSimulationMatchesObservedParameters(potentialCase,
-                quantizedPropertyCacheOptimalConditionTuple.Item1,
-                quantizedPropertyCacheOptimalConditionTuple.Item2);
+            var simulationMatches = false;
+            if (simulationToExecute is not null) {
+                var quantizedSimulationProperties = GetQuantizedProperties(simulationToExecute.PropertyCache.ConfigurableParameters, simulationToExecute.PropertyCache.Properties);
 
-            // If the case matches with this cycle's observed parameters, save it. If the case cannot be saved, the remainder of any simulations in the simulation path it
-            // comes from must also be discarded.
-            if (caseMatches) {
-                _caseRepository.CreateCase(potentialCase);
-            } else {
+                simulationMatches = quantizedSimulationProperties.SequenceEqual(quantizedObservedProperties, new PropertyEqualityComparer());
+            }
+
+            // If the previously executed simulation's results don't match the current cycle's observations, the predictions for the rest of the simulation path are outside of
+            // previously predicted conditions and should thus be discarded.
+            if (!simulationMatches) {
                 currentOptimalSimulationPath = null!;
             }
 
             if (_coordinatorSettings.UseCaseBasedFunctionality && potentialCase is not null) {
+                // If there is a potential case from the previous cycle to be saved and the values of the observed Properties from this cycle match with the predicted quantized
+                // values from the simulation of the last cycle, then case is valid and can be saved to the database. Otherwise, the case should be nullified.
+                if (simulationMatches) {
+                    _caseRepository.CreateCase(potentialCase);
+                } else {
+                    potentialCase = null!;
+                }
+
+                var quantizedObservedOptimalConditions = GetQuantizedOptimalConditions(cache.OptimalConditions);
+
                 // If there are still remaining simulations in the simulation path, get the next potential case from it. Otherwise, try to look for it in the database.
                 if (currentOptimalSimulationPath is not null && currentOptimalSimulationPath.Simulations.Any()) {
-                    potentialCase = GetPotentialCaseFromSimulationPath(quantizedPropertyCacheOptimalConditionTuple.Item1,
-                        quantizedPropertyCacheOptimalConditionTuple.Item2,
-                        currentOptimalSimulationPath);
+                    
+                    potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedOptimalConditions, currentOptimalSimulationPath);
 
                     // After getting the potential case from the simulation path, reduce the number of remaining simulations.
                     currentOptimalSimulationPath.RemoveFirstRemainingSimulationFromSimulationPath();
                 } else {
-                    potentialCase = _caseRepository.ReadCase(quantizedPropertyCacheOptimalConditionTuple.Item1,
-                    quantizedPropertyCacheOptimalConditionTuple.Item2,
-                    _coordinatorSettings.LookAheadMapekCycles,
-                    _coordinatorSettings.SimulationDurationSeconds,
-                    0);
+                    currentOptimalSimulationPath = GetSimulationPathFromSavedCases(quantizedObservedProperties, quantizedObservedOptimalConditions);
+                    if (currentOptimalSimulationPath is not null) {
+                        potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedOptimalConditions, currentOptimalSimulationPath);
+
+                        // After getting the potential case from the simulation path, reduce the number of remaining simulations.
+                        currentOptimalSimulationPath.RemoveFirstRemainingSimulationFromSimulationPath();
+                    }
                 }
             }
-
             
             if (potentialCase is null) {
-                // If there are no remaining simulations to be executed from a previously-created simulation path, run the planning phase again.
+                // If there are no remaining simulations to be executed from a previously created simulation path, run the planning phase again.
                 if (currentOptimalSimulationPath is null || !currentOptimalSimulationPath.Simulations.Any()) {
                     // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
                     // TODO: use the simulation tree for visualization.
@@ -151,32 +162,23 @@ namespace Logic.Mapek {
 
                 // If case-based functionality is used, get the potential case from the new simulation path.
                 if (_coordinatorSettings.UseCaseBasedFunctionality) {
-                    potentialCase = GetPotentialCaseFromSimulationPath(quantizedPropertyCacheOptimalConditionTuple.Item1,
-                        quantizedPropertyCacheOptimalConditionTuple.Item2,
-                        currentOptimalSimulationPath);
+                    var quantizedObservedOptimalConditions = GetQuantizedOptimalConditions(cache.OptimalConditions);
+
+                    potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedOptimalConditions, currentOptimalSimulationPath);
                 }
 
                 simulationToExecute = currentOptimalSimulationPath.Simulations.First();
 
-                // Reduce the number of remaining simulations.
+                // After getting the simulation from the simulation path, reduce the number of remaining simulations.
                 currentOptimalSimulationPath.RemoveFirstRemainingSimulationFromSimulationPath();
             }
 
             return (simulationToExecute, potentialCase, currentSimulationTree, currentOptimalSimulationPath)!;
         }
 
-        private static bool CheckIfExecutedSimulationMatchesObservedParameters(Simulation simulation,
-            IEnumerable<Property> quantizedObservedProperties,
-            IEnumerable<OptimalCondition> observedQuantizedOptimalConditions) {
-            return potentialCaseToSave.QuantizedProperties!.SequenceEqual(quantizedObservedProperties, new PropertyEqualityComparer()) &&
-                potentialCaseToSave.QuantizedOptimalConditions!.SequenceEqual(observedQuantizedOptimalConditions, new OptimalConditionEqualityComparer());
-        }
-
-        private (IEnumerable<Property>, IEnumerable<OptimalCondition>) GetQuantizedPropertiesAndOptimalConditions(IDictionary<string, ConfigurableParameter> configurableParameters,
-            IDictionary<string, Property> properties,
-            IEnumerable<OptimalCondition> optimalConditions) {
+        private List<Property> GetQuantizedProperties(IDictionary<string, ConfigurableParameter> configurableParameters,
+            IDictionary<string, Property> properties) {
             var quantizedProperties = new List<Property>();
-            var quantizedOptimalConditions = new List<OptimalCondition>();
 
             foreach (var configurableParameterKeyValuePair in configurableParameters) {
                 var valueHandler = _factory.GetValueHandlerImplementation(configurableParameterKeyValuePair.Value.OwlType);
@@ -200,6 +202,12 @@ namespace Logic.Mapek {
                 quantizedProperties.Add(quantizedProperty);
             }
 
+            return quantizedProperties;
+        }
+
+        private List<OptimalCondition> GetQuantizedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions) {
+            var quantizedOptimalConditions = new List<OptimalCondition>();
+
             foreach (var optimalCondition in optimalConditions) {
                 var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.ConstraintValueType);
                 var quantizedConstraints = new List<ConstraintExpression>();
@@ -217,7 +225,7 @@ namespace Logic.Mapek {
                 });
             }
 
-            return new (quantizedProperties, quantizedOptimalConditions);
+            return quantizedOptimalConditions;
         }
 
         private ConstraintExpression GetQuantizedOptimalConditionConstraint(ConstraintExpression constraintExpression, IValueHandler valueHandler) {
@@ -236,6 +244,32 @@ namespace Logic.Mapek {
                     Right = GetQuantizedOptimalConditionConstraint(nestedConstraintExpression.Right, valueHandler)
                 };
             }
+        }
+
+        private SimulationPath GetSimulationPathFromSavedCases(IEnumerable<Property> quantizedProperties, IEnumerable<OptimalCondition> quantizedOptimalConditions) {
+            var simulations = new List<Simulation>();
+
+            for (var i = 0; i < _coordinatorSettings.LookAheadMapekCycles; i++) {
+                var savedCase = _caseRepository.ReadCase(quantizedProperties,
+                    quantizedOptimalConditions,
+                    _coordinatorSettings.LookAheadMapekCycles,
+                    _coordinatorSettings.SimulationDurationSeconds,
+                    i);
+
+                // If no case is found, return a null.
+                if (savedCase is null) {
+                    return null!;
+                }
+
+                simulations.Add(savedCase.Simulation);
+
+                quantizedProperties = savedCase.QuantizedProperties;
+                quantizedOptimalConditions = savedCase.QuantizedOptimalConditions;
+            }
+
+            return new SimulationPath {
+                Simulations = simulations
+            };
         }
 
         private Case GetPotentialCaseFromSimulationPath(IEnumerable<Property> quantizedObservedProperties,

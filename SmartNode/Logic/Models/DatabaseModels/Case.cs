@@ -7,9 +7,9 @@ namespace Logic.Models.DatabaseModels {
         [BsonId]
         public string? ID { get; set; }
 
-        public IEnumerable<Property>? QuantizedProperties { get; set; }
+        public required IEnumerable<Property> QuantizedProperties { get; set; }
 
-        public IEnumerable<OptimalCondition>? QuantizedOptimalConditions { get; set; }
+        public required IEnumerable<OptimalCondition> QuantizedOptimalConditions { get; set; }
 
         public int LookAheadCycles { get; set; }
 
@@ -17,6 +17,6 @@ namespace Logic.Models.DatabaseModels {
 
         public int Index { get; set; }
 
-        public Simulation? Simulation { get; set; }
+        public required Simulation Simulation { get; set; }
     }
 }

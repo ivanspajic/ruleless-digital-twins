@@ -7,7 +7,7 @@ Coming soon!
 ## Requirements
 - .NET 8 (for running the control loop coordinator)
 - Java (for running the inference engine)
-- MongoDB (for hosting the case repository)
+- MongoDB (for hosting the case repository - not needed if you are not using this)
 
 ## Docker-based example
 
@@ -36,7 +36,14 @@ latest: Pulling from volkers/smartnode
 
 ### MongoDB in Docker
 Since MongoDB is required to use the case-based functionality, there are some setup steps required to make it run (and persist) in Docker:
-
+1. Create a network in Docker:
+```
+docker network create <your_network_name>
+```
+2. Connect the MongoDB and coordinator containers to the newly-created network:
+```
+docker network connect <your_network_name> <container_name>
+```
 
 ## Running the Control Loop Coordinator (SmartNode)
 The codebase is a .NET 8 solution consisting of multiple projects: `Logic` (MAPE-K and models), `Implementations` (for user-provided sensor/actuator implementations), `SmartNode` (startup and configuration project), and `TestProject` (unit and integration tests). We also include our own fork of [Femyou](https://github.com/Oaz/Femyou) for the logic that loads and executes our FMUs. Users may choose between running the solution natively or containerized.
@@ -51,12 +58,13 @@ The codebase uses a `appsettings.json` in the `SmartNode/Properties` directory a
   - `FmuDirectory`: the solution's FMU storage directory.
   - `DataDirectory`: the solution's data storage directory for persisting data values from MAPE-K cycles.
 2. Coordinator settings:
-  - `MaximumMapekRounds`: the maximum number of MAPE-K cycles to run before termination. Setting this value to -1 runs the solution indefinitely.
   - `UseSimulatedEnvironment`: a boolean value for using the preconfigured simulated environment or a real one.
   - `SaveMapekData`: a boolean for saving MAPE-K cycle data to the disk.
+  - `StartInReactiveMode`: a boolean for setting the starting mode of the coordinator. Running it in reactive mode means the system will only simulate corrective actions given the respective system actuators to mitigate the current optimal condition violations. In case of no violations of optimal conditions, the system will not simulate actions. In proactive mode, the system takes a proactive approach and simulates regardless of optimal condition status, subsequently including all existing system actuators. As a result, the proactive approach checks for potential violations of optimal conditions before they happen. Conversely, the reactive approach requires less simulating and is thus more performant.
+  - `UseCaseBasedFunctionality`: a boolean for using the functionality where the system uses previously-saved actions for already encountered conditions.
+  - `MaximumMapekRounds`: the maximum number of MAPE-K cycles to run before termination. Setting this value to -1 runs the solution indefinitely.
   - `SimulationDurationSeconds`: sets the duration of simulations in FMU time (not real-world time).
   - `LookAheadMapekCycles`: the number of cycles to simulate the future for. Simulating further ahead can yield more optimal decisions in the long run, but more cycles generally means less prediction accuracy and more performance overhead.
-  - `StartInReactiveMode`: a boolean for setting the starting mode of the coordinator. Running it in reactive mode means the system will only simulate corrective actions given the respective system actuators to mitigate the current optimal condition violations. In case of no violations of optimal conditions, the system will not simulate actions. In proactive mode, the system takes a proactive approach and simulates regardless of optimal condition status, subsequently including all existing system actuators. As a result, the proactive approach checks for potential violations of optimal conditions before they happen. Conversely, the reactive approach requires less simulating and is thus more performant.
   - `PropertyValueFuzziness`: to match encountered conditions with potentially preexisting solutions, a quantization technique is applied to enable matching against (virtually) infinite numbers of property values.
 3. Database settings:
   - `ConnectionString`: the MongoDB server connection string.

@@ -4,7 +4,7 @@ namespace TestProject.Utilities {
     internal static class InferenceTestHelper {
         public static TheoryData<string, IEnumerable<IEnumerable<ActuationAction>>> TestData =>
             new() {
-                {
+                /*{
                     "unrestrictedDehumidifierFanHeater.ttl",
                     new[] {
                         new ActuationAction[] {
@@ -284,8 +284,8 @@ namespace TestProject.Utilities {
                             }
                         }
                     }
-                },
-                /*{
+                },*/
+                {
                     "restrictedDehumidifierFanHeater.ttl",
                     new[] {
                         new ActuationAction[] {
@@ -1115,7 +1115,7 @@ namespace TestProject.Utilities {
                             }
                         }
                     }
-                }*/
+                }
             };
     }
 }

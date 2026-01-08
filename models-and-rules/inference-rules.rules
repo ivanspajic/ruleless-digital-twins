@@ -100,7 +100,7 @@
 
 [rule2a:    (?restriction rdf:comment ?property)
             (?property meta:hasValue ?propertyValue)
-            (?property meta:propertyFor ?propertyChange)
+            (?propertyChange ssn:forProperty ?property)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             (?restriction xsd:minExclusive ?restrictionValue)
             le(?propertyValue, ?restrictionValue)
@@ -108,17 +108,19 @@
 ]
 
 [rule2b:    (?restriction rdf:comment ?property)
+            (?property rdf:type sosa:ObservableProperty)
             (?property meta:hasValue ?propertyValue)
-            (?property meta:propertyFor ?propertyChange)
-            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
-            (?restriction xsd:minInclusive ?restrictionValue)
-            lessThan(?propertyValue, ?restrictionValue)
-            ->  (_: rdf:comment ?propertyChange)
+            //(?propertyChange ssn:forProperty ?property)
+            //(?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
+            //(?restriction xsd:minInclusive ?restrictionValue)
+            //lessThan(?propertyValue, ?restrictionValue)
+            ->  print("poop")
+                
 ]
 
 [rule2c:    (?restriction rdf:comment ?property)
             (?property meta:hasValue ?propertyValue)
-            (?property meta:propertyFor ?propertyChange)
+            (?propertyChange ssn:forProperty ?property)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             (?restriction xsd:maxExclusive ?restrictionValue)
             ge(?propertyValue, ?restrictionValue)
@@ -127,7 +129,7 @@
 
 [rule2d:    (?restriction rdf:comment ?property)
             (?property meta:hasValue ?propertyValue)
-            (?property meta:propertyFor ?propertyChange)
+            (?propertyChange ssn:forProperty ?property)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             (?restriction xsd:maxInclusive ?restrictionValue)
             greaterThan(?propertyValue, ?restrictionValue)

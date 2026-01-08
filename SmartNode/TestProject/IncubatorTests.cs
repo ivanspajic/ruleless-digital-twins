@@ -9,6 +9,7 @@ using Logic.ValueHandlerInterfaces;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks;
+using System.Collections.ObjectModel;
 
 namespace TestProject
 {
@@ -116,6 +117,8 @@ namespace TestProject
         public async Task SimulateFromAMQ(string fromPython, string model, string inferred, int lookAheadCycles)
         {
             SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
+            IMapekExecute mpe;
+            mock.Add(typeof(IMapekExecute), mpe = new MapekExecute(mock));
 
             await i.Connect();
             var consumerTag = await i.Setup();
@@ -130,14 +133,14 @@ namespace TestProject
             // Only valid AFTER focing evaluation through simulation:
             Assert.Equal(Math.Pow(2, lookAheadCycles), simulationTree.SimulationPaths.Count());
             Assert.Equal(30, simulationTree.ChildrenCount);
-            var path = simulationTree.SimulationPaths.First();
 
-            foreach (var s in path.Simulations)
+            foreach (var s in optimalSimulationPath.Simulations)
             {
                 Trace.WriteLine(string.Join(";", s.Actions.Select(a => a.Name)));
                 Trace.WriteLine("Params: " + string.Join(";", s.InitializationActions.Select(a => a.Name).ToList()));
                 Trace.WriteLine("Inputs: " + string.Join(";", s.Actions.Select(a => a.Name).ToList()));
             }
+            mpe.Execute(new SimulationPath() { Simulations = [optimalSimulationPath.Simulations.First()]}, ReadOnlyDictionary<string, ConfigurableParameter>.Empty, false);
         }
 
         private static void SetupFiles(string fromPython, string model, string inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan)
@@ -224,14 +227,34 @@ namespace TestProject
             { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
         };
-            public IActuator GetActuatorDeviceImplementation(string actuatorName)
-            {
-                throw new NotImplementedException();
+            public IActuator GetActuatorDeviceImplementation(string actuatorName) {
+                if ("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#HeaterActuator".Equals(actuatorName)) {
+                    return new AMQHeater();
+                } else {
+                    throw new NotImplementedException(actuatorName);
+                }
             }
 
             public IConfigurableParameter GetConfigurableParameterImplementation(string configurableParameterName)
             {
                 throw new NotImplementedException();
+            }
+
+            internal class AMQHeater() : IActuator
+            {
+                public string ActuatorName => "Incubator Heater";
+
+                public void Actuate(object state) {
+                    var _actuatorState = int.Parse((string)state);
+                    if (_actuatorState == 0) {
+                        Task t = Task.Run(async () => await i.SetHeater(false));
+                    } else if (_actuatorState == 1) {
+                        Task t = Task.Run(async () => await i.SetHeater(true));
+                        t.Wait();
+                    } else {
+                        Debug.Fail($"Unexpected value {_actuatorState}!");
+                    }
+                }
             }
 
             public class AMQSensor(string sensorName, string procedureName, Func<IncubatorFields, double> f) : ISensor

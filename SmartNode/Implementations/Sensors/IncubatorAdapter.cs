@@ -90,7 +90,7 @@ namespace Implementations.Sensors {
             var new_heater = new Heater(on);
             byte[] messageBodyBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize<Heater>(new_heater)); // Arrrrr
             var props = new BasicProperties();
-            await Channel.BasicPublishAsync(ExchangeName, "incubator.mock.hw.heater.on", false, props, messageBodyBytes);
+            await Channel.BasicPublishAsync(ExchangeName, "incubator.hardware.gpio.heater.on", false, props, messageBodyBytes);
         }
     }
 }

@@ -8,12 +8,12 @@ namespace Logic.Mapek
 {
     public class MapekExecute : IMapekExecute
     {
-        private readonly ILogger<MapekExecute> _logger;
+        private readonly ILogger<IMapekExecute> _logger;
         private readonly IFactory _factory;
 
         public MapekExecute(IServiceProvider serviceProvider)
         {
-            _logger = serviceProvider.GetRequiredService<ILogger<MapekExecute>>();
+            _logger = serviceProvider.GetRequiredService<ILogger<IMapekExecute>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 

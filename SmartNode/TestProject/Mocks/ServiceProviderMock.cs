@@ -13,6 +13,7 @@ namespace TestProject.Mocks
                 { typeof(ILogger<IMapekPlan>), new LoggerMock<IMapekPlan>() },
                 { typeof(ILogger<IMapekKnowledge>), new LoggerMock<IMapekKnowledge>() },
                 { typeof(ILogger<IMapekMonitor>), new LoggerMock<IMapekMonitor>() },
+                { typeof(ILogger<IMapekExecute>), new LoggerMock<IMapekExecute>() },
                 { typeof(IFactory), factory ?? new FactoryMock() }
             };
         }

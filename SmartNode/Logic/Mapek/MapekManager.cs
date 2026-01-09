@@ -81,7 +81,7 @@ namespace Logic.Mapek {
                     currentOptimalSimulationPath);
 
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
-                _mapekExecute.Execute(simulationToExecute, _coordinatorSettings.UseSimulatedEnvironment);
+                _mapekExecute.Execute(simulationToExecute);
 
                 // If configured, write MAPE-K state to CSV.
                 if (_coordinatorSettings.SaveMapekCycleData) {

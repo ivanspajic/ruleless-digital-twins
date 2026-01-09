@@ -3,7 +3,7 @@ using Logic.TTComponentInterfaces;
 using System.Diagnostics;
 
 namespace Implementations.Sensors.Incubator {
-    public class AMQSensor(string sensorName, string procedureName, Func<IncubatorFields, double> f) : ISensor {
+    public class AmqSensor(string sensorName, string procedureName, Func<IncubatorFields, double> f) : ISensor {
         private readonly IncubatorAdapter _incubatorAdapter = IncubatorAdapter.GetInstance("localhost", new CancellationToken());
 
         public bool _onceOnly = true;

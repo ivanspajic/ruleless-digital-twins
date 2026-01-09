@@ -1,12 +1,23 @@
 ﻿namespace Implementations.SimulatedTwinningTargets
 {
-    public class DummyRoomM370
-    {
+    public class DummyRoomM370 {
         private readonly Random _randomGenerator = new();
 
         private double _roomTemperature = 17.7;
         private double _roomHumidity = 10.2;
         private double _energyConsumption = 0.0;
+
+        private static DummyRoomM370? _instance;
+
+        private DummyRoomM370() { }
+
+        public static DummyRoomM370 Instance {
+            get {
+                _instance ??= new DummyRoomM370();
+
+                return _instance;
+            }
+        }
 
         public double RoomTemperature
         {

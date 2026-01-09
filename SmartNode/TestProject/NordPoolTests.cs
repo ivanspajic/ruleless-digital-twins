@@ -22,7 +22,7 @@ namespace TestProject
             { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
         };
-        public IActuator GetActuatorDeviceImplementation(string actuatorName)
+        public IActuator GetActuatorImplementation(string actuatorName)
         {
             throw new NotImplementedException();
         }
@@ -31,7 +31,7 @@ namespace TestProject
             throw new NotImplementedException();
         }
 
-        public ISensor GetSensorDeviceImplementation(string sensorName, string procedureName)
+        public ISensor GetSensorImplementation(string sensorName, string procedureName)
         {
             throw new NotImplementedException();
         }
@@ -106,7 +106,7 @@ namespace TestProject
                 MaximumMapekRounds = 4,
                 StartInReactiveMode = false,
                 SimulationDurationSeconds = 10,
-                UseSimulatedEnvironment = true
+                Environment = ""
             });
             // TODO: not sure anymore if pulling it out was actually necessary in the end:
             mock.Add<IMapekKnowledge>(new MapekKnowledge(mock));

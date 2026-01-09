@@ -5,9 +5,9 @@ namespace Logic.FactoryInterface
 {
     public interface IFactory
     {
-        public ISensor GetSensorDeviceImplementation(string sensorName, string procedureName);
+        public ISensor GetSensorImplementation(string sensorName, string procedureName);
 
-        public IActuator GetActuatorDeviceImplementation(string actuatorName);
+        public IActuator GetActuatorImplementation(string actuatorName);
 
         public IConfigurableParameter GetConfigurableParameterImplementation(string configurableParameterName);
 

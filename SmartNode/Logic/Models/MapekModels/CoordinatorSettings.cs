@@ -2,7 +2,7 @@
     public class CoordinatorSettings {
         public int MaximumMapekRounds { get; set; }
 
-        public bool UseSimulatedEnvironment { get; set; }
+        public required string Environment{ get; set; }
 
         public bool StartInReactiveMode { get; set; }
 

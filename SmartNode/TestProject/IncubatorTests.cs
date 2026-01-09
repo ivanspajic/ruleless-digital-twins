@@ -133,7 +133,7 @@ namespace TestProject {
                 Trace.WriteLine("Params: " + string.Join(";", s.InitializationActions.Select(a => a.Name).ToList()));
                 Trace.WriteLine("Inputs: " + string.Join(";", s.Actions.Select(a => a.Name).ToList()));
             }
-            mpe.Execute(optimalSimulationPath.Simulations.First(), false);
+            mpe.Execute(optimalSimulationPath.Simulations.First());
         }
 
         private static void SetupFiles(string fromPython, string model, string inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan) {
@@ -172,7 +172,7 @@ namespace TestProject {
                 MaximumMapekRounds = 4,
                 StartInReactiveMode = false,
                 SimulationDurationSeconds = 10,
-                UseSimulatedEnvironment = true
+                Environment = "incubator"
             });
             mapekKnowledge = new MapekKnowledge(mock);
             mock.Add<IMapekKnowledge>(mapekKnowledge);
@@ -214,7 +214,7 @@ namespace TestProject {
                 { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
                 { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
             };
-            public IActuator GetActuatorDeviceImplementation(string actuatorName) {
+            public IActuator GetActuatorImplementation(string actuatorName) {
                 if ("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#HeaterActuator".Equals(actuatorName)) {
                     return new AMQHeater();
                 } else {
@@ -263,7 +263,7 @@ namespace TestProject {
                 }
             }
 
-            public ISensor GetSensorDeviceImplementation(string sensorName, string procedureName) {
+            public ISensor GetSensorImplementation(string sensorName, string procedureName) {
                 if (sensorName == "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor") {
                     if (procedureName == "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure") {
                         return AMQTempSensor;

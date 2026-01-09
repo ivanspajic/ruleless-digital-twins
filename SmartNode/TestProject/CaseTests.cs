@@ -382,7 +382,7 @@ namespace TestProject {
             };
             // Set up the coordinator to only perform 2 MAPE-K cycles, which should be enough for this test.
             var coordinatorSettings = new CoordinatorSettings {
-                UseSimulatedEnvironment = true,
+                Environment = "roomM370",
                 SaveMapekCycleData = false,
                 StartInReactiveMode = false,
                 UseCaseBasedFunctionality = true,

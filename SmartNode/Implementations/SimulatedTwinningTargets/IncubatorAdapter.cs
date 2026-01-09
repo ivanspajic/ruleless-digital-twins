@@ -13,8 +13,8 @@ namespace Implementations.SimulatedTwinningTargets {
     public record class Incubator(string measurement, IncubatorFields fields);
 
     public class IncubatorAdapter {
-        private static ConnectionFactory _factory;
-        private static CancellationToken _ct;
+        private ConnectionFactory? _factory;
+        private CancellationToken _ct;
         public IncubatorFields? Data;
         public ulong Counter = 0;
 
@@ -36,9 +36,7 @@ namespace Implementations.SimulatedTwinningTargets {
         }
 
         public static IncubatorAdapter GetInstance(string hostName, CancellationToken cancellationToken) {
-            if (_factory is null) {
-                _instance = new IncubatorAdapter(hostName, cancellationToken);
-            }
+            _instance ??= new IncubatorAdapter(hostName, cancellationToken);
 
             return _instance;
         }

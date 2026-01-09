@@ -13,7 +13,7 @@ namespace TestProject.Mocks.ServiceMocks
             { "int", new IntValueHandlerMock() }
         };
 
-        public IActuator GetActuatorDeviceImplementation(string actuatorName)
+        public IActuator GetActuatorImplementation(string actuatorName)
         {
             throw new NotImplementedException();
         }
@@ -22,7 +22,7 @@ namespace TestProject.Mocks.ServiceMocks
             throw new NotImplementedException();
         }
 
-        public ISensor GetSensorDeviceImplementation(string sensorName, string procedureName)
+        public ISensor GetSensorImplementation(string sensorName, string procedureName)
         {
             throw new NotImplementedException();
         }

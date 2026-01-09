@@ -142,7 +142,7 @@ namespace Logic.Mapek {
             var sensorNode = procedureQueryResult.Results[0]["sensor"];
 
             // Get an instance of a Sensor from the factory.
-            var sensor = _factory.GetSensorDeviceImplementation(sensorNode.ToString(), procedureNode.ToString());
+            var sensor = _factory.GetSensorImplementation(sensorNode.ToString(), procedureNode.ToString());
 
             query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?inputProperty WHERE {
                     @procedure ssn:hasInput ?inputProperty .

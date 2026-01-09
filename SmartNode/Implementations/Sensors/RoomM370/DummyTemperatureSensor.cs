@@ -7,11 +7,11 @@ namespace Implementations.Sensors.RoomM370
     {
         private readonly DummyRoomM370 _dummyRoomM370;
 
-        public DummyTemperatureSensor(string sensorName, string procedureName, DummyRoomM370 dummyRoomM370)
+        public DummyTemperatureSensor(string sensorName, string procedureName)
         {
             SensorName = sensorName;
             ProcedureName = procedureName;
-            _dummyRoomM370 = dummyRoomM370;
+            _dummyRoomM370 = DummyRoomM370.Instance;
         }
 
         public string SensorName { get; private set; }

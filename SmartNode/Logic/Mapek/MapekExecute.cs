@@ -17,7 +17,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public void Execute(Simulation simulation, bool useSimulatedTwinningTarget)
+        public void Execute(Simulation simulation)
         {
             _logger.LogInformation("Starting the Execute phase.");
 
@@ -30,12 +30,6 @@ namespace Logic.Mapek
                 }
             }
 
-            if (!useSimulatedTwinningTarget)
-            {
-                // TODO: add a delay to match the duration of a cycle with the simulated interval. This is especially important in multi-cycle (look-ahead)
-                // simulations.
-            }
-
             LogExpectedPropertyValues(simulation);
         }
 
@@ -45,7 +39,7 @@ namespace Logic.Mapek
                 actuationAction.Actuator.Name,
                 actuationAction.NewStateValue.ToString());
 
-            var actuator = _factory.GetActuatorDeviceImplementation(actuationAction.Actuator.Name);
+            var actuator = _factory.GetActuatorImplementation(actuationAction.Actuator.Name);
 
             // This cannot be a blocking call to ensure that multiple Actuators in an interval get actuated for the same duration.
             actuator.Actuate(actuationAction.NewStateValue);

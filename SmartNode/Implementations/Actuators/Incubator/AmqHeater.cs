@@ -3,7 +3,7 @@ using Logic.TTComponentInterfaces;
 using System.Diagnostics;
 
 namespace Implementations.Actuators.Incubator {
-    public class AMQHeater() : IActuator {
+    public class AmqHeater() : IActuator {
         private readonly IncubatorAdapter _incubatorAdapter = IncubatorAdapter.GetInstance("localhost", new CancellationToken());
 
         public string ActuatorName => "Incubator Heater";

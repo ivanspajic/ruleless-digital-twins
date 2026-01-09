@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Implementations.Sensors;
+using Implementations.Sensors.HomeAssistant;
 
 namespace TestProject;
 

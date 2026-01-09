@@ -157,7 +157,7 @@ namespace Logic.Mapek {
                 if (currentOptimalSimulationPath is null || !currentOptimalSimulationPath.Simulations.Any()) {
                     // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
                     // TODO: use the simulation tree for visualization.
-                    (currentSimulationTree, currentOptimalSimulationPath) = _mapekPlan.Plan(cache, _coordinatorSettings.LookAheadMapekCycles);
+                    (currentSimulationTree, currentOptimalSimulationPath) = _mapekPlan.Plan(cache);
                 }
 
                 // If case-based functionality is used, get the potential case from the new simulation path.

@@ -2,7 +2,7 @@
 using Logic.TTComponentInterfaces;
 using System.Globalization;
 
-namespace Implementations.Actuators
+namespace Implementations.Actuators.RoomM370
 {
     public class DummyHeater : IActuator
     {

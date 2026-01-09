@@ -41,7 +41,7 @@ namespace Logic.Mapek
             _filepathArguments = serviceProvider.GetRequiredService<FilepathArguments>();
         }
 
-        public (SimulationTreeNode, SimulationPath) Plan(Cache cache, int lookAheadCycles) {
+        public (SimulationTreeNode, SimulationPath) Plan(Cache cache) {
             _logger.LogInformation("Starting the Plan phase.");
 
             _logger.LogInformation("Generating simulations.");
@@ -56,7 +56,7 @@ namespace Logic.Mapek
                 NodeItem = new Simulation(cache.PropertyCache),
                 Children = []
             };
-            var simulations = GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<ActuationAction>>(), cache.PropertyCache);
+            var simulations = GetSimulationsAndGenerateSimulationTree(_coordinatorSettings.LookAheadMapekCycles, 0, simulationTree, false, true, new List<List<ActuationAction>>(), cache.PropertyCache);
 
             // Execute the simulations and obtain their results.
             Simulate(simulations, cache.SoftSensorTreeNodes);

@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Implementations.Sensors;
+using Implementations.SimulatedTwinningTargets;
 
 namespace TestProject {
 

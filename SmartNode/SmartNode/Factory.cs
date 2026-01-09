@@ -1,23 +1,21 @@
 ﻿using Logic.TTComponentInterfaces;
 using Logic.FactoryInterface;
 using Logic.ValueHandlerInterfaces;
-using Implementations.Actuators;
-using Implementations.Sensors;
 using Implementations.ValueHandlers;
 using Implementations.SimulatedTwinningTargets;
 using Implementations.Sensors.RoomM370;
 using Implementations.Sensors.CustomPiece;
 using Implementations.SoftwareComponents;
+using Implementations.Actuators.RoomM370;
 
 namespace SmartNode
 {
     internal class Factory : IFactory
     {
-        private readonly bool _useDummyDevices;
+        private readonly string _dummyEnvironment;
 
         // New implementations can simply be added to the factory collections.
-        private readonly Dictionary<(string, string), ISensor> _dummySensors = new()
-        {
+        private readonly Dictionary<(string, string), ISensor> _dummySensors = new() {
             {
                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1",
                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm"),
@@ -124,8 +122,7 @@ namespace SmartNode
             },
         };
 
-        private readonly Dictionary<string, IActuator> _dummyActuators = new()
-        {
+        private readonly Dictionary<string, IActuator> _dummyActuators = new() {
             {
                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater",
                 new DummyHeater(
@@ -158,49 +155,34 @@ namespace SmartNode
         };
 
         // The keys represent the OWL (RDF/XSD) types supported by Protege, and the values are user implementations.
-        private readonly Dictionary<string, IValueHandler> _valueHandlers = new()
-        {
+        private readonly Dictionary<string, IValueHandler> _valueHandlers = new() {
             { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#base64Binary", new Base64BinaryValueHandler() }
-        };
+        };        
 
-        // Keep an instance of the simulated TT.
-        private static readonly DummyRoomM370 _dummyRoomM370 = new();
-
-        public Factory(bool useDummyDevices)
-        {
-            _useDummyDevices = useDummyDevices;
+        public Factory(string dummyEnvironment) {
+            _dummyEnvironment = dummyEnvironment;
         }
 
-        public ISensor GetSensorDeviceImplementation(string sensorName, string procedureName)
-        {
-            if (_useDummyDevices)
-            {
-                if (_dummySensors.TryGetValue((sensorName, procedureName), out ISensor? sensor))
-                {
+        public ISensor GetSensorDeviceImplementation(string sensorName, string procedureName) {
+            if (!string.IsNullOrEmpty(_dummyEnvironment)) {
+                if (_dummySensors.TryGetValue((sensorName, procedureName), out ISensor? sensor)) {
                     return sensor;
                 }
-            }
-            else
-            {
+            } else {
                 // Reserved for real implementations.
             }
 
             throw new Exception($"No implementation was found for Sensor {sensorName} with Procedure {procedureName}.");
         }
 
-        public IActuator GetActuatorDeviceImplementation(string actuatorName)
-        {
-            if (_useDummyDevices)
-            {
-                if (_dummyActuators.TryGetValue(actuatorName, out IActuator? actuator))
-                {
+        public IActuator GetActuatorDeviceImplementation(string actuatorName) {
+            if (!string.IsNullOrEmpty(_dummyEnvironment)) {
+                if (_dummyActuators.TryGetValue(actuatorName, out IActuator? actuator)) {
                     return actuator;
                 }
-            }
-            else
-            {
+            } else {
                 // Reserved for real implementations.
             }
 
@@ -208,7 +190,7 @@ namespace SmartNode
         }
 
         public IConfigurableParameter GetConfigurableParameterImplementation(string configurableParameterName) {
-            if (_useDummyDevices) {
+            if (!string.IsNullOrEmpty(_dummyEnvironment)) {
                 if (_dummyConfigurableParameters.TryGetValue(configurableParameterName, out IConfigurableParameter? configurableParameter)) {
                     return configurableParameter;
                 }
@@ -219,10 +201,8 @@ namespace SmartNode
             throw new Exception($"No implementation was found for software component {configurableParameterName}.");
         }
 
-        public IValueHandler GetValueHandlerImplementation(string owlType)
-        {
-            if (_valueHandlers.TryGetValue(owlType, out IValueHandler? sensorValueHandler))
-            {
+        public IValueHandler GetValueHandlerImplementation(string owlType) {
+            if (_valueHandlers.TryGetValue(owlType, out IValueHandler? sensorValueHandler)) {
                 return sensorValueHandler;
             }
 

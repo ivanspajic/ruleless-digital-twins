@@ -1,13 +1,13 @@
 ﻿using Implementations.SimulatedTwinningTargets;
 using Logic.TTComponentInterfaces;
 
-namespace Implementations.Sensors
+namespace Implementations.Sensors.RoomM370
 {
-    public class DummyTemperatureSensor : ISensor
+    public class DummyHumiditySensor : ISensor
     {
         private readonly DummyRoomM370 _dummyRoomM370;
 
-        public DummyTemperatureSensor(string sensorName, string procedureName, DummyRoomM370 dummyRoomM370)
+        public DummyHumiditySensor(string sensorName, string procedureName, DummyRoomM370 dummyRoomM370)
         {
             SensorName = sensorName;
             ProcedureName = procedureName;
@@ -20,7 +20,7 @@ namespace Implementations.Sensors
 
         public object ObservePropertyValue(params object[] inputProperties)
         {
-            return _dummyRoomM370.RoomTemperature;
+            return _dummyRoomM370.RoomHumidity;
         }
     }
 }

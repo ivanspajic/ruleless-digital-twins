@@ -58,7 +58,7 @@ The codebase uses a `appsettings.json` in the `SmartNode/Properties` directory a
   - `FmuDirectory`: the solution's FMU storage directory.
   - `DataDirectory`: the solution's data storage directory for persisting data values from MAPE-K cycles.
 2. Coordinator settings:
-  - `UseSimulatedEnvironment`: a boolean value for using the preconfigured simulated environment or a real one.
+  - `SimulatedEnvironment`: a string for selecting a preconfigured simulated environment implementation. Leave blank if you wish to use a real one.
   - `SaveMapekData`: a boolean for saving MAPE-K cycle data to the disk.
   - `StartInReactiveMode`: a boolean for setting the starting mode of the coordinator. Running it in reactive mode means the system will only simulate corrective actions given the respective system actuators to mitigate the current optimal condition violations. In case of no violations of optimal conditions, the system will not simulate actions. In proactive mode, the system takes a proactive approach and simulates regardless of optimal condition status, subsequently including all existing system actuators. As a result, the proactive approach checks for potential violations of optimal conditions before they happen. Conversely, the reactive approach requires less simulating and is thus more performant.
   - `UseCaseBasedFunctionality`: a boolean for using the functionality where the system uses previously-saved actions for already encountered conditions.

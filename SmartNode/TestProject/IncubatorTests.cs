@@ -1,5 +1,4 @@
 using Implementations.ValueHandlers;
-using Implementations.Sensors;
 using Logic.TTComponentInterfaces;
 using Logic.FactoryInterface;
 using Logic.Mapek;
@@ -9,13 +8,13 @@ using Logic.ValueHandlerInterfaces;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks.ServiceMocks;
-using System.Collections.ObjectModel;
+using Implementations.SimulatedTwinningTargets;
 
 namespace TestProject {
     public class IncubatorTests : IDisposable {
         static bool runInference = false; // `false` can be overriden by logic below.
         // IP is coming from "docket network create // inspect" -> rabbitmq-ip or variations thereof:
-        static IncubatorAdapter i = new("172.20.0.2", TestContext.Current.CancellationToken);
+        static IncubatorAdapter i = IncubatorAdapter.GetInstance("localhost", TestContext.Current.CancellationToken);
         static Factory.AMQSensor AMQTempSensor = new("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor", "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure", ((d) => d.average_temperature));
 
         private class MyMapekPlan : MapekPlan {
@@ -87,7 +86,7 @@ namespace TestProject {
             mapekKnowledge.Validate(propertyCacheMock);
 
             // TODO: Assert that there's at least one actuator that's not a parameter.
-            var (simulationTree, optimalSimulationPath) = mapekPlan.Plan(new Cache() { PropertyCache = propertyCacheMock, OptimalConditions = [], SoftSensorTreeNodes = [] }, lookAheadCycles);
+            var (simulationTree, optimalSimulationPath) = mapekPlan.Plan(new Cache() { PropertyCache = propertyCacheMock, OptimalConditions = [], SoftSensorTreeNodes = [] });
 
             // Only valid AFTER focing evaluation through simulation:
             Assert.Equal(Math.Pow(2, lookAheadCycles), simulationTree.SimulationPaths.Count());
@@ -112,7 +111,7 @@ namespace TestProject {
         public async Task SimulateFromAMQ(string fromPython, string model, string inferred, int lookAheadCycles) {
             SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
             IMapekExecute mpe;
-            mock.Add<IMapekExecute>(mpe = new MapekExecute(mock));
+            mock.Add(mpe = new MapekExecute(mock));
 
             await i.Connect();
             var consumerTag = await i.Setup();
@@ -121,7 +120,7 @@ namespace TestProject {
             Assert.True(AMQTempSensor._onceOnly);
             var cache = monitor.Monitor();
 
-            var (simulationTree, optimalSimulationPath) = mapekPlan.Plan(cache, lookAheadCycles);
+            var (simulationTree, optimalSimulationPath) = mapekPlan.Plan(cache);
             Assert.False(AMQTempSensor._onceOnly); // Must've been used.
 
             // Only valid AFTER focing evaluation through simulation:

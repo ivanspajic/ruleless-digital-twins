@@ -1,7 +1,7 @@
 ﻿using Implementations.SimulatedTwinningTargets;
 using Logic.TTComponentInterfaces;
 
-namespace Implementations.Actuators {
+namespace Implementations.Actuators.RoomM370 {
     public class DummyFloorHeating : IActuator {
         private int _actuatorState = 0;
         private readonly DummyRoomM370 _dummyRoomM370;

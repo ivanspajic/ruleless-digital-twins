@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Logic.TTComponentInterfaces;
 
-namespace Implementations.Sensors {
+namespace Implementations.Sensors.HomeAssistant {
     
     public class HomeAssistantSensor : ISensor {
         private readonly HttpClient _httpClient;

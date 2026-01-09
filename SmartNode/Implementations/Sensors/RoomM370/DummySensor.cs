@@ -1,6 +1,6 @@
 ﻿using Logic.TTComponentInterfaces;
 
-namespace Implementations.Sensors
+namespace Implementations.Sensors.RoomM370
 {
     public class DummySensor(string sensorName, string procedureName) : ISensor
     {

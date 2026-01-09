@@ -1,10 +1,10 @@
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 
-namespace Implementations.Sensors {
+namespace Implementations.SimulatedTwinningTargets {
 
     // Case-sensitive!
     public record class IncubatorFields(double t1, double t2, double t3, double average_temperature, double execution_interval, double elapsed,
@@ -13,24 +13,34 @@ namespace Implementations.Sensors {
     public record class Incubator(string measurement, IncubatorFields fields);
 
     public class IncubatorAdapter {
-        private readonly ConnectionFactory _factory;
-        private readonly CancellationToken _ct;
+        private static ConnectionFactory _factory;
+        private static CancellationToken _ct;
         public IncubatorFields? Data;
         public ulong Counter = 0;
 
-        readonly string ExchangeName = "Incubator_AMQP"; // From Incubator
-        readonly double G_box = 0.5763498; // startup.conf
+        private readonly string ExchangeName = "Incubator_AMQP"; // From Incubator
+        private readonly double G_box = 0.5763498; // startup.conf
+
+        private static IncubatorAdapter _instance;
 
         public IConnection? Conn { get; private set; }
         public IChannel? Channel { get; private set; }
 
-        public IncubatorAdapter(string hostName, CancellationToken ct) {
+        private IncubatorAdapter(string hostName, CancellationToken cancellationToken) {
             _factory = new() {
                 UserName = "incubator",
                 Password = "incubator",
                 HostName = hostName
             };
-            _ct = ct;
+            _ct = cancellationToken;
+        }
+
+        public static IncubatorAdapter GetInstance(string hostName, CancellationToken cancellationToken) {
+            if (_factory is null) {
+                _instance = new IncubatorAdapter(hostName, cancellationToken);
+            }
+
+            return _instance;
         }
 
         public async Task Connect()

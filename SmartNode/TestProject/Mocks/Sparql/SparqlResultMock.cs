@@ -3,7 +3,7 @@ using VDS.RDF;
 using VDS.RDF.Query;
 using VDS.RDF.Writing.Formatting;
 
-namespace TestProject.Mocks {
+namespace TestProject.Mocks.Sparql {
     internal class SparqlResultMock : ISparqlResult {
         public Dictionary<string, INode> Nodes { get; set; }
 

@@ -99,8 +99,10 @@
 // them for a temporary mark.
 
 [rule2a:    (?restriction rdf:comment ?property)
-            (?property meta:hasValue ?propertyValue)
-            (?property meta:propertyFor ?propertyChange)
+            (?property rdf:type ?bNode)
+            (?bNode owl:onProperty meta:hasValue)
+            (?bNode owl:hasValue ?propertyValue)
+            (?propertyChange ssn:forProperty ?property)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             (?restriction xsd:minExclusive ?restrictionValue)
             le(?propertyValue, ?restrictionValue)
@@ -108,8 +110,10 @@
 ]
 
 [rule2b:    (?restriction rdf:comment ?property)
-            (?property meta:hasValue ?propertyValue)
-            (?property meta:propertyFor ?propertyChange)
+            (?property rdf:type ?bNode)
+            (?bNode owl:onProperty meta:hasValue)
+            (?bNode owl:hasValue ?propertyValue)
+            (?propertyChange ssn:forProperty ?property)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             (?restriction xsd:minInclusive ?restrictionValue)
             lessThan(?propertyValue, ?restrictionValue)
@@ -117,8 +121,10 @@
 ]
 
 [rule2c:    (?restriction rdf:comment ?property)
-            (?property meta:hasValue ?propertyValue)
-            (?property meta:propertyFor ?propertyChange)
+            (?property rdf:type ?bNode)
+            (?bNode owl:onProperty meta:hasValue)
+            (?bNode owl:hasValue ?propertyValue)
+            (?propertyChange ssn:forProperty ?property)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             (?restriction xsd:maxExclusive ?restrictionValue)
             ge(?propertyValue, ?restrictionValue)
@@ -126,8 +132,10 @@
 ]
 
 [rule2d:    (?restriction rdf:comment ?property)
-            (?property meta:hasValue ?propertyValue)
-            (?property meta:propertyFor ?propertyChange)
+            (?property rdf:type ?bNode)
+            (?bNode owl:onProperty meta:hasValue)
+            (?bNode owl:hasValue ?propertyValue)
+            (?propertyChange ssn:forProperty ?property)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             (?restriction xsd:maxInclusive ?restrictionValue)
             greaterThan(?propertyValue, ?restrictionValue)
@@ -141,7 +149,7 @@
 // are generated in cases of, e.g., multiple actuators causing multiple different PropertyChanges.
 
 [rule3a:   (?thing rdf:comment ?propertyChange)
-           (?propertyChange meta:enactedBy ?actuator)
+           (?actuator meta:enacts ?propertyChange)
            (?actuator rdf:type sosa:Actuator)
            (?actuator meta:hasActuatorState ?actuatorState)
            uriConcat(?actuator, "_", ?actuatorState, ?actionName)
@@ -154,7 +162,7 @@
 ]
 
 [rule3b:   (?thing rdf:comment ?propertyChange)
-           (?propertyChange meta:enactedBy ?configurableParameter)
+           (?configurableParameter meta:enacts ?propertyChange)
            (?configurableParameter rdf:type meta:ConfigurableParameter)
            (?configurableParameter meta:hasPossibleValue ?configurableParameterValue)
            uriConcat(?configurableParameter, "_", ?configurableParameterValue, ?actionName)

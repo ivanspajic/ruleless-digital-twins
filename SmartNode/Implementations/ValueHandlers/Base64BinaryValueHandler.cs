@@ -17,6 +17,10 @@ namespace Implementations.ValueHandlers {
             throw new NotImplementedException();
         }
 
+        public object GetQuantizedValue(object value, double fuzziness) {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<AtomicConstraintExpression> GetUnsatisfiedConstraintsFromEvaluation(ConstraintExpression constraintExpression, object propertyValue) {
             throw new NotImplementedException();
         }

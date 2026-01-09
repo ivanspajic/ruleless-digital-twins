@@ -1,8 +1,9 @@
 ﻿using Logic.TTComponentInterfaces;
 using Logic.FactoryInterface;
 using Logic.ValueHandlerInterfaces;
+using TestProject.Mocks.ValueHandlerMocks;
 
-namespace TestProject.Mocks
+namespace TestProject.Mocks.ServiceMocks
 {
     internal class FactoryMock : IFactory
     {
@@ -34,6 +35,10 @@ namespace TestProject.Mocks
             }
 
             return null!;
+        }
+
+        public void AddValueHandlerImplementation(string owlType, IValueHandler valueHandler) {
+            _valueHandlerImplementations.Add(owlType, valueHandler);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Logic.Mapek.Comparers
                 var yActuationAction = y as ActuationAction;
 
                 if (xActuationAction!.Actuator.Name.Equals(yActuationAction!.Actuator.Name) &&
-                    xActuationAction.NewStateValue.Equals(yActuationAction.NewStateValue) &&
+                    xActuationAction.NewStateValue.ToString()!.Equals(yActuationAction.NewStateValue.ToString()) &&
                     xActuationAction.Name.Equals(yActuationAction.Name))
                 {
                     return true;
@@ -24,10 +24,10 @@ namespace Logic.Mapek.Comparers
                 var xReconfigurationAction = x as ReconfigurationAction;
                 var yReconfigurationAction = y as ReconfigurationAction;
 
-                if (xReconfigurationAction!.NewParameterValue.Equals(yReconfigurationAction!.NewParameterValue) &&
+                if (xReconfigurationAction!.NewParameterValue.ToString()!.Equals(yReconfigurationAction!.NewParameterValue.ToString()) &&
                     xReconfigurationAction.Name.Equals(yReconfigurationAction.Name) &&
                     xReconfigurationAction.ConfigurableParameter.OwlType.Equals(yReconfigurationAction.ConfigurableParameter.OwlType) &&
-                    xReconfigurationAction.ConfigurableParameter.Value.Equals(yReconfigurationAction.ConfigurableParameter.Value))
+                    xReconfigurationAction.ConfigurableParameter.Value.ToString()!.Equals(yReconfigurationAction.ConfigurableParameter.Value.ToString()))
                 {
                     return true;
                 }

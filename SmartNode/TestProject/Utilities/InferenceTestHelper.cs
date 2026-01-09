@@ -285,7 +285,7 @@ namespace TestProject.Utilities {
                         }
                     }
                 },
-                /*{
+                {
                     "restrictedDehumidifierFanHeater.ttl",
                     new[] {
                         new ActuationAction[] {
@@ -1115,7 +1115,7 @@ namespace TestProject.Utilities {
                             }
                         }
                     }
-                }*/
+                }
             };
     }
 }

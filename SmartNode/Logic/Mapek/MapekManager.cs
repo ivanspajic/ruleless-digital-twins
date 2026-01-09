@@ -1,5 +1,11 @@
-﻿using Logic.Models.MapekModels;
+﻿using Logic.CaseRepository;
+using Logic.FactoryInterface;
+using Logic.Mapek.Comparers;
+using Logic.Models.DatabaseModels;
+using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
 using Logic.Utilities;
+using Logic.ValueHandlerInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
@@ -9,17 +15,16 @@ using System.Runtime.CompilerServices;
 namespace Logic.Mapek {
     public class MapekManager : IMapekManager {
         private const int SleepyTimeMilliseconds = 2_000;
-        // Decides on the number of MAPE-K cycles to look ahead for and thus the number of simulation steps to run. For example,
-        // setting this value to 1 means only simulating for the current cycle, while setting it to 4 means simulating for the next
-        // 4 cycles.
+
         private readonly FilepathArguments _filepathArguments;
         private readonly CoordinatorSettings _coordinatorSettings;
         private readonly ILogger<IMapekManager> _logger;
         private readonly IMapekMonitor _mapekMonitor;
-        //private readonly IMapekAnalyze _mapekAnalyze;
         private readonly IMapekPlan _mapekPlan;
         private readonly IMapekExecute _mapekExecute;
         private readonly IMapekKnowledge _mapekKnowledge;
+        private readonly ICaseRepository _caseRepository;
+        private readonly IFactory _factory;
 
         private bool _isLoopActive = false;
 
@@ -28,10 +33,11 @@ namespace Logic.Mapek {
             _coordinatorSettings = serviceProvider.GetRequiredService<CoordinatorSettings>();
             _logger = serviceProvider.GetRequiredService<ILogger<IMapekManager>>();
             _mapekMonitor = serviceProvider.GetRequiredService<IMapekMonitor>();
-            //_mapekAnalyze = serviceProvider.GetRequiredService<IMapekAnalyze>();
             _mapekPlan = serviceProvider.GetRequiredService<IMapekPlan>();
             _mapekExecute = serviceProvider.GetRequiredService<IMapekExecute>();
             _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
+            _caseRepository = serviceProvider.GetRequiredService<ICaseRepository>();
+            _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
         public void StartLoop() {
@@ -47,6 +53,10 @@ namespace Logic.Mapek {
             _logger.LogInformation("Starting the MAPE-K loop. (maxRounds= {maxRound})", _coordinatorSettings.MaximumMapekRounds);
 
             var currentRound = 0;
+            Simulation simulationToExecute = null!;
+            Case potentialCase = null!;
+            SimulationTreeNode currentSimulationTree = null!;
+            SimulationPath currentOptimalSimulationPath = null!;
 
             while (_isLoopActive) {
                 if (_coordinatorSettings.MaximumMapekRounds > -1) {
@@ -56,21 +66,28 @@ namespace Logic.Mapek {
                 // Reload the instance model for each cycle to ensure dynamic model updates are captured.
                 _mapekKnowledge.LoadModelsFromKnowledgeBase(); // This makes sense in theory but won't work without the Factory updating as well.
 
-                // Monitor - Observe all hard and soft Sensor values.
+                // Monitor - Observe all hard and soft Sensor values, construct soft Sensor trees, and collect OptimalConditions.
                 var cache = _mapekMonitor.Monitor();
 
-                // Analyze - Out of all possible Actions, filter out the irrelevant ones based on current Property values and return
-                // them with all OptimalConditions.
-                // var optimalConditionsAndActions = _mapekAnalyze.Analyze(instanceModel, propertyCache, ConfigurableParameterGranularity);
+                // Check for previously constructed simulation paths to pick the next simulation configuration to execute. If case-based functionality is enabled, check for preexisting
+                // cases and save new ones when applicable. For simplicity, the look-ahead approach and the case-based functionality effectively keep state based on the configuration at
+                // the time of making a sequence of simulations/cases to execute. This means if settings values are changed midway through a full simulation path execution (e.g., 2/4),
+                // the system will continue executing as if it followed the old ones for the remainder of the simulation path. Dynamic settings changes thus take effect after the execution
+                // of a full simulation path or in case it is deliberately rejected early by the system due to deviation from its previously predicted Property values.
+                (simulationToExecute, potentialCase, currentSimulationTree, currentOptimalSimulationPath) = ManageSimulationsAndCasesAndPotentiallyPlan(cache,
+                    simulationToExecute,
+                    potentialCase,
+                    currentSimulationTree,
+                    currentOptimalSimulationPath);
 
-                // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
-                var (_, _, optimalSimulationPath) = _mapekPlan.Plan(cache, _coordinatorSettings.LookAheadMapekCycles);
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
-                _mapekExecute.Execute(optimalSimulationPath, cache.PropertyCache.ConfigurableParameters, _coordinatorSettings.UseSimulatedEnvironment);
+                _mapekExecute.Execute(simulationToExecute, _coordinatorSettings.UseSimulatedEnvironment);
 
-                // Write MAPE-K state to CSV.
-                CsvUtils.WritePropertyStatesToCsv(_filepathArguments.DataDirectory, currentRound, cache.PropertyCache);
-                CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentRound, optimalSimulationPath);
+                // If configured, write MAPE-K state to CSV.
+                if (_coordinatorSettings.SaveMapekCycleData) {
+                    CsvUtils.WritePropertyStatesToCsv(_filepathArguments.DataDirectory, currentRound, cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
+                    CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentRound, potentialCase.Simulation);
+                }
 
                 if (_coordinatorSettings.MaximumMapekRounds > 0) {
                     _coordinatorSettings.MaximumMapekRounds--;
@@ -84,6 +101,191 @@ namespace Logic.Mapek {
 
                 // Thread.Sleep(SleepyTimeMilliseconds);
             }
+        }
+
+        private (Simulation, Case, SimulationTreeNode, SimulationPath) ManageSimulationsAndCasesAndPotentiallyPlan(Cache cache,
+            Simulation simulationToExecute,
+            Case potentialCase,
+            SimulationTreeNode currentSimulationTree,
+            SimulationPath currentOptimalSimulationPath) {
+            var quantizedObservedProperties = GetQuantizedProperties(cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
+
+            var simulationMatches = false;
+            if (simulationToExecute is not null) {
+                var quantizedSimulationProperties = GetQuantizedProperties(simulationToExecute.PropertyCache.ConfigurableParameters, simulationToExecute.PropertyCache.Properties);
+
+                simulationMatches = quantizedSimulationProperties.SequenceEqual(quantizedObservedProperties, new PropertyEqualityComparer());
+            }
+
+            // If the previously executed simulation's results don't match the current cycle's observations, the predictions for the rest of the simulation path are outside of
+            // previously predicted conditions and should thus be discarded.
+            if (!simulationMatches) {
+                currentOptimalSimulationPath = null!;
+            }
+
+            if (_coordinatorSettings.UseCaseBasedFunctionality && potentialCase is not null) {
+                // If there is a potential case from the previous cycle to be saved and the values of the observed Properties from this cycle match with the predicted quantized
+                // values from the simulation of the last cycle, then case is valid and can be saved to the database. Otherwise, the case should be nullified.
+                if (simulationMatches) {
+                    _caseRepository.CreateCase(potentialCase);
+                } else {
+                    potentialCase = null!;
+                }
+
+                var quantizedObservedOptimalConditions = GetQuantizedOptimalConditions(cache.OptimalConditions);
+
+                // If there are still remaining simulations in the simulation path, get the next potential case from it. Otherwise, try to look for it in the database.
+                if (currentOptimalSimulationPath is not null && currentOptimalSimulationPath.Simulations.Any()) {
+                    
+                    potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedOptimalConditions, currentOptimalSimulationPath);
+
+                    // After getting the potential case from the simulation path, reduce the number of remaining simulations.
+                    currentOptimalSimulationPath.RemoveFirstRemainingSimulationFromSimulationPath();
+                } else {
+                    currentOptimalSimulationPath = GetSimulationPathFromSavedCases(quantizedObservedProperties, quantizedObservedOptimalConditions);
+                    if (currentOptimalSimulationPath is not null) {
+                        potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedOptimalConditions, currentOptimalSimulationPath);
+
+                        // After getting the potential case from the simulation path, reduce the number of remaining simulations.
+                        currentOptimalSimulationPath.RemoveFirstRemainingSimulationFromSimulationPath();
+                    }
+                }
+            }
+            
+            if (potentialCase is null) {
+                // If there are no remaining simulations to be executed from a previously created simulation path, run the planning phase again.
+                if (currentOptimalSimulationPath is null || !currentOptimalSimulationPath.Simulations.Any()) {
+                    // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
+                    // TODO: use the simulation tree for visualization.
+                    (currentSimulationTree, currentOptimalSimulationPath) = _mapekPlan.Plan(cache, _coordinatorSettings.LookAheadMapekCycles);
+                }
+
+                // If case-based functionality is used, get the potential case from the new simulation path.
+                if (_coordinatorSettings.UseCaseBasedFunctionality) {
+                    var quantizedObservedOptimalConditions = GetQuantizedOptimalConditions(cache.OptimalConditions);
+
+                    potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedOptimalConditions, currentOptimalSimulationPath);
+                }
+
+                simulationToExecute = currentOptimalSimulationPath.Simulations.First();
+
+                // After getting the simulation from the simulation path, reduce the number of remaining simulations.
+                currentOptimalSimulationPath.RemoveFirstRemainingSimulationFromSimulationPath();
+            }
+
+            return (simulationToExecute, potentialCase, currentSimulationTree, currentOptimalSimulationPath)!;
+        }
+
+        private List<Property> GetQuantizedProperties(IDictionary<string, ConfigurableParameter> configurableParameters,
+            IDictionary<string, Property> properties) {
+            var quantizedProperties = new List<Property>();
+
+            foreach (var configurableParameterKeyValuePair in configurableParameters) {
+                var valueHandler = _factory.GetValueHandlerImplementation(configurableParameterKeyValuePair.Value.OwlType);
+                var quantizedValue = valueHandler.GetQuantizedValue(configurableParameterKeyValuePair.Value.Value, _coordinatorSettings.PropertyValueFuzziness);
+                var quantizedConfigurableParameter = new ConfigurableParameter {
+                    Name = configurableParameterKeyValuePair.Value.Name,
+                    OwlType = configurableParameterKeyValuePair.Value.OwlType,
+                    Value = quantizedValue
+                };
+                quantizedProperties.Add(quantizedConfigurableParameter);
+            }
+
+            foreach (var propertyKeyValuePair in properties) {
+                var valueHandler = _factory.GetValueHandlerImplementation(propertyKeyValuePair.Value.OwlType);
+                var quantizedValue = valueHandler.GetQuantizedValue(propertyKeyValuePair.Value.Value, _coordinatorSettings.PropertyValueFuzziness);
+                var quantizedProperty = new Property {
+                    Name = propertyKeyValuePair.Value.Name,
+                    OwlType = propertyKeyValuePair.Value.OwlType,
+                    Value = quantizedValue
+                };
+                quantizedProperties.Add(quantizedProperty);
+            }
+
+            return quantizedProperties;
+        }
+
+        private List<OptimalCondition> GetQuantizedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions) {
+            var quantizedOptimalConditions = new List<OptimalCondition>();
+
+            foreach (var optimalCondition in optimalConditions) {
+                var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.ConstraintValueType);
+                var quantizedConstraints = new List<ConstraintExpression>();
+                foreach (var constraint in optimalCondition.Constraints) {
+                    var quantizedConstraint = GetQuantizedOptimalConditionConstraint(constraint, valueHandler);
+                    quantizedConstraints.Add(quantizedConstraint);
+                }
+                quantizedOptimalConditions.Add(new OptimalCondition {
+                    Constraints = quantizedConstraints,
+                    ConstraintValueType = optimalCondition.ConstraintValueType,
+                    Name = optimalCondition.Name,
+                    Property = optimalCondition.Property,
+                    ReachedInMaximumSeconds = optimalCondition.ReachedInMaximumSeconds,
+                    UnsatisfiedAtomicConstraints = []
+                });
+            }
+
+            return quantizedOptimalConditions;
+        }
+
+        private ConstraintExpression GetQuantizedOptimalConditionConstraint(ConstraintExpression constraintExpression, IValueHandler valueHandler) {
+            // Go through the whole tree of OptimalCondition constraints and get quantized values for each one.
+            if (constraintExpression is AtomicConstraintExpression atomicConstraintExpression) {
+                return new AtomicConstraintExpression {
+                    ConstraintType = atomicConstraintExpression.ConstraintType,
+                    Right = valueHandler.GetQuantizedValue(atomicConstraintExpression.Right, _coordinatorSettings.PropertyValueFuzziness)
+                };
+            } else {
+                var nestedConstraintExpression = constraintExpression as NestedConstraintExpression;
+
+                return new NestedConstraintExpression {
+                    ConstraintType = nestedConstraintExpression!.ConstraintType,
+                    Left = GetQuantizedOptimalConditionConstraint(nestedConstraintExpression.Left, valueHandler),
+                    Right = GetQuantizedOptimalConditionConstraint(nestedConstraintExpression.Right, valueHandler)
+                };
+            }
+        }
+
+        private SimulationPath GetSimulationPathFromSavedCases(IEnumerable<Property> quantizedProperties, IEnumerable<OptimalCondition> quantizedOptimalConditions) {
+            var simulations = new List<Simulation>();
+
+            for (var i = 0; i < _coordinatorSettings.LookAheadMapekCycles; i++) {
+                var savedCase = _caseRepository.ReadCase(quantizedProperties,
+                    quantizedOptimalConditions,
+                    _coordinatorSettings.LookAheadMapekCycles,
+                    _coordinatorSettings.SimulationDurationSeconds,
+                    i);
+
+                // If no case is found, return a null.
+                if (savedCase is null) {
+                    return null!;
+                }
+
+                simulations.Add(savedCase.Simulation);
+
+                quantizedProperties = savedCase.QuantizedProperties;
+                quantizedOptimalConditions = savedCase.QuantizedOptimalConditions;
+            }
+
+            return new SimulationPath {
+                Simulations = simulations
+            };
+        }
+
+        private Case GetPotentialCaseFromSimulationPath(IEnumerable<Property> quantizedObservedProperties,
+            IEnumerable<OptimalCondition> quantizedObservedOptimalConditions,
+            SimulationPath simulationPath) {
+            var firstSimulation = simulationPath.Simulations.First();
+
+            return new Case {
+                ID = null,
+                Index = firstSimulation.Index,
+                LookAheadCycles = _coordinatorSettings.LookAheadMapekCycles,
+                SimulationDurationSeconds = _coordinatorSettings.SimulationDurationSeconds,
+                QuantizedOptimalConditions = quantizedObservedOptimalConditions,
+                QuantizedProperties = quantizedObservedProperties,
+                Simulation = firstSimulation
+            };
         }
     }
 }

@@ -35,7 +35,7 @@ namespace Implementations.ValueHandlers
 
         public void WriteValueToSimulationParameter(IInstance fmuInstance, IVariable parameter, object value) {
             if (value is not bool) {
-                value = Boolean.Parse(value.ToString()!);
+                value = bool.Parse(value.ToString()!);
             }
 
             fmuInstance.WriteBoolean((parameter, (bool)value));
@@ -51,12 +51,16 @@ namespace Implementations.ValueHandlers
 
         public string GetValueAsCultureInvariantString(object value) {
             if (value is not bool) {
-                value = Boolean.Parse(value.ToString()!);
+                value = bool.Parse(value.ToString()!);
             }
             return ((bool)value).ToString(CultureInfo.InvariantCulture);
         }
 
         public int IncreaseComp(object comparingValue, object targetValue) {
+            throw new NotImplementedException();
+        }
+
+        public object GetQuantizedValue(object value, double fuzziness) {
             throw new NotImplementedException();
         }
     }

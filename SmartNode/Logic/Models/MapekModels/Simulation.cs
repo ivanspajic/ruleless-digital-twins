@@ -16,7 +16,7 @@ namespace Logic.Models.MapekModels
 
         public IEnumerable<OntologicalModels.Action> Actions { get; init; }
 
-        public PropertyCache? PropertyCache { get; set; }
+        public PropertyCache PropertyCache { get; set; }
 
         public IEnumerable<FMUParameterAction> InitializationActions { get; set; }
     }

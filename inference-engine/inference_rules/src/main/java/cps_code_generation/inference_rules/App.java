@@ -10,6 +10,7 @@ import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
 import org.apache.jena.reasoner.ValidityReport;
 import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
+import org.apache.jena.reasoner.rulesys.GenericRuleReasoner.RuleMode;
 import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -26,14 +27,12 @@ public class App
     	Model myOntology = RDFDataMgr.loadModel(ontologyFilePath);
     	Model instanceModel = RDFDataMgr.loadModel(instanceModelFilePath);
     	
-    	Reasoner owlReasoner = ReasonerRegistry.getOWLReasoner()
-    			.bindSchema(myOntology);
-    	InfModel basicInferredModel = ModelFactory.createInfModel(owlReasoner, instanceModel);
-    	
     	List ruleList = Rule.rulesFromURL(ruleModelFilePath);
     	GenericRuleReasoner ruleReasoner = new GenericRuleReasoner(ruleList);
-    	InfModel finalInferredModel = ModelFactory.createInfModel(ruleReasoner, basicInferredModel);
+    	ruleReasoner.setDerivationLogging(true);
+    	InfModel finalInferredModel = ModelFactory.createInfModel(ruleReasoner, instanceModel);
     	
+    	// Validation example from the Apache Jena website.
     	ValidityReport validityReport = finalInferredModel.validate();
     	if (validityReport.isValid()) {
     	    System.out.println("The model is valid.");
@@ -47,6 +46,6 @@ public class App
     	FileOutputStream fileOutputStream = new FileOutputStream(inferredModelFilePath);
     	RDFDataMgr.write(fileOutputStream, finalInferredModel, Lang.TTL);
     	
-    	System.out.println("Terminated.");
+    	System.out.println("Generated the inferred model.");
     }
 }

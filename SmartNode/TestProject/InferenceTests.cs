@@ -17,19 +17,19 @@ namespace TestProject
         [MemberData(nameof(InferenceTestHelper.TestData), MemberType = typeof(InferenceTestHelper))]
         public void Correct_action_combinations_for_instance_model(string instanceModelFilename, IEnumerable<IEnumerable<ActuationAction>> expectedCombinations) {
             // Arrange
-            var executingAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
 
-            var workingDirectoryPath = Path.Combine(executingAssemblyPath!, "ModelsAndRules");
-            var ontologyFilepath = Path.Combine(executingAssemblyPath!, "Ontology", "ruleless-digital-twins.ttl");
-            var inferenceRulesFilepath = Path.Combine(executingAssemblyPath!, "ModelsAndRules", "inference-rules.rules");
-            var instanceModelFilepath = Path.Combine(executingAssemblyPath!, "TestFiles", instanceModelFilename);
-            var inferredInstanceModelFilepath = Path.Combine(executingAssemblyPath!, "TestFiles", instanceModelFilename.Split('.')[0] + "Inferred.ttl");
+            var workingDirectoryPath = Path.Combine(rootDirectory, "models-and-rules");
+            var ontologyFilepath = Path.Combine(rootDirectory, "ontology", "ruleless-digital-twins.ttl");
+            var inferenceRulesFilepath = Path.Combine(rootDirectory, "models-and-rules", "inference-rules.rules");
+            var instanceModelFilepath = Path.Combine(rootDirectory, "SmartNode", "TestProject", "TestFiles", instanceModelFilename);
+            var inferredInstanceModelFilepath = Path.Combine(rootDirectory, "SmartNode", "TestProject", "TestFiles", instanceModelFilename.Split('.')[0] + "Inferred.ttl");
 
             var inferredModel = new Graph();
             var turtleParser = new TurtleParser();
 
             // Act
-            ExecuteJarFile($"\"{Path.Combine(executingAssemblyPath!, "ModelsAndRules", "ruleless-digital-twins-inference-engine.jar")}\"",
+            ExecuteJarFile($"\"{Path.Combine(rootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar")}\"",
                 [$"\"{ontologyFilepath}\"", $"\"{instanceModelFilepath}\"", $"\"{inferenceRulesFilepath}\"", $"\"{inferredInstanceModelFilepath}\""],
                 workingDirectoryPath);
 
@@ -63,6 +63,8 @@ namespace TestProject
             };
 
             Debug.WriteLine($"Process started with ID {process.Id}.");
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
             process.WaitForExit();
 
             if (process.ExitCode != 0) {

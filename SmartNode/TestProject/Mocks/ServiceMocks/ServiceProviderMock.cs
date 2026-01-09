@@ -14,12 +14,12 @@ namespace TestProject.Mocks.ServiceMocks
                 { typeof(ILogger<IMapekKnowledge>), new LoggerMock<IMapekKnowledge>() },
                 { typeof(ILogger<IMapekMonitor>), new LoggerMock<IMapekMonitor>() },
                 { typeof(ILogger<IMapekManager>), new LoggerMock<IMapekManager>() },
-                { typeof(ILogger<ICaseRepository>), new LoggerMock<ICaseRepository>() }
+                { typeof(ILogger<ICaseRepository>), new LoggerMock<ICaseRepository>() },
+                { typeof(ILogger<IMapekExecute>), new LoggerMock<IMapekExecute>() }
             };
         }
 
-        public object? GetService(Type serviceType)
-        {
+        public object? GetService(Type serviceType) {
             if (_serviceImplementationMocks.TryGetValue(serviceType, out object? implementation)) {
                 return implementation;
             }

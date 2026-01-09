@@ -9,6 +9,7 @@ using Logic.ValueHandlerInterfaces;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks.ServiceMocks;
+using System.Collections.ObjectModel;
 
 namespace TestProject {
     public class IncubatorTests : IDisposable {
@@ -110,6 +111,8 @@ namespace TestProject {
         [InlineData("Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
         public async Task SimulateFromAMQ(string fromPython, string model, string inferred, int lookAheadCycles) {
             SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
+            IMapekExecute mpe;
+            mock.Add<IMapekExecute>(mpe = new MapekExecute(mock));
 
             await i.Connect();
             var consumerTag = await i.Setup();
@@ -124,13 +127,14 @@ namespace TestProject {
             // Only valid AFTER focing evaluation through simulation:
             Assert.Equal(Math.Pow(2, lookAheadCycles), simulationTree.SimulationPaths.Count());
             Assert.Equal(30, simulationTree.ChildrenCount);
-            var path = simulationTree.SimulationPaths.First();
 
-            foreach (var s in path.Simulations) {
+            foreach (var s in optimalSimulationPath.Simulations)
+            {
                 Trace.WriteLine(string.Join(";", s.Actions.Select(a => a.Name)));
                 Trace.WriteLine("Params: " + string.Join(";", s.InitializationActions.Select(a => a.Name).ToList()));
                 Trace.WriteLine("Inputs: " + string.Join(";", s.Actions.Select(a => a.Name).ToList()));
             }
+            mpe.Execute(optimalSimulationPath.Simulations.First(), false);
         }
 
         private static void SetupFiles(string fromPython, string model, string inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan) {
@@ -207,22 +211,41 @@ namespace TestProject {
 
         internal class Factory : IFactory {
             private readonly Dictionary<string, IValueHandler> _valueHandlers = new() {
-            { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
-            { "double", new DoubleValueHandler() }, // FIXME
-            { "boolean", new BooleanValueHandler() },
-            { "string", new StringValueHandler() },
-            { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
-            { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
-        };
+                { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
+                { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
+                { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
+            };
             public IActuator GetActuatorDeviceImplementation(string actuatorName) {
-                throw new NotImplementedException();
+                if ("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#HeaterActuator".Equals(actuatorName)) {
+                    return new AMQHeater();
+                } else {
+                    throw new NotImplementedException(actuatorName);
+                }
             }
 
             public IConfigurableParameter GetConfigurableParameterImplementation(string configurableParameterName) {
                 throw new NotImplementedException();
             }
 
-            public class AMQSensor(string sensorName, string procedureName, Func<IncubatorFields, double> f) : ISensor {
+            internal class AMQHeater() : IActuator
+            {
+                public string ActuatorName => "Incubator Heater";
+
+                public void Actuate(object state) {
+                    var _actuatorState = int.Parse((string)state);
+                    if (_actuatorState == 0) {
+                        Task t = Task.Run(async () => await i.SetHeater(false));
+                    } else if (_actuatorState == 1) {
+                        Task t = Task.Run(async () => await i.SetHeater(true));
+                        t.Wait();
+                    } else {
+                        Debug.Fail($"Unexpected value {_actuatorState}!");
+                    }
+                }
+            }
+
+            public class AMQSensor(string sensorName, string procedureName, Func<IncubatorFields, double> f) : ISensor
+            {
                 public bool _onceOnly = true;
 
                 public string SensorName { get; private init; } = sensorName;

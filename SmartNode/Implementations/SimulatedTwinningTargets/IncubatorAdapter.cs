@@ -13,8 +13,8 @@ namespace Implementations.SimulatedTwinningTargets {
     public record class Incubator(string measurement, IncubatorFields fields);
 
     public class IncubatorAdapter {
-        private ConnectionFactory? _factory;
-        private CancellationToken _ct;
+        private readonly ConnectionFactory? _factory;
+        private readonly CancellationToken _ct;
         public IncubatorFields? Data;
         public ulong Counter = 0;
 

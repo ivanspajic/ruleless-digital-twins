@@ -662,12 +662,10 @@ namespace Logic.Mapek
             var simulationPathsWithMostOptimalConditionsSatisfied = GetSimulationPathsWithMostOptimalConditionsSatisfied(simulationPaths,
                 optimalConditions);
 
-            if (simulationPathsWithMostOptimalConditionsSatisfied.Count == 1)
-            {
+            _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationPathsWithMostOptimalConditionsSatisfied.Count);
+            if (simulationPathsWithMostOptimalConditionsSatisfied.Count == 1) {
                 return simulationPathsWithMostOptimalConditionsSatisfied.First();
             }
-
-            _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationPathsWithMostOptimalConditionsSatisfied.Count);
 
             // Filter for simulation configurations that optimize the most targeted Properties.
             var simulationPathsWithMostOptimizedProperties =

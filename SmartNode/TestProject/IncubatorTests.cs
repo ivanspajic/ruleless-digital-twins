@@ -91,8 +91,17 @@ namespace TestProject {
             // Only valid AFTER focing evaluation through simulation:
             Assert.Equal(Math.Pow(2, lookAheadCycles), simulationTree.SimulationPaths.Count());
             Assert.Equal(30, simulationTree.ChildrenCount);
-            var path = simulationTree.SimulationPaths.First();
 
+            Trace.WriteLine("Checking Volker's `best` solution:");
+            // Note that the optimal conditions are coming from the INITIAL model, but will be evaluated in the 
+            //  LAST state of the simulations!
+            IEnumerable<OptimalCondition> optimalConditions = mapekKnowledge.GetAllOptimalConditions(propertyCacheMock);
+            Assert.NotEmpty(optimalConditions);
+            var vs = mapekPlan.GetOptimalSimulationPathsEuclidian(simulationTree.SimulationPaths, optimalConditions);
+            Trace.WriteLine($"{vs.Count()} solutions: {string.Join(",",vs.Select(pd => pd.Item2))}");
+            var path = vs.First().Item1;
+
+            // var path = optimalSimulationPath;
             foreach (var s in path.Simulations) {
                 Trace.WriteLine(string.Join(";", s.Actions.Select(a => a.Name)));
                 Trace.WriteLine("Params: " + string.Join(";", s.InitializationActions.Select(a => a.Name).ToList()));
@@ -100,8 +109,8 @@ namespace TestProject {
             }
 
             // Cold room, assert that the optimal path is heading in the right direction:
-            Assert.Equal(4, optimalSimulationPath.Simulations.Count());
-            foreach (var s in optimalSimulationPath.Simulations) {
+            Assert.Equal(4, path.Simulations.Count());
+            foreach (var s in path.Simulations) {
                 Assert.True(s.Actions.All(a => "1" == ((ActuationAction)a).NewStateValue.ToString()));
             }
         }
@@ -126,6 +135,13 @@ namespace TestProject {
             // Only valid AFTER focing evaluation through simulation:
             Assert.Equal(Math.Pow(2, lookAheadCycles), simulationTree.SimulationPaths.Count());
             Assert.Equal(30, simulationTree.ChildrenCount);
+
+            Trace.WriteLine("Checking Volker's `best` solution:");
+            IEnumerable<OptimalCondition> optimalConditions = mapekKnowledge.GetAllOptimalConditions(cache.PropertyCache);
+            Assert.NotEmpty(optimalConditions);
+            var vs = mapekPlan.GetOptimalSimulationPathsEuclidian(simulationTree.SimulationPaths, optimalConditions);
+            Trace.WriteLine($"{vs.Count()} solutions: {string.Join(",",vs.Select(pd => pd.Item2))}");
+            var path = vs.First().Item1;
 
             foreach (var s in optimalSimulationPath.Simulations)
             {

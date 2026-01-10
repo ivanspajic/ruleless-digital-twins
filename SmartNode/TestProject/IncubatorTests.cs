@@ -14,7 +14,7 @@ namespace TestProject {
     public class IncubatorTests : IDisposable {
         static bool runInference = false; // `false` can be overriden by logic below.
         // IP is coming from "docket network create // inspect" -> rabbitmq-ip or variations thereof:
-        static IncubatorAdapter i = IncubatorAdapter.GetInstance("localhost", TestContext.Current.CancellationToken);
+        static IncubatorAdapter i = IncubatorAdapter.GetInstance("172.20.0.3", TestContext.Current.CancellationToken);
         static Factory.AMQSensor AMQTempSensor = new("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor", "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure", ((d) => d.average_temperature));
 
         private class MyMapekPlan : MapekPlan {

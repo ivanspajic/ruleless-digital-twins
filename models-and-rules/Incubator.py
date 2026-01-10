@@ -32,7 +32,6 @@ g.add((gheaterActuator.node, RDT["hasActuatorState"], Literal("1.0", datatype=XS
 g.add((gheaterActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.boolean)))
 
 rtemp = ObservableProperty(g, MINE["in_room_temperature"])
-oc_rtemp = OptimalConditionDouble(g, MINE["oc_temp"], rtemp, 3600, (30, False), (35, False))
 rtempActuator = Actuator(g, MINE["TempActuator"], Change(g, MINE["TempChange"], rtemp))
 g.add((rtempActuator.node, RDT["hasActuatorName"], Literal("in_room_temperature", datatype=XSD.string)))
 # TODO: Absence triggers a runtime error
@@ -40,6 +39,7 @@ g.add((rtempActuator.node, RDT["hasActuatorState"], Literal("10.0", datatype=XSD
 g.add((rtempActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.boolean)))
 
 temp = ObservableProperty(g, MINE["T"], None)
+oc_rtemp = OptimalConditionDouble(g, MINE["oc_temp"], temp, 3600, (30, False), (35, False))
 node = BNode()
 g.add((node, RDF["type"], OWL["Restriction"]))
 g.add((node, OWL["onProperty"], RDT["hasValue"]))

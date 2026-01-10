@@ -69,6 +69,7 @@ class OptimalConditionDouble(OptimalCondition):
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
         g.add((self.node, RDF["type"], RDT["OptimalCondition"]))
         g.add((self.node, SSN["forProperty"], onProperty.node))
+        g.add((self.node, RDT["reachedInMaximumSeconds"], Literal(reachedInMaximumSeconds, datatype=XSD.nonNegativeInteger)))
         res = BNode()
         g.add((res, RDF["type"], OWL["Restriction"]))
         g.add((res, OWL["onProperty"], RDT["hasValueConstraint"]))

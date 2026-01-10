@@ -620,31 +620,23 @@ namespace Logic.Mapek
 
             foreach (var optimalCondition in optimalConditions)
             {
-                var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.ConstraintValueType);
 
-                object propertyValue;
-
-                if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property, out ConfigurableParameter? configurableParameter))
-                {
-                    propertyValue = configurableParameter.Value;
-                }
-                else if (propertyCache.Properties.TryGetValue(optimalCondition.Property, out Property? property))
-                {
-                    propertyValue = property.Value;
-                }
-                else
-                {
+                Property p;
+                if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property, out ConfigurableParameter? configurableParameter)) {
+                    p = configurableParameter;
+                    // Sanity-check. Seems a bit odd that we should've forgotten where this was originally coming from?
+                    Debug.Assert(!propertyCache.Properties.TryGetValue(optimalCondition.Property, out Property? property), "This should probably not have happened.");
+                } else if (propertyCache.Properties.TryGetValue(optimalCondition.Property, out Property? property)) {
+                    p = property;
+                } else {
                     throw new Exception($"Property {optimalCondition.Property} was not found in the system.");
                 }
 
-                foreach (var constraint in optimalCondition.Constraints)
-                {
-                    var unsatisfiedConstraints = valueHandler.GetUnsatisfiedConstraintsFromEvaluation(constraint, propertyValue);
-
-                    if (!unsatisfiedConstraints.Any())
-                    {
-                        numberOfSatisfiedOptimalConditions++;
-                    }
+                var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.ConstraintValueType);
+                // Could use .Sum() here, but if you generalise it further you'll run into CS9236.
+                foreach (var constraint in optimalCondition.Constraints) {
+                    var unsatisfiedConstraints = valueHandler.GetUnsatisfiedConstraintsFromEvaluation(constraint, p.Value);
+                    numberOfSatisfiedOptimalConditions += unsatisfiedConstraints.Any() ? 0 : 1;
                 }
             }
 

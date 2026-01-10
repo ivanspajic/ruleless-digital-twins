@@ -1,4 +1,5 @@
-﻿using Logic.Models.OntologicalModels;
+﻿using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
 using VDS.RDF.Query;
 
 namespace Logic.Mapek {
@@ -20,5 +21,6 @@ namespace Logic.Mapek {
         public void LoadModelsFromKnowledgeBase();
 
         public void UpdateModel(SparqlParameterizedString query);
+        IEnumerable<OptimalCondition> GetAllOptimalConditions(PropertyCache propertyCache);
     }
 }

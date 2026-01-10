@@ -1,4 +1,5 @@
 ﻿using Logic.Mapek;
+using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using TestProject.Mocks.Sparql;
 using VDS.RDF;
@@ -59,6 +60,11 @@ namespace TestProject.Mocks.ServiceMocks {
                 return resultSet;
             }
 
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<OptimalCondition> GetAllOptimalConditions(PropertyCache propertyCache)
+        {
             throw new NotImplementedException();
         }
 

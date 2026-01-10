@@ -52,7 +52,7 @@ namespace TestProject {
                         "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#in_room_temperature",
                         new Property {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#in_room_temperature",
-                            OwlType = "double",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = 10.0
                         }
                     },
@@ -60,7 +60,7 @@ namespace TestProject {
                         "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#T",
                         new Property {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#T",
-                            OwlType = "double",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = 10.0
                         }
                     },
@@ -68,7 +68,7 @@ namespace TestProject {
                         "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#T_heater",
                         new Property {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#T_heater",
-                            OwlType = "double",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = 10.0
                         }
                     },
@@ -76,7 +76,7 @@ namespace TestProject {
                         "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#G_box",
                         new Property {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#G_box",
-                            OwlType = "double",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = gbox
                         }
                     }

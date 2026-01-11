@@ -80,12 +80,16 @@ class OptimalConditionDouble(OptimalCondition):
         reslist = BNode()
         fNode = BNode()
         rNode = BNode()
+        f2Node = BNode()
+        r2Node = BNode()
         (min, minIncl) = minT
         (max, maxIncl) = maxT
         g.add((fNode, XSD["minInclusive" if minIncl else "minExclusive"], Literal(min, datatype=XSD.double)))
-        g.add((rNode, XSD["maxInclusive" if maxIncl else "maxExclusive"], Literal(max, datatype=XSD.double)))        
+        g.add((f2Node, XSD["maxInclusive" if maxIncl else "maxExclusive"], Literal(max, datatype=XSD.double)))        
         g.add((reslist, RDF["first"], fNode))
         g.add((reslist, RDF["rest"], rNode))
+        g.add((rNode, RDF["first"], f2Node))
+        g.add((rNode, RDF["rest"], r2Node))
         g.add((minmax, OWL.withRestrictions, reslist))
         g.add((res, OWL["onDataRange"], minmax))
 

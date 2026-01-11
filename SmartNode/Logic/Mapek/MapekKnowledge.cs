@@ -74,6 +74,15 @@ namespace Logic.Mapek {
             return ExecuteQuery(query);
         }
 
+        bool suppressLogging = false;
+        // Suppress logging in selected places. An alternative would be to switch to log level DEBUG instead INFO.
+        private SparqlResultSet ExecuteSuppressedQuery(SparqlParameterizedString query) {
+            suppressLogging = true;
+            var result = ExecuteQuery(query);
+            suppressLogging = false;
+            return result;
+        }
+
         public SparqlResultSet ExecuteQuery(SparqlParameterizedString query, bool useInferredModel = false) {
             SparqlResultSet queryResult;
             
@@ -83,11 +92,14 @@ namespace Logic.Mapek {
                 queryResult = (SparqlResultSet)_instanceModel.ExecuteQuery(query);
             }
 
-            _logger.LogInformation("Executed query: {query} ({numResults})", query.CommandText, queryResult.Results.Count);
+            // Some parts like finding optimal conditions really spam the log, so introduce an override:
+            if (!suppressLogging) {
+                _logger.LogInformation("Executed query: {query} ({numResults})", query.CommandText, queryResult.Results.Count);
 
-            if (!queryResult.IsEmpty) {
-                var resultString = string.Join("\n", queryResult.Results.Select(r => r.ToString()));
-                _logger.LogInformation("Query result: {resultString}", resultString);
+                if (!queryResult.IsEmpty) {
+                    var resultString = string.Join("\n", queryResult.Results.Select(r => r.ToString()));
+                    _logger.LogInformation("Query result: {resultString}", resultString);
+                }
             }
 
             return queryResult;
@@ -375,7 +387,7 @@ namespace Logic.Mapek {
                 query.SetParameter("property", property);
                 query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                var queryResult = ExecuteQuery(query);
+                var queryResult = ExecuteSuppressedQuery(query);
 
                 foreach (var result in queryResult.Results) {
                     var constraint = result["constraint"].ToString().Split('^')[0];
@@ -413,7 +425,7 @@ namespace Logic.Mapek {
                 query.SetParameter("property", property);
                 query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                var queryResult = ExecuteQuery(query);
+                var queryResult = ExecuteSuppressedQuery(query);
 
                 foreach (var result in queryResult.Results) {
                     var constraint = result["constraint"].ToString().Split('^')[0];
@@ -461,7 +473,7 @@ namespace Logic.Mapek {
                     query.SetParameter("property", property);
                     query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                    var queryResult = ExecuteQuery(query);
+                    var queryResult = ExecuteSuppressedQuery(query);
 
                     foreach (var result in queryResult.Results) {
                         var leftConstraint = result["constraint1"].ToString().Split('^')[0];
@@ -524,7 +536,7 @@ namespace Logic.Mapek {
                         query.SetParameter("property", property);
                         query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                        var queryResult = ExecuteQuery(query);
+                        var queryResult = ExecuteSuppressedQuery(query);
 
                         foreach (var result in queryResult.Results) {
                             var leftConstraint1 = result["constraint1"].ToString().Split('^')[0];
@@ -602,7 +614,7 @@ namespace Logic.Mapek {
                             query.SetParameter("property", property);
                             query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
-                            var queryResult = ExecuteQuery(query);
+                            var queryResult = ExecuteSuppressedQuery(query);
 
                             foreach (var result in queryResult.Results) {
                                 var leftConstraint1 = result["constraint1"].ToString().Split('^')[0];

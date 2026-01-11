@@ -16,6 +16,8 @@ namespace TestProject {
         // IP is coming from "docket network create // inspect" -> rabbitmq-ip or variations thereof:
         static IncubatorAdapter i = IncubatorAdapter.GetInstance("172.20.0.3", TestContext.Current.CancellationToken);
         static Factory.AMQSensor AMQTempSensor = new("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor", "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure", ((d) => d.average_temperature));
+        static bool crashed = true;
+        private static MyMapekPlan _mapekPlan;
 
         private class MyMapekPlan : MapekPlan {
 
@@ -30,8 +32,12 @@ namespace TestProject {
         }
 
         [Theory]
-        [InlineData("Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
-        public void SimulateFMUOnly(string fromPython, string model, string inferred, int lookAheadCycles) {
+        [InlineData(21.0, true, "Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
+        // Higher temps may fail since I currently don't handle the upper bound correctly:
+        [InlineData(37.0, false, "Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
+        // This one used to glitch with an INF-crash in the FMU, but now passes?!
+        [InlineData(53.2359909270973, false, "Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
+        public void SimulateFMUOnly(double initial_T_value, bool all_actuators, string fromPython, string model, string inferred, int lookAheadCycles) {
             SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
 
             // TODO: Prototype populate cache from FMU.
@@ -53,7 +59,7 @@ namespace TestProject {
                         new Property {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#in_room_temperature",
                             OwlType = "http://www.w3.org/2001/XMLSchema#double",
-                            Value = 10.0
+                            Value = 21.0
                         }
                     },
                    {
@@ -61,15 +67,7 @@ namespace TestProject {
                         new Property {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#T",
                             OwlType = "http://www.w3.org/2001/XMLSchema#double",
-                            Value = 10.0
-                        }
-                    },
-                   {
-                        "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#T_heater",
-                        new Property {
-                            Name = "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#T_heater",
-                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
-                            Value = 10.0
+                            Value = initial_T_value
                         }
                     },
                    {
@@ -87,18 +85,23 @@ namespace TestProject {
 
             // TODO: Assert that there's at least one actuator that's not a parameter.
             var (simulationTree, optimalSimulationPath) = mapekPlan.Plan(new Cache() { PropertyCache = propertyCacheMock, OptimalConditions = [], SoftSensorTreeNodes = [] });
+            crashed = false;
 
             // Only valid AFTER focing evaluation through simulation:
             Assert.Equal(Math.Pow(2, lookAheadCycles), simulationTree.SimulationPaths.Count());
             Assert.Equal(30, simulationTree.ChildrenCount);
 
             Trace.WriteLine("Checking Volker's `best` solution:");
-            // Note that the optimal conditions are coming from the INITIAL model, but will be evaluated in the 
-            //  LAST state of the simulations!
+                        // We move this up here in the test since it may spam the log:
             IEnumerable<OptimalCondition> optimalConditions = mapekKnowledge.GetAllOptimalConditions(propertyCacheMock);
             Assert.NotEmpty(optimalConditions);
+
+            // Note that the optimal conditions are coming from the INITIAL model, but will be evaluated in the 
+            //  LAST state of the simulations!
             var vs = mapekPlan.GetOptimalSimulationPathsEuclidian(simulationTree.SimulationPaths, optimalConditions);
             Trace.WriteLine($"{vs.Count()} solutions: {string.Join(",",vs.Select(pd => pd.Item2))}");
+            // We know that for OUR tests, we either pull out all stops or keep all off.
+            Assert.True(!all_actuators || vs.First().Item2 < vs.ElementAt(1).Item2);
             var path = vs.First().Item1;
 
             // var path = optimalSimulationPath;
@@ -111,8 +114,9 @@ namespace TestProject {
             // Cold room, assert that the optimal path is heading in the right direction:
             Assert.Equal(4, path.Simulations.Count());
             foreach (var s in path.Simulations) {
-                Assert.True(s.Actions.All(a => "1" == ((ActuationAction)a).NewStateValue.ToString()));
+                Assert.True(s.Actions.All(a => (all_actuators ? "1" : "0") == ((ActuationAction)a).NewStateValue.ToString()));
             }
+            crashed = false;
         }
 
         [Theory]
@@ -130,6 +134,7 @@ namespace TestProject {
             var cache = monitor.Monitor();
 
             var (simulationTree, optimalSimulationPath) = mapekPlan.Plan(cache);
+            crashed = false;
             Assert.False(AMQTempSensor._onceOnly); // Must've been used.
 
             // Only valid AFTER focing evaluation through simulation:
@@ -150,9 +155,12 @@ namespace TestProject {
                 Trace.WriteLine("Inputs: " + string.Join(";", s.Actions.Select(a => a.Name).ToList()));
             }
             mpe.Execute(optimalSimulationPath.Simulations.First());
+            crashed = false;
         }
 
         private static void SetupFiles(string fromPython, string model, string inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan) {
+            crashed = true;
+            Directory.Delete("/tmp/Femyou", true);
             var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
             var modelDirPath = Path.Combine(rootDirectory, "models-and-rules");
             var inferredFilePath = Path.Combine(modelDirPath, inferred);
@@ -193,6 +201,7 @@ namespace TestProject {
             mapekKnowledge = new MapekKnowledge(mock);
             mock.Add<IMapekKnowledge>(mapekKnowledge);
             mapekPlan = new MyMapekPlan(mock);
+            _mapekPlan = mapekPlan; // save for crash-handling.
         }
 
         private static void GenerateFromPython(string fromPython, string outPath, string executingAssemblyPath) {
@@ -221,7 +230,13 @@ namespace TestProject {
 
         public void Dispose() {
             // Marker in output because sometimes FMU-crashes confuse the testing framework:
-            Trace.WriteLine("We didn't crash, yay!");
+            if (crashed) {
+                Trace.WriteLine("We crashed 🥺");
+            } else {
+                Trace.WriteLine("We didn't crash, yay!");
+            }
+            _mapekPlan.Dispose();
+            Assert.False(crashed);
         }
 
         internal class Factory : IFactory {

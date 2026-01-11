@@ -11,7 +11,7 @@ using static Femyou.IModel;
 
 namespace Logic.Mapek
 {
-    public class MapekPlan : IMapekPlan
+    public class MapekPlan : IMapekPlan, IDisposable 
     {
         // Required as fields to preserve caching throughout multiple MAPE-K loop cycles.
         private readonly Dictionary<string, IModel> _fmuDict = [];
@@ -830,6 +830,17 @@ namespace Logic.Mapek
             }
 
             _logger.LogInformation(logMsg);
+        }
+
+        public void Dispose() {
+            foreach (var d in _iDict) {
+                _logger.LogDebug("Disposing instance of {fmu}.", d.Key);
+                d.Value.Dispose();
+            }
+            foreach (var d in _fmuDict) {
+                _logger.LogDebug("Disposing {fmu}.", d.Key);
+                d.Value.Dispose();
+            }
         }
     }
 }

@@ -17,25 +17,11 @@ g.add((heaterActuator.node, RDT["hasActuatorName"], Literal("in_heater_state", d
 g.add((heaterActuator.node, RDT["hasActuatorState"], Literal("0", datatype=XSD.int)))
 g.add((heaterActuator.node, RDT["hasActuatorState"], Literal("1", datatype=XSD.int)))
 
-cheaterProperty = ObservableProperty(g, MINE["CHeaterProperty"])
-cheaterChange = Change(g, MINE["CHeaterChange"], cheaterProperty)
-cheaterActuator = Actuator(g, MINE["C_heater"], cheaterChange)
-# TODO: setting the name explicitly shouldn't be necessary here, but the generated name contains the value?!
-g.add((cheaterActuator.node, RDT["hasActuatorName"], Literal("C_heater", datatype=XSD.string)))
-g.add((cheaterActuator.node, RDT["hasActuatorState"], Literal("1", datatype=XSD.double)))
-g.add((cheaterActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.string)))
-gheaterProperty = ObservableProperty(g, MINE["GHeaterProperty"])
-gheaterChange = Change(g, MINE["GHeaterChange"], gheaterProperty)
-gheaterActuator = Actuator(g, MINE["G_heater"], gheaterChange)
-g.add((gheaterActuator.node, RDT["hasActuatorName"], Literal("G_heater", datatype=XSD.string)))
-g.add((gheaterActuator.node, RDT["hasActuatorState"], Literal("1.0", datatype=XSD.double)))
-g.add((gheaterActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.boolean)))
-
 rtemp = ObservableProperty(g, MINE["in_room_temperature"])
 rtempActuator = Actuator(g, MINE["TempActuator"], Change(g, MINE["TempChange"], rtemp))
 g.add((rtempActuator.node, RDT["hasActuatorName"], Literal("in_room_temperature", datatype=XSD.string)))
 # TODO: Absence triggers a runtime error
-g.add((rtempActuator.node, RDT["hasActuatorState"], Literal("10.0", datatype=XSD.double)))
+g.add((rtempActuator.node, RDT["hasActuatorState"], Literal("21.0", datatype=XSD.double)))
 g.add((rtempActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.boolean)))
 
 temp = ObservableProperty(g, MINE["T"], None)
@@ -46,16 +32,12 @@ g.add((node, OWL["onProperty"], RDT["hasValue"]))
 g.add((node, OWL["hasValue"], Literal("20.0", datatype=XSD.double)))
 g.add((temp.node, RDF["type"], node))
 
-t_heater = ObservableProperty(g, MINE["T_heater"])
-# Technically a user-interactable element. It doesn't make sense to fiddle with it in simulation for now:
-# g_box = ObservableProperty(g, MINE["G_box"]) # initially closed
-# tempSensor = Sensor(g, MINE["TempSensor"], [temp, t_heater, g_box])
 tempSensor = Sensor(g, MINE["TempSensor"], [temp])
 tempMeasure = Measure(g, MINE["TempMeasure"])
 
 tempProcedure = Procedure(g, MINE["TempProcedure"], tempMeasure, tempSensor)
 
-room = Platform(g, MINE["IncubatorTest"], False, [heaterActuator, cheaterActuator, rtempActuator, tempSensor], implements=[oc_rtemp])
+room = Platform(g, MINE["IncubatorTest"], False, [heaterActuator, rtempActuator, tempSensor], implements=[oc_rtemp])
 fmu = FMU(g, MINE["Incubator_FMU"], "Source/au_incubator.fmu", 30) # 3s
 room.addFMU(g, fmu)
 

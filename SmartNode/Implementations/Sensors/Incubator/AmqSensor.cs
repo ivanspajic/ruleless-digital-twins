@@ -7,6 +7,7 @@ namespace Implementations.Sensors.Incubator {
         private readonly IncubatorAdapter _incubatorAdapter = IncubatorAdapter.GetInstance(new CancellationToken());
 
         public bool _onceOnly = true;
+        private const int IncubatorAdapterMessageDelayMilliseconds = 2_500;
 
         public string SensorName { get; private init; } = sensorName;
 
@@ -17,7 +18,7 @@ namespace Implementations.Sensors.Incubator {
             await _incubatorAdapter.Setup();
 
             // Wait a little bit before messages are sent to the queue.
-            await Task.Delay(2500);
+            await Task.Delay(IncubatorAdapterMessageDelayMilliseconds);
 
             IncubatorFields? myData = null;
             Monitor.Enter(_incubatorAdapter);

@@ -32,198 +32,198 @@
 [] owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger.
 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1> a owl:Ontology;
                                                                     owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins>.
-:AverageTemperature a [a owl:Restriction ; 
-                       owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
-                       owl:hasValue "17.7"^^xsd:double],
-                      <http://www.w3.org/ns/ssn/Property>,
+:AverageTemperature a owl:NamedIndividual,
                       <http://www.w3.org/ns/ssn/Output>,
-                      owl:NamedIndividual.
-:AverageTemperatureSoftSensor a <http://www.w3.org/ns/sosa/Sensor>,
-                                owl:NamedIndividual;
+                      <http://www.w3.org/ns/ssn/Property>,
+                      [a owl:Restriction ; 
+                       owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
+                       owl:hasValue "16.746512725848774"^^xsd:double].
+:AverageTemperatureSoftSensor a owl:NamedIndividual,
+                                <http://www.w3.org/ns/sosa/Sensor>;
                               <http://www.w3.org/ns/ssn/implements> :AverageTemperatureSoftSensorProcedure.
-:AverageTemperatureSoftSensorProcedure a <http://www.w3.org/ns/sosa/Procedure>,
-                                         owl:NamedIndividual;
-                                       <http://www.w3.org/ns/ssn/hasInput> :IncreasedTemperature,
-                                                                           :DecreasedTemperature;
+:AverageTemperatureSoftSensorProcedure a owl:NamedIndividual,
+                                         <http://www.w3.org/ns/sosa/Procedure>;
+                                       <http://www.w3.org/ns/ssn/hasInput> :DecreasedTemperature,
+                                                                           :IncreasedTemperature;
                                        <http://www.w3.org/ns/ssn/hasOutput> :AverageTemperature.
-:DecreaseTemperatureSoftSensor a <http://www.w3.org/ns/sosa/Sensor>,
-                                 owl:NamedIndividual;
+:DecreaseTemperatureSoftSensor a owl:NamedIndividual,
+                                 <http://www.w3.org/ns/sosa/Sensor>;
                                <http://www.w3.org/ns/ssn/implements> :DecreaseTemperatureSoftSensorProcedure.
-:DecreaseTemperatureSoftSensorProcedure a <http://www.w3.org/ns/sosa/Procedure>,
-                                          owl:NamedIndividual;
-                                        <http://www.w3.org/ns/ssn/hasInput> :TemperatureSensor2MeasuredTemperature,
-                                                                            :TemperatureSensor1MeasuredTemperature;
+:DecreaseTemperatureSoftSensorProcedure a owl:NamedIndividual,
+                                          <http://www.w3.org/ns/sosa/Procedure>;
+                                        <http://www.w3.org/ns/ssn/hasInput> :TemperatureSensor1MeasuredTemperature,
+                                                                            :TemperatureSensor2MeasuredTemperature;
                                         <http://www.w3.org/ns/ssn/hasOutput> :DecreasedTemperature.
-:DecreasedTemperature a [a owl:Restriction ; 
-                         owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
-                         owl:hasValue "15.2"^^xsd:double],
-                        <http://www.w3.org/ns/ssn/Property>,
-                        <http://www.w3.org/ns/ssn/Output>,
+:DecreasedTemperature a owl:NamedIndividual,
                         <http://www.w3.org/ns/ssn/Input>,
-                        owl:NamedIndividual.
-:Dehumidifier <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :RoomHumidityDecrease,
-                                                                                               :EnergyConsumptionIncrease;
-              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> "1"^^xsd:int,
-                                                                                                         "0"^^xsd:int;
-              a <http://www.w3.org/ns/sosa/Actuator>,
-                owl:NamedIndividual.
-:EnergyConsumption a [a owl:Restriction ; 
-                      owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
-                      owl:hasValue "0"^^xsd:double],
+                        <http://www.w3.org/ns/ssn/Output>,
+                        <http://www.w3.org/ns/ssn/Property>,
+                        [a owl:Restriction ; 
+                         owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
+                         owl:hasValue "14.246512725848774"^^xsd:double].
+:Dehumidifier <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :EnergyConsumptionIncrease,
+                                                                                               :RoomHumidityDecrease;
+              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> "0"^^xsd:int,
+                                                                                                         "1"^^xsd:int;
+              a owl:NamedIndividual,
+                <http://www.w3.org/ns/sosa/Actuator>.
+:EnergyConsumption a owl:NamedIndividual,
                      <http://www.w3.org/ns/sosa/ObservableProperty>,
-                     owl:NamedIndividual.
+                     [a owl:Restriction ; 
+                      owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
+                      owl:hasValue "0"^^xsd:double].
 :EnergyConsumptionDecrease <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
-                           a <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>,
-                             owl:NamedIndividual;
+                           a owl:NamedIndividual,
+                             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>;
                            <http://www.w3.org/ns/ssn/forProperty> :EnergyConsumption.
 :EnergyConsumptionIncrease <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease>;
-                           a <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>,
-                             owl:NamedIndividual;
+                           a owl:NamedIndividual,
+                             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>;
                            <http://www.w3.org/ns/ssn/forProperty> :EnergyConsumption.
-:EnergyConsumptionMeter a <http://www.w3.org/ns/sosa/Sensor>,
-                          owl:NamedIndividual;
+:EnergyConsumptionMeter a owl:NamedIndividual,
+                          <http://www.w3.org/ns/sosa/Sensor>;
                         <http://www.w3.org/ns/sosa/observes> :EnergyConsumption;
                         <http://www.w3.org/ns/ssn/implements> :EnergyConsumptionMeterProcedure.
-:EnergyConsumptionMeterMeasuredEnergyConsumption a [a owl:Restriction ; 
-                                                    owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
-                                                    owl:hasValue "0"^^xsd:double],
-                                                   <http://www.w3.org/ns/ssn/Property>,
+:EnergyConsumptionMeterMeasuredEnergyConsumption a owl:NamedIndividual,
                                                    <http://www.w3.org/ns/ssn/Output>,
-                                                   owl:NamedIndividual.
-:EnergyConsumptionMeterProcedure a <http://www.w3.org/ns/sosa/Procedure>,
-                                   owl:NamedIndividual;
+                                                   <http://www.w3.org/ns/ssn/Property>,
+                                                   [a owl:Restriction ; 
+                                                    owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
+                                                    owl:hasValue "0"^^xsd:double].
+:EnergyConsumptionMeterProcedure a owl:NamedIndividual,
+                                   <http://www.w3.org/ns/sosa/Procedure>;
                                  <http://www.w3.org/ns/ssn/hasOutput> :EnergyConsumptionMeterMeasuredEnergyConsumption.
-:FloorHeating <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :RoomTemperatureIncrease,
-                                                                                               :EnergyConsumptionIncrease;
-              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> "1"^^xsd:int,
-                                                                                                         "0"^^xsd:int;
-              a <http://www.w3.org/ns/sosa/Actuator>,
-                owl:NamedIndividual.
-:Heater <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :RoomTemperatureIncrease,
-                                                                                         :EnergyConsumptionIncrease;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> "2"^^xsd:int,
+:FloorHeating <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :EnergyConsumptionIncrease,
+                                                                                               :RoomTemperatureIncrease;
+              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> "0"^^xsd:int,
+                                                                                                         "1"^^xsd:int;
+              a owl:NamedIndividual,
+                <http://www.w3.org/ns/sosa/Actuator>.
+:Heater <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :EnergyConsumptionIncrease,
+                                                                                         :RoomTemperatureIncrease;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> "0"^^xsd:int,
                                                                                                    "1"^^xsd:int,
-                                                                                                   "0"^^xsd:int;
-        a <http://www.w3.org/ns/sosa/Actuator>,
-          owl:NamedIndividual.
-:HumiditySensor a <http://www.w3.org/ns/sosa/Sensor>,
-                  owl:NamedIndividual;
+                                                                                                   "2"^^xsd:int;
+        a owl:NamedIndividual,
+          <http://www.w3.org/ns/sosa/Actuator>.
+:HumiditySensor a owl:NamedIndividual,
+                  <http://www.w3.org/ns/sosa/Sensor>;
                 <http://www.w3.org/ns/sosa/observes> :RoomHumidity;
                 <http://www.w3.org/ns/ssn/implements> :HumiditySensorProcedure.
-:HumiditySensorMeasuredHumidity a [a owl:Restriction ; 
-                                   owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
-                                   owl:hasValue "10.2"^^xsd:double],
-                                  <http://www.w3.org/ns/ssn/Property>,
+:HumiditySensorMeasuredHumidity a owl:NamedIndividual,
                                   <http://www.w3.org/ns/ssn/Output>,
-                                  owl:NamedIndividual.
-:HumiditySensorProcedure a <http://www.w3.org/ns/sosa/Procedure>,
-                           owl:NamedIndividual;
+                                  <http://www.w3.org/ns/ssn/Property>,
+                                  [a owl:Restriction ; 
+                                   owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
+                                   owl:hasValue "8.065931477520403"^^xsd:double].
+:HumiditySensorProcedure a owl:NamedIndividual,
+                           <http://www.w3.org/ns/sosa/Procedure>;
                          <http://www.w3.org/ns/ssn/hasOutput> :HumiditySensorMeasuredHumidity.
-:IncreaseTemperatureSoftSensor a <http://www.w3.org/ns/sosa/Sensor>,
-                                 owl:NamedIndividual;
+:IncreaseTemperatureSoftSensor a owl:NamedIndividual,
+                                 <http://www.w3.org/ns/sosa/Sensor>;
                                <http://www.w3.org/ns/ssn/implements> :IncreaseTemperatureSoftSensorProcedure.
-:IncreaseTemperatureSoftSensorProcedure a <http://www.w3.org/ns/sosa/Procedure>,
-                                          owl:NamedIndividual;
-                                        <http://www.w3.org/ns/ssn/hasInput> :TemperatureSensor2MeasuredTemperature,
-                                                                            :TemperatureSensor1MeasuredTemperature;
+:IncreaseTemperatureSoftSensorProcedure a owl:NamedIndividual,
+                                          <http://www.w3.org/ns/sosa/Procedure>;
+                                        <http://www.w3.org/ns/ssn/hasInput> :TemperatureSensor1MeasuredTemperature,
+                                                                            :TemperatureSensor2MeasuredTemperature;
                                         <http://www.w3.org/ns/ssn/hasOutput> :IncreasedTemperature.
-:IncreasedTemperature a [a owl:Restriction ; 
-                         owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
-                         owl:hasValue "20.2"^^xsd:double],
-                        <http://www.w3.org/ns/ssn/Property>,
-                        <http://www.w3.org/ns/ssn/Output>,
+:IncreasedTemperature a owl:NamedIndividual,
                         <http://www.w3.org/ns/ssn/Input>,
-                        owl:NamedIndividual.
+                        <http://www.w3.org/ns/ssn/Output>,
+                        <http://www.w3.org/ns/ssn/Property>,
+                        [a owl:Restriction ; 
+                         owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
+                         owl:hasValue "19.246512725848774"^^xsd:double].
 :OptimalCondition1 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> "3600"^^xsd:int;
-                   a [a owl:Restriction ; 
+                   a owl:NamedIndividual,
+                     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>,
+                     [a owl:Restriction ; 
                       owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValueConstraint> ; 
                       owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
                       owl:onDataRange [a rdfs:Datatype ; 
                                        owl:onDatatype xsd:double ; 
                                        owl:withRestrictions ([xsd:minInclusive "27.5"^^xsd:double]
-                                                             [xsd:maxExclusive "30.2"^^xsd:double])]],
-                     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>,
-                     owl:NamedIndividual;
+                                                             [xsd:maxExclusive "30.2"^^xsd:double])]];
                    <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature.
 :OptimalCondition2 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> "3600"^^xsd:int;
-                   a [a owl:Restriction ; 
+                   a owl:NamedIndividual,
+                     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>,
+                     [a owl:Restriction ; 
                       owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValueConstraint> ; 
                       owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
                       owl:onDataRange [a rdfs:Datatype ; 
                                        owl:onDatatype xsd:double ; 
                                        owl:withRestrictions ([xsd:minExclusive "10.1"^^xsd:double]
-                                                             [xsd:maxInclusive "28.5"^^xsd:double])]],
-                     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>,
-                     owl:NamedIndividual;
+                                                             [xsd:maxInclusive "28.5"^^xsd:double])]];
                    <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature.
-:RoomHumidity a [a owl:Restriction ; 
-                 owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
-                 owl:hasValue "10.2"^^xsd:double],
+:RoomHumidity a owl:NamedIndividual,
                 <http://www.w3.org/ns/sosa/ObservableProperty>,
-                owl:NamedIndividual.
+                [a owl:Restriction ; 
+                 owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
+                 owl:hasValue "8.065931477520403"^^xsd:double].
 :RoomHumidityDecrease <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
-                      a <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>,
-                        owl:NamedIndividual;
+                      a owl:NamedIndividual,
+                        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>;
                       <http://www.w3.org/ns/ssn/forProperty> :RoomHumidity.
 :RoomM370 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromOptimalConditions> false;
           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel> :RoomM370FMU;
-          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor> :RoomHumidityDecrease,
-                                                                                                 :EnergyConsumptionDecrease;
-          a <http://www.w3.org/ns/sosa/Platform>,
-            owl:NamedIndividual;
-          <http://www.w3.org/ns/sosa/hosts> :TemperatureSensor2,
-                                            :TemperatureSensor1,
-                                            :HumiditySensor,
-                                            :Heater,
-                                            :FloorHeating,
+          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor> :EnergyConsumptionDecrease,
+                                                                                                 :RoomHumidityDecrease;
+          a owl:NamedIndividual,
+            <http://www.w3.org/ns/sosa/Platform>;
+          <http://www.w3.org/ns/sosa/hosts> :Dehumidifier,
                                             :EnergyConsumptionMeter,
-                                            :Dehumidifier;
-          <http://www.w3.org/ns/ssn/implements> :OptimalCondition2,
-                                                :OptimalCondition1.
+                                            :FloorHeating,
+                                            :Heater,
+                                            :HumiditySensor,
+                                            :TemperatureSensor1,
+                                            :TemperatureSensor2;
+          <http://www.w3.org/ns/ssn/implements> :OptimalCondition1,
+                                                :OptimalCondition2.
 :RoomM370FMU <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds> "100"^^xsd:int;
              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI> "roomM370.fmu"^^xsd:anyURI;
-             a <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel>,
-               owl:NamedIndividual.
-:RoomTemperature a [a owl:Restriction ; 
-                    owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
-                    owl:hasValue "17.7"^^xsd:double],
+             a owl:NamedIndividual,
+               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel>.
+:RoomTemperature a owl:NamedIndividual,
                    <http://www.w3.org/ns/sosa/ObservableProperty>,
-                   owl:NamedIndividual.
+                   [a owl:Restriction ; 
+                    owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
+                    owl:hasValue "16.746512725848774"^^xsd:double].
 :RoomTemperatureDecrease <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
-                         a <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>,
-                           owl:NamedIndividual;
+                         a owl:NamedIndividual,
+                           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>;
                          <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature.
 :RoomTemperatureIncrease <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease>;
-                         a <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>,
-                           owl:NamedIndividual;
+                         a owl:NamedIndividual,
+                           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>;
                          <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature.
-:TemperatureSensor1 a <http://www.w3.org/ns/sosa/Sensor>,
-                      owl:NamedIndividual;
+:TemperatureSensor1 a owl:NamedIndividual,
+                      <http://www.w3.org/ns/sosa/Sensor>;
                     <http://www.w3.org/ns/sosa/observes> :RoomTemperature;
                     <http://www.w3.org/ns/ssn/implements> :TemperatureSensor1Procedure.
-:TemperatureSensor1MeasuredTemperature a [a owl:Restriction ; 
-                                          owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
-                                          owl:hasValue "17.7"^^xsd:double],
-                                         <http://www.w3.org/ns/ssn/Property>,
-                                         <http://www.w3.org/ns/ssn/Output>,
+:TemperatureSensor1MeasuredTemperature a owl:NamedIndividual,
                                          <http://www.w3.org/ns/ssn/Input>,
-                                         owl:NamedIndividual.
-:TemperatureSensor1Procedure a <http://www.w3.org/ns/sosa/Procedure>,
-                               owl:NamedIndividual;
+                                         <http://www.w3.org/ns/ssn/Output>,
+                                         <http://www.w3.org/ns/ssn/Property>,
+                                         [a owl:Restriction ; 
+                                          owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
+                                          owl:hasValue "16.746512725848774"^^xsd:double].
+:TemperatureSensor1Procedure a owl:NamedIndividual,
+                               <http://www.w3.org/ns/sosa/Procedure>;
                              <http://www.w3.org/ns/ssn/hasOutput> :TemperatureSensor1MeasuredTemperature.
-:TemperatureSensor2 a <http://www.w3.org/ns/sosa/Sensor>,
-                      owl:NamedIndividual;
+:TemperatureSensor2 a owl:NamedIndividual,
+                      <http://www.w3.org/ns/sosa/Sensor>;
                     <http://www.w3.org/ns/sosa/observes> :RoomTemperature;
                     <http://www.w3.org/ns/ssn/implements> :TemperatureSensor2Procedure.
-:TemperatureSensor2MeasuredTemperature a [a owl:Restriction ; 
-                                          owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
-                                          owl:hasValue "17.7"^^xsd:double],
-                                         <http://www.w3.org/ns/ssn/Property>,
-                                         <http://www.w3.org/ns/ssn/Output>,
+:TemperatureSensor2MeasuredTemperature a owl:NamedIndividual,
                                          <http://www.w3.org/ns/ssn/Input>,
-                                         owl:NamedIndividual.
-:TemperatureSensor2Procedure a <http://www.w3.org/ns/sosa/Procedure>,
-                               owl:NamedIndividual;
+                                         <http://www.w3.org/ns/ssn/Output>,
+                                         <http://www.w3.org/ns/ssn/Property>,
+                                         [a owl:Restriction ; 
+                                          owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> ; 
+                                          owl:hasValue "16.746512725848774"^^xsd:double].
+:TemperatureSensor2Procedure a owl:NamedIndividual,
+                               <http://www.w3.org/ns/sosa/Procedure>;
                              <http://www.w3.org/ns/ssn/hasOutput> :TemperatureSensor2MeasuredTemperature.
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> a owl:AnnotationProperty.
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasModel> a owl:AnnotationProperty.

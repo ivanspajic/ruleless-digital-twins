@@ -18,7 +18,7 @@ namespace Implementations.Sensors.RoomM370
 
         public string ProcedureName { get; private set; }
 
-        public object ObservePropertyValue(params object[] inputProperties)
+        public async Task<object> ObservePropertyValue(params object[] inputProperties)
         {
             return _dummyRoomM370.RoomHumidity;
         }

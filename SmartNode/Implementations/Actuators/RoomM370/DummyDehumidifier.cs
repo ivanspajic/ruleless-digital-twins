@@ -17,7 +17,7 @@ namespace Implementations.Actuators.RoomM370
 
         public string ActuatorName { get; }
 
-        public void Actuate(object state)
+        public async Task Actuate(object state)
         {
             if (state is not int) {
                 state = int.Parse(state.ToString()!, CultureInfo.InvariantCulture);

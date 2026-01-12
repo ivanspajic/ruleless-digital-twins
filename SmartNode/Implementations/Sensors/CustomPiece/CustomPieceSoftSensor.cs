@@ -11,7 +11,7 @@ namespace Implementations.Sensors.CustomPiece {
 
         public string ProcedureName { get; private set; }
 
-        public object ObservePropertyValue(params object[] inputProperties) {
+        public async Task<object> ObservePropertyValue(params object[] inputProperties) {
             return 1; // TODO: return the CustomPiece/MixPiece compressed time series object.
         }
     }

@@ -24,7 +24,7 @@ namespace Implementations.Sensors.HomeAssistant {
         record class HAAttributes(string? unit_of_measurement);
         record class SensorValue(double State, HAAttributes Attributes); // For deserializing the JSON response
 
-        public object ObservePropertyValue(params object[] inputProperties) {
+        public async Task<object> ObservePropertyValue(params object[] inputProperties) {
             // Console.WriteLine($"Observing Home Assistant Sensor Value: {inputProperties[0]}");
             // We sometimes don't need the primary `state`, but need to look into the attributes,
             // 

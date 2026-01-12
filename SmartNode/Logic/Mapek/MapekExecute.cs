@@ -17,7 +17,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public void Execute(Simulation simulation)
+        public async Task Execute(Simulation simulation)
         {
             _logger.LogInformation("Starting the Execute phase.");
 

@@ -18,7 +18,7 @@ namespace Logic.Mapek {
             _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
         }
 
-        public Cache Monitor() {
+        public async Task<Cache> Monitor() {
             _logger.LogInformation("Starting the Monitor phase.");
 
             var cache = new Cache {
@@ -54,7 +54,7 @@ namespace Logic.Mapek {
                 var property = result["property"];
                 var softSensorTreeNode = new SoftSensorTreeNode();
                 
-                PopulateCacheWithPropertiesSoftSensors(property, cache.PropertyCache, softSensorTreeNode, softSensorDictionary);
+                await PopulateCacheWithPropertiesSoftSensors(property, cache.PropertyCache, softSensorTreeNode, softSensorDictionary);
 
                 softSensorTreeNodes.Add(softSensorTreeNode);
             }
@@ -100,7 +100,7 @@ namespace Logic.Mapek {
             }
         }
 
-        private void PopulateCacheWithPropertiesSoftSensors(INode propertyNode,
+        private async Task PopulateCacheWithPropertiesSoftSensors(INode propertyNode,
             PropertyCache propertyCache,
             SoftSensorTreeNode softSensorTreeNode,
             Dictionary<string, SoftSensorTreeNode> softSensorDictionary) {
@@ -164,7 +164,7 @@ namespace Logic.Mapek {
                 var softSensorTreeChildNode = new SoftSensorTreeNode();
 
                 var inputProperty = innerQueryResult.Results[i]["inputProperty"];
-                PopulateCacheWithPropertiesSoftSensors(inputProperty, propertyCache, softSensorTreeChildNode, softSensorDictionary);
+                await PopulateCacheWithPropertiesSoftSensors(inputProperty, propertyCache, softSensorTreeChildNode, softSensorDictionary);
 
                 if (propertyCache.Properties.ContainsKey(inputProperty.ToString())) {
                     inputProperties[i] = propertyCache.Properties[inputProperty.ToString()].Value;
@@ -177,7 +177,7 @@ namespace Logic.Mapek {
                 softSensorNodeChildren.Add(softSensorTreeChildNode);
             }
 
-            var propertyValue = sensor.ObservePropertyValue(inputProperties);
+            var propertyValue = await sensor.ObservePropertyValue(inputProperties);
             var property = new Property {
                 Name = propertyNode.ToString(),
                 OwlType = _mapekKnowledge.GetPropertyType(propertyName),

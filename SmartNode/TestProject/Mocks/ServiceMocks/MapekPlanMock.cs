@@ -9,7 +9,7 @@ namespace TestProject.Mocks.ServiceMocks {
             _simulationTuple = simulationTuple;
         }
 
-        public (SimulationTreeNode, SimulationPath) Plan(Cache cache) {
+        public async Task<(SimulationTreeNode, SimulationPath)> Plan(Cache cache) {
             return _simulationTuple;
         }
     }

@@ -4,6 +4,6 @@
     {
         public string ActuatorName { get; }
 
-        public void Actuate(object state);
+        public Task Actuate(object state);
     }
 }

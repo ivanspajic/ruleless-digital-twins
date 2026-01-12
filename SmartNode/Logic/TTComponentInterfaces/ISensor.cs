@@ -6,6 +6,6 @@
 
         public string ProcedureName { get; }
 
-        public object ObservePropertyValue(params object[] inputProperties);
+        public Task<object> ObservePropertyValue(params object[] inputProperties);
     }
 }

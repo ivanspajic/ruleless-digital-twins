@@ -14,7 +14,7 @@ namespace SmartNode
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var builder = Host.CreateApplicationBuilder(args);
 
@@ -63,7 +63,8 @@ namespace SmartNode
             // Start the loop.
             try
             {
-                mapekManager.StartLoop();
+                // Fire and forget.
+                await mapekManager.StartLoop();
             }
             catch (Exception exception)
             {

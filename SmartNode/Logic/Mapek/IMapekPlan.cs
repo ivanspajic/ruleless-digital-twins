@@ -4,6 +4,6 @@ namespace Logic.Mapek
 {
     public interface IMapekPlan
     {
-        public (SimulationTreeNode, SimulationPath) Plan(Cache cache);
+        public Task<(SimulationTreeNode, SimulationPath)> Plan(Cache cache);
     }
 }

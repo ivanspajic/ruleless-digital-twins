@@ -40,16 +40,16 @@ namespace Logic.Mapek {
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public void StartLoop() {
+        public async Task StartLoop() {
             _isLoopActive = true;
-            RunMapekLoop();
+            await RunMapekLoop();
         }
 
         public void StopLoop() {
             _isLoopActive = false;
         }
 
-        private void RunMapekLoop() {
+        private async Task RunMapekLoop() {
             _logger.LogInformation("Starting the MAPE-K loop. (maxRounds= {maxRound})", _coordinatorSettings.MaximumMapekRounds);
 
             var currentRound = 0;
@@ -67,21 +67,21 @@ namespace Logic.Mapek {
                 _mapekKnowledge.LoadModelsFromKnowledgeBase(); // This makes sense in theory but won't work without the Factory updating as well.
 
                 // Monitor - Observe all hard and soft Sensor values, construct soft Sensor trees, and collect OptimalConditions.
-                var cache = _mapekMonitor.Monitor();
+                var cache = await _mapekMonitor.Monitor();
 
                 // Check for previously constructed simulation paths to pick the next simulation configuration to execute. If case-based functionality is enabled, check for preexisting
                 // cases and save new ones when applicable. For simplicity, the look-ahead approach and the case-based functionality effectively keep state based on the configuration at
                 // the time of making a sequence of simulations/cases to execute. This means if settings values are changed midway through a full simulation path execution (e.g., 2/4),
                 // the system will continue executing as if it followed the old ones for the remainder of the simulation path. Dynamic settings changes thus take effect after the execution
                 // of a full simulation path or in case it is deliberately rejected early by the system due to deviation from its previously predicted Property values.
-                (simulationToExecute, potentialCase, currentSimulationTree, currentOptimalSimulationPath) = ManageSimulationsAndCasesAndPotentiallyPlan(cache,
+                (simulationToExecute, potentialCase, currentSimulationTree, currentOptimalSimulationPath) = await ManageSimulationsAndCasesAndPotentiallyPlan(cache,
                     simulationToExecute,
                     potentialCase,
                     currentSimulationTree,
                     currentOptimalSimulationPath);
 
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
-                _mapekExecute.Execute(simulationToExecute);
+                await _mapekExecute.Execute(simulationToExecute);
 
                 // If configured, write MAPE-K state to CSV.
                 if (_coordinatorSettings.SaveMapekCycleData) {
@@ -103,7 +103,7 @@ namespace Logic.Mapek {
             }
         }
 
-        private (Simulation, Case, SimulationTreeNode, SimulationPath) ManageSimulationsAndCasesAndPotentiallyPlan(Cache cache,
+        private async Task<(Simulation, Case, SimulationTreeNode, SimulationPath)> ManageSimulationsAndCasesAndPotentiallyPlan(Cache cache,
             Simulation simulationToExecute,
             Case potentialCase,
             SimulationTreeNode currentSimulationTree,
@@ -157,7 +157,7 @@ namespace Logic.Mapek {
                 if (currentOptimalSimulationPath is null || !currentOptimalSimulationPath.Simulations.Any()) {
                     // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
                     // TODO: use the simulation tree for visualization.
-                    (currentSimulationTree, currentOptimalSimulationPath) = _mapekPlan.Plan(cache);
+                    (currentSimulationTree, currentOptimalSimulationPath) = await _mapekPlan.Plan(cache);
                 }
 
                 // If case-based functionality is used, get the potential case from the new simulation path.

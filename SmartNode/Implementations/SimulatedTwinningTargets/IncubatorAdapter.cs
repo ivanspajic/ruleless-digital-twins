@@ -13,6 +13,9 @@ namespace Implementations.SimulatedTwinningTargets {
     public record class Incubator(string measurement, IncubatorFields fields);
 
     public class IncubatorAdapter {
+        // Changing the environment variable's value requires restarting Visual Studio before it's visible.
+        private const string HostNameEnvironmentVariableName = "AU_INCUBATOR_RABBITMQ_HOST_NAME";
+
         private readonly ConnectionFactory? _factory;
         private readonly CancellationToken _ct;
         public IncubatorFields? Data;
@@ -26,7 +29,12 @@ namespace Implementations.SimulatedTwinningTargets {
         public IConnection? Conn { get; private set; }
         public IChannel? Channel { get; private set; }
 
-        private IncubatorAdapter(string hostName, CancellationToken cancellationToken) {
+        private IncubatorAdapter(CancellationToken cancellationToken) {
+            var hostName = Environment.GetEnvironmentVariable(HostNameEnvironmentVariableName);
+            if (string.IsNullOrEmpty(hostName)) {
+                throw new ArgumentException($"Environment variable {HostNameEnvironmentVariableName} is missing a value.");
+            }
+
             _factory = new() {
                 UserName = "incubator",
                 Password = "incubator",
@@ -35,21 +43,21 @@ namespace Implementations.SimulatedTwinningTargets {
             _ct = cancellationToken;
         }
 
-        public static IncubatorAdapter GetInstance(string hostName, CancellationToken cancellationToken) {
-            _instance ??= new IncubatorAdapter(hostName, cancellationToken);
+        public static IncubatorAdapter GetInstance(CancellationToken cancellationToken) {
+            _instance ??= new IncubatorAdapter(cancellationToken);
 
             return _instance;
         }
 
         public async Task Connect()
         {
-            Conn = await _factory.CreateConnectionAsync(cancellationToken: _ct);            
+            Conn = await _factory.CreateConnectionAsync(cancellationToken: _ct);
             Channel = await Conn.CreateChannelAsync(cancellationToken: _ct);
             await Channel.ExchangeDeclareAsync(ExchangeName, ExchangeType.Topic, cancellationToken: _ct);
         }
 
         public async Task<string> Setup() {
-            if (Channel == null) {
+            if (Channel is null) {
                 throw new Exception();
             }
             var queueName = "mine_local"; // Under our control

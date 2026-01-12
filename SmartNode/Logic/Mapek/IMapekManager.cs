@@ -2,7 +2,7 @@
 {
     public interface IMapekManager
     {
-        public void StartLoop();
+        public Task StartLoop();
 
         public void StopLoop();
     }

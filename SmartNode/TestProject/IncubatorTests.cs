@@ -14,7 +14,7 @@ namespace TestProject {
     public class IncubatorTests : IDisposable {
         static bool runInference = false; // `false` can be overriden by logic below.
         // IP is coming from "docket network create // inspect" -> rabbitmq-ip or variations thereof:
-        static IncubatorAdapter i = IncubatorAdapter.GetInstance("172.20.0.3", TestContext.Current.CancellationToken);
+        static IncubatorAdapter i = IncubatorAdapter.GetInstance("localhost", TestContext.Current.CancellationToken);
         static Factory.AMQSensor AMQTempSensor = new("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor", "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure", ((d) => d.average_temperature));
         static bool crashed = true;
         private static MyMapekPlan _mapekPlan;
@@ -84,7 +84,7 @@ namespace TestProject {
             mapekKnowledge.Validate(propertyCacheMock);
 
             // TODO: Assert that there's at least one actuator that's not a parameter.
-            var (simulationTree, optimalSimulationPath) = mapekPlan.Plan(new Cache() { PropertyCache = propertyCacheMock, OptimalConditions = [], SoftSensorTreeNodes = [] });
+            var (simulationTree, simulationPath) = mapekPlan.Plan(new Cache() { PropertyCache = propertyCacheMock, OptimalConditions = [], SoftSensorTreeNodes = [] }).Result;
             crashed = false;
 
             // Only valid AFTER focing evaluation through simulation:
@@ -121,19 +121,20 @@ namespace TestProject {
 
         [Theory]
         [InlineData("Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
-        public async Task SimulateFromAMQ(string fromPython, string model, string inferred, int lookAheadCycles) {
+        public void SimulateFromAMQ(string fromPython, string model, string inferred, int lookAheadCycles) {
             SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
             IMapekExecute mpe;
             mock.Add(mpe = new MapekExecute(mock));
 
-            await i.Connect();
-            var consumerTag = await i.Setup();
+            // Run things synchronously until we figure out how to retrive exceptions that xUnit swallows.
+            i.Connect().Wait();
+            var consumerTag = i.Setup().Result;
 
             var monitor = new MapekMonitor(mock);
             Assert.True(AMQTempSensor._onceOnly);
-            var cache = monitor.Monitor();
+            var cache = monitor.Monitor().Result;
 
-            var (simulationTree, optimalSimulationPath) = mapekPlan.Plan(cache);
+            var (simulationTree, optimalSimulationPath) = mapekPlan.Plan(cache).Result;
             crashed = false;
             Assert.False(AMQTempSensor._onceOnly); // Must've been used.
 
@@ -154,13 +155,15 @@ namespace TestProject {
                 Trace.WriteLine("Params: " + string.Join(";", s.InitializationActions.Select(a => a.Name).ToList()));
                 Trace.WriteLine("Inputs: " + string.Join(";", s.Actions.Select(a => a.Name).ToList()));
             }
-            mpe.Execute(optimalSimulationPath.Simulations.First());
+            mpe.Execute(optimalSimulationPath.Simulations.First()).Wait();
             crashed = false;
         }
 
         private static void SetupFiles(string fromPython, string model, string inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan) {
             crashed = true;
-            Directory.Delete("/tmp/Femyou", true);
+            if (Directory.Exists("/tmp/Femyou")) {
+                Directory.Delete("/tmp/Femyou", true);
+            }
             var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
             var modelDirPath = Path.Combine(rootDirectory, "models-and-rules");
             var inferredFilePath = Path.Combine(modelDirPath, inferred);
@@ -261,7 +264,7 @@ namespace TestProject {
             {
                 public string ActuatorName => "Incubator Heater";
 
-                public void Actuate(object state) {
+                public async Task Actuate(object state) {
                     var _actuatorState = int.Parse((string)state);
                     if (_actuatorState == 0) {
                         Task t = Task.Run(async () => await i.SetHeater(false));
@@ -282,7 +285,7 @@ namespace TestProject {
 
                 public string ProcedureName { get; private init; } = procedureName;
 
-                public object ObservePropertyValue(params object[] inputProperties) {
+                public async Task<object> ObservePropertyValue(params object[] inputProperties) {
                     Assert.True(_onceOnly, "Really just expecting it to be called once here.");
                     IncubatorFields? myData = null;
                     Monitor.Enter(i);

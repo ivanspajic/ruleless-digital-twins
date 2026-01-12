@@ -41,7 +41,7 @@ namespace Logic.Mapek
             _filepathArguments = serviceProvider.GetRequiredService<FilepathArguments>();
         }
 
-        public (SimulationTreeNode, SimulationPath) Plan(Cache cache) {
+        public async Task<(SimulationTreeNode, SimulationPath)> Plan(Cache cache) {
             _logger.LogInformation("Starting the Plan phase.");
 
             _logger.LogInformation("Generating simulations.");
@@ -59,7 +59,7 @@ namespace Logic.Mapek
             var simulations = GetSimulationsAndGenerateSimulationTree(_coordinatorSettings.LookAheadMapekCycles, 0, simulationTree, false, true, new List<List<ActuationAction>>(), cache.PropertyCache);
 
             // Execute the simulations and obtain their results.
-            Simulate(simulations, cache.SoftSensorTreeNodes);
+            await Simulate(simulations, cache.SoftSensorTreeNodes);
 
             _logger.LogInformation("Generated a total of {total} simulation paths.", simulationTree.SimulationPaths.Count());
 
@@ -368,7 +368,7 @@ namespace Logic.Mapek
                 select accseq.Concat(new[] { item }));
         }
 
-        internal void Simulate(IEnumerable<Simulation> simulations, IEnumerable<SoftSensorTreeNode> softSensorTreeNodes)
+        internal async Task Simulate(IEnumerable<Simulation> simulations, IEnumerable<SoftSensorTreeNode> softSensorTreeNodes)
         {
             // Measure simulation time.
             var stopwatch = new Stopwatch();
@@ -386,18 +386,18 @@ namespace Logic.Mapek
                 // Perform the simulation via FMU execution and ensure all the Properties in the simulation's property cache are updated by running all soft sensors
                 // in the correct order.
                 ExecuteFmu(fmuModel, simulation);
-                ExecuteSoftSensorsAndUpdateSimulationCache(simulation, softSensorTreeNodes);
+                await ExecuteSoftSensorsAndUpdateSimulationCache(simulation, softSensorTreeNodes);
             }
 
             stopwatch.Stop();
             _logger.LogInformation("Total simulation time (seconds): {elapsedTime}", (double)stopwatch.ElapsedMilliseconds / 1000);
         }
         
-        private static void ExecuteSoftSensorsAndUpdateSimulationCache(Simulation simulation, IEnumerable<SoftSensorTreeNode> softSensorTreeNodes) {
+        private async static Task ExecuteSoftSensorsAndUpdateSimulationCache(Simulation simulation, IEnumerable<SoftSensorTreeNode> softSensorTreeNodes) {
             // Execute the tree of soft sensors in the correct order to ensure all Properties in the simulation's property cache are updated.
             foreach (var softSensorTreeNode in softSensorTreeNodes) {
                 if (softSensorTreeNode.Children.Any()) {
-                    ExecuteSoftSensorsAndUpdateSimulationCache(simulation, softSensorTreeNode.Children);
+                    await ExecuteSoftSensorsAndUpdateSimulationCache(simulation, softSensorTreeNode.Children);
 
                     var inputs = new List<object>();
                     foreach (var softSensorTreeNodeChild in softSensorTreeNode.Children) {
@@ -405,7 +405,7 @@ namespace Logic.Mapek
                         inputs.Add(inputProperty.Value);
                     }
 
-                    var propertyValue = softSensorTreeNode.NodeItem.ObservePropertyValue(inputs.ToArray());
+                    var propertyValue = await softSensorTreeNode.NodeItem.ObservePropertyValue(inputs.ToArray());
                     var property = simulation.PropertyCache!.Properties[softSensorTreeNode.OutputProperty];
                     property.Value = propertyValue;
                 }

@@ -4,11 +4,11 @@ using System.Diagnostics;
 
 namespace Implementations.Actuators.Incubator {
     public class AmqHeater() : IActuator {
-        private readonly IncubatorAdapter _incubatorAdapter = IncubatorAdapter.GetInstance("localhost", new CancellationToken());
+        private readonly IncubatorAdapter _incubatorAdapter = IncubatorAdapter.GetInstance(new CancellationToken());
 
         public string ActuatorName => "Incubator Heater";
 
-        public void Actuate(object state) {
+        public async Task Actuate(object state) {
             var _actuatorState = int.Parse((string)state);
             if (_actuatorState == 0) {
                 Task t = Task.Run(async () => await _incubatorAdapter.SetHeater(false));

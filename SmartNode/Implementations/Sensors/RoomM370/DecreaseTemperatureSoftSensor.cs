@@ -12,7 +12,7 @@ namespace Implementations.Sensors.RoomM370 {
 
         public string ProcedureName { get; private set; }
 
-        public object ObservePropertyValue(params object[] inputProperties) {
+        public async Task<object> ObservePropertyValue(params object[] inputProperties) {
             var input1 = inputProperties[0];
             var input2 = inputProperties[1];
 

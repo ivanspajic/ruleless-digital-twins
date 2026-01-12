@@ -28,7 +28,7 @@ namespace SmartNode
                 new SensorActuatorMapWrapper {
                     ActuatorMap = new() {
                         {
-                            "Incubator Heater",
+                            "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#HeaterActuator",
                             new AmqHeater()
                         }
                     },
@@ -177,7 +177,7 @@ namespace SmartNode
             { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#base64Binary", new Base64BinaryValueHandler() }
-        };        
+        };
 
         public Factory(string dummyEnvironment) {
             _environment = dummyEnvironment;

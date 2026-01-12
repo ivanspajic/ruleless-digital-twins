@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace Implementations.Sensors.Incubator {
     public class AmqSensor(string sensorName, string procedureName, Func<IncubatorFields, double> f) : ISensor {
-        private readonly IncubatorAdapter _incubatorAdapter = IncubatorAdapter.GetInstance("localhost", new CancellationToken());
+        private readonly IncubatorAdapter _incubatorAdapter = IncubatorAdapter.GetInstance(new CancellationToken());
 
         public bool _onceOnly = true;
 
@@ -12,7 +12,13 @@ namespace Implementations.Sensors.Incubator {
 
         public string ProcedureName { get; private init; } = procedureName;
 
-        public object ObservePropertyValue(params object[] inputProperties) {
+        public async Task<object> ObservePropertyValue(params object[] inputProperties) {
+            await _incubatorAdapter.Connect();
+            await _incubatorAdapter.Setup();
+
+            // Wait a little bit before messages are sent to the queue.
+            await Task.Delay(2500);
+
             IncubatorFields? myData = null;
             Monitor.Enter(_incubatorAdapter);
             myData = _incubatorAdapter.Data;

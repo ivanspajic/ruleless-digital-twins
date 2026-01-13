@@ -643,7 +643,7 @@ namespace Logic.Mapek
             return numberOfSatisfiedOptimalConditions;
         }
 
-        private SimulationPath GetOptimalSimulationPath(PropertyCache propertyCache,
+        protected virtual SimulationPath GetOptimalSimulationPath(PropertyCache propertyCache,
             IEnumerable<OptimalCondition> optimalConditions,
             IEnumerable<SimulationPath> simulationPaths)
         {

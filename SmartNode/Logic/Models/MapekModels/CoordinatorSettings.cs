@@ -15,5 +15,8 @@
         public int LookAheadMapekCycles { get; set; }
 
         public double PropertyValueFuzziness { get; set; }
+
+        public bool UseEuclid{ get; set; }
+        public int SleepyTimeMilliseconds { get; set; }
     }
 }

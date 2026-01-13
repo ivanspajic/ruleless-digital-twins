@@ -14,9 +14,6 @@ namespace Implementations.Sensors.Incubator {
         public string ProcedureName { get; private init; } = procedureName;
 
         public async Task<object> ObservePropertyValue(params object[] inputProperties) {
-            await _incubatorAdapter.Connect();
-            await _incubatorAdapter.Setup();
-
             // Wait a little bit before messages are sent to the queue.
             await Task.Delay(IncubatorAdapterMessageDelayMilliseconds);
 

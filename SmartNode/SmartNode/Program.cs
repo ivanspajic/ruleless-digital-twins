@@ -3,6 +3,7 @@ using Logic.FactoryInterface;
 using Logic.Mapek;
 using Logic.Models.DatabaseModels;
 using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -15,6 +16,16 @@ namespace SmartNode
 {
     internal class Program
     {
+        private class EuclidMapekPlan : MapekPlan {
+            public EuclidMapekPlan(IServiceProvider serviceProvider) : base(serviceProvider) {}
+            protected override SimulationPath GetOptimalSimulationPath(PropertyCache propertyCache,
+                    IEnumerable<OptimalCondition> optimalConditions,
+                    IEnumerable<SimulationPath> simulationPaths)
+            {
+                return GetOptimalSimulationPathsEuclidian(simulationPaths, optimalConditions).First().Item1;
+            }
+        }
+
         static async Task Main(string[] args)
         {
             RootCommand rootCommand = new();
@@ -59,7 +70,11 @@ namespace SmartNode
             builder.Services.AddSingleton<ICaseRepository, CaseRepository>(serviceProvider => new CaseRepository(serviceProvider));
             builder.Services.AddSingleton<IFactory, Factory>(serviceProvider => new Factory(coordinatorSettings!.Environment));
             builder.Services.AddSingleton<IMapekMonitor, MapekMonitor>(serviceProvider => new MapekMonitor(serviceProvider));
-            builder.Services.AddSingleton<IMapekPlan, MapekPlan>(serviceProvider => new MapekPlan(serviceProvider));
+            if (coordinatorSettings!.UseEuclid) {
+                builder.Services.AddSingleton<IMapekPlan, MapekPlan>(serviceProvider => new EuclidMapekPlan(serviceProvider));
+            } else {
+                builder.Services.AddSingleton<IMapekPlan, MapekPlan>(serviceProvider => new MapekPlan(serviceProvider));
+            }
             builder.Services.AddSingleton<IMapekExecute, MapekExecute>(serviceProvider => new MapekExecute(serviceProvider));
             builder.Services.AddSingleton<IMapekKnowledge, MapekKnowledge>(serviceProvider => new MapekKnowledge(serviceProvider));
             builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceprovider => new MapekManager(serviceprovider));

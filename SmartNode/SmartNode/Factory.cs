@@ -188,11 +188,14 @@ namespace SmartNode
 
         public Factory(string dummyEnvironment) {
             _environment = dummyEnvironment;
-            var hostName = Environment.GetEnvironmentVariable(HostNameEnvironmentVariableName);
-            if (string.IsNullOrEmpty(hostName)) {
-                throw new ArgumentException($"Environment variable {HostNameEnvironmentVariableName} is missing a value.");
-            }
+            var hostName = Environment.GetEnvironmentVariable(HostNameEnvironmentVariableName) ?? "localhost";
             _incubatorAdapter = new IncubatorAdapter(hostName, new CancellationToken());
+            Task t = Task.Run(async () => {
+                await _incubatorAdapter.Connect();
+                await _incubatorAdapter.Setup();
+            });
+            t.Wait();
+
             _sensorActuatorMaps = MakeSensorMap();
         }
 

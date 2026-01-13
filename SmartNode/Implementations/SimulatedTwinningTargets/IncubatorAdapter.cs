@@ -29,8 +29,10 @@ namespace Implementations.SimulatedTwinningTargets {
         public IConnection? Conn { get; private set; }
         public IChannel? Channel { get; private set; }
 
-        private IncubatorAdapter(CancellationToken cancellationToken) {
-            var hostName = Environment.GetEnvironmentVariable(HostNameEnvironmentVariableName);
+        private IncubatorAdapter(CancellationToken cancellationToken, string hostName = null!) {
+            if (string.IsNullOrEmpty(hostName)) {
+                hostName = Environment.GetEnvironmentVariable(HostNameEnvironmentVariableName)!;
+            }
             if (string.IsNullOrEmpty(hostName)) {
                 throw new ArgumentException($"Environment variable {HostNameEnvironmentVariableName} is missing a value.");
             }
@@ -44,7 +46,11 @@ namespace Implementations.SimulatedTwinningTargets {
         }
 
         public static IncubatorAdapter GetInstance(CancellationToken cancellationToken) {
-            _instance ??= new IncubatorAdapter(cancellationToken);
+            return GetInstance(null!, cancellationToken);
+        }
+
+        public static IncubatorAdapter GetInstance(string hostName, CancellationToken cancellationToken) {
+            _instance ??= new IncubatorAdapter(cancellationToken, hostName);
 
             return _instance;
         }

@@ -8,7 +8,7 @@ namespace TestProject {
         [Theory(Explicit = true)]
         [InlineData("192.168.64.1")] // Should probably come from the outside since it depends where your Incubator-container is running.
         public async Task TestConnect(string hostName) {
-            var i = IncubatorAdapter.GetInstance(hostName, TestContext.Current.CancellationToken);
+            var i = new IncubatorAdapter(hostName, TestContext.Current.CancellationToken);
             await i.Connect();
             var consumerTag = await i.Setup();
             IncubatorFields? myData = null;

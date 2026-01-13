@@ -3,8 +3,8 @@ using Logic.TTComponentInterfaces;
 using System.Diagnostics;
 
 namespace Implementations.Sensors.Incubator {
-    public class AmqSensor(string sensorName, string procedureName, Func<IncubatorFields, double> f) : ISensor {
-        private readonly IncubatorAdapter _incubatorAdapter = IncubatorAdapter.GetInstance(new CancellationToken());
+    public class AmqSensor(IncubatorAdapter incubatorAdapter, string sensorName, string procedureName, Func<IncubatorFields, double> f) : ISensor {
+        private readonly IncubatorAdapter _incubatorAdapter = incubatorAdapter;
 
         public bool _onceOnly = true;
         private const int IncubatorAdapterMessageDelayMilliseconds = 2_500;

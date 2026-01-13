@@ -15,26 +15,20 @@ namespace Implementations.SimulatedTwinningTargets {
     public class IncubatorAdapter {
         private const string HostNameEnvironmentVariableName = "AU_INCUBATOR_RABBITMQ_HOST_NAME";
 
-        private readonly ConnectionFactory? _factory;
-        private readonly CancellationToken _ct;
+        private readonly ConnectionFactory _factory;
+        private readonly CancellationToken _ct; // Probably shouldn't be "static", but good enough for now.
         public IncubatorFields? Data;
         public ulong Counter = 0;
 
         private readonly string ExchangeName = "Incubator_AMQP"; // From Incubator
         private readonly double G_box = 0.5763498; // startup.conf
 
-        private static IncubatorAdapter _instance;
+        private IncubatorAdapter _instance;
 
         public IConnection? Conn { get; private set; }
         public IChannel? Channel { get; private set; }
 
-        private IncubatorAdapter(CancellationToken cancellationToken, string hostName = null!) {
-            if (string.IsNullOrEmpty(hostName)) {
-                hostName = Environment.GetEnvironmentVariable(HostNameEnvironmentVariableName)!;
-            }
-            if (string.IsNullOrEmpty(hostName)) {
-                throw new ArgumentException($"Environment variable {HostNameEnvironmentVariableName} is missing a value.");
-            }
+        public IncubatorAdapter(string hostName, CancellationToken cancellationToken) {
 
             _factory = new() {
                 UserName = "incubator",
@@ -42,20 +36,10 @@ namespace Implementations.SimulatedTwinningTargets {
                 HostName = hostName
             };
             _ct = cancellationToken;
+            _instance = this;
         }
 
-        public static IncubatorAdapter GetInstance(CancellationToken cancellationToken) {
-            return GetInstance(null!, cancellationToken);
-        }
-
-        public static IncubatorAdapter GetInstance(string hostName, CancellationToken cancellationToken) {
-            _instance ??= new IncubatorAdapter(cancellationToken, hostName);
-
-            return _instance;
-        }
-
-        public async Task Connect()
-        {
+        public async Task Connect() {
             Conn = await _factory.CreateConnectionAsync(cancellationToken: _ct);
             Channel = await Conn.CreateChannelAsync(cancellationToken: _ct);
             await Channel.ExchangeDeclareAsync(ExchangeName, ExchangeType.Topic, cancellationToken: _ct);

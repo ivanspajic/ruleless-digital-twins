@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.CommandLine;
 using System.Reflection;
 
 namespace SmartNode
@@ -16,9 +17,19 @@ namespace SmartNode
     {
         static async Task Main(string[] args)
         {
-            var builder = Host.CreateApplicationBuilder(args);
+            RootCommand rootCommand = new();
+            Option<string> fileNameArg = new("--appsettings")
+            {
+                Description = "Which appsettings file to use."
+            };
+            rootCommand.Add(fileNameArg);
+            ParseResult parseResult = rootCommand.Parse(args);
+            string? settingsFile = parseResult.GetValue(fileNameArg);
 
-            builder.Configuration.AddJsonFile(Path.Combine("Properties", $"appsettings.json"));
+            var appSettings = settingsFile == null ? Path.Combine("Properties", $"appsettings.json") : settingsFile;
+
+            var builder = Host.CreateApplicationBuilder(args);
+            builder.Configuration.AddJsonFile(appSettings);
 
             var filepathArguments = builder.Configuration.GetSection("FilepathArguments").Get<FilepathArguments>();
             var coordinatorSettings = builder.Configuration.GetSection("CoordinatorSettings").Get<CoordinatorSettings>();

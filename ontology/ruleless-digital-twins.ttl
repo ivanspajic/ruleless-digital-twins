@@ -36,6 +36,12 @@ xsd:duration rdf:type rdfs:Datatype .
            rdfs:label "alteredBy"@en .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/comparisonOperator
+:comparisonOperator rdf:type owl:ObjectProperty ;
+                    rdfs:comment "Required to enable Condition constraints on variable Property values. Since it is not possible to use the standard comparison operators (>, <, >=, <=) on objects, this property allows us to do so."@en ;
+                    rdfs:label "comparisonOperator"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enactedBy
 :enactedBy rdf:type owl:ObjectProperty ;
            owl:inverseOf :enacts ;
@@ -48,6 +54,18 @@ xsd:duration rdf:type rdfs:Datatype .
         rdfs:range :PropertyChange ;
         rdfs:comment "Represents a relation between a thing, such as a System or Actuator, and a PropertyChange."@en ;
         rdfs:label "enacts"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThan
+:greaterThan rdf:type owl:ObjectProperty ;
+             rdfs:subPropertyOf :comparisonOperator ;
+             rdfs:comment "Represents the '>' (greater than) comparison operator for Property-based values."@en ;
+             rdfs:label "greaterThan"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo
+:greaterThanOrEqualTo rdf:type owl:ObjectProperty ;
+                      rdfs:subPropertyOf :comparisonOperator .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator
@@ -80,6 +98,16 @@ xsd:duration rdf:type rdfs:Datatype .
             rdfs:label "isOutputOf"@en .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThan
+:lessThan rdf:type owl:ObjectProperty ;
+          rdfs:subPropertyOf :comparisonOperator .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo
+:lessThanOrEqualTo rdf:type owl:ObjectProperty ;
+                   rdfs:subPropertyOf :comparisonOperator .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizedBy
 :optimizedBy rdf:type owl:ObjectProperty ;
              owl:inverseOf :optimizesFor ;
@@ -106,14 +134,6 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Data properties
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#hasPossibleValue
-:hasPossibleValue rdf:type owl:DatatypeProperty ;
-                  rdfs:domain :ConfigurableParameter ;
-                  rdfs:range rdfs:Literal ;
-                  rdfs:comment "Represents one value that a ConfigurableParameter can have."@en ;
-                  rdfs:label "hasPossibleValue"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromOptimalConditions
 :generateCombinationsOnlyFromOptimalConditions rdf:type owl:DatatypeProperty ;
                                                rdfs:domain <http://www.w3.org/ns/sosa/Platform> ;
@@ -139,6 +159,22 @@ xsd:duration rdf:type rdfs:Datatype .
                rdfs:range xsd:string ;
                rdfs:comment "Represents a relation from a thing to its identifier."@en ;
                rdfs:label "hasIdentifier"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasPossibleValue
+:hasPossibleValue rdf:type owl:DatatypeProperty ;
+                  rdfs:domain :ConfigurableParameter ;
+                  rdfs:range rdfs:Literal ;
+                  rdfs:comment "Represents one value that a ConfigurableParameter can have."@en ;
+                  rdfs:label "hasPossibleValue"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasPriority
+:hasPriority rdf:type owl:DatatypeProperty ;
+             rdfs:domain :OptimalCondition ;
+             rdfs:range xsd:int ;
+             rdfs:comment "Classifies an OptimalCondition as having a specific priority to facilitate DT decision making by ranking."@en ;
+             rdfs:label "hasPriority"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds
@@ -180,10 +216,18 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds
 :reachedInMaximumSeconds rdf:type owl:DatatypeProperty ;
-                         rdfs:domain :OptimalCondition ;
+                         rdfs:domain :Condition ;
                          rdfs:range xsd:int ;
                          rdfs:comment "Represents the maximum amount of time in seconds to reach an OptimalCondition."@en ;
                          rdfs:label "reachedInMaximumSeconds"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/satisfiedBy
+:satisfiedBy rdf:type owl:DatatypeProperty ;
+             rdfs:domain :Condition ;
+             rdfs:range xsd:dateTimeStamp ;
+             rdfs:comment "Represents a relation between a Condition and the time that Condition must be satisfied at. In case of no specified time, the Condition should always be satisfied."@en ;
+             rdfs:label "satisfiedBy"@en .
 
 
 #################################################################
@@ -217,6 +261,30 @@ xsd:duration rdf:type rdfs:Datatype .
                  owl:disjointWith :ReconfigurationAction ;
                  rdfs:comment "Represents a single system Action with an actuation, either for optimization or regaining optimal conditions."@en ;
                  rdfs:label "ActuationAction"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Condition
+:Condition rdf:type owl:Class ;
+           rdfs:subClassOf [ rdf:type owl:Restriction ;
+                             owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
+                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                             owl:onClass <http://www.w3.org/ns/ssn/Property>
+                           ] ,
+                           [ rdf:type owl:Restriction ;
+                             owl:onProperty :satisfiedBy ;
+                             owl:someValuesFrom xsd:dateTimeStamp
+                           ] ,
+                           [ rdf:type owl:Restriction ;
+                             owl:onProperty :hasValueConstraint ;
+                             owl:cardinality "1"^^xsd:nonNegativeInteger
+                           ] ,
+                           [ rdf:type owl:Restriction ;
+                             owl:onProperty :reachedInMaximumSeconds ;
+                             owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                             owl:onDataRange xsd:int
+                           ] ;
+           rdfs:comment "Represents a required value range constraint on a Property.  For example, a condition on the temperature of a room could be defined as values greater than 18 and lower than 22 degrees Celsius."@en ;
+           rdfs:label "Condition"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ConfigurableParameter
@@ -261,21 +329,13 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition
 :OptimalCondition rdf:type owl:Class ;
-                  rdfs:subClassOf [ rdf:type owl:Restriction ;
-                                    owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
-                                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                    owl:onClass <http://www.w3.org/ns/ssn/Property>
-                                  ] ,
+                  rdfs:subClassOf :Condition ,
                                   [ rdf:type owl:Restriction ;
-                                    owl:onProperty :hasValueConstraint ;
-                                    owl:cardinality "1"^^xsd:nonNegativeInteger
-                                  ] ,
-                                  [ rdf:type owl:Restriction ;
-                                    owl:onProperty :reachedInMaximumSeconds ;
+                                    owl:onProperty :hasPriority ;
                                     owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                     owl:onDataRange xsd:int
                                   ] ;
-                  rdfs:comment "An optimal property condition, such as a desired value range definition. For example, an optimal temperature condition of a room could be defined as values greater than 18 and lower than 22 degrees Celsius."@en ;
+                  rdfs:comment "Represents a softer Condition that may be broken for the purposes of achieving a more optimal long-term DT decision."@en ;
                   rdfs:label "OptimalCondition"@en .
 
 

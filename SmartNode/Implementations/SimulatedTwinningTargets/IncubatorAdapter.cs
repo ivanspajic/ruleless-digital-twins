@@ -13,7 +13,6 @@ namespace Implementations.SimulatedTwinningTargets {
     public record class Incubator(string measurement, IncubatorFields fields);
 
     public class IncubatorAdapter {
-        // Changing the environment variable's value requires restarting Visual Studio before it's visible.
         private const string HostNameEnvironmentVariableName = "AU_INCUBATOR_RABBITMQ_HOST_NAME";
 
         private readonly ConnectionFactory? _factory;

@@ -13,8 +13,6 @@ namespace Implementations.SimulatedTwinningTargets {
     public record class Incubator(string measurement, IncubatorFields fields);
 
     public class IncubatorAdapter {
-        private const string HostNameEnvironmentVariableName = "AU_INCUBATOR_RABBITMQ_HOST_NAME";
-
         private readonly ConnectionFactory _factory;
         private readonly CancellationToken _ct; // Probably shouldn't be "static", but good enough for now.
         public IncubatorFields? Data;

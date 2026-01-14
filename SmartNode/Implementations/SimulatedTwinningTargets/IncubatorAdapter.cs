@@ -21,8 +21,6 @@ namespace Implementations.SimulatedTwinningTargets {
         private readonly string ExchangeName = "Incubator_AMQP"; // From Incubator
         private readonly double G_box = 0.5763498; // startup.conf
 
-        private IncubatorAdapter _instance;
-
         public IConnection? Conn { get; private set; }
         public IChannel? Channel { get; private set; }
 
@@ -34,7 +32,6 @@ namespace Implementations.SimulatedTwinningTargets {
                 HostName = hostName
             };
             _ct = cancellationToken;
-            _instance = this;
         }
 
         public async Task Connect() {
@@ -48,7 +45,7 @@ namespace Implementations.SimulatedTwinningTargets {
                 throw new Exception();
             }
             var queueName = "mine_local"; // Under our control
-            await Channel.QueueDeclareAsync(queueName, false, false, false, null, cancellationToken: _ct);
+            await Channel.QueueDeclareAsync(queueName, false, false, autoDelete: true, null, cancellationToken: _ct);
             // From Incubator: incubator_state_csv_recorder.py:
             await Channel.QueueBindAsync(queueName, ExchangeName, "incubator.record.driver.state", null, cancellationToken: _ct);
 

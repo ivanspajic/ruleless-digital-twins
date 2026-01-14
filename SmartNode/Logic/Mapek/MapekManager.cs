@@ -98,6 +98,7 @@ namespace Logic.Mapek {
 
                 currentRound++;
 
+                _logger.LogInformation("Sleeping {sleepTime} ms until next MAPE-K cycle.", _coordinatorSettings.SleepyTimeMilliseconds);
                 Thread.Sleep(_coordinatorSettings.SleepyTimeMilliseconds);
             }
         }

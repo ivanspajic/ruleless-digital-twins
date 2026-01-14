@@ -182,19 +182,23 @@ namespace SmartNode
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#base64Binary", new Base64BinaryValueHandler() }
         };
-        private readonly IncubatorAdapter _incubatorAdapter;
+        private readonly IncubatorAdapter? _incubatorAdapter;
         // Changing the environment variable's value requires restarting Visual Studio before it's visible.
         private const string HostNameEnvironmentVariableName = "AU_INCUBATOR_RABBITMQ_HOST_NAME";
 
         public Factory(string dummyEnvironment) {
             _environment = dummyEnvironment;
-            var hostName = Environment.GetEnvironmentVariable(HostNameEnvironmentVariableName) ?? "localhost";
-            _incubatorAdapter = new IncubatorAdapter(hostName, new CancellationToken());
-            Task t = Task.Run(async () => {
-                await _incubatorAdapter.Connect();
-                await _incubatorAdapter.Setup();
-            });
-            t.Wait();
+            // XXX: We should really split the factory eventually.
+            if ("incubator".Equals(_environment)) {
+                // TODO: Might as well directly come from its own section in the ConfigurationSettings.
+                var hostName = Environment.GetEnvironmentVariable(HostNameEnvironmentVariableName) ?? "localhost";
+                _incubatorAdapter = new IncubatorAdapter(hostName, new CancellationToken());
+                Task t = Task.Run(async () => {
+                    await _incubatorAdapter.Connect();
+                    await _incubatorAdapter.Setup();
+                });
+                t.Wait();
+            }
 
             _sensorActuatorMaps = MakeSensorMap();
         }

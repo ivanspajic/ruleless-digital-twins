@@ -36,16 +36,8 @@ xsd:duration rdf:type rdfs:Datatype .
            rdfs:label "alteredBy"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/arithmeticOperator
-:arithmeticOperator rdf:type owl:ObjectProperty ;
-                    rdfs:subPropertyOf :operator .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/comparisonOperator
 :comparisonOperator rdf:type owl:ObjectProperty ;
-                    rdfs:subPropertyOf :operator ;
-                    rdfs:domain :Constraint ;
-                    rdfs:range <http://www.w3.org/ns/ssn/Property> ;
                     rdfs:comment "Required to enable Condition constraints on variable Property values. Since it is not possible to use the standard comparison operators (>, <, >=, <=) on non-literals, this property allows us to do so."@en ;
                     rdfs:label "comparisonOperator"@en .
 
@@ -96,7 +88,11 @@ xsd:duration rdf:type rdfs:Datatype .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint
 :hasConstraint rdf:type owl:ObjectProperty ;
                rdfs:domain :Condition ;
-               rdfs:range :Constraint ;
+               rdfs:range [ rdf:type owl:Restriction ;
+                            owl:onProperty :comparisonOperator ;
+                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                            owl:onClass <http://www.w3.org/ns/ssn/Property>
+                          ] ;
                rdfs:comment "Represents a relation between a Condition and a Constraint."@en ;
                rdfs:label "hasConstraint"@en .
 
@@ -137,20 +133,6 @@ xsd:duration rdf:type rdfs:Datatype .
                    rdfs:label "lessThanOrEqualTo"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/minus
-:minus rdf:type owl:ObjectProperty ;
-       rdfs:subPropertyOf :arithmeticOperator ;
-       rdfs:comment "Represents the '-' (subtraction) arithmetic operator for Property-based values."@en ;
-       rdfs:label "minus"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/operator
-:operator rdf:type owl:ObjectProperty ;
-          rdfs:range <http://www.w3.org/ns/ssn/Property> ;
-          rdfs:comment "Represents an operator property that can be used on non-literals. Decidability terms and conditions apply."@en ;
-          rdfs:label "operator"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizedBy
 :optimizedBy rdf:type owl:ObjectProperty ;
              owl:inverseOf :optimizesFor ;
@@ -166,32 +148,11 @@ xsd:duration rdf:type rdfs:Datatype .
               rdfs:label "optimizesFor"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/over
-:over rdf:type owl:ObjectProperty ;
-      rdfs:subPropertyOf :arithmeticOperator ;
-      rdfs:comment "Represents the '/' (division) arithmetic operator for Property-based values."@en ;
-      rdfs:label "over"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/plus
-:plus rdf:type owl:ObjectProperty ;
-      rdfs:subPropertyOf :arithmeticOperator ;
-      rdfs:comment "Represents the '+' (addition) arithmetic operator for Property-based values."@en ;
-      rdfs:label "plus"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/propertyFor
 :propertyFor rdf:type owl:ObjectProperty ;
              owl:inverseOf <http://www.w3.org/ns/ssn/forProperty> ;
              rdfs:comment "A relation between some property and an entity."@en ;
              rdfs:label "property for"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/times
-:times rdf:type owl:ObjectProperty ;
-       rdfs:subPropertyOf :arithmeticOperator ;
-       rdfs:comment "Represents the '*' (multiplication) arithmetic operator for Property-based values."@en ;
-       rdfs:label "times"@en .
 
 
 #################################################################
@@ -323,6 +284,15 @@ xsd:duration rdf:type rdfs:Datatype .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Condition
 :Condition rdf:type owl:Class ;
            rdfs:subClassOf [ rdf:type owl:Restriction ;
+                             owl:onProperty :hasConstraint ;
+                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                             owl:onClass [ rdf:type owl:Restriction ;
+                                           owl:onProperty :comparisonOperator ;
+                                           owl:maxQualifiedCardinality "4"^^xsd:nonNegativeInteger ;
+                                           owl:onClass <http://www.w3.org/ns/ssn/Property>
+                                         ]
+                           ] ,
+                           [ rdf:type owl:Restriction ;
                              owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                              owl:onClass <http://www.w3.org/ns/ssn/Property>
@@ -341,7 +311,7 @@ xsd:duration rdf:type rdfs:Datatype .
                              owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                              owl:onDataRange xsd:int
                            ] ;
-           rdfs:comment "Represents a required value range constraint on a Property.  For example, a condition on the temperature of a room could be defined as values greater than 18 and lower than 22 degrees Celsius."@en ;
+           rdfs:comment "Represents a required value range constraint on a Property.  For example, a condition on the temperature of a room could be defined as values greater than 18 and lower than 22 degrees Celsius. Due to the OWA, the subclass definition includes a cardinality restriction of maximum 4 Properties while the restrictions are more strict. This is enforced by additional (external) inference rules."@en ;
            rdfs:label "Condition"@en .
 
 
@@ -360,25 +330,6 @@ xsd:duration rdf:type rdfs:Datatype .
                                        ] ;
                        rdfs:comment "A parameter not directly observable or actuatable but rather used for configuring an an Input to a System or Procedure."@en ;
                        rdfs:label "ConfigurableParameter"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Constraint
-:Constraint rdf:type owl:Class ;
-            rdfs:subClassOf [ rdf:type owl:Class ;
-                              owl:unionOf ( [ rdf:type owl:Restriction ;
-                                              owl:onProperty :greaterThan ;
-                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                              owl:onClass <http://www.w3.org/ns/ssn/Property>
-                                            ]
-                                            [ rdf:type owl:Restriction ;
-                                              owl:onProperty :greaterThanOrEqualTo ;
-                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                              owl:onClass <http://www.w3.org/ns/ssn/Property>
-                                            ]
-                                          )
-                            ] ;
-            rdfs:comment "Represents a value constraint used by Conditions."@en ;
-            rdfs:label "Constraint"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Effect
@@ -527,26 +478,6 @@ xsd:duration rdf:type rdfs:Datatype .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease
 :ValueIncrease rdf:type owl:NamedIndividual ,
                         :Effect .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/test
-:test rdf:type owl:NamedIndividual ,
-               :Constraint ,
-               [ rdf:type owl:Restriction ;
-                 owl:onProperty :equalTo ;
-                 owl:hasValue :testprop2
-               ] .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/testprop1
-:testprop1 rdf:type owl:NamedIndividual ,
-                    <http://www.w3.org/ns/ssn/Property> ;
-           owl:differentFrom :testprop2 .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/testprop2
-:testprop2 rdf:type owl:NamedIndividual ,
-                    <http://www.w3.org/ns/ssn/Property> .
 
 
 ###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

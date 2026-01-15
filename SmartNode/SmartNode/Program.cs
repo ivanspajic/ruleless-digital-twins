@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.CommandLine;
 using System.Reflection;
 
 namespace SmartNode
@@ -16,9 +17,19 @@ namespace SmartNode
     {
         static async Task Main(string[] args)
         {
-            var builder = Host.CreateApplicationBuilder(args);
+            RootCommand rootCommand = new();
+            Option<string> fileNameArg = new("--appsettings")
+            {
+                Description = "Which appsettings file to use."
+            };
+            rootCommand.Add(fileNameArg);
+            ParseResult parseResult = rootCommand.Parse(args);
+            string? settingsFile = parseResult.GetValue(fileNameArg);
 
-            builder.Configuration.AddJsonFile(Path.Combine("Properties", $"appsettings.json"));
+            var appSettings = settingsFile == null ? Path.Combine("Properties", $"appsettings.json") : settingsFile;
+
+            var builder = Host.CreateApplicationBuilder(args);
+            builder.Configuration.AddJsonFile(appSettings);
 
             var filepathArguments = builder.Configuration.GetSection("FilepathArguments").Get<FilepathArguments>();
             var coordinatorSettings = builder.Configuration.GetSection("CoordinatorSettings").Get<CoordinatorSettings>();
@@ -48,7 +59,9 @@ namespace SmartNode
             builder.Services.AddSingleton<ICaseRepository, CaseRepository>(serviceProvider => new CaseRepository(serviceProvider));
             builder.Services.AddSingleton<IFactory, Factory>(serviceProvider => new Factory(coordinatorSettings!.Environment));
             builder.Services.AddSingleton<IMapekMonitor, MapekMonitor>(serviceProvider => new MapekMonitor(serviceProvider));
-            builder.Services.AddSingleton<IMapekPlan, MapekPlan>(serviceProvider => new MapekPlan(serviceProvider));
+            builder.Services.AddSingleton<IMapekPlan, MapekPlan>(serviceProvider => {
+                return coordinatorSettings!.UseEuclid ? new EuclidMapekPlan(serviceProvider) : new MapekPlan(serviceProvider);
+            });
             builder.Services.AddSingleton<IMapekExecute, MapekExecute>(serviceProvider => new MapekExecute(serviceProvider));
             builder.Services.AddSingleton<IMapekKnowledge, MapekKnowledge>(serviceProvider => new MapekKnowledge(serviceProvider));
             builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceprovider => new MapekManager(serviceprovider));

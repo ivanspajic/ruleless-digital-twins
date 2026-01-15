@@ -13,27 +13,18 @@ namespace Implementations.SimulatedTwinningTargets {
     public record class Incubator(string measurement, IncubatorFields fields);
 
     public class IncubatorAdapter {
-        // Changing the environment variable's value requires restarting Visual Studio before it's visible.
-        private const string HostNameEnvironmentVariableName = "AU_INCUBATOR_RABBITMQ_HOST_NAME";
-
-        private readonly ConnectionFactory? _factory;
-        private readonly CancellationToken _ct;
+        private readonly ConnectionFactory _factory;
+        private readonly CancellationToken _ct; // Probably shouldn't be "static", but good enough for now.
         public IncubatorFields? Data;
         public ulong Counter = 0;
 
         private readonly string ExchangeName = "Incubator_AMQP"; // From Incubator
         private readonly double G_box = 0.5763498; // startup.conf
 
-        private static IncubatorAdapter _instance;
-
         public IConnection? Conn { get; private set; }
         public IChannel? Channel { get; private set; }
 
-        private IncubatorAdapter(CancellationToken cancellationToken) {
-            var hostName = Environment.GetEnvironmentVariable(HostNameEnvironmentVariableName);
-            if (string.IsNullOrEmpty(hostName)) {
-                throw new ArgumentException($"Environment variable {HostNameEnvironmentVariableName} is missing a value.");
-            }
+        public IncubatorAdapter(string hostName, CancellationToken cancellationToken) {
 
             _factory = new() {
                 UserName = "incubator",
@@ -43,14 +34,7 @@ namespace Implementations.SimulatedTwinningTargets {
             _ct = cancellationToken;
         }
 
-        public static IncubatorAdapter GetInstance(CancellationToken cancellationToken) {
-            _instance ??= new IncubatorAdapter(cancellationToken);
-
-            return _instance;
-        }
-
-        public async Task Connect()
-        {
+        public async Task Connect() {
             Conn = await _factory.CreateConnectionAsync(cancellationToken: _ct);
             Channel = await Conn.CreateChannelAsync(cancellationToken: _ct);
             await Channel.ExchangeDeclareAsync(ExchangeName, ExchangeType.Topic, cancellationToken: _ct);
@@ -61,7 +45,7 @@ namespace Implementations.SimulatedTwinningTargets {
                 throw new Exception();
             }
             var queueName = "mine_local"; // Under our control
-            await Channel.QueueDeclareAsync(queueName, false, false, false, null, cancellationToken: _ct);
+            await Channel.QueueDeclareAsync(queueName, false, false, autoDelete: true, null, cancellationToken: _ct);
             // From Incubator: incubator_state_csv_recorder.py:
             await Channel.QueueBindAsync(queueName, ExchangeName, "incubator.record.driver.state", null, cancellationToken: _ct);
 

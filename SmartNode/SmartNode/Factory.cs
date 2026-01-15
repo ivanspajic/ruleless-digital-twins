@@ -7,8 +7,8 @@ using Implementations.Sensors.CustomPiece;
 using Implementations.SoftwareComponents;
 using Implementations.Actuators.RoomM370;
 using Implementations.Sensors.Incubator;
-using RabbitMQ.Client;
 using Implementations.Actuators.Incubator;
+using Implementations.SimulatedTwinningTargets;
 
 namespace SmartNode
 {
@@ -22,21 +22,24 @@ namespace SmartNode
         // be registered in one map.
         // 
         // New implementations can simply be added to the factory collections.
-        private readonly Dictionary<string, SensorActuatorMapWrapper> _sensorActuatorMaps = new() {
-            {
+        private readonly Dictionary<string, SensorActuatorMapWrapper> _sensorActuatorMaps;
+        private Dictionary<string, SensorActuatorMapWrapper> MakeSensorMap()
+        {
+            return new Dictionary<string, SensorActuatorMapWrapper>(){
+                {
                 "incubator",
                 new SensorActuatorMapWrapper {
                     ActuatorMap = new() {
                         {
                             "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#HeaterActuator",
-                            new AmqHeater()
+                            new AmqHeater(_incubatorAdapter)
                         }
                     },
                     SensorMap = new() {
                         {
                             ("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor",
                             "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure"),
-                            new AmqSensor("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor",
+                            new AmqSensor(_incubatorAdapter, "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor",
                                 "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure",
                                 d => d.average_temperature)
                         }
@@ -160,6 +163,7 @@ namespace SmartNode
                 }
             }
         };
+        }
 
         private readonly Dictionary<string, IConfigurableParameter> _configurableParameters = new() {
             {
@@ -178,9 +182,25 @@ namespace SmartNode
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#base64Binary", new Base64BinaryValueHandler() }
         };
+        private readonly IncubatorAdapter? _incubatorAdapter;
+        // Changing the environment variable's value requires restarting Visual Studio before it's visible.
+        private const string HostNameEnvironmentVariableName = "AU_INCUBATOR_RABBITMQ_HOST_NAME";
 
         public Factory(string dummyEnvironment) {
             _environment = dummyEnvironment;
+            // XXX: We should really split the factory eventually.
+            if ("incubator".Equals(_environment)) {
+                // TODO: Might as well directly come from its own section in the ConfigurationSettings.
+                var hostName = Environment.GetEnvironmentVariable(HostNameEnvironmentVariableName) ?? "localhost";
+                _incubatorAdapter = new IncubatorAdapter(hostName, new CancellationToken());
+                Task t = Task.Run(async () => {
+                    await _incubatorAdapter.Connect();
+                    await _incubatorAdapter.Setup();
+                });
+                t.Wait();
+            }
+
+            _sensorActuatorMaps = MakeSensorMap();
         }
 
         public ISensor GetSensorImplementation(string sensorName, string procedureName) {

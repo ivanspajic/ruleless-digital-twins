@@ -14,7 +14,6 @@ using System.Runtime.CompilerServices;
 
 namespace Logic.Mapek {
     public class MapekManager : IMapekManager {
-        private const int SleepyTimeMilliseconds = 2_000;
 
         private readonly FilepathArguments _filepathArguments;
         private readonly CoordinatorSettings _coordinatorSettings;
@@ -99,7 +98,8 @@ namespace Logic.Mapek {
 
                 currentRound++;
 
-                // Thread.Sleep(SleepyTimeMilliseconds);
+                _logger.LogInformation("Sleeping {sleepTime} ms until next MAPE-K cycle.", _coordinatorSettings.SleepyTimeMilliseconds);
+                Thread.Sleep(_coordinatorSettings.SleepyTimeMilliseconds);
             }
         }
 

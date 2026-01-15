@@ -14,8 +14,8 @@ namespace TestProject {
     public class IncubatorTests : IDisposable {
         static bool runInference = false; // `false` can be overriden by logic below.
         // IP is coming from "docket network create // inspect" -> rabbitmq-ip or variations thereof:
-        static IncubatorAdapter i = IncubatorAdapter.GetInstance("localhost", TestContext.Current.CancellationToken);
-        static Factory.AMQSensor AMQTempSensor = new("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor", "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure", ((d) => d.average_temperature));
+        static readonly IncubatorAdapter i = new("172.21.0.2", TestContext.Current.CancellationToken);
+        static readonly Factory.AMQSensor AMQTempSensor = new("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor", "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure", ((d) => d.average_temperature));
         static bool crashed = true;
         private static MyMapekPlan _mapekPlan;
 
@@ -127,6 +127,7 @@ namespace TestProject {
             mock.Add(mpe = new MapekExecute(mock));
 
             // Run things synchronously until we figure out how to retrive exceptions that xUnit swallows.
+#pragma warning disable xUnit1051 // Probably okay for now since we gave the Adapter the token already.
             i.Connect().Wait();
             var consumerTag = i.Setup().Result;
 
@@ -149,14 +150,15 @@ namespace TestProject {
             Trace.WriteLine($"{vs.Count()} solutions: {string.Join(",",vs.Select(pd => pd.Item2))}");
             var path = vs.First().Item1;
 
-            foreach (var s in optimalSimulationPath.Simulations)
+            foreach (var s in path.Simulations)
             {
                 Trace.WriteLine(string.Join(";", s.Actions.Select(a => a.Name)));
                 Trace.WriteLine("Params: " + string.Join(";", s.InitializationActions.Select(a => a.Name).ToList()));
                 Trace.WriteLine("Inputs: " + string.Join(";", s.Actions.Select(a => a.Name).ToList()));
             }
-            mpe.Execute(optimalSimulationPath.Simulations.First()).Wait();
+            mpe.Execute(path.Simulations.First()).Wait();
             crashed = false;
+#pragma warning restore xUnit1051
         }
 
         private static void SetupFiles(string fromPython, string model, string inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan) {

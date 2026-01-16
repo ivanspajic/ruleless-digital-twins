@@ -2,157 +2,97 @@
 @prefix meta: <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/>.
 @prefix ssn: <http://www.w3.org/ns/ssn/>.
 @prefix sosa: <http://www.w3.org/ns/sosa/>.
-@include <OWL>.
+
+
+
+// These rules are used as a verification mechanism against malformed Conditions and OptimalConditions. In
+// cases of errors, these rules will explicitly print messages such that the coordinator catches them and
+// throws exceptions.
 
 // Verifies that system optimizations are not conflicting.
-[rule1g:    (?thing1 meta:optimizesFor ?propertyChange1)
+[ruleVer1:  (?platform rdf:type sosa:Platform)
+            (?platform meta:optimizesFor ?propertyChange1)
             (?propertyChange1 ssn:forProperty ?property)
-            (?thing2 meta:optimizesFor ?propertyChange2)
+            (?platform meta:optimizesFor ?propertyChange2)
             (?propertyChange2 ssn:forProperty ?property)
             (?propertyChange1 meta:affectsPropertyWith meta:ValueIncrease)
             (?propertyChange2 meta:affectsPropertyWith meta:ValueDecrease)
-            ->  print()
-                print("Conflicting optimizations detected!")
-                print(?thing1, "optimizes for", ?property, "with ValueIncrease through", ?propertyChange1)
-                print(?thing2, "optimizes for", ?property, "with ValueDecrease through", ?propertyChange2)
-                print()
+            ->  print("Conflicting optimizations detected!")
+                print(?platform, "optimizes for", ?property, "with ValueIncrease through", ?propertyChange1)
+                print(?platform, "optimizes for", ?property, "with ValueDecrease through", ?propertyChange2)
 ]
 
-// Checks for two different OptimalConditions with conflicting constraints for the same Property. This is only an
-// issue in the case of impossible values for specific combinations of operators. In other words, using some
-// combinations of operators in conjunction is legitimate if they produce a legitimate range for a value. E.g.,
-// OptimalCondition1 having a constraint of >15 and OptimalCondition2 having a constraint of <20. However, such
-// combinations are not valid in cases of swapped values, i.e., OptimalCondition1 having a constraint of >20
-// and OptimalCondition2 having a constraint of <15, meaning the same Property would have to have a value of
-// >20 and <15 at the same time.
-//
-// To represent disjoint ranges, we offer support for disjunctions. E.g., >20 or <15.
-
-// Checks for OptimalConditions with single-valued range constraints.
-[rule1h:    (?individual1 rdf:type meta:OptimalCondition)
-            (?individual1 ssn:forProperty ?property)
-            (?individual1 rdf:type ?bNode1_1)
-            (?bNode1_1 owl:onProperty meta:hasValueConstraint)
-            (?bNode1_1 owl:onDataRange ?bNode2_1)
-            (?bNode2_1 owl:withRestrictions ?bNode3_1)
-            (?bNode3_1 rdf:first ?restriction1)
-            noValue(?bNode3_1, rdf:rest, isBNode(?bNode4_1))
-            (?individual2 rdf:type meta:OptimalCondition)
-            (?individual2 ssn:forProperty ?property)
-            (?individual2 rdf:type ?bNode1_2)
-            (?bNode1_2 owl:onProperty meta:hasValueConstraint)
-            (?bNode1_2 owl:onDataRange ?bNode2_2)
-            (?bNode2_2 owl:withRestrictions ?bNode3_2)
-            (?bNode3_2 rdf:first ?restriction2)
-            noValue(?bNode3_2, rdf:rest, isBNode(?bNode4_2))
-            ->  (?restriction1 rdf:comment "verification mark")
-                (?restriction2 rdf:comment "verification mark")
+// These check that single-constraint Conditions/OptimalConditions, such as >15, use the allowed operators. 
+[ruleVer2:  (?condition rdf:type meta:Condition)
+            (?condition rdf:type ?aNode)
+            (?aNode rdf:type owl:Restriction)
+            (?aNode owl:hasValue ?property)
+            (?property rdf:type ssn:Property)
+            (?aNode owl:onProperty ?operator)
+            notEqual(?operator, meta:equalTo)
+            notEqual(?operator, meta:greaterThan)
+            notEqual(?operator, meta:greaterThanOrEqualTo)
+            notEqual(?operator, meta:lessThan)
+            notEqual(?operator, meta:lessThanOrEqualTo)
+            ->  print("Unapproved operator used in Condition: ", ?operator)
 ]
 
-// Checks for OptimalConditions where one has a single-valued and the other a double-valued range constraint.
-[rule1i:    (?individual1 rdf:type meta:OptimalCondition)
-            (?individual1 ssn:forProperty ?property)
-            (?individual1 rdf:type ?bNode1_1)
-            (?bNode1_1 owl:onProperty meta:hasValueConstraint)
-            (?bNode1_1 owl:onDataRange ?bNode2_1)
-            (?bNode2_1 owl:withRestrictions ?bNode3_1)
-            (?bNode3_1 rdf:first ?restriction1)
-            (?bNode3_1 rdf:rest ?bNode4_1)
-            (?bNode4_1 rdf:first ?restriction2)
-            (?individual2 rdf:type meta:OptimalCondition)
-            (?individual2 ssn:forProperty ?property)
-            (?individual2 rdf:type ?bNode1_2)
-            (?bNode1_2 owl:onProperty meta:hasValueConstraint)
-            (?bNode1_2 owl:onDataRange ?bNode2_2)
-            (?bNode2_2 owl:withRestrictions ?bNode3_2)
-            (?bNode3_2 rdf:first ?restriction3)
-            noValue(?bNode3_2, rdf:rest, isBNode(?bNode4_2))
-            ->  (?restriction1 rdf:comment "verification mark")
-                (?restriction2 rdf:comment "verification mark")
-                (?restriction3 rdf:comment "verification mark")
+[ruleVer2:  (?condition rdf:type meta:Condition)
+            (?condition rdf:type ?aNode)
+            (?aNode rdf:type owl:Restriction)
+            (?aNode owl:hasValue ?property)
+            (?property rdf:type ssn:Property)
+            (?aNode owl:onProperty ?operator)
+            notEqual(?operator, meta:equalTo)
+            notEqual(?operator, meta:greaterThan)
+            notEqual(?operator, meta:greaterThanOrEqualTo)
+            notEqual(?operator, meta:lessThan)
+            notEqual(?operator, meta:lessThanOrEqualTo)
+            ->  print("Unapproved operator used in Condition: ", ?operator)
 ]
 
-// Checks for OptimalConditions with double-valued range constraints.
-[rule1j:    (?individual1 rdf:type meta:OptimalCondition)
-            (?individual1 ssn:forProperty ?property)
-            (?individual1 rdf:type ?bNode1_1)
-            (?bNode1_1 owl:onProperty meta:hasValueConstraint)
-            (?bNode1_1 owl:onDataRange ?bNode2_1)
-            (?bNode2_1 owl:withRestrictions ?bNode3_1)
-            (?bNode3_1 rdf:first ?restriction1)
-            (?bNode3_1 rdf:rest ?bNode4_1)
-            (?bNode4_1 rdf:first ?restriction2)
-            (?individual2 rdf:type meta:OptimalCondition)
-            (?individual2 ssn:forProperty ?property)
-            (?individual2 rdf:type ?bNode1_2)
-            (?bNode1_2 owl:onProperty meta:hasValueConstraint)
-            (?bNode1_2 owl:onDataRange ?bNode2_2)
-            (?bNode2_2 owl:withRestrictions ?bNode3_2)
-            (?bNode3_2 rdf:first ?restriction3)
-            (?bNode3_2 rdf:rest ?bNode4_2)
-            (?bNode4_2 rdf:first ?restriction4)
-            ->  (?restriction1 rdf:comment "verification mark")
-                (?restriction2 rdf:comment "verification mark")
-                (?restriction3 rdf:comment "verification mark")
-                (?restriction4 rdf:comment "verification mark")
+// These check for conjunctive Conditions, such as >15 and <22.
+[ruleVer9:  (?condition rdf:type meta:Condition)
+            (?condition rdf:type ?aNode1)
+            (?aNode1 owl:intersectionOf ?aList1)
+            (?aList1 rdf:first ?aNode2)
+            (?aNode2 rdf:type owl:Restriction)
+            (?aNode2 owl:hasValue ?property1)
+            (?property1 rdf:type ssn:Property)
+            (?aList1 rdf:rest ?aList2)
+            (?aList2 rdf:first ?aNode3)
+            (?aNode3 rdf:type owl:Restriction)
+            (?aNode3 owl:hasValue ?property2)
+            (?property2 rdf:type ssn:Property)
+            notEqual(?property1, ?property2)
+            ->  (?aNode2 rdf:comment ?condition)
+                (?aNode2 rdf:comment "conjunctive unverified")
+                (?aNode3 rdf:comment ?condition)
+                (?aNode3 rdf:comment "conjunctive unverified")
 ]
 
-// Checks if the marked constraints have disallowed values for '>' and '<' operators.
-[rule1k:    (?restriction1 rdf:comment ?property)
-            (?restriction1 rdf:comment "verification mark")
-            (?restriction1 xsd:minExclusive ?value1)
-            (?restriction2 rdf:comment ?property)
-            (?restriction2 rdf:comment "verification mark")
-            (?restriction2 xsd:maxExclusive ?value2)
-            notEqual(?property, "verification mark")
-            ge(?value1, ?value2)
-            ->  print()
-                print("Conflicting conditions detected!")
-                print("Conditions for", ?property, "are >", ?value1, "and <", ?value2, "at the same time.")
-                print()
+[ruleVer10: (?condition rdf:type meta:OptimalCondition)
+            (?condition rdf:type ?aNode1)
+            (?aNode1 owl:intersectionOf ?aList1)
+            (?aList1 rdf:first ?aNode2)
+            (?aNode2 rdf:type owl:Restriction)
+            (?aNode2 owl:hasValue ?property1)
+            (?property1 rdf:type ssn:Property)
+            (?aList1 rdf:rest ?aList2)
+            (?aList2 rdf:first ?aNode3)
+            (?aNode3 rdf:type owl:Restriction)
+            (?aNode3 owl:hasValue ?property2)
+            (?property2 rdf:type ssn:Property)
+            notEqual(?property1, ?property2)
+            ->  (?aNode2 rdf:comment ?condition)
+                (?aNode2 rdf:comment "conjunctive unverified")
+                (?aNode3 rdf:comment ?condition)
+                (?aNode3 rdf:comment "conjunctive unverified")
 ]
 
-// Checks if the marked constraints have disallowed values for '>=' and '<' operators.
-[rule1l:    (?restriction1 rdf:comment ?property)
-            (?restriction1 rdf:comment "verification mark")
-            (?restriction1 xsd:minInclusive ?value1)
-            (?restriction2 rdf:comment ?property)
-            (?restriction2 rdf:comment "verification mark")
-            (?restriction2 xsd:maxExclusive ?value2)
-            notEqual(?property, "verification mark")
-            ge(?value1, ?value2)
-            ->  print()
-                print("Conflicting conditions detected!")
-                print("Conditions for", ?property, "are >=", ?value1, "and <", ?value2, "at the same time.")
-                print()
-]
-
-// Checks if the marked constraints have disallowed values for '>' and '<=' operators.
-[rule1m:    (?restriction1 rdf:comment ?property)
-            (?restriction1 rdf:comment "verification mark")
-            (?restriction1 xsd:minExclusive ?value1)
-            (?restriction2 rdf:comment ?property)
-            (?restriction2 rdf:comment "verification mark")
-            (?restriction2 xsd:maxInclusive ?value2)
-            notEqual(?property, "verification mark")
-            ge(?value1, ?value2)
-            ->  print()
-                print("Conflicting conditions detected!")
-                print("Conditions for", ?property, "are >", ?value1, "and <=", ?value2, "at the same time.")
-                print()
-]
-
-// Checks if the marked constraints have disallowed values for '>=' and '<=' operators.
-[rule1n:    (?restriction1 rdf:comment ?property)
-            (?restriction1 rdf:comment "verification mark")
-            (?restriction1 xsd:minInclusive ?value1)
-            (?restriction2 rdf:comment ?property)
-            (?restriction2 rdf:comment "verification mark")
-            (?restriction2 xsd:maxInclusive ?value2)
-            notEqual(?property, "verification mark")
-            greaterThan(?value1, ?value2)
-            ->  print()
-                print("Conflicting conditions detected!")
-                print("Conditions for", ?property, "are >=", ?value1, "and <=", ?value2, "at the same time.")
-                print()
-]
+// TODO:
+// check for single constraint conditions being useless or conflicting
+// check for double + single constraint conditions being useless or conflicting
+// check for double + double constraint conditions being useless or conflicting
+// this should be done in the same fashion as before where we check for different types of conditions and mark them
+// then, for every mark, we check different kinds of uselessness/conflicts

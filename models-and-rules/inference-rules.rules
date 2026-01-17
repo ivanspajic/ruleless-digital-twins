@@ -10,6 +10,10 @@
 // The following rules cover individuals with one or two value constraints. Once an OptimalCondition constraint has been located,
 // a mark will be placed to allow subsequent rules to match and fire.
 
+[rule1a:    (?optimalCondition rdf:type meta:OptimalCondition)
+            ->  (?optimalCondition rdf:type meta:Condition)
+]
+
 [rule1a:    (?platform rdf:type sosa:Platform)
             (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
             (?individual rdf:type meta:OptimalCondition)

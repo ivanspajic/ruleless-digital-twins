@@ -7,144 +7,25 @@
 
 
 
-// The following rules cover individuals with one or two value constraints. Once an OptimalCondition constraint has been located,
-// a mark will be placed to allow subsequent rules to match and fire.
-
+// For performance reasons, we`re not making an intermediate OWL inference step. At times, these might be necessary to reduce
+// rule writing, so we make a manual inference saying OptimalCondition (subclass) individuals are also of type Condition (superclass). 
 [rule1a:    (?optimalCondition rdf:type meta:OptimalCondition)
             ->  (?optimalCondition rdf:type meta:Condition)
 ]
 
-[rule1a:    (?platform rdf:type sosa:Platform)
+
+
+// Upon locating the marks for Condition constraints, these rules find the relevant PropertyChanges and use them as a temporary mark
+// for subsequent rules.
+
+[rule2a:    (?platform rdf:type sosa:Platform)
             (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?individual rdf:type meta:OptimalCondition)
-            (?individual ssn:forProperty ?property)
-            (?individual rdf:type ?bNode1)
-            (?bNode1 owl:onDataRange ?bNode2)
-            (?bNode2 owl:withRestrictions ?bNode3)
-            (?bNode3 rdf:first ?restriction)
-            ->  (?restriction rdf:comment ?property)
+            (?aNode :withConditionProperty ?conditionProperty)
+            (?aNode :withCheck "conjunction")
 ]
 
-[rule1b:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?individual rdf:type meta:OptimalCondition)
-            (?individual ssn:forProperty ?property)
-            (?individual rdf:type ?bNode1)
-            (?bNode1 owl:onDataRange ?bNode2)
-            (?bNode2 owl:withRestrictions ?bNode3)
-            (?bNode3 rdf:rest ?bNode4)
-            (?bNode4 rdf:first ?restriction)
-            ->  (?restriction rdf:comment ?property)
-]
-
-// These rules support disjunctive constraint definitions in OptimalConditions. E.g., (>15, <=20) or (>=24, <35). Such definitions
-// cover cases whose Property values might fit in disjoint ranges. Currently, only 2 constraints are supported, but it is naturally
-// possible to support more.
-
-[rule1c:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?individual rdf:type meta:OptimalCondition)
-            (?individual ssn:forProperty ?property)
-            (?individual rdf:type ?bNode1)
-            (?bNode1 owl:onDataRange ?bNode2)
-            (?bNode2 owl:unionOf ?bNode3)
-            (?bNode3 rdf:first ?bNode4)
-            (?bNode4 owl:withRestrictions ?bNode5)
-            (?bNode5 rdf:first ?restriction)
-            ->  (?restriction rdf:comment ?property)
-]
-
-[rule1d:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?individual rdf:type meta:OptimalCondition)
-            (?individual ssn:forProperty ?property)
-            (?individual rdf:type ?bNode1)
-            (?bNode1 owl:onDataRange ?bNode2)
-            (?bNode2 owl:unionOf ?bNode3)
-            (?bNode3 rdf:first ?bNode4)
-            (?bNode4 owl:withRestrictions ?bNode5)
-            (?bNode5 rdf:rest ?bNode6)
-            (?bNode6 rdf:first ?restriction)
-            ->  (?restriction rdf:comment ?property)
-]
-
-[rule1e:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?individual rdf:type meta:OptimalCondition)
-            (?individual ssn:forProperty ?property)
-            (?individual rdf:type ?bNode1)
-            (?bNode1 owl:onDataRange ?bNode2)
-            (?bNode2 owl:unionOf ?bNode3)
-            (?bNode3 rdf:rest ?bNode4)
-            (?bNode4 rdf:first ?bNode5)
-            (?bNode5 owl:withRestrictions ?bNode6)
-            (?bNode6 rdf:first ?restriction)
-            ->  (?restriction rdf:comment ?property)
-]
-
-[rule1f:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?individual rdf:type meta:OptimalCondition)
-            (?individual ssn:forProperty ?property)
-            (?individual rdf:type ?bNode1)
-            (?bNode1 owl:onDataRange ?bNode2)
-            (?bNode2 owl:unionOf ?bNode3)
-            (?bNode3 rdf:rest ?bNode4)
-            (?bNode4 rdf:first ?bNode5)
-            (?bNode5 owl:withRestrictions ?bNode6)
-            (?bNode6 rdf:rest ?bNode7)
-            (?bNode7 rdf:first ?restriction)
-            ->  (?restriction rdf:comment ?property)
-]
-
-
-
-// Upon locating the marks for OptimalCondition constraints or optimization targets, these rules find the relevant PropertyChanges and use
-// them for a temporary mark.
-
-[rule2a:    (?restriction rdf:comment ?property)
-            (?property rdf:type ?bNode)
-            (?bNode owl:onProperty meta:hasValue)
-            (?bNode owl:hasValue ?propertyValue)
-            (?propertyChange ssn:forProperty ?property)
-            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
-            (?restriction xsd:minExclusive ?restrictionValue)
-            le(?propertyValue, ?restrictionValue)
-            ->  (_: rdf:comment ?propertyChange)
-]
-
-[rule2b:    (?restriction rdf:comment ?property)
-            (?property rdf:type ?bNode)
-            (?bNode owl:onProperty meta:hasValue)
-            (?bNode owl:hasValue ?propertyValue)
-            (?propertyChange ssn:forProperty ?property)
-            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
-            (?restriction xsd:minInclusive ?restrictionValue)
-            lessThan(?propertyValue, ?restrictionValue)
-            ->  (_: rdf:comment ?propertyChange)
-]
-
-[rule2c:    (?restriction rdf:comment ?property)
-            (?property rdf:type ?bNode)
-            (?bNode owl:onProperty meta:hasValue)
-            (?bNode owl:hasValue ?propertyValue)
-            (?propertyChange ssn:forProperty ?property)
-            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
-            (?restriction xsd:maxExclusive ?restrictionValue)
-            ge(?propertyValue, ?restrictionValue)
-            ->  (_: rdf:comment ?propertyChange)
-]
-
-[rule2d:    (?restriction rdf:comment ?property)
-            (?property rdf:type ?bNode)
-            (?bNode owl:onProperty meta:hasValue)
-            (?bNode owl:hasValue ?propertyValue)
-            (?propertyChange ssn:forProperty ?property)
-            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
-            (?restriction xsd:maxInclusive ?restrictionValue)
-            greaterThan(?propertyValue, ?restrictionValue)
-            ->  (_: rdf:comment ?propertyChange)
-]
+// TODO:
+// finish rules for inferring propertychanges out of all valid setups
 
 
 
@@ -152,7 +33,7 @@
 // concatinations are used for generating unique names for unique combinations of elements in an Action. This ensures that no duplicate Actions
 // are generated in cases of, e.g., multiple actuators causing multiple different PropertyChanges.
 
-[rule3a:   (?thing rdf:comment ?propertyChange)
+[rule3a:   (?thing :withPropertyChange ?propertyChange)
            (?actuator meta:enacts ?propertyChange)
            (?actuator rdf:type sosa:Actuator)
            (?actuator meta:hasActuatorState ?actuatorState)
@@ -165,7 +46,7 @@
                print()
 ]
 
-[rule3b:   (?thing rdf:comment ?propertyChange)
+[rule3b:   (?thing :withPropertyChange ?propertyChange)
            (?configurableParameter meta:enacts ?propertyChange)
            (?configurableParameter rdf:type meta:ConfigurableParameter)
            (?configurableParameter meta:hasPossibleValue ?configurableParameterValue)

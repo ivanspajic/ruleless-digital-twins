@@ -6,22 +6,12 @@ PREFIX xml:  <http://www.w3.org/XML/1998/namespace>
 PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
 
 :OptimalCondition1  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Condition> , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:NamedIndividual;
-        rdf:type  [ rdf:type     owl:Class;
-                    owl:unionOf  ( [ rdf:type                owl:Restriction;
-                                     :withCheck              "property" , "operator" , "disjunction";
-                                     :withCondition          :OptimalCondition1;
-                                     :withConditionProperty  :RoomTemperature;
-                                     owl:hasValue            :RoomTemperatureUpperLimit;
-                                     owl:onProperty          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo>
-                                   ]
-                                   [ rdf:type                owl:Restriction;
-                                     :withCheck              "property" , "operator" , "disjunction";
-                                     :withCondition          :OptimalCondition1;
-                                     :withConditionProperty  :RoomTemperature;
-                                     owl:hasValue            :RoomTemperatureUpperLimit;
-                                     owl:onProperty          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo>
-                                   ]
-                                 )
+        rdf:type  [ rdf:type                owl:Restriction;
+                    :withCheck              "property" , "operator";
+                    :withCondition          :OptimalCondition1;
+                    :withConditionProperty  :RoomTemperature;
+                    owl:hasValue            :TestProp;
+                    owl:onProperty          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/equalTo>
                   ];
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>
                 "3600"^^xsd:int;
@@ -29,21 +19,29 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
                 :RoomTemperature .
 
 :OptimalCondition2  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Condition> , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:NamedIndividual;
-        rdf:type  [ rdf:type                owl:Restriction;
-                    :withCheck              "property" , "operator";
-                    :withCondition          :OptimalCondition2;
-                    :withConditionProperty  :RoomTemperature;
-                    owl:hasValue            :RoomTemperatureUpperLimit;
-                    owl:onProperty          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThan>
+        rdf:type  [ rdf:type            owl:Class;
+                    owl:intersectionOf  ( [ rdf:type                owl:Restriction;
+                                            :withCheck              "property" , "operator" , "conjunction";
+                                            :withCondition          :OptimalCondition2;
+                                            :withConditionProperty  :RoomTemperature;
+                                            :withIdentifier         _:b0;
+                                            owl:hasValue            :RoomTemperatureLowerLimit;
+                                            owl:onProperty          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThan>
+                                          ]
+                                          [ rdf:type                owl:Restriction;
+                                            :withCheck              "property" , "operator" , "conjunction";
+                                            :withCondition          :OptimalCondition2;
+                                            :withConditionProperty  :RoomTemperature;
+                                            :withIdentifier         _:b0;
+                                            owl:hasValue            :RoomTemperatureUpperLimit;
+                                            owl:onProperty          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThan>
+                                          ]
+                                        )
                   ];
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>
                 "3600"^^xsd:int;
         <http://www.w3.org/ns/ssn/forProperty>
                 :RoomTemperature .
-
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
-[ xsd:minExclusive  "10.1"^^xsd:double ] .
 
 :HumiditySensorMeasuredHumidity
         rdf:type  <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual;
@@ -52,7 +50,7 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
                     owl:onProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                   ] .
 
-[ xsd:maxExclusive  "30.2"^^xsd:double ] .
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
 :RoomTemperatureIncrease
         rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> , owl:NamedIndividual;
@@ -74,8 +72,6 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
         <http://www.w3.org/ns/ssn/hasOutput>
                 :IncreasedTemperature .
 
-[ xsd:maxExclusive  "30.2"^^xsd:double ] .
-
 :RoomTemperature  rdf:type  <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "16.746512725848774"^^xsd:double .
@@ -83,11 +79,11 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
 owl:qualifiedCardinality
         rdf:type  owl:AnnotationProperty .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
-[ xsd:minExclusive  "10.1"^^xsd:double ] .
+[ xsd:maxInclusive  "28.5"^^xsd:double ] .
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+[ xsd:minInclusive  "27.5"^^xsd:double ] .
 
 :EnergyConsumptionMeterProcedure
         rdf:type  <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual;
@@ -99,10 +95,6 @@ owl:qualifiedCardinality
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "32.5"^^xsd:double .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
-[ xsd:maxInclusive  "28.5"^^xsd:double ] .
-
 :TemperatureSensor1MeasuredTemperature
         rdf:type  <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Input> , owl:NamedIndividual;
         rdf:type  [ rdf:type        owl:Restriction;
@@ -113,8 +105,6 @@ owl:qualifiedCardinality
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasModel>
         rdf:type  owl:AnnotationProperty .
 
-[ xsd:maxInclusive  "28.5"^^xsd:double ] .
-
 :EnergyConsumption  rdf:type  <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual;
         rdf:type  [ rdf:type        owl:Restriction;
                     owl:hasValue    "0.0"^^xsd:double;
@@ -123,8 +113,6 @@ owl:qualifiedCardinality
 
 <http://www.w3.org/ns/sosa/observes>
         rdf:type  owl:AnnotationProperty .
-
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
@@ -141,16 +129,20 @@ owl:qualifiedCardinality
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
                 "2"^^xsd:int , "1"^^xsd:int , "0"^^xsd:int .
 
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
 :TemperatureSensor1  rdf:type  <http://www.w3.org/ns/sosa/Sensor> , owl:NamedIndividual;
         <http://www.w3.org/ns/sosa/observes>
                 :RoomTemperature;
         <http://www.w3.org/ns/ssn/implements>
                 :TemperatureSensor1Procedure .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+[ xsd:maxExclusive  "30.2"^^xsd:double ] .
 
 <http://www.w3.org/ns/ssn/hasOutput>
         rdf:type  owl:AnnotationProperty .
+
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
 :RoomTemperatureDecrease
         rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> , owl:NamedIndividual;
@@ -166,7 +158,7 @@ owl:qualifiedCardinality
                     owl:onProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                   ] .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+[ xsd:minInclusive  "27.5"^^xsd:double ] .
 
 :EnergyConsumptionMeter
         rdf:type  <http://www.w3.org/ns/sosa/Sensor> , owl:NamedIndividual;
@@ -174,6 +166,8 @@ owl:qualifiedCardinality
                 :EnergyConsumption;
         <http://www.w3.org/ns/ssn/implements>
                 :EnergyConsumptionMeterProcedure .
+
+[ xsd:minExclusive  "10.1"^^xsd:double ] .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>
         rdf:type  owl:AnnotationProperty .
@@ -187,6 +181,10 @@ owl:qualifiedCardinality
         rdf:type     owl:Ontology;
         owl:imports  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins> .
 
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
 :AverageTemperatureSoftSensor
         rdf:type  <http://www.w3.org/ns/sosa/Sensor> , owl:NamedIndividual;
         <http://www.w3.org/ns/ssn/implements>
@@ -198,7 +196,13 @@ owl:qualifiedCardinality
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
                 "1"^^xsd:int , "0"^^xsd:int .
 
-[ xsd:minExclusive  "10.1"^^xsd:double ] .
+[ xsd:maxExclusive  "30.2"^^xsd:double ] .
+
+[ xsd:maxInclusive  "28.5"^^xsd:double ] .
+
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
 :RoomHumidity  rdf:type  <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual;
         rdf:type  [ rdf:type        owl:Restriction;
@@ -213,12 +217,16 @@ owl:qualifiedCardinality
                     owl:onProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                   ] .
 
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
 :RoomHumidityDecrease
         rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith>
                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
         <http://www.w3.org/ns/ssn/forProperty>
                 :RoomHumidity .
+
+[ xsd:maxExclusive  "30.2"^^xsd:double ] .
 
 :RoomTemperatureLowerLimit
         rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
@@ -230,7 +238,11 @@ owl:qualifiedCardinality
         <http://www.w3.org/ns/ssn/implements>
                 :DecreaseTemperatureSoftSensorProcedure .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+:TestProp  rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "12.9"^^xsd:double;
+        <http://www.w3.org/ns/ssn/forProperty>
+                :RoomTemperature .
 
 :TemperatureSensor2Procedure
         rdf:type  <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual;
@@ -254,7 +266,7 @@ owl:qualifiedCardinality
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI>
                 "roomM370.fmu"^^xsd:anyURI .
 
-[ xsd:minInclusive  "27.5"^^xsd:double ] .
+[ xsd:minExclusive  "10.1"^^xsd:double ] .
 
 :DecreasedTemperature
         rdf:type  <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Input> , owl:NamedIndividual;
@@ -263,13 +275,13 @@ owl:qualifiedCardinality
                     owl:onProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                   ] .
 
+[ xsd:minExclusive  "10.1"^^xsd:double ] .
+
 <http://www.w3.org/ns/ssn/forProperty>
         rdf:type  owl:AnnotationProperty .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor>
         rdf:type  owl:AnnotationProperty .
-
-[ xsd:minInclusive  "1"^^xsd:int ] .
 
 <http://www.w3.org/ns/sosa/hosts>
         rdf:type  owl:AnnotationProperty .
@@ -281,9 +293,11 @@ owl:qualifiedCardinality
         <http://www.w3.org/ns/ssn/hasOutput>
                 :DecreasedTemperature .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+[ xsd:maxInclusive  "3"^^xsd:int ] .
 
 xsd:minInclusive  rdf:type  owl:AnnotationProperty .
+
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
 :AverageTemperatureSoftSensorProcedure
         rdf:type  <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual;
@@ -310,24 +324,22 @@ xsd:minInclusive  rdf:type  owl:AnnotationProperty .
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
                 "1"^^xsd:int , "0"^^xsd:int .
 
-[ xsd:maxInclusive  "3"^^xsd:int ] .
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
 xsd:maxInclusive  rdf:type  owl:AnnotationProperty .
-
-[ xsd:minInclusive  "27.5"^^xsd:double ] .
 
 :HumiditySensorProcedure
         rdf:type  <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual;
         <http://www.w3.org/ns/ssn/hasOutput>
                 :HumiditySensorMeasuredHumidity .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
 :AverageTemperature  rdf:type  <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual;
         rdf:type  [ rdf:type        owl:Restriction;
                     owl:hasValue    "16.746512725848774"^^xsd:double;
                     owl:onProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                   ] .
+
+[ xsd:minInclusive  "1"^^xsd:int ] .
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
@@ -349,10 +361,6 @@ xsd:minExclusive  rdf:type  owl:AnnotationProperty .
                 :TemperatureSensor2Procedure .
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
-[ xsd:maxExclusive  "30.2"^^xsd:double ] .
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 

@@ -26,26 +26,17 @@ public class App
     	
     	Model myOntology = RDFDataMgr.loadModel(ontologyFilePath);
     	Model instanceModel = RDFDataMgr.loadModel(instanceModelFilePath);
-    	
     	List ruleList = Rule.rulesFromURL(ruleModelFilePath);
+    	
+    	System.out.println();
+    	
     	GenericRuleReasoner ruleReasoner = new GenericRuleReasoner(ruleList);
-    	ruleReasoner.setDerivationLogging(true);
     	InfModel finalInferredModel = ModelFactory.createInfModel(ruleReasoner, instanceModel);
     	
-    	// Validation example from the Apache Jena website.
-    	ValidityReport validityReport = finalInferredModel.validate();
-    	if (validityReport.isValid()) {
-    	    System.out.println("The model is valid.");
-    	} else {
-    	    System.out.println("Inconsistencies detected!");
-    	    for (Iterator i = validityReport.getReports(); i.hasNext(); ) {
-    	        System.out.println(" - " + i.next());
-    	    }
-    	}
-    	
-    	FileOutputStream fileOutputStream = new FileOutputStream(inferredModelFilePath);
+    	FileOutputStream fileOutputStream = new FileOutputStream(inferredModelFilePath);    	
     	RDFDataMgr.write(fileOutputStream, finalInferredModel, Lang.TTL);
     	
+    	System.out.println();
     	System.out.println("Generated the inferred model.");
     }
 }

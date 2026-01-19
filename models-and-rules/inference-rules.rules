@@ -18,14 +18,29 @@
 // Upon locating the marks for Condition constraints, these rules find the relevant PropertyChanges and use them as a temporary mark
 // for subsequent rules.
 
-[rule2a:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+[rule1b:    (?aNode :withCondition ?condition)
             (?aNode :withConditionProperty ?conditionProperty)
-            (?aNode :withCheck "conjunction")
+            (?conditionProperty meta:hasValue ?conditionPropertyValue)
+            (?aNode owl:hasValue ?boundProperty)
+            (?boundProperty meta:hasValue ?boundPropertyValue)
+            (?aNode owl:onProperty ?operator)
+            noValue(?aNode :withCheck "conjunction")
+            equal(?operator, meta:equalTo)
+            ->  print(?conditionPropertyValue)
+                print(?boundPropertyValue)
 ]
 
-// TODO:
-// finish rules for inferring propertychanges out of all valid setups
+// single constraint, no conjunction (disjunctive constraints can be treated as single here) markers
+// conjunctive constraint, equal to and equal to different bounds
+// conjunctive constraint, equal to and equal to the same bound, only if values in valid ranges
+// conjunctive constraint, equal to and less than or equal to different bounds
+// conjunctive constraint, equal to and less than or equal to the same bound, only if values in valid ranges
+// conjunctive constraint, equal to and greater than or equal to different bounds
+// conjunctive constraint, equal to and greater than or equal to the same bound, only if values in valid ranges
+// conjunctive constraint, greater than and less than different bounds, only if values in valid ranges
+// conjunctive constraint, greater than and less than or equal to different bounds, only if values in valid ranges
+// conjunctive constraint, greater than or equal to and less than different bounds, only if values in valid ranges
+// conjunctive constraint, greater than or equal to and less than or equal to bounds, only if values in valid ranges
 
 
 

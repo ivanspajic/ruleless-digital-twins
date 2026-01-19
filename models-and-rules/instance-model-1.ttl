@@ -251,16 +251,9 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition1
 :OptimalCondition1 rdf:type owl:NamedIndividual ,
                             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> ,
-                            [ rdf:type owl:Class ;
-                              owl:unionOf ( [ rdf:type owl:Restriction ;
-                                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo> ;
-                                              owl:hasValue :RoomTemperatureUpperLimit
-                                            ]
-                                            [ rdf:type owl:Restriction ;
-                                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo> ;
-                                              owl:hasValue :RoomTemperatureUpperLimit
-                                            ]
-                                          )
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/equalTo> ;
+                              owl:hasValue :TestProp
                             ] ;
                    <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
                    <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> "3600"^^xsd:int .
@@ -269,9 +262,16 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition2
 :OptimalCondition2 rdf:type owl:NamedIndividual ,
                             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> ,
-                            [ rdf:type owl:Restriction ;
-                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThan> ;
-                              owl:hasValue :RoomTemperatureUpperLimit
+                            [ owl:intersectionOf ( [ rdf:type owl:Restriction ;
+                                                     owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThan> ;
+                                                     owl:hasValue :RoomTemperatureLowerLimit
+                                                   ]
+                                                   [ rdf:type owl:Restriction ;
+                                                     owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThan> ;
+                                                     owl:hasValue :RoomTemperatureUpperLimit
+                                                   ]
+                                                 ) ;
+                              rdf:type owl:Class
                             ] ;
                    <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
                    <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> "3600"^^xsd:int .
@@ -398,50 +398,15 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                              <http://www.w3.org/ns/ssn/hasOutput> :TemperatureSensor2MeasuredTemperature .
 
 
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
-] .
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TestProp
+:TestProp rdf:type owl:NamedIndividual ,
+                   <http://www.w3.org/ns/ssn/Property> ;
+          <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
+          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "12.9"^^xsd:double .
 
-[ xsd:minExclusive "10.1"^^xsd:double
- ] .
-
-[ xsd:maxExclusive "30.2"^^xsd:double
- ] .
 
 [ xsd:maxInclusive "28.5"^^xsd:double
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ xsd:maxExclusive "30.2"^^xsd:double
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ xsd:minExclusive "10.1"^^xsd:double
- ] .
-
-[ xsd:minInclusive "27.5"^^xsd:double
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ xsd:maxExclusive "30.2"^^xsd:double
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
+] .
 
 [ xsd:minInclusive "27.5"^^xsd:double
  ] .
@@ -464,16 +429,25 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 [ xsd:maxInclusive "3"^^xsd:int
  ] .
 
-[ xsd:minInclusive "1"^^xsd:int
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ xsd:minExclusive "10.1"^^xsd:double
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ xsd:minInclusive "1"^^xsd:int
  ] .
 
 [ xsd:maxInclusive "28.5"^^xsd:double
  ] .
 
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+[ xsd:maxExclusive "30.2"^^xsd:double
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
@@ -483,6 +457,39 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ xsd:maxExclusive "30.2"^^xsd:double
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ xsd:minInclusive "27.5"^^xsd:double
+ ] .
+
+[ xsd:minExclusive "10.1"^^xsd:double
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ xsd:maxExclusive "30.2"^^xsd:double
  ] .
 
 ###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

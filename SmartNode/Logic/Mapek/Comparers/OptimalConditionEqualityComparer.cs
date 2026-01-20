@@ -2,8 +2,8 @@
 using System.Diagnostics.CodeAnalysis;
 
 namespace Logic.Mapek.Comparers {
-    internal class OptimalConditionEqualityComparer : IEqualityComparer<OptimalCondition> {
-        public bool Equals(OptimalCondition? x, OptimalCondition? y) {
+    internal class OptimalConditionEqualityComparer : IEqualityComparer<Condition> {
+        public bool Equals(Condition? x, Condition? y) {
             return x!.Name.Equals(y!.Name) &&
                 x.Property.Equals(y.Property) &&
                 x.ConstraintValueType.Equals(y.ConstraintValueType) &&
@@ -12,7 +12,7 @@ namespace Logic.Mapek.Comparers {
                 x.Constraints.SequenceEqual(y.Constraints, new ConstraintExpressionEqualityComparer());
         }
 
-        public int GetHashCode([DisallowNull] OptimalCondition obj) {
+        public int GetHashCode([DisallowNull] Condition obj) {
             return obj.GetHashCode() *
                 obj.Property.GetHashCode() *
                 obj.ConstraintValueType.GetHashCode() *

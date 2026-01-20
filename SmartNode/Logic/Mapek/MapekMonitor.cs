@@ -27,7 +27,7 @@ namespace Logic.Mapek {
                     ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
                 },
                 SoftSensorTreeNodes = new List<SoftSensorTreeNode>(),
-                OptimalConditions = new List<OptimalCondition>()
+                OptimalConditions = new List<Condition>()
             };
 
             // Get the values of all ConfigurableParameters and populate the cache.

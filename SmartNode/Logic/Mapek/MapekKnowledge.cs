@@ -259,8 +259,8 @@ namespace Logic.Mapek {
             }
         }
 
-        public IEnumerable<OptimalCondition> GetAllOptimalConditions(PropertyCache propertyCache) {
-            var optimalConditions = new List<OptimalCondition>();
+        public IEnumerable<Condition> GetAllOptimalConditions(PropertyCache propertyCache) {
+            var optimalConditions = new List<Condition>();
 
             var query = GetParameterizedStringQuery(@"SELECT ?optimalCondition ?property ?reachedInMaximumSeconds WHERE {
                 ?optimalCondition rdf:type meta:OptimalCondition .
@@ -293,7 +293,7 @@ namespace Logic.Mapek {
                 var constraints = GetOptimalConditionConstraints(optimalConditionNode, propertyNode, reachedInMaximumSeconds) ??
                     throw new Exception($"OptimalCondition {optimalConditionNode.ToString()} has no constraints.");
 
-                var optimalCondition = new OptimalCondition() {
+                var optimalCondition = new Condition() {
                     Constraints = constraints,
                     ConstraintValueType = property.OwlType,
                     Name = optimalConditionNode.ToString(),

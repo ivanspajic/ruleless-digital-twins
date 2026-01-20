@@ -21,6 +21,6 @@ namespace Logic.Mapek {
         public void LoadModelsFromKnowledgeBase();
 
         public void UpdateModel(SparqlParameterizedString query);
-        IEnumerable<OptimalCondition> GetAllOptimalConditions(PropertyCache propertyCache);
+        IEnumerable<Condition> GetAllOptimalConditions(PropertyCache propertyCache);
     }
 }

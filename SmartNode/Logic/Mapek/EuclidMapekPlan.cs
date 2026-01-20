@@ -12,12 +12,12 @@ namespace Logic.Mapek {
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
         protected override SimulationPath GetOptimalSimulationPath(PropertyCache propertyCache,
-                IEnumerable<OptimalCondition> optimalConditions,
+                IEnumerable<Condition> optimalConditions,
                 IEnumerable<SimulationPath> simulationPaths) {
             return GetOptimalSimulationPathsEuclidian(simulationPaths, optimalConditions).First().Item1;
         }
 
-        internal IEnumerable<(SimulationPath, double)>? GetOptimalSimulationPathsEuclidian(IEnumerable<SimulationPath> simulationPaths, IEnumerable<OptimalCondition> optimalConditions) {
+        internal IEnumerable<(SimulationPath, double)>? GetOptimalSimulationPathsEuclidian(IEnumerable<SimulationPath> simulationPaths, IEnumerable<Condition> optimalConditions) {
             var pathXdists = simulationPaths.Select(sp => {
                 // We only look into the final state of the simulation:
                 var lastPC = sp.Simulations.Last().PropertyCache;

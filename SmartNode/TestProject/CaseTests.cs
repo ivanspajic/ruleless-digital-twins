@@ -97,8 +97,8 @@ namespace TestProject {
                     Value = 12
                 }
             };
-            var quantizedOptimalConditions = new List<OptimalCondition> {
-                new OptimalCondition {
+            var quantizedOptimalConditions = new List<Condition> {
+                new Condition {
                     Name = "FakeOptimalCondition1",
                     ReachedInMaximumSeconds = 0,
                     Property = "FakeProperty1",
@@ -111,7 +111,7 @@ namespace TestProject {
                         }
                     }
                 },
-                new OptimalCondition {
+                new Condition {
                     Name = "FakeOptimalCondition2",
                     ReachedInMaximumSeconds = 0,
                     Property = "FakeProperty2",
@@ -134,8 +134,8 @@ namespace TestProject {
                 LookAheadCycles = 2,
                 SimulationDurationSeconds = 100,
                 Simulation = simulationPath.Simulations.First(),
-                QuantizedOptimalConditions = new List<OptimalCondition> {
-                    new OptimalCondition {
+                QuantizedOptimalConditions = new List<Condition> {
+                    new Condition {
                         Name = "FakeOptimalCondition1",
                         ReachedInMaximumSeconds = 0,
                         Property = "FakeProperty1",
@@ -148,7 +148,7 @@ namespace TestProject {
                             }
                         }
                     },
-                    new OptimalCondition {
+                    new Condition {
                         Name = "FakeOptimalCondition2",
                         ReachedInMaximumSeconds = 0,
                         Property = "FakeProperty2",
@@ -181,8 +181,8 @@ namespace TestProject {
                 LookAheadCycles = 2,
                 SimulationDurationSeconds = 150,
                 Simulation = simulationPath.Simulations.First(),
-                QuantizedOptimalConditions = new List<OptimalCondition> {
-                    new OptimalCondition {
+                QuantizedOptimalConditions = new List<Condition> {
+                    new Condition {
                         Name = "FakeOptimalCondition1",
                         ReachedInMaximumSeconds = 0,
                         Property = "FakeProperty3",
@@ -195,7 +195,7 @@ namespace TestProject {
                             }
                         }
                     },
-                    new OptimalCondition {
+                    new Condition {
                         Name = "FakeOptimalCondition2",
                         ReachedInMaximumSeconds = 0,
                         Property = "FakeProperty2",
@@ -247,8 +247,8 @@ namespace TestProject {
             // Arrange
             // Set up all the DTOs.
             var observedCacheMock = new Cache {
-                OptimalConditions = new List<OptimalCondition> {
-                    new OptimalCondition {
+                OptimalConditions = new List<Condition> {
+                    new Condition {
                         Name = "FakeOptimalCondition1",
                         ReachedInMaximumSeconds = 0,
                         Property = "FakeProperty1",
@@ -261,7 +261,7 @@ namespace TestProject {
                             }
                         }
                     },
-                    new OptimalCondition {
+                    new Condition {
                         Name = "FakeOptimalCondition2",
                         ReachedInMaximumSeconds = 0,
                         Property = "FakeProperty2",
@@ -421,8 +421,8 @@ namespace TestProject {
                 LookAheadCycles = 2,
                 SimulationDurationSeconds = 100,
                 Simulation = simulationPath.Simulations.First(),
-                QuantizedOptimalConditions = new List<OptimalCondition> {
-                    new OptimalCondition {
+                QuantizedOptimalConditions = new List<Condition> {
+                    new Condition {
                         Name = "FakeOptimalCondition1",
                         ReachedInMaximumSeconds = 0,
                         Property = "FakeProperty1",
@@ -435,7 +435,7 @@ namespace TestProject {
                             }
                         }
                     },
-                    new OptimalCondition {
+                    new Condition {
                         Name = "FakeOptimalCondition2",
                         ReachedInMaximumSeconds = 0,
                         Property = "FakeProperty2",

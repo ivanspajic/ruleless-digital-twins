@@ -9,7 +9,7 @@ namespace Logic.Models.DatabaseModels {
 
         public required IEnumerable<Property> QuantizedProperties { get; set; }
 
-        public required IEnumerable<OptimalCondition> QuantizedOptimalConditions { get; set; }
+        public required IEnumerable<Condition> QuantizedOptimalConditions { get; set; }
 
         public int LookAheadCycles { get; set; }
 

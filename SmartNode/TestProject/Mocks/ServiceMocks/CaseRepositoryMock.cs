@@ -15,7 +15,7 @@ namespace TestProject.Mocks.ServiceMocks {
         }
 
         public Case ReadCase(IEnumerable<Property> quantizedProperties,
-            IEnumerable<OptimalCondition> quantizedOptimalConditions,
+            IEnumerable<Condition> quantizedOptimalConditions,
             int lookAheadCycles,
             int simulationDurationSeconds,
             int index) {

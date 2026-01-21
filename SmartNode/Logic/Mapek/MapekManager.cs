@@ -205,8 +205,8 @@ namespace Logic.Mapek {
             return quantizedProperties;
         }
 
-        private List<OptimalCondition> GetQuantizedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions) {
-            var quantizedOptimalConditions = new List<OptimalCondition>();
+        private List<Condition> GetQuantizedOptimalConditions(IEnumerable<Condition> optimalConditions) {
+            var quantizedOptimalConditions = new List<Condition>();
 
             foreach (var optimalCondition in optimalConditions) {
                 var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.ConstraintValueType);
@@ -215,7 +215,7 @@ namespace Logic.Mapek {
                     var quantizedConstraint = GetQuantizedOptimalConditionConstraint(constraint, valueHandler);
                     quantizedConstraints.Add(quantizedConstraint);
                 }
-                quantizedOptimalConditions.Add(new OptimalCondition {
+                quantizedOptimalConditions.Add(new Condition {
                     Constraints = quantizedConstraints,
                     ConstraintValueType = optimalCondition.ConstraintValueType,
                     Name = optimalCondition.Name,
@@ -246,7 +246,7 @@ namespace Logic.Mapek {
             }
         }
 
-        private SimulationPath GetSimulationPathFromSavedCases(IEnumerable<Property> quantizedProperties, IEnumerable<OptimalCondition> quantizedOptimalConditions) {
+        private SimulationPath GetSimulationPathFromSavedCases(IEnumerable<Property> quantizedProperties, IEnumerable<Condition> quantizedOptimalConditions) {
             var simulations = new List<Simulation>();
 
             for (var i = 0; i < _coordinatorSettings.LookAheadMapekCycles; i++) {
@@ -273,7 +273,7 @@ namespace Logic.Mapek {
         }
 
         private Case GetPotentialCaseFromSimulationPath(IEnumerable<Property> quantizedObservedProperties,
-            IEnumerable<OptimalCondition> quantizedObservedOptimalConditions,
+            IEnumerable<Condition> quantizedObservedOptimalConditions,
             SimulationPath simulationPath) {
             var firstSimulation = simulationPath.Simulations.First();
 

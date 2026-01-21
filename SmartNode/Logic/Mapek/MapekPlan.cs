@@ -614,7 +614,7 @@ namespace Logic.Mapek
             _logger.LogInformation("New values:\n{vals}", logMsg);   
         }
 
-        private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
+        private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<Condition> optimalConditions, PropertyCache propertyCache)
         {
             var numberOfSatisfiedOptimalConditions = 0;
 
@@ -644,7 +644,7 @@ namespace Logic.Mapek
         }
 
         protected virtual SimulationPath GetOptimalSimulationPath(PropertyCache propertyCache,
-            IEnumerable<OptimalCondition> optimalConditions,
+            IEnumerable<Condition> optimalConditions,
             IEnumerable<SimulationPath> simulationPaths)
         {
             // This method is a filter for finding the optimal simulation path. It works in a few steps of descending precedance, each of which further reduces the set of
@@ -679,7 +679,7 @@ namespace Logic.Mapek
         }
 
         private List<SimulationPath> GetSimulationPathsWithMostOptimalConditionsSatisfied(IEnumerable<SimulationPath> simulationPaths,
-            IEnumerable<OptimalCondition> optimalConditions)
+            IEnumerable<Condition> optimalConditions)
         {
             var passingSimulationPaths = new List<SimulationPath>();
             var highestNumberOfSatisfiedOptimalConditions = 0;

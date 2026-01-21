@@ -19,7 +19,7 @@ namespace TestProject {
         static bool crashed = true;
         private static MyMapekPlan _mapekPlan;
 
-        private class MyMapekPlan : MapekPlan {
+        private class MyMapekPlan : EuclidMapekPlan {
 
             public MyMapekPlan(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
@@ -93,7 +93,7 @@ namespace TestProject {
 
             Trace.WriteLine("Checking Volker's `best` solution:");
                         // We move this up here in the test since it may spam the log:
-            IEnumerable<OptimalCondition> optimalConditions = mapekKnowledge.GetAllOptimalConditions(propertyCacheMock);
+            IEnumerable<Condition> optimalConditions = mapekKnowledge.GetAllOptimalConditions(propertyCacheMock);
             Assert.NotEmpty(optimalConditions);
 
             // Note that the optimal conditions are coming from the INITIAL model, but will be evaluated in the 
@@ -144,7 +144,7 @@ namespace TestProject {
             Assert.Equal(30, simulationTree.ChildrenCount);
 
             Trace.WriteLine("Checking Volker's `best` solution:");
-            IEnumerable<OptimalCondition> optimalConditions = mapekKnowledge.GetAllOptimalConditions(cache.PropertyCache);
+            IEnumerable<Condition> optimalConditions = mapekKnowledge.GetAllOptimalConditions(cache.PropertyCache);
             Assert.NotEmpty(optimalConditions);
             var vs = mapekPlan.GetOptimalSimulationPathsEuclidian(simulationTree.SimulationPaths, optimalConditions);
             Trace.WriteLine($"{vs.Count()} solutions: {string.Join(",",vs.Select(pd => pd.Item2))}");

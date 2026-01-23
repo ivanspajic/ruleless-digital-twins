@@ -18,8 +18,7 @@ namespace Implementations.ValueHandlers
             { ConstraintType.LessThanOrEqualTo, EvaluateLessThanOrEqualTo },
         };
 
-        // In case of more ways of combining constraint propositions of OptimalConditions, this could be used to register new
-        // delegates.
+        // In case of more ways of combining constraint propositions of Conditions, this could be used to register new delegates.
         private static readonly Dictionary<ConstraintType, Func<bool, bool, bool>> _expressionCombinationDelegateMap = new()
         {
             { ConstraintType.And, EvaluateAnd },
@@ -197,24 +196,24 @@ namespace Implementations.ValueHandlers
             }
         }
 
-        private static bool EvaluateGreaterThan(double sensorValue, double optimalConditionValue)
+        private static bool EvaluateGreaterThan(double sensorValue, double conditionValue)
         {
-            return sensorValue > optimalConditionValue;
+            return sensorValue > conditionValue;
         }
 
-        private static bool EvaluateGreaterThanOrEqualTo(double sensorValue, double optimalConditionValue)
+        private static bool EvaluateGreaterThanOrEqualTo(double sensorValue, double conditionValue)
         {
-            return sensorValue >= optimalConditionValue;
+            return sensorValue >= conditionValue;
         }
 
-        private static bool EvaluateLessThan(double sensorValue, double optimalConditionValue)
+        private static bool EvaluateLessThan(double sensorValue, double conditionValue)
         {
-            return sensorValue < optimalConditionValue;
+            return sensorValue < conditionValue;
         }
 
-        private static bool EvaluateLessThanOrEqualTo(double sensorValue, double optimalConditionValue)
+        private static bool EvaluateLessThanOrEqualTo(double sensorValue, double conditionValue)
         {
-            return sensorValue <= optimalConditionValue;
+            return sensorValue <= conditionValue;
         }
 
         private static bool EvaluateAnd(bool left, bool right)

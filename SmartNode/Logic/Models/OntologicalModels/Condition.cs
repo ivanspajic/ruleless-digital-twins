@@ -2,16 +2,18 @@
 
 namespace Logic.Models.OntologicalModels
 {
-    public class OptimalCondition : NamedIndividual
+    public class Condition : NamedIndividual
     {
-        public required string Property { get; init; }
+        public required Property Property { get; init; }
 
         public required IEnumerable<ConstraintExpression> Constraints { get; init; }
 
-        public required IEnumerable<AtomicConstraintExpression> UnsatisfiedAtomicConstraints { get; set; }
-
         public int ReachedInMaximumSeconds { get; init; }
 
-        public required string ConstraintValueType { get; init; }
+        public int Priority { get; init; }
+
+        public bool IsOptimalCondition { get; init; }
+
+        public DateTime SatisfiedBy { get; init; }
     }
 }

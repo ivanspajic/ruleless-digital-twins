@@ -20,7 +20,7 @@ namespace Logic.CaseRepository {
         }
 
         public Case ReadCase(IEnumerable<Property> quantizedProperties,
-            IEnumerable<Condition> quantizedOptimalConditions,
+            IEnumerable<Condition> quantizedConditions,
             int lookAheadCycles,
             int simulationDurationSeconds,
             int caseIndex) {
@@ -31,7 +31,7 @@ namespace Logic.CaseRepository {
                 .ToEnumerable();
 
             var match = potentialMatches.Where(element => element.QuantizedProperties!.SequenceEqual(quantizedProperties, new PropertyEqualityComparer()) &&
-                element.QuantizedOptimalConditions!.SequenceEqual(quantizedOptimalConditions, new OptimalConditionEqualityComparer()))
+                element.QuantizedConditions!.SequenceEqual(quantizedConditions, new ConditionEqualityComparer()))
                 .FirstOrDefault()!;
 
             if (match is not null) {

@@ -63,7 +63,7 @@ namespace TestProject.Mocks.ServiceMocks {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<Condition> GetAllOptimalConditions(PropertyCache propertyCache)
+        public IEnumerable<Condition> GetAllConditions(PropertyCache propertyCache)
         {
             throw new NotImplementedException();
         }

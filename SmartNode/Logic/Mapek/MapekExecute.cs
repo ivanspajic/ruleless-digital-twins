@@ -21,6 +21,10 @@ namespace Logic.Mapek
         {
             _logger.LogInformation("Starting the Execute phase.");
 
+            if (simulation is null) {
+                return;
+            }
+
             foreach (var action in simulation.Actions)
             {
                 if (action is ActuationAction actuationAction) {

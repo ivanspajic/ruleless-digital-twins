@@ -17,7 +17,7 @@
 // for subsequent rules.
 
 [rule1b:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?platform meta:generateCombinationsOnlyFromConditions "true"^^xsd:boolean)
             (?aNode :withConditionProperty ?conditionProperty)
             (?conditionProperty meta:hasValue ?conditionPropertyValue)
             (?aNode owl:hasValue ?boundProperty)
@@ -31,7 +31,7 @@
 ]
 
 [rule1c:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?platform meta:generateCombinationsOnlyFromConditions "true"^^xsd:boolean)
             (?aNode :withConditionProperty ?conditionProperty)
             (?conditionProperty meta:hasValue ?conditionPropertyValue)
             (?aNode owl:hasValue ?boundProperty)
@@ -44,7 +44,7 @@
 ]
 
 [rule1d:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?platform meta:generateCombinationsOnlyFromConditions "true"^^xsd:boolean)
             (?aNode :withConditionProperty ?conditionProperty)
             (?conditionProperty meta:hasValue ?conditionPropertyValue)
             (?aNode owl:hasValue ?boundProperty)
@@ -57,7 +57,7 @@
 ]
 
 [rule1e:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?platform meta:generateCombinationsOnlyFromConditions "true"^^xsd:boolean)
             (?aNode :withConditionProperty ?conditionProperty)
             (?conditionProperty meta:hasValue ?conditionPropertyValue)
             (?aNode owl:hasValue ?boundProperty)
@@ -70,7 +70,7 @@
 ]
 
 [rule1f:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?platform meta:generateCombinationsOnlyFromConditions "true"^^xsd:boolean)
             (?aNode :withConditionProperty ?conditionProperty)
             (?conditionProperty meta:hasValue ?conditionPropertyValue)
             (?aNode owl:hasValue ?boundProperty)
@@ -83,7 +83,7 @@
 ]
 
 [rule1g:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?platform meta:generateCombinationsOnlyFromConditions "true"^^xsd:boolean)
             (?aNode1 :withConditionProperty ?conditionProperty1)
             (?conditionProperty1 meta:hasValue ?conditionProperty1Value)
             (?aNode1 :withCheck "conjunction")
@@ -109,7 +109,7 @@
 ]
 
 [rule1h:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?platform meta:generateCombinationsOnlyFromConditions "true"^^xsd:boolean)
             (?aNode1 :withConditionProperty ?conditionProperty1)
             (?conditionProperty1 meta:hasValue ?conditionProperty1Value)
             (?aNode1 :withCheck "conjunction")
@@ -135,7 +135,7 @@
 ]
 
 [rule1i:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?platform meta:generateCombinationsOnlyFromConditions "true"^^xsd:boolean)
             (?aNode1 :withConditionProperty ?conditionProperty1)
             (?conditionProperty1 meta:hasValue ?conditionProperty1Value)
             (?aNode1 :withCheck "conjunction")
@@ -161,7 +161,7 @@
 ]
 
 [rule1j:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?platform meta:generateCombinationsOnlyFromConditions "true"^^xsd:boolean)
             (?aNode1 :withConditionProperty ?conditionProperty1)
             (?conditionProperty1 meta:hasValue ?conditionProperty1Value)
             (?aNode1 :withCheck "conjunction")
@@ -187,7 +187,7 @@
 ]
 
 [rule1k:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?platform meta:generateCombinationsOnlyFromConditions "true"^^xsd:boolean)
             (?aNode1 :withConditionProperty ?conditionProperty1)
             (?conditionProperty1 meta:hasValue ?conditionProperty1Value)
             (?aNode1 :withCheck "conjunction")
@@ -213,7 +213,7 @@
 ]
 
 [rule1l:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?platform meta:generateCombinationsOnlyFromConditions "true"^^xsd:boolean)
             (?aNode1 :withConditionProperty ?conditionProperty1)
             (?conditionProperty1 meta:hasValue ?conditionProperty1Value)
             (?aNode1 :withCheck "conjunction")
@@ -239,7 +239,7 @@
 ]
 
 [rule1m:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?platform meta:generateCombinationsOnlyFromConditions "true"^^xsd:boolean)
             (?aNode1 :withConditionProperty ?conditionProperty1)
             (?conditionProperty1 meta:hasValue ?conditionProperty1Value)
             (?aNode1 :withCheck "conjunction")
@@ -336,11 +336,11 @@
                print("Generated ReconfigurationAction", ?actionName)
 ]
 
-// The following rules generate Actions provided the switch for generating restrictive combinations (only based on unsatisfied OptimalConditions)
+// The following rules generate Actions provided the switch for generating restrictive combinations (only based on unsatisfied Conditions)
 // is disabled.
 
 [rule3c:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "false"^^xsd:boolean)
+            (?platform meta:generateCombinationsOnlyFromConditions "false"^^xsd:boolean)
             (?actuator rdf:type sosa:Actuator)
             (?actuator meta:hasActuatorState ?actuatorState)
             uriConcat(?actuator, "_", ?actuatorState, ?actionName)
@@ -351,7 +351,7 @@
 ]
 
 [rule3d:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "false"^^xsd:boolean)
+            (?platform meta:generateCombinationsOnlyFromConditions "false"^^xsd:boolean)
             (?configurableParameter rdf:type meta:ConfigurableParameter)
             (?configurableParameter meta:hasPossibleValue ?configurableParameterValue)
             uriConcat(?configurableParameter, "_", ?configurableParameterValue, ?actionName)

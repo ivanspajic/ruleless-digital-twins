@@ -3,14 +3,13 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace TestProject.Mocks.EqualityComparers
 {
-    internal class OptimalConditionEqualityComparer : IEqualityComparer<Condition>
+    internal class ConditionEqualityComparer : IEqualityComparer<Condition>
     {
         private ConstraintExpressionEqualityComparer _constraintExpressionEqualityComparer = new ConstraintExpressionEqualityComparer();
 
         public bool Equals(Condition? x, Condition? y)
         {
-            if (x!.ConstraintValueType.Equals(y!.ConstraintValueType) &&
-                x.ReachedInMaximumSeconds == y.ReachedInMaximumSeconds &&
+            if (x.ReachedInMaximumSeconds == y.ReachedInMaximumSeconds &&
                 x.Name.Equals(y.Name) &&
                 x.Property.Equals(y.Property))
             {
@@ -30,22 +29,6 @@ namespace TestProject.Mocks.EqualityComparers
                     }
                 }
 
-                foreach (var xUnsatisfiedAtomicConstraint in x.UnsatisfiedAtomicConstraints)
-                {
-                    if (!y.UnsatisfiedAtomicConstraints.Contains(xUnsatisfiedAtomicConstraint, _constraintExpressionEqualityComparer))
-                    {
-                        return false;
-                    }
-                }
-                
-                foreach (var yUnsatisfiedAtomicConstraint in y.UnsatisfiedAtomicConstraints)
-                {
-                    if (!x.UnsatisfiedAtomicConstraints.Contains(yUnsatisfiedAtomicConstraint, _constraintExpressionEqualityComparer))
-                    {
-                        return false;
-                    }
-                }
-
                 return true;
             }
 
@@ -56,17 +39,11 @@ namespace TestProject.Mocks.EqualityComparers
         {
             var hashCode = obj.Name.GetHashCode() * 
                 obj.ReachedInMaximumSeconds.GetHashCode() * 
-                obj.ConstraintValueType.GetHashCode() * 
                 obj.Property.GetHashCode();
 
             foreach (var constraint in obj.Constraints)
             {
                 hashCode *= _constraintExpressionEqualityComparer.GetHashCode(constraint);
-            }
-
-            foreach (var unsatisfiedAtomicConstraint in obj.UnsatisfiedAtomicConstraints)
-            {
-                hashCode *= _constraintExpressionEqualityComparer.GetHashCode(unsatisfiedAtomicConstraint);
             }
 
             return hashCode;

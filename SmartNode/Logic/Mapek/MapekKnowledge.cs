@@ -105,53 +105,6 @@ namespace Logic.Mapek {
             return queryResult;
         }
 
-        public string GetPropertyType(string propertyName) {
-            // Check ObservableProperties first.
-            var query = GetParameterizedStringQuery(@"SELECT ?propertyValue WHERE {
-                @property rdf:type sosa:ObservableProperty .
-                @property rdf:type ?bNode . 
-                ?bNode owl:hasValue ?propertyValue. }");
-
-            query.SetUri("property", new Uri(propertyName));
-
-            var propertyTypeQueryResult = ExecuteQuery(query);
-
-            if (!propertyTypeQueryResult.IsEmpty) {
-                return propertyTypeQueryResult.Results[0]["propertyValue"].ToString().Split("^^")[^1];
-            }
-
-            // Check ConfigurableParameters next.
-            query = GetParameterizedStringQuery(@"SELECT ?propertyValue WHERE {
-                @property rdf:type meta:ConfigurableParameter .
-                @property rdf:type ?bNode . 
-                ?bNode owl:hasValue ?propertyValue. }");
-
-            query.SetUri("property", new Uri(propertyName));
-
-            propertyTypeQueryResult = ExecuteQuery(query);
-
-            if (!propertyTypeQueryResult.IsEmpty) {
-                return propertyTypeQueryResult.Results[0]["propertyValue"].ToString().Split("^^")[^1];
-            }
-
-            // Check Output Properties last.
-            query = GetParameterizedStringQuery(@"SELECT ?propertyValue WHERE {
-                @property rdf:type ssn:Property .
-                @property rdf:type ssn:Output .
-                @property rdf:type ?bNode .
-                ?bNode owl:hasValue ?propertyValue. }");
-
-            query.SetUri("property", new Uri(propertyName));
-
-            propertyTypeQueryResult = ExecuteQuery(query);
-
-            if (!propertyTypeQueryResult.IsEmpty) {
-                return propertyTypeQueryResult.Results[0]["propertyValue"].ToString().Split("^^")[^1];
-            }
-
-            throw new Exception("The property " + propertyName + " was found without a value type.");
-        }
-
         public void UpdatePropertyValue(Property property) {
             var valueHandler = _factory.GetValueHandlerImplementation(property.OwlType);
             var propertyValue = valueHandler.GetValueAsCultureInvariantString(property.Value);
@@ -259,20 +212,30 @@ namespace Logic.Mapek {
             }
         }
 
-        public IEnumerable<Condition> GetAllOptimalConditions(PropertyCache propertyCache) {
-            var optimalConditions = new List<Condition>();
+        public IEnumerable<Condition> GetAllConditions(PropertyCache propertyCache) {
+            var conditions = new List<Condition>();
 
-            var query = GetParameterizedStringQuery(@"SELECT ?optimalCondition ?property ?reachedInMaximumSeconds WHERE {
-                ?optimalCondition rdf:type meta:OptimalCondition .
-                ?optimalCondition ssn:forProperty ?property .
-                ?optimalCondition meta:reachedInMaximumSeconds ?reachedInMaximumSeconds . }");
+            var conditionQuery = GetParameterizedStringQuery(@"SELECT ?condition WHERE {
+                ?condition rdf:type meta:Condition . }");
+            var conditionQueryResult = ExecuteQuery(conditionQuery);
 
-            var queryResult = ExecuteQuery(query);
+            var optimalConditionQuery = GetParameterizedStringQuery(@"SELECT ?optimalCondition WHERE {
+                ?optimalCondition rdf:type meta:OptimalCondition . }");
+            var optimalConditionQueryResult = ExecuteQuery(optimalConditionQuery);
 
-            // For each OptimalCondition, process its respective constraints and get the appropriate Actions
-            // for mitigation.
-            foreach (var result in queryResult.Results) {
-                var optimalConditionNode = result["optimalCondition"];
+            var queryResults = new List<ISparqlResult>(conditionQueryResult.Results);
+            queryResults.AddRange(optimalConditionQueryResult.Results);
+
+            // For each Condition, process its respective constraints and get the appropriate Actions for mitigation.
+            foreach (var result in queryResults) {
+                var conditionNode = result["condition"];
+
+                var extendedConditionQuery = GetParameterizedStringQuery(@"SELECT ?property ?priority ?reachedInMaximumSeconds ?satisfiedBy WHERE {
+                    @condition ssn:forProperty ?property .
+                    OPTIONAL {
+                        @condition 
+                    }}");
+
                 var propertyNode = result["property"];
                 var propertyName = propertyNode.ToString();
 
@@ -289,26 +252,24 @@ namespace Logic.Mapek {
                 var reachedInMaximumSeconds = result["reachedInMaximumSeconds"];
                 var reachedInMaximumSecondsValue = reachedInMaximumSeconds.ToString().Split('^')[0];
 
-                // Build this OptimalCondition's full expression tree.
-                var constraints = GetOptimalConditionConstraints(optimalConditionNode, propertyNode, reachedInMaximumSeconds) ??
-                    throw new Exception($"OptimalCondition {optimalConditionNode.ToString()} has no constraints.");
+                // Build this Condition's full constraint expression tree.
+                var constraints = GetConditionConstraints(conditionNode, propertyNode, reachedInMaximumSeconds) ??
+                    throw new Exception($"Condition {conditionNode.ToString()} has no constraints.");
 
-                var optimalCondition = new Condition() {
+                var condition = new Condition() {
                     Constraints = constraints,
-                    ConstraintValueType = property.OwlType,
-                    Name = optimalConditionNode.ToString(),
-                    Property = propertyName,
-                    ReachedInMaximumSeconds = int.Parse(reachedInMaximumSecondsValue),
-                    UnsatisfiedAtomicConstraints = []
+                    Name = conditionNode.ToString(),
+                    Property = property,
+                    ReachedInMaximumSeconds = int.Parse(reachedInMaximumSecondsValue)
                 };
 
-                optimalConditions.Add(optimalCondition);
+                conditions.Add(condition);
             }
 
-            return optimalConditions;
+            return conditions;
         }
 
-        private List<ConstraintExpression> GetOptimalConditionConstraints(INode optimalCondition, INode property, INode reachedInMaximumSeconds) {
+        private List<ConstraintExpression> GetConditionConstraints(INode condition, INode property, INode reachedInMaximumSeconds) {
             var constraintExpressions = new List<ConstraintExpression>();
 
             // This could be made more streamlined and elegant through the use of fewer, more cleverly combined queries, however,
@@ -331,19 +292,19 @@ namespace Logic.Mapek {
             };
 
             AddConstraintsOfFirstOrOnlyRangeValues(constraintExpressions,
-                optimalCondition,
+                condition,
                 property,
                 reachedInMaximumSeconds,
                 operatorFilters);
 
             AddConstraintsOfSecondRangeValues(constraintExpressions,
-                optimalCondition,
+                condition,
                 property,
                 reachedInMaximumSeconds,
                 operatorFilters);
 
             AddConstraintsOfDisjunctionsOfOneAndOne(constraintExpressions,
-                optimalCondition,
+                condition,
                 property,
                 reachedInMaximumSeconds,
                 operatorFilters);
@@ -351,13 +312,13 @@ namespace Logic.Mapek {
             // For models created with Protege (and the OWL API), disjunctions containing 1 and then 2 values will be converted to those
             // containing 2 and then 1.
             AddConstraintsOfDisjunctionsOfTwoAndOne(constraintExpressions,
-                optimalCondition,
+                condition,
                 property,
                 reachedInMaximumSeconds,
                 operatorFilters);
 
             AddConstraintsOfDisjunctionsOfTwoAndTwo(constraintExpressions,
-                optimalCondition,
+                condition,
                 property,
                 reachedInMaximumSeconds,
                 operatorFilters);
@@ -366,7 +327,7 @@ namespace Logic.Mapek {
         }
 
         private void AddConstraintsOfFirstOrOnlyRangeValues(IList<ConstraintExpression> constraintExpressions,
-            INode optimalCondition,
+            INode condition,
             INode property,
             INode reachedInMaximumSeconds,
             IEnumerable<ConstraintType> constraintTypes) {
@@ -375,15 +336,15 @@ namespace Logic.Mapek {
 
                 // Gets the constraints of first or only values of ranges.
                 var query = GetParameterizedStringQuery(@"SELECT ?constraint WHERE {
-                    @optimalCondition ssn:forProperty @property .
-                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                    @optimalCondition rdf:type ?bNode1 .
+                    @condition ssn:forProperty @property .
+                    @condition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @condition rdf:type ?bNode1 .
                     ?bNode1 owl:onProperty meta:hasValueConstraint .
                     ?bNode1 owl:onDataRange ?bNode2 .
                     ?bNode2 owl:withRestrictions ?bNode3 .
                     ?bNode3 rdf:first [ " + operatorFilter + " ?constraint ] .}");
 
-                query.SetParameter("optimalCondition", optimalCondition);
+                query.SetParameter("condition", condition);
                 query.SetParameter("property", property);
                 query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
@@ -403,7 +364,7 @@ namespace Logic.Mapek {
         }
 
         private void AddConstraintsOfSecondRangeValues(IList<ConstraintExpression> constraintExpressions,
-            INode optimalCondition,
+            INode condition,
             INode property,
             INode reachedInMaximumSeconds,
             IEnumerable<ConstraintType> constraintTypes) {
@@ -412,16 +373,16 @@ namespace Logic.Mapek {
 
                 // Gets the constraints of the second values of ranges.
                 var query = GetParameterizedStringQuery(@"SELECT ?constraint WHERE {
-                    @optimalCondition ssn:forProperty @property .
-                    @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                    @optimalCondition rdf:type ?bNode1 .
+                    @condition ssn:forProperty @property .
+                    @condition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                    @condition rdf:type ?bNode1 .
                     ?bNode1 owl:onProperty meta:hasValueConstraint .
                     ?bNode1 owl:onDataRange ?bNode2 .
                     ?bNode2 owl:withRestrictions ?bNode3 .
                     ?bNode3 rdf:rest ?bNode4 .
                     ?bNode4 rdf:first [ " + operatorFilter + " ?constraint ] . }");
 
-                query.SetParameter("optimalCondition", optimalCondition);
+                query.SetParameter("condition", condition);
                 query.SetParameter("property", property);
                 query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
@@ -441,7 +402,7 @@ namespace Logic.Mapek {
         }
 
         private void AddConstraintsOfDisjunctionsOfOneAndOne(IList<ConstraintExpression> constraintExpressions,
-            INode optimalCondition,
+            INode condition,
             INode property,
             INode reachedInMaximumSeconds,
             IEnumerable<ConstraintType> constraintTypes) {
@@ -453,9 +414,9 @@ namespace Logic.Mapek {
 
                     // Gets the constraints of two disjunctive, single-valued ranges.
                     var query = GetParameterizedStringQuery(@"SELECT ?constraint1 ?constraint2 WHERE {
-                        @optimalCondition ssn:forProperty @property .
-                        @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                        @optimalCondition rdf:type ?bNode1 .
+                        @condition ssn:forProperty @property .
+                        @condition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                        @condition rdf:type ?bNode1 .
                         ?bNode1 owl:onProperty meta:hasValueConstraint .
                         ?bNode1 owl:onDataRange ?bNode2 .
                         ?bNode2 owl:unionOf ?bNode3 .
@@ -469,7 +430,7 @@ namespace Logic.Mapek {
                         ?bNode6_2 rdf:first [ " + operatorFilter2 + @" ?constraint2 ] .
                         ?bNode6_2 rdf:rest () . }");
 
-                    query.SetParameter("optimalCondition", optimalCondition);
+                    query.SetParameter("condition", condition);
                     query.SetParameter("property", property);
                     query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
@@ -500,7 +461,7 @@ namespace Logic.Mapek {
         }
 
         private void AddConstraintsOfDisjunctionsOfTwoAndOne(IList<ConstraintExpression> constraintExpressions,
-            INode optimalCondition,
+            INode condition,
             INode property,
             INode reachedInMaximumSeconds,
             IEnumerable<ConstraintType> constraintTypes) {
@@ -515,9 +476,9 @@ namespace Logic.Mapek {
 
                         // Gets the constraints of two disjunctive ranges, one two-valued and the other single-valued.
                         var query = GetParameterizedStringQuery(@"SELECT ?constraint1 ?constraint2 ?constraint3 WHERE {
-                            @optimalCondition ssn:forProperty @property .
-                            @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                            @optimalCondition rdf:type ?bNode1 .
+                            @condition ssn:forProperty @property .
+                            @condition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                            @condition rdf:type ?bNode1 .
                             ?bNode1 owl:onProperty meta:hasValueConstraint .
                             ?bNode1 owl:onDataRange ?bNode2 .
                             ?bNode2 owl:unionOf ?bNode3 .
@@ -532,7 +493,7 @@ namespace Logic.Mapek {
                             ?bNode6_2 rdf:first [ " + operatorFilter3 + @" ?constraint3 ] .
                             ?bNode6_2 rdf:rest () . }");
 
-                        query.SetParameter("optimalCondition", optimalCondition);
+                        query.SetParameter("condition", condition);
                         query.SetParameter("property", property);
                         query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 
@@ -574,7 +535,7 @@ namespace Logic.Mapek {
         }
 
         private void AddConstraintsOfDisjunctionsOfTwoAndTwo(IList<ConstraintExpression> constraintExpressions,
-            INode optimalCondition,
+            INode condition,
             INode property,
             INode reachedInMaximumSeconds,
             IEnumerable<ConstraintType> constraintTypes) {
@@ -592,9 +553,9 @@ namespace Logic.Mapek {
 
                             // Gets the constraints of two disjunctive, two-valued ranges.
                             var query = GetParameterizedStringQuery(@"SELECT ?constraint1 ?constraint2 ?constraint3 ?constraint4 WHERE {
-                                @optimalCondition ssn:forProperty @property .
-                                @optimalCondition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                                @optimalCondition rdf:type ?bNode1 .
+                                @condition ssn:forProperty @property .
+                                @condition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+                                @condition rdf:type ?bNode1 .
                                 ?bNode1 owl:onProperty meta:hasValueConstraint .
                                 ?bNode1 owl:onDataRange ?bNode2 .
                                 ?bNode2 owl:unionOf ?bNode3 .
@@ -610,7 +571,7 @@ namespace Logic.Mapek {
                                 ?bNode6_2 rdf:rest ?bNode7_2 .
                                 ?bNode7_2 rdf:first [ " + operatorFilter4 + " ?constraint4 ] . }");
 
-                            query.SetParameter("optimalCondition", optimalCondition);
+                            query.SetParameter("condition", condition);
                             query.SetParameter("property", property);
                             query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
 

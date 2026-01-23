@@ -159,12 +159,12 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Data properties
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromOptimalConditions
-:generateCombinationsOnlyFromOptimalConditions rdf:type owl:DatatypeProperty ;
-                                               rdfs:domain <http://www.w3.org/ns/sosa/Platform> ;
-                                               rdfs:range xsd:boolean ;
-                                               rdfs:comment "Determines how ActionCombination generation for a Platforms future simulations occurs. 'false' generates all possible combinations from all actuators and their states in the instance model. 'true' restricts combination generation to only the relevant actuators and their states that potentially restore violated OptimalConditions."@en ;
-                                               rdfs:label "generateCombinationsOnlyFromOptimalConditions"@en .
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromConditions
+:generateCombinationsOnlyFromConditions rdf:type owl:DatatypeProperty ;
+                                        rdfs:domain <http://www.w3.org/ns/sosa/Platform> ;
+                                        rdfs:range xsd:boolean ;
+                                        rdfs:comment "Determines how ActionCombination generation for a Platforms future simulations occurs. 'false' generates all possible combinations from all actuators and their states in the instance model. 'true' restricts combination generation to only the relevant actuators and their states that potentially restore violated Conditions."@en ;
+                                        rdfs:label "generateCombinationsOnlyFromConditions"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState
@@ -198,7 +198,7 @@ xsd:duration rdf:type rdfs:Datatype .
 :hasPriority rdf:type owl:DatatypeProperty ;
              rdfs:domain :OptimalCondition ;
              rdfs:range xsd:int ;
-             rdfs:comment "Classifies an OptimalCondition as having a specific priority to facilitate DT decision making by ranking."@en ;
+             rdfs:comment "Classifies an OptimalCondition as having a specific priority to facilitate DT decision making by ranking. The intended domain is positive integers. The lower the value, the higher the rank and thus the priority."@en ;
              rdfs:label "hasPriority"@en .
 
 
@@ -286,20 +286,24 @@ xsd:duration rdf:type rdfs:Datatype .
            rdfs:subClassOf [ rdf:type owl:Restriction ;
                              owl:onProperty :hasConstraint ;
                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                             owl:onClass [ rdf:type owl:Restriction ;
-                                           owl:onProperty :comparisonOperator ;
-                                           owl:maxQualifiedCardinality "4"^^xsd:nonNegativeInteger ;
-                                           owl:onClass <http://www.w3.org/ns/ssn/Property>
+                             owl:onClass [ owl:intersectionOf ( [ rdf:type owl:Restriction ;
+                                                                  owl:onProperty :comparisonOperator ;
+                                                                  owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                                  owl:onClass <http://www.w3.org/ns/ssn/Property>
+                                                                ]
+                                                                [ rdf:type owl:Restriction ;
+                                                                  owl:onProperty :comparisonOperator ;
+                                                                  owl:maxQualifiedCardinality "4"^^xsd:nonNegativeInteger ;
+                                                                  owl:onClass <http://www.w3.org/ns/ssn/Property>
+                                                                ]
+                                                              ) ;
+                                           rdf:type owl:Class
                                          ]
                            ] ,
                            [ rdf:type owl:Restriction ;
                              owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                              owl:onClass <http://www.w3.org/ns/ssn/Property>
-                           ] ,
-                           [ rdf:type owl:Restriction ;
-                             owl:onProperty :satisfiedBy ;
-                             owl:someValuesFrom xsd:dateTimeStamp
                            ] ,
                            [ rdf:type owl:Restriction ;
                              owl:onProperty :hasPriority ;
@@ -310,6 +314,11 @@ xsd:duration rdf:type rdfs:Datatype .
                              owl:onProperty :reachedInMaximumSeconds ;
                              owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                              owl:onDataRange xsd:int
+                           ] ,
+                           [ rdf:type owl:Restriction ;
+                             owl:onProperty :satisfiedBy ;
+                             owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                             owl:onDataRange xsd:dateTimeStamp
                            ] ;
            rdfs:comment "Represents a required value range constraint on a Property.  For example, a condition on the temperature of a room could be defined as values greater than 18 and lower than 22 degrees Celsius. Due to the OWA, the subclass definition includes a cardinality restriction of maximum 4 Properties while the restrictions are more strict. This is enforced by additional (external) inference rules."@en ;
            rdfs:label "Condition"@en .
@@ -460,7 +469,7 @@ xsd:duration rdf:type rdfs:Datatype .
                                                        owl:onClass :FmuModel
                                                      ] ,
                                                      [ rdf:type owl:Restriction ;
-                                                       owl:onProperty :generateCombinationsOnlyFromOptimalConditions ;
+                                                       owl:onProperty :generateCombinationsOnlyFromConditions ;
                                                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                        owl:onDataRange xsd:boolean
                                                      ] .

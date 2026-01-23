@@ -97,13 +97,11 @@ namespace TestProject {
                     Value = 12
                 }
             };
-            var quantizedOptimalConditions = new List<Condition> {
+            var quantizedConditions = new List<Condition> {
                 new Condition {
-                    Name = "FakeOptimalCondition1",
+                    Name = "FakeCondition1",
                     ReachedInMaximumSeconds = 0,
-                    Property = "FakeProperty1",
-                    ConstraintValueType = "http://www.w3.org/2001/XMLSchema#double",
-                    UnsatisfiedAtomicConstraints = [],
+                    Property = quantizedProperties[0],
                     Constraints = new List<ConstraintExpression> {
                         new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.GreaterThan,
@@ -112,11 +110,9 @@ namespace TestProject {
                     }
                 },
                 new Condition {
-                    Name = "FakeOptimalCondition2",
+                    Name = "FakeCondition2",
                     ReachedInMaximumSeconds = 0,
-                    Property = "FakeProperty2",
-                    ConstraintValueType = "http://www.w3.org/2001/XMLSchema#double",
-                    UnsatisfiedAtomicConstraints = [],
+                    Property = quantizedProperties[1],
                     Constraints = new List<ConstraintExpression> {
                         new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.LessThanOrEqualTo,
@@ -134,13 +130,11 @@ namespace TestProject {
                 LookAheadCycles = 2,
                 SimulationDurationSeconds = 100,
                 Simulation = simulationPath.Simulations.First(),
-                QuantizedOptimalConditions = new List<Condition> {
+                QuantizedConditions = new List<Condition> {
                     new Condition {
-                        Name = "FakeOptimalCondition1",
+                        Name = "FakeCondition1",
                         ReachedInMaximumSeconds = 0,
-                        Property = "FakeProperty1",
-                        ConstraintValueType = "http://www.w3.org/2001/XMLSchema#double",
-                        UnsatisfiedAtomicConstraints = [],
+                        Property = quantizedProperties[0],
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.GreaterThan,
@@ -149,11 +143,9 @@ namespace TestProject {
                         }
                     },
                     new Condition {
-                        Name = "FakeOptimalCondition2",
+                        Name = "FakeCondition2",
                         ReachedInMaximumSeconds = 0,
-                        Property = "FakeProperty2",
-                        ConstraintValueType = "http://www.w3.org/2001/XMLSchema#double",
-                        UnsatisfiedAtomicConstraints = [],
+                        Property = quantizedProperties[1],
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.LessThanOrEqualTo,
@@ -181,13 +173,11 @@ namespace TestProject {
                 LookAheadCycles = 2,
                 SimulationDurationSeconds = 150,
                 Simulation = simulationPath.Simulations.First(),
-                QuantizedOptimalConditions = new List<Condition> {
+                QuantizedConditions = new List<Condition> {
                     new Condition {
-                        Name = "FakeOptimalCondition1",
+                        Name = "FakeCondition1",
                         ReachedInMaximumSeconds = 0,
-                        Property = "FakeProperty3",
-                        ConstraintValueType = "http://www.w3.org/2001/XMLSchema#double",
-                        UnsatisfiedAtomicConstraints = [],
+                        Property = quantizedProperties[1],
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.GreaterThan,
@@ -196,11 +186,9 @@ namespace TestProject {
                         }
                     },
                     new Condition {
-                        Name = "FakeOptimalCondition2",
+                        Name = "FakeCondition2",
                         ReachedInMaximumSeconds = 0,
-                        Property = "FakeProperty2",
-                        ConstraintValueType = "http://www.w3.org/2001/XMLSchema#double",
-                        UnsatisfiedAtomicConstraints = [],
+                        Property = quantizedProperties[1],
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.LessThanOrEqualTo,
@@ -236,7 +224,7 @@ namespace TestProject {
             // Act
             caseRepository.CreateCase(expectedCase);
             caseRepository.CreateCase(otherCase);
-            var actualCase = caseRepository.ReadCase(quantizedProperties, quantizedOptimalConditions, lookAheadCycles, simulationDurationSeconds, caseIndex);
+            var actualCase = caseRepository.ReadCase(quantizedProperties, quantizedConditions, lookAheadCycles, simulationDurationSeconds, caseIndex);
 
             // Assert
             Assert.Equal(expectedCase, actualCase);
@@ -246,14 +234,18 @@ namespace TestProject {
         public void Successful_case_saved() {
             // Arrange
             // Set up all the DTOs.
+
+
             var observedCacheMock = new Cache {
-                OptimalConditions = new List<Condition> {
+                Conditions = new List<Condition> {
                     new Condition {
-                        Name = "FakeOptimalCondition1",
+                        Name = "FakeCondition1",
                         ReachedInMaximumSeconds = 0,
-                        Property = "FakeProperty1",
-                        ConstraintValueType = "http://www.w3.org/2001/XMLSchema#double",
-                        UnsatisfiedAtomicConstraints = [],
+                        Property = new Property {
+                            Name = "FakeProperty1",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                            Value = 22.674
+                        },
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.GreaterThan,
@@ -262,11 +254,13 @@ namespace TestProject {
                         }
                     },
                     new Condition {
-                        Name = "FakeOptimalCondition2",
+                        Name = "FakeCondition2",
                         ReachedInMaximumSeconds = 0,
-                        Property = "FakeProperty2",
-                        ConstraintValueType = "http://www.w3.org/2001/XMLSchema#double",
-                        UnsatisfiedAtomicConstraints = [],
+                        Property = new Property {
+                            Name = "FakeProperty2",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                            Value = 11.995
+                        },
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.LessThanOrEqualTo,
@@ -421,13 +415,15 @@ namespace TestProject {
                 LookAheadCycles = 2,
                 SimulationDurationSeconds = 100,
                 Simulation = simulationPath.Simulations.First(),
-                QuantizedOptimalConditions = new List<Condition> {
+                QuantizedConditions = new List<Condition> {
                     new Condition {
-                        Name = "FakeOptimalCondition1",
+                        Name = "FakeCondition1",
                         ReachedInMaximumSeconds = 0,
-                        Property = "FakeProperty1",
-                        ConstraintValueType = "http://www.w3.org/2001/XMLSchema#double",
-                        UnsatisfiedAtomicConstraints = [],
+                        Property = new Property {
+                            Name = "FakeProperty1",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                            Value = 22.674
+                        },
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.GreaterThan,
@@ -436,11 +432,13 @@ namespace TestProject {
                         }
                     },
                     new Condition {
-                        Name = "FakeOptimalCondition2",
+                        Name = "FakeCondition2",
                         ReachedInMaximumSeconds = 0,
-                        Property = "FakeProperty2",
-                        ConstraintValueType = "http://www.w3.org/2001/XMLSchema#double",
-                        UnsatisfiedAtomicConstraints = [],
+                        Property = new Property {
+                            Name = "FakeProperty2",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                            Value = 11.995
+                        },
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.LessThanOrEqualTo,
@@ -464,7 +462,7 @@ namespace TestProject {
             };
 
             // Act
-            mapekManager.StartLoop();
+            mapekManager.StartLoop().RunSynchronously();
 
             var actualCase = caseRepositoryMock.Cases[0];
 
@@ -474,7 +472,7 @@ namespace TestProject {
             Assert.Equal(expectedCase.Simulation.Index, actualCase.Simulation!.Index);
             Assert.Equal(expectedCase.Simulation.Actions, actualCase.Simulation.Actions, new ActionEqualityComparer());
             Assert.Equal(expectedCase.QuantizedProperties, actualCase.QuantizedProperties, new PropertyEqualityComparer());
-            Assert.Equal(expectedCase.QuantizedOptimalConditions, actualCase.QuantizedOptimalConditions, new OptimalConditionEqualityComparer());
+            Assert.Equal(expectedCase.QuantizedConditions, actualCase.QuantizedConditions, new ConditionEqualityComparer());
         }
     }
 }

@@ -12,19 +12,19 @@ namespace Logic.Mapek {
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
         protected override SimulationPath GetOptimalSimulationPath(PropertyCache propertyCache,
-                IEnumerable<Condition> optimalConditions,
+                IEnumerable<Condition> conditions,
                 IEnumerable<SimulationPath> simulationPaths) {
-            return GetOptimalSimulationPathsEuclidian(simulationPaths, optimalConditions).First().Item1;
+            return GetOptimalSimulationPathsEuclidian(simulationPaths, conditions).First().Item1;
         }
 
-        internal IEnumerable<(SimulationPath, double)>? GetOptimalSimulationPathsEuclidian(IEnumerable<SimulationPath> simulationPaths, IEnumerable<Condition> optimalConditions) {
+        internal IEnumerable<(SimulationPath, double)>? GetOptimalSimulationPathsEuclidian(IEnumerable<SimulationPath> simulationPaths, IEnumerable<Condition> conditions) {
             var pathXdists = simulationPaths.Select(sp => {
                 // We only look into the final state of the simulation:
                 var lastPC = sp.Simulations.Last().PropertyCache;
-                var distances = optimalConditions.Select(oc => {
-                    Debug.Assert(lastPC.Properties.TryGetValue(oc.Property, out var p));
+                var distances = conditions.Select(oc => {
+                    Debug.Assert(lastPC.Properties.TryGetValue(oc.Property.Name, out var p));
                     Debug.Assert(p != null);
-                    if (!"http://www.w3.org/2001/XMLSchema#double".Equals(oc.ConstraintValueType) || oc.Constraints.Any(c => c.ConstraintType == ConstraintType.And || c.ConstraintType == ConstraintType.Or)) {
+                    if (!"http://www.w3.org/2001/XMLSchema#double".Equals(oc.Property.OwlType) || oc.Constraints.Any(c => c.ConstraintType == ConstraintType.And || c.ConstraintType == ConstraintType.Or)) {
                         // Coward.
                         Debug.WriteLine("Cowardly refusing do to anything here.");
                         return 1;

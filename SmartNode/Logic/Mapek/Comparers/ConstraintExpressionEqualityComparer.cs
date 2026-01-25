@@ -12,7 +12,7 @@ namespace Logic.Mapek.Comparers {
                 var atomicY = (AtomicConstraintExpression)y!;
 
                 return atomicX.ConstraintType == atomicY.ConstraintType &&
-                    atomicX.Right.ToString()!.Equals(atomicY.Right.ToString());
+                    atomicX.Property.ToString()!.Equals(atomicY.Property.ToString());
             }
         }
 
@@ -27,7 +27,7 @@ namespace Logic.Mapek.Comparers {
 
                 return atomicObj.GetHashCode() *
                     atomicObj.ConstraintType.GetHashCode() *
-                    atomicObj.Right.GetHashCode();
+                    atomicObj.Property.GetHashCode();
             }
         }
     }

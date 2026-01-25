@@ -7,12 +7,6 @@
 
 
 
-// For performance reasons, we`re not making an intermediate OWL inference step. At times, these might be necessary to reduce
-// rule writing, so we make a manual inference saying OptimalCondition (subclass) individuals are also of type Condition (superclass). 
-[rule1a:    (?optimalCondition rdf:type meta:OptimalCondition)
-            ->  (?optimalCondition rdf:type meta:Condition)
-]
-
 // Upon locating the marks for Condition constraints, these rules find the relevant PropertyChanges and use them as a temporary mark
 // for subsequent rules.
 
@@ -361,7 +355,7 @@
                 print("Generated ReconfigurationAction", ?actionName)
 ]
 
-// TODO: simplify this with the pattern idea!!
+
 
 // The following rules infer possible combinations of Actions to take as part of the DT`s final decision. They effectively produce a
 // cartesian product of a variable number of sets (Actions grouped by Actuators or ConfigurableParameters) with a variable number of

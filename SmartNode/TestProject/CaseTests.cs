@@ -105,7 +105,11 @@ namespace TestProject {
                     Constraints = new List<ConstraintExpression> {
                         new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.GreaterThan,
-                            Right = 22.5
+                            Property = new Property {
+                                Name = "ConditionProperty1",
+                                OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                Value = 22.5
+                            }
                         }
                     }
                 },
@@ -116,7 +120,11 @@ namespace TestProject {
                     Constraints = new List<ConstraintExpression> {
                         new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.LessThanOrEqualTo,
-                            Right = 12.25
+                            Property = new Property {
+                                Name = "ConditionProperty2",
+                                OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                Value = 12.25
+                            }
                         }
                     }
                 }
@@ -138,7 +146,11 @@ namespace TestProject {
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.GreaterThan,
-                                Right = 22.5
+                                Property = new Property {
+                                    Name = "ConditionProperty1",
+                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                    Value = 22.5
+                                }
                             }
                         }
                     },
@@ -149,7 +161,11 @@ namespace TestProject {
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.LessThanOrEqualTo,
-                                Right = 12.25
+                                Property = new Property {
+                                    Name = "ConditionProperty2",
+                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                    Value = 12.25
+                                }
                             }
                         }
                     }
@@ -181,7 +197,11 @@ namespace TestProject {
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.GreaterThan,
-                                Right = 22.75
+                                Property = new Property {
+                                    Name = "ConditionProperty1",
+                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                    Value = 22.75
+                                }
                             }
                         }
                     },
@@ -192,7 +212,11 @@ namespace TestProject {
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.LessThanOrEqualTo,
-                                Right = 12.25
+                                Property = new Property {
+                                    Name = "ConditionProperty2",
+                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                    Value = 12.25
+                                }
                             }
                         }
                     }
@@ -235,7 +259,6 @@ namespace TestProject {
             // Arrange
             // Set up all the DTOs.
 
-
             var observedCacheMock = new Cache {
                 Conditions = new List<Condition> {
                     new Condition {
@@ -249,7 +272,11 @@ namespace TestProject {
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.GreaterThan,
-                                Right = 22.456
+                                Property = new Property {
+                                    Name = "ConditionProperty1",
+                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                    Value = 22.456
+                                }
                             }
                         }
                     },
@@ -264,7 +291,11 @@ namespace TestProject {
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.LessThanOrEqualTo,
-                                Right = 12.345
+                                Property = new Property {
+                                    Name = "ConditionProperty2",
+                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                    Value = 12.345
+                                }
                             }
                         }
                     }
@@ -427,7 +458,11 @@ namespace TestProject {
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.GreaterThan,
-                                Right = 22.5
+                                Property = new Property {
+                                    Name = "ConditionProperty1",
+                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                    Value = 22.5
+                                }
                             }
                         }
                     },
@@ -442,7 +477,11 @@ namespace TestProject {
                         Constraints = new List<ConstraintExpression> {
                             new AtomicConstraintExpression {
                                 ConstraintType = ConstraintType.LessThanOrEqualTo,
-                                Right = 12.25
+                                Property = new Property {
+                                    Name = "ConditionProperty2",
+                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                    Value = 12.25
+                                }
                             }
                         }
                     }
@@ -462,7 +501,7 @@ namespace TestProject {
             };
 
             // Act
-            mapekManager.StartLoop().RunSynchronously();
+            mapekManager.StartLoop().Wait();
 
             var actualCase = caseRepositoryMock.Cases[0];
 

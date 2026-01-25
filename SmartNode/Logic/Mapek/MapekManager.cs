@@ -233,9 +233,15 @@ namespace Logic.Mapek {
         private ConstraintExpression GetQuantizedConditionConstraint(ConstraintExpression constraintExpression, IValueHandler valueHandler) {
             // Go through the whole tree of Condition constraints and get quantized values for each one.
             if (constraintExpression is AtomicConstraintExpression atomicConstraintExpression) {
+                var quantizedProperty = new Property {
+                    Name = atomicConstraintExpression.Property.Name,
+                    OwlType = atomicConstraintExpression.Property.OwlType,
+                    Value = valueHandler.GetQuantizedValue(atomicConstraintExpression.Property.Value, _coordinatorSettings.PropertyValueFuzziness)
+                };
+
                 return new AtomicConstraintExpression {
                     ConstraintType = atomicConstraintExpression.ConstraintType,
-                    Right = valueHandler.GetQuantizedValue(atomicConstraintExpression.Right, _coordinatorSettings.PropertyValueFuzziness)
+                    Property = quantizedProperty
                 };
             } else {
                 var nestedConstraintExpression = constraintExpression as NestedConstraintExpression;

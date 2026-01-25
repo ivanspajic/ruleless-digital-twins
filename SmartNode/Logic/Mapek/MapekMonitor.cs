@@ -66,6 +66,9 @@ namespace Logic.Mapek {
             // Get the values of all ObservableProperties and populate the cache.
             PopulateObservablePropertiesCache(cache.PropertyCache);
 
+            // Get the values of Condition bound Properties in case there are any that are not handled by the above.
+            PopulateCacheWithNonObservedNonOutputProperties();
+
             // Write Property values back to the knowledge base.
             WritePropertyValuesToKnowledgeBase(cache.PropertyCache);
 

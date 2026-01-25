@@ -8,12 +8,12 @@ namespace Logic.Models.OntologicalModels
 
         public required IEnumerable<ConstraintExpression> Constraints { get; init; }
 
-        public int ReachedInMaximumSeconds { get; init; }
+        public int? ReachedInMaximumSeconds { get; init; }
 
-        public int Priority { get; init; }
+        public int? Priority { get; init; }
 
-        public bool IsOptimalCondition { get; init; }
+        public DateTime? SatisfiedBy { get; init; }
 
-        public DateTime SatisfiedBy { get; init; }
+        public bool IsBreakable { get; init; }
     }
 }

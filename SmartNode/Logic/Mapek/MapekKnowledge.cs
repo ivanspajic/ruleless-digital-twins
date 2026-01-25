@@ -215,52 +215,42 @@ namespace Logic.Mapek {
         public IEnumerable<Condition> GetAllConditions(PropertyCache propertyCache) {
             var conditions = new List<Condition>();
 
-            var conditionQuery = GetParameterizedStringQuery(@"SELECT ?condition WHERE {
-                ?condition rdf:type meta:Condition . }");
+            var conditionQuery = GetParameterizedStringQuery(@"SELECT ?condition ?property ?isBreakable ?priority ?reachedInMaximumSeconds ?satisfiedBy WHERE {
+                ?condition rdf:type meta:Condition .
+                ?condition ssn:forProperty ?property .
+                ?condition meta:isBreakable ?isBreakable .
+                OPTIONAL {
+                    ?condition meta:hasPriority ?priority .
+                }
+                OPTIONAL {
+                    ?condition meta:reachedInMaximumSeconds ?reachedInMaximumSeconds .
+                }
+                OPTIONAL {
+                    ?condition meta:satisfiedBy ?satisfiedBy .
+                }}");
+
             var conditionQueryResult = ExecuteQuery(conditionQuery);
 
-            var optimalConditionQuery = GetParameterizedStringQuery(@"SELECT ?optimalCondition WHERE {
-                ?optimalCondition rdf:type meta:OptimalCondition . }");
-            var optimalConditionQueryResult = ExecuteQuery(optimalConditionQuery);
-
-            var queryResults = new List<ISparqlResult>(conditionQueryResult.Results);
-            queryResults.AddRange(optimalConditionQueryResult.Results);
-
-            // For each Condition, process its respective constraints and get the appropriate Actions for mitigation.
-            foreach (var result in queryResults) {
+            foreach (var result in conditionQueryResult.Results) {
                 var conditionNode = result["condition"];
+                var propertyName = result["property"].ToString();
+                var isBreakable = bool.Parse(result["isBreakable"].ToString().Split("^^")[0]);
+                var priorityString = GetOptionalQueryResult(result, "priority");
+                var reachedInMaximumSecondsString = GetOptionalQueryResult(result, "reachedInMaximumSeconds");
+                var satisfiedByString = GetOptionalQueryResult(result, "satisfiedBy");
 
-                var extendedConditionQuery = GetParameterizedStringQuery(@"SELECT ?property ?priority ?reachedInMaximumSeconds ?satisfiedBy WHERE {
-                    @condition ssn:forProperty ?property .
-                    OPTIONAL {
-                        @condition 
-                    }}");
+                var property = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, propertyName);
 
-                var propertyNode = result["property"];
-                var propertyName = propertyNode.ToString();
+                var constraints = GetConditionConstraints(conditionNode, propertyCache);
 
-                Property property = null!;
-
-                if (propertyCache.Properties.ContainsKey(propertyName)) {
-                    property = propertyCache.Properties[propertyName];
-                } else if (propertyCache.ConfigurableParameters.ContainsKey(propertyName)) {
-                    property = propertyCache.ConfigurableParameters[propertyName];
-                } else {
-                    throw new Exception($"Property {propertyName} not found in the property cache.");
-                }
-
-                var reachedInMaximumSeconds = result["reachedInMaximumSeconds"];
-                var reachedInMaximumSecondsValue = reachedInMaximumSeconds.ToString().Split('^')[0];
-
-                // Build this Condition's full constraint expression tree.
-                var constraints = GetConditionConstraints(conditionNode, propertyNode, reachedInMaximumSeconds) ??
-                    throw new Exception($"Condition {conditionNode.ToString()} has no constraints.");
-
-                var condition = new Condition() {
+                var condition = new Condition {
                     Constraints = constraints,
                     Name = conditionNode.ToString(),
                     Property = property,
-                    ReachedInMaximumSeconds = int.Parse(reachedInMaximumSecondsValue)
+                    IsBreakable = isBreakable,
+                    Priority = priorityString is not null ? int.Parse(priorityString) : null!,
+                    ReachedInMaximumSeconds = reachedInMaximumSecondsString is not null ? int.Parse(reachedInMaximumSecondsString) : null!,
+                    SatisfiedBy = satisfiedByString is not null ? DateTime.Parse(satisfiedByString) : null!
                 };
 
                 conditions.Add(condition);
@@ -269,366 +259,384 @@ namespace Logic.Mapek {
             return conditions;
         }
 
-        private List<ConstraintExpression> GetConditionConstraints(INode condition, INode property, INode reachedInMaximumSeconds) {
+        private static string GetOptionalQueryResult(ISparqlResult queryResult, string variableName) {
+            return queryResult.HasValue(variableName) ? queryResult[variableName].ToString().Split("^^")[0] : null!;
+        }
+
+        private List<ConstraintExpression> GetConditionConstraints(INode condition, PropertyCache propertyCache) {
             var constraintExpressions = new List<ConstraintExpression>();
 
             // This could be made more streamlined and elegant through the use of fewer, more cleverly combined queries, however,
-            // SPARQL doesn't handle bNode identities, so these can't be used as variables for later referencing. For this reason, it's
-            // necessary to loop through all range constraint operators (">", ">=", "<", "<=") to execute the same queries with each one.
+            // SPARQL doesn't handle bNode identities, so these can't be used as variables for later referencing.
             //
             // Documentation: (https://www.w3.org/TR/sparql11-query/#BlankNodesInResults)
             // "An application writer should not expect blank node labels in a query to refer to a particular blank node in the data."
-            // For this reason, queries can be constructed with contiguous chains of bNodes, however, saving their INode objects and
+            // For this reason, queries can be constructed with continuous chains of bNodes, however, saving their INode objects and
             // using them as variables in subsequent queries doesn't work.
             //
             // A workaround would certainly be to insert triples as markings (much like for the inference rules), but the instance
-            // model should probably not be polluted in light of other options.
-            var operatorFilters = new List<ConstraintType>
-            {
+            // model should probably not be (more) polluted in light of other options.
+
+            var comparisonOperators = new List<ConstraintType> {
+                ConstraintType.EqualTo,
                 ConstraintType.GreaterThan,
                 ConstraintType.GreaterThanOrEqualTo,
                 ConstraintType.LessThan,
                 ConstraintType.LessThanOrEqualTo
             };
 
-            AddConstraintsOfFirstOrOnlyRangeValues(constraintExpressions,
-                condition,
-                property,
-                reachedInMaximumSeconds,
-                operatorFilters);
-
-            AddConstraintsOfSecondRangeValues(constraintExpressions,
-                condition,
-                property,
-                reachedInMaximumSeconds,
-                operatorFilters);
-
-            AddConstraintsOfDisjunctionsOfOneAndOne(constraintExpressions,
-                condition,
-                property,
-                reachedInMaximumSeconds,
-                operatorFilters);
-
-            // For models created with Protege (and the OWL API), disjunctions containing 1 and then 2 values will be converted to those
-            // containing 2 and then 1.
-            AddConstraintsOfDisjunctionsOfTwoAndOne(constraintExpressions,
-                condition,
-                property,
-                reachedInMaximumSeconds,
-                operatorFilters);
-
-            AddConstraintsOfDisjunctionsOfTwoAndTwo(constraintExpressions,
-                condition,
-                property,
-                reachedInMaximumSeconds,
-                operatorFilters);
+            // Example: >15
+            AddSingleConstraints(constraintExpressions, condition, comparisonOperators, propertyCache);
+            // Example: >15 and <20
+            AddConjunctiveConstraints(constraintExpressions, condition);
+            // Example: <15 or >20
+            AddDisjunctiveSingleSingleConstraints(constraintExpressions, condition);
+            // Example: (>15 and <20) or >25
+            AddDisjunctiveDoubleSingleConstraints(constraintExpressions, condition);
+            // Example: (>15 and <20) or (>25 and <30)
+            AddDisjunctiveDoubleDoubleConstraints(constraintExpressions, condition);
 
             return constraintExpressions;
         }
 
-        private void AddConstraintsOfFirstOrOnlyRangeValues(IList<ConstraintExpression> constraintExpressions,
-            INode condition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            IEnumerable<ConstraintType> constraintTypes) {
-            foreach (var constraintType in constraintTypes) {
-                var operatorFilter = GetOperatorFilterFromConstraintType(constraintType);
+        private void AddSingleConstraints(IList<ConstraintExpression> constraintExpressions, INode conditionNode, IEnumerable<ConstraintType> comparisonOperators, PropertyCache propertyCache) {
+            foreach (var comparisonOperator in comparisonOperators) {
+                var operatorObjectProperty = GetOperatorObjectPropertyFromConstraintType(comparisonOperator);
 
-                // Gets the constraints of first or only values of ranges.
-                var query = GetParameterizedStringQuery(@"SELECT ?constraint WHERE {
-                    @condition ssn:forProperty @property .
-                    @condition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                    @condition rdf:type ?bNode1 .
-                    ?bNode1 owl:onProperty meta:hasValueConstraint .
-                    ?bNode1 owl:onDataRange ?bNode2 .
-                    ?bNode2 owl:withRestrictions ?bNode3 .
-                    ?bNode3 rdf:first [ " + operatorFilter + " ?constraint ] .}");
+                var query = GetParameterizedStringQuery(@"SELECT ?boundProperty ?operator WHERE {
+                    @condition rdf:type ?aNode .
+                    ?aNode rdf:type owl:Restriction .
+                    ?aNode owl:hasValue ?boundProperty .
+                    ?aNode owl:onProperty " + operatorObjectProperty + " .}");
 
-                query.SetParameter("condition", condition);
-                query.SetParameter("property", property);
-                query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+                query.SetParameter("condition", conditionNode);
 
                 var queryResult = ExecuteSuppressedQuery(query);
 
                 foreach (var result in queryResult.Results) {
-                    var constraint = result["constraint"].ToString().Split('^')[0];
+                    var boundPropertyName = result["boundProperty"].ToString();
+                    var boundProperty = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, boundPropertyName);
 
-                    var constraintExpression = new AtomicConstraintExpression {
-                        Right = constraint,
-                        ConstraintType = constraintType
-                    };
-
-                    constraintExpressions.Add(constraintExpression);
+                    constraintExpressions.Add(new AtomicConstraintExpression {
+                        ConstraintType = comparisonOperator,
+                        Property = boundProperty
+                    });
                 }
             }
         }
 
-        private void AddConstraintsOfSecondRangeValues(IList<ConstraintExpression> constraintExpressions,
-            INode condition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            IEnumerable<ConstraintType> constraintTypes) {
-            foreach (var constraintType in constraintTypes) {
-                var operatorFilter = GetOperatorFilterFromConstraintType(constraintType);
+        private void AddConjunctiveConstraints(IList<ConstraintExpression> constraintExpressions, INode conditionNode) {
 
-                // Gets the constraints of the second values of ranges.
-                var query = GetParameterizedStringQuery(@"SELECT ?constraint WHERE {
-                    @condition ssn:forProperty @property .
-                    @condition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                    @condition rdf:type ?bNode1 .
-                    ?bNode1 owl:onProperty meta:hasValueConstraint .
-                    ?bNode1 owl:onDataRange ?bNode2 .
-                    ?bNode2 owl:withRestrictions ?bNode3 .
-                    ?bNode3 rdf:rest ?bNode4 .
-                    ?bNode4 rdf:first [ " + operatorFilter + " ?constraint ] . }");
-
-                query.SetParameter("condition", condition);
-                query.SetParameter("property", property);
-                query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-                var queryResult = ExecuteSuppressedQuery(query);
-
-                foreach (var result in queryResult.Results) {
-                    var constraint = result["constraint"].ToString().Split('^')[0];
-
-                    var constraintExpression = new AtomicConstraintExpression {
-                        Right = constraint,
-                        ConstraintType = constraintType
-                    };
-
-                    constraintExpressions.Add(constraintExpression);
-                }
-            }
         }
 
-        private void AddConstraintsOfDisjunctionsOfOneAndOne(IList<ConstraintExpression> constraintExpressions,
-            INode condition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            IEnumerable<ConstraintType> constraintTypes) {
-            foreach (var constraintType1 in constraintTypes) {
-                var operatorFilter1 = GetOperatorFilterFromConstraintType(constraintType1);
+        private void AddDisjunctiveSingleSingleConstraints(IList<ConstraintExpression> constraintExpressions, INode conditionNode) {
 
-                foreach (var constraintType2 in constraintTypes) {
-                    var operatorFilter2 = GetOperatorFilterFromConstraintType(constraintType2);
-
-                    // Gets the constraints of two disjunctive, single-valued ranges.
-                    var query = GetParameterizedStringQuery(@"SELECT ?constraint1 ?constraint2 WHERE {
-                        @condition ssn:forProperty @property .
-                        @condition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                        @condition rdf:type ?bNode1 .
-                        ?bNode1 owl:onProperty meta:hasValueConstraint .
-                        ?bNode1 owl:onDataRange ?bNode2 .
-                        ?bNode2 owl:unionOf ?bNode3 .
-                        ?bNode3 rdf:first ?bNode4_1 .
-                        ?bNode4_1 owl:withRestrictions ?bNode5_1 .
-                        ?bNode5_1 rdf:first [ " + operatorFilter1 + @" ?constraint1 ] .
-                        ?bNode5_1 rdf:rest () .
-                        ?bNode3 rdf:rest ?bNode4_2 .
-                        ?bNode4_2 rdf:first ?bNode5_2 .
-                        ?bNode5_2 owl:withRestrictions ?bNode6_2 .
-                        ?bNode6_2 rdf:first [ " + operatorFilter2 + @" ?constraint2 ] .
-                        ?bNode6_2 rdf:rest () . }");
-
-                    query.SetParameter("condition", condition);
-                    query.SetParameter("property", property);
-                    query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-                    var queryResult = ExecuteSuppressedQuery(query);
-
-                    foreach (var result in queryResult.Results) {
-                        var leftConstraint = result["constraint1"].ToString().Split('^')[0];
-                        var rightConstraint = result["constraint2"].ToString().Split('^')[0];
-
-                        var leftConstraintExpression = new AtomicConstraintExpression {
-                            Right = leftConstraint,
-                            ConstraintType = constraintType1
-                        };
-                        var rightConstraintExpression = new AtomicConstraintExpression {
-                            Right = rightConstraint,
-                            ConstraintType = constraintType2
-                        };
-                        var disjunctiveExpression = new NestedConstraintExpression {
-                            Left = leftConstraintExpression,
-                            Right = rightConstraintExpression,
-                            ConstraintType = ConstraintType.Or
-                        };
-
-                        constraintExpressions.Add(disjunctiveExpression);
-                    }
-                }
-            }
         }
 
-        private void AddConstraintsOfDisjunctionsOfTwoAndOne(IList<ConstraintExpression> constraintExpressions,
-            INode condition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            IEnumerable<ConstraintType> constraintTypes) {
-            foreach (var constraintType1 in constraintTypes) {
-                var operatorFilter1 = GetOperatorFilterFromConstraintType(constraintType1);
+        private void AddDisjunctiveDoubleSingleConstraints(IList<ConstraintExpression> constraintExpressions, INode conditionNode) {
 
-                foreach (var constraintType2 in constraintTypes) {
-                    var operatorFilter2 = GetOperatorFilterFromConstraintType(constraintType2);
-
-                    foreach (var constraintType3 in constraintTypes) {
-                        var operatorFilter3 = GetOperatorFilterFromConstraintType(constraintType3);
-
-                        // Gets the constraints of two disjunctive ranges, one two-valued and the other single-valued.
-                        var query = GetParameterizedStringQuery(@"SELECT ?constraint1 ?constraint2 ?constraint3 WHERE {
-                            @condition ssn:forProperty @property .
-                            @condition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                            @condition rdf:type ?bNode1 .
-                            ?bNode1 owl:onProperty meta:hasValueConstraint .
-                            ?bNode1 owl:onDataRange ?bNode2 .
-                            ?bNode2 owl:unionOf ?bNode3 .
-                            ?bNode3 rdf:first ?bNode4_1 .
-                            ?bNode4_1 owl:withRestrictions ?bNode5_1 .
-                            ?bNode5_1 rdf:first [ " + operatorFilter1 + @" ?constraint1 ] .
-                            ?bNode5_1 rdf:rest ?bNode6_1 .
-                            ?bNode6_1 rdf:first [ " + operatorFilter2 + @" ?constraint2 ] .
-                            ?bNode3 rdf:rest ?bNode4_2 .
-                            ?bNode4_2 rdf:first ?bNode5_2 .
-                            ?bNode5_2 owl:withRestrictions ?bNode6_2 .
-                            ?bNode6_2 rdf:first [ " + operatorFilter3 + @" ?constraint3 ] .
-                            ?bNode6_2 rdf:rest () . }");
-
-                        query.SetParameter("condition", condition);
-                        query.SetParameter("property", property);
-                        query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-                        var queryResult = ExecuteSuppressedQuery(query);
-
-                        foreach (var result in queryResult.Results) {
-                            var leftConstraint1 = result["constraint1"].ToString().Split('^')[0];
-                            var leftConstraint2 = result["constraint2"].ToString().Split('^')[0];
-                            var rightConstraint = result["constraint3"].ToString().Split('^')[0];
-
-                            var leftConstraintExpression1 = new AtomicConstraintExpression {
-                                Right = leftConstraint1,
-                                ConstraintType = constraintType1
-                            };
-                            var leftConstraintExpression2 = new AtomicConstraintExpression {
-                                Right = leftConstraint2,
-                                ConstraintType = constraintType2
-                            };
-                            var rightConstraintExpression = new AtomicConstraintExpression {
-                                Right = rightConstraint,
-                                ConstraintType = constraintType3
-                            };
-                            var leftConstraintExpression = new NestedConstraintExpression {
-                                Left = leftConstraintExpression1,
-                                Right = leftConstraintExpression2,
-                                ConstraintType = ConstraintType.And
-                            };
-                            var disjunctiveExpression = new NestedConstraintExpression {
-                                Left = leftConstraintExpression,
-                                Right = rightConstraintExpression,
-                                ConstraintType = ConstraintType.Or
-                            };
-
-                            constraintExpressions.Add(disjunctiveExpression);
-                        }
-                    }
-                }
-            }
         }
 
-        private void AddConstraintsOfDisjunctionsOfTwoAndTwo(IList<ConstraintExpression> constraintExpressions,
-            INode condition,
-            INode property,
-            INode reachedInMaximumSeconds,
-            IEnumerable<ConstraintType> constraintTypes) {
-            foreach (var constraintType1 in constraintTypes) {
-                var operatorFilter1 = GetOperatorFilterFromConstraintType(constraintType1);
+        private void AddDisjunctiveDoubleDoubleConstraints(IList<ConstraintExpression> constraintExpressions, INode conditionNode) {
 
-                foreach (var constraintType2 in constraintTypes) {
-                    var operatorFilter2 = GetOperatorFilterFromConstraintType(constraintType2);
-
-                    foreach (var constraintType3 in constraintTypes) {
-                        var operatorFilter3 = GetOperatorFilterFromConstraintType(constraintType3);
-
-                        foreach (var constraintType4 in constraintTypes) {
-                            var operatorFilter4 = GetOperatorFilterFromConstraintType(constraintType4);
-
-                            // Gets the constraints of two disjunctive, two-valued ranges.
-                            var query = GetParameterizedStringQuery(@"SELECT ?constraint1 ?constraint2 ?constraint3 ?constraint4 WHERE {
-                                @condition ssn:forProperty @property .
-                                @condition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
-                                @condition rdf:type ?bNode1 .
-                                ?bNode1 owl:onProperty meta:hasValueConstraint .
-                                ?bNode1 owl:onDataRange ?bNode2 .
-                                ?bNode2 owl:unionOf ?bNode3 .
-                                ?bNode3 rdf:first ?bNode4_1 .
-                                ?bNode4_1 owl:withRestrictions ?bNode5_1 .
-                                ?bNode5_1 rdf:first [ " + operatorFilter1 + @" ?constraint1 ] .
-                                ?bNode5_1 rdf:rest ?bNode6_1 .
-                                ?bNode6_1 rdf:first [ " + operatorFilter2 + @" ?constraint2 ] .
-                                ?bNode3 rdf:rest ?bNode4_2 .
-                                ?bNode4_2 rdf:first ?bNode5_2 .
-                                ?bNode5_2 owl:withRestrictions ?bNode6_2 .
-                                ?bNode6_2 rdf:first [ " + operatorFilter3 + @" ?constraint3 ] .
-                                ?bNode6_2 rdf:rest ?bNode7_2 .
-                                ?bNode7_2 rdf:first [ " + operatorFilter4 + " ?constraint4 ] . }");
-
-                            query.SetParameter("condition", condition);
-                            query.SetParameter("property", property);
-                            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
-
-                            var queryResult = ExecuteSuppressedQuery(query);
-
-                            foreach (var result in queryResult.Results) {
-                                var leftConstraint1 = result["constraint1"].ToString().Split('^')[0];
-                                var leftConstraint2 = result["constraint2"].ToString().Split('^')[0];
-                                var rightConstraint1 = result["constraint3"].ToString().Split('^')[0];
-                                var rightConstraint2 = result["constraint4"].ToString().Split('^')[0];
-
-                                var leftConstraintExpression1 = new AtomicConstraintExpression {
-                                    Right = leftConstraint1,
-                                    ConstraintType = constraintType1
-                                };
-                                var leftConstraintExpression2 = new AtomicConstraintExpression {
-                                    Right = leftConstraint2,
-                                    ConstraintType = constraintType2
-                                };
-                                var rightConstraintExpression1 = new AtomicConstraintExpression {
-                                    Right = rightConstraint1,
-                                    ConstraintType = constraintType3
-                                };
-                                var rightConstraintExpression2 = new AtomicConstraintExpression {
-                                    Right = rightConstraint2,
-                                    ConstraintType = constraintType4
-                                };
-                                var leftConstraintExpression = new NestedConstraintExpression {
-                                    Left = leftConstraintExpression1,
-                                    Right = leftConstraintExpression2,
-                                    ConstraintType = ConstraintType.And
-                                };
-                                var rightConstraintExpression = new NestedConstraintExpression {
-                                    Left = rightConstraintExpression1,
-                                    Right = rightConstraintExpression2,
-                                    ConstraintType = ConstraintType.And
-                                };
-                                var disjunctiveExpression = new NestedConstraintExpression {
-                                    Left = leftConstraintExpression,
-                                    Right = rightConstraintExpression,
-                                    ConstraintType = ConstraintType.Or
-                                };
-
-                                constraintExpressions.Add(disjunctiveExpression);
-                            }
-                        }
-                    }
-                }
-            }
         }
 
-        private static string GetOperatorFilterFromConstraintType(ConstraintType constraintType) {
+        //private void AddConstraintsOfFirstOrOnlyRangeValues(IList<ConstraintExpression> constraintExpressions,
+        //    INode condition,
+        //    IEnumerable<ConstraintType> constraintTypes) {
+        //    foreach (var constraintType in constraintTypes) {
+        //        var operatorFilter = GetOperatorFilterFromConstraintType(constraintType);
+
+        //        // Gets the constraints of first or only values of ranges.
+        //        var query = GetParameterizedStringQuery(@"SELECT ?constraint WHERE {
+        //            @condition ssn:forProperty @property .
+        //            @condition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+        //            @condition rdf:type ?bNode1 .
+        //            ?bNode1 owl:onProperty meta:hasValueConstraint .
+        //            ?bNode1 owl:onDataRange ?bNode2 .
+        //            ?bNode2 owl:withRestrictions ?bNode3 .
+        //            ?bNode3 rdf:first [ " + operatorFilter + " ?constraint ] .}");
+
+        //        query.SetParameter("condition", condition);
+
+        //        var queryResult = ExecuteSuppressedQuery(query);
+
+        //        foreach (var result in queryResult.Results) {
+        //            var constraint = result["constraint"].ToString().Split('^')[0];
+
+        //            var constraintExpression = new AtomicConstraintExpression {
+        //                Property = constraint,
+        //                ConstraintType = constraintType
+        //            };
+
+        //            constraintExpressions.Add(constraintExpression);
+        //        }
+        //    }
+        //}
+
+        //private void AddConstraintsOfSecondRangeValues(IList<ConstraintExpression> constraintExpressions,
+        //    INode condition,
+        //    IEnumerable<ConstraintType> constraintTypes) {
+        //    foreach (var constraintType in constraintTypes) {
+        //        var operatorFilter = GetOperatorFilterFromConstraintType(constraintType);
+
+        //        // Gets the constraints of the second values of ranges.
+        //        var query = GetParameterizedStringQuery(@"SELECT ?constraint WHERE {
+        //            @condition ssn:forProperty @property .
+        //            @condition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+        //            @condition rdf:type ?bNode1 .
+        //            ?bNode1 owl:onProperty meta:hasValueConstraint .
+        //            ?bNode1 owl:onDataRange ?bNode2 .
+        //            ?bNode2 owl:withRestrictions ?bNode3 .
+        //            ?bNode3 rdf:rest ?bNode4 .
+        //            ?bNode4 rdf:first [ " + operatorFilter + " ?constraint ] . }");
+
+        //        query.SetParameter("condition", condition);
+
+        //        var queryResult = ExecuteSuppressedQuery(query);
+
+        //        foreach (var result in queryResult.Results) {
+        //            var constraint = result["constraint"].ToString().Split('^')[0];
+
+        //            var constraintExpression = new AtomicConstraintExpression {
+        //                Property = constraint,
+        //                ConstraintType = constraintType
+        //            };
+
+        //            constraintExpressions.Add(constraintExpression);
+        //        }
+        //    }
+        //}
+
+        //private void AddConstraintsOfDisjunctionsOfOneAndOne(IList<ConstraintExpression> constraintExpressions,
+        //    INode condition,
+        //    INode property,
+        //    INode reachedInMaximumSeconds,
+        //    IEnumerable<ConstraintType> constraintTypes) {
+        //    foreach (var constraintType1 in constraintTypes) {
+        //        var operatorFilter1 = GetOperatorFilterFromConstraintType(constraintType1);
+
+        //        foreach (var constraintType2 in constraintTypes) {
+        //            var operatorFilter2 = GetOperatorFilterFromConstraintType(constraintType2);
+
+        //            // Gets the constraints of two disjunctive, single-valued ranges.
+        //            var query = GetParameterizedStringQuery(@"SELECT ?constraint1 ?constraint2 WHERE {
+        //                @condition ssn:forProperty @property .
+        //                @condition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+        //                @condition rdf:type ?bNode1 .
+        //                ?bNode1 owl:onProperty meta:hasValueConstraint .
+        //                ?bNode1 owl:onDataRange ?bNode2 .
+        //                ?bNode2 owl:unionOf ?bNode3 .
+        //                ?bNode3 rdf:first ?bNode4_1 .
+        //                ?bNode4_1 owl:withRestrictions ?bNode5_1 .
+        //                ?bNode5_1 rdf:first [ " + operatorFilter1 + @" ?constraint1 ] .
+        //                ?bNode5_1 rdf:rest () .
+        //                ?bNode3 rdf:rest ?bNode4_2 .
+        //                ?bNode4_2 rdf:first ?bNode5_2 .
+        //                ?bNode5_2 owl:withRestrictions ?bNode6_2 .
+        //                ?bNode6_2 rdf:first [ " + operatorFilter2 + @" ?constraint2 ] .
+        //                ?bNode6_2 rdf:rest () . }");
+
+        //            query.SetParameter("condition", condition);
+        //            query.SetParameter("property", property);
+        //            query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+        //            var queryResult = ExecuteSuppressedQuery(query);
+
+        //            foreach (var result in queryResult.Results) {
+        //                var leftConstraint = result["constraint1"].ToString().Split('^')[0];
+        //                var rightConstraint = result["constraint2"].ToString().Split('^')[0];
+
+        //                var leftConstraintExpression = new AtomicConstraintExpression {
+        //                    Property = leftConstraint,
+        //                    ConstraintType = constraintType1
+        //                };
+        //                var rightConstraintExpression = new AtomicConstraintExpression {
+        //                    Property = rightConstraint,
+        //                    ConstraintType = constraintType2
+        //                };
+        //                var disjunctiveExpression = new NestedConstraintExpression {
+        //                    Left = leftConstraintExpression,
+        //                    Right = rightConstraintExpression,
+        //                    ConstraintType = ConstraintType.Or
+        //                };
+
+        //                constraintExpressions.Add(disjunctiveExpression);
+        //            }
+        //        }
+        //    }
+        //}
+
+        //private void AddConstraintsOfDisjunctionsOfTwoAndOne(IList<ConstraintExpression> constraintExpressions,
+        //    INode condition,
+        //    INode property,
+        //    INode reachedInMaximumSeconds,
+        //    IEnumerable<ConstraintType> constraintTypes) {
+        //    foreach (var constraintType1 in constraintTypes) {
+        //        var operatorFilter1 = GetOperatorFilterFromConstraintType(constraintType1);
+
+        //        foreach (var constraintType2 in constraintTypes) {
+        //            var operatorFilter2 = GetOperatorFilterFromConstraintType(constraintType2);
+
+        //            foreach (var constraintType3 in constraintTypes) {
+        //                var operatorFilter3 = GetOperatorFilterFromConstraintType(constraintType3);
+
+        //                // Gets the constraints of two disjunctive ranges, one two-valued and the other single-valued.
+        //                var query = GetParameterizedStringQuery(@"SELECT ?constraint1 ?constraint2 ?constraint3 WHERE {
+        //                    @condition ssn:forProperty @property .
+        //                    @condition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+        //                    @condition rdf:type ?bNode1 .
+        //                    ?bNode1 owl:onProperty meta:hasValueConstraint .
+        //                    ?bNode1 owl:onDataRange ?bNode2 .
+        //                    ?bNode2 owl:unionOf ?bNode3 .
+        //                    ?bNode3 rdf:first ?bNode4_1 .
+        //                    ?bNode4_1 owl:withRestrictions ?bNode5_1 .
+        //                    ?bNode5_1 rdf:first [ " + operatorFilter1 + @" ?constraint1 ] .
+        //                    ?bNode5_1 rdf:rest ?bNode6_1 .
+        //                    ?bNode6_1 rdf:first [ " + operatorFilter2 + @" ?constraint2 ] .
+        //                    ?bNode3 rdf:rest ?bNode4_2 .
+        //                    ?bNode4_2 rdf:first ?bNode5_2 .
+        //                    ?bNode5_2 owl:withRestrictions ?bNode6_2 .
+        //                    ?bNode6_2 rdf:first [ " + operatorFilter3 + @" ?constraint3 ] .
+        //                    ?bNode6_2 rdf:rest () . }");
+
+        //                query.SetParameter("condition", condition);
+        //                query.SetParameter("property", property);
+        //                query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+        //                var queryResult = ExecuteSuppressedQuery(query);
+
+        //                foreach (var result in queryResult.Results) {
+        //                    var leftConstraint1 = result["constraint1"].ToString().Split('^')[0];
+        //                    var leftConstraint2 = result["constraint2"].ToString().Split('^')[0];
+        //                    var rightConstraint = result["constraint3"].ToString().Split('^')[0];
+
+        //                    var leftConstraintExpression1 = new AtomicConstraintExpression {
+        //                        Property = leftConstraint1,
+        //                        ConstraintType = constraintType1
+        //                    };
+        //                    var leftConstraintExpression2 = new AtomicConstraintExpression {
+        //                        Property = leftConstraint2,
+        //                        ConstraintType = constraintType2
+        //                    };
+        //                    var rightConstraintExpression = new AtomicConstraintExpression {
+        //                        Property = rightConstraint,
+        //                        ConstraintType = constraintType3
+        //                    };
+        //                    var leftConstraintExpression = new NestedConstraintExpression {
+        //                        Left = leftConstraintExpression1,
+        //                        Right = leftConstraintExpression2,
+        //                        ConstraintType = ConstraintType.And
+        //                    };
+        //                    var disjunctiveExpression = new NestedConstraintExpression {
+        //                        Left = leftConstraintExpression,
+        //                        Right = rightConstraintExpression,
+        //                        ConstraintType = ConstraintType.Or
+        //                    };
+
+        //                    constraintExpressions.Add(disjunctiveExpression);
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
+        //private void AddConstraintsOfDisjunctionsOfTwoAndTwo(IList<ConstraintExpression> constraintExpressions,
+        //    INode condition,
+        //    INode property,
+        //    INode reachedInMaximumSeconds,
+        //    IEnumerable<ConstraintType> constraintTypes) {
+        //    foreach (var constraintType1 in constraintTypes) {
+        //        var operatorFilter1 = GetOperatorFilterFromConstraintType(constraintType1);
+
+        //        foreach (var constraintType2 in constraintTypes) {
+        //            var operatorFilter2 = GetOperatorFilterFromConstraintType(constraintType2);
+
+        //            foreach (var constraintType3 in constraintTypes) {
+        //                var operatorFilter3 = GetOperatorFilterFromConstraintType(constraintType3);
+
+        //                foreach (var constraintType4 in constraintTypes) {
+        //                    var operatorFilter4 = GetOperatorFilterFromConstraintType(constraintType4);
+
+        //                    // Gets the constraints of two disjunctive, two-valued ranges.
+        //                    var query = GetParameterizedStringQuery(@"SELECT ?constraint1 ?constraint2 ?constraint3 ?constraint4 WHERE {
+        //                        @condition ssn:forProperty @property .
+        //                        @condition meta:reachedInMaximumSeconds @reachedInMaximumSeconds .
+        //                        @condition rdf:type ?bNode1 .
+        //                        ?bNode1 owl:onProperty meta:hasValueConstraint .
+        //                        ?bNode1 owl:onDataRange ?bNode2 .
+        //                        ?bNode2 owl:unionOf ?bNode3 .
+        //                        ?bNode3 rdf:first ?bNode4_1 .
+        //                        ?bNode4_1 owl:withRestrictions ?bNode5_1 .
+        //                        ?bNode5_1 rdf:first [ " + operatorFilter1 + @" ?constraint1 ] .
+        //                        ?bNode5_1 rdf:rest ?bNode6_1 .
+        //                        ?bNode6_1 rdf:first [ " + operatorFilter2 + @" ?constraint2 ] .
+        //                        ?bNode3 rdf:rest ?bNode4_2 .
+        //                        ?bNode4_2 rdf:first ?bNode5_2 .
+        //                        ?bNode5_2 owl:withRestrictions ?bNode6_2 .
+        //                        ?bNode6_2 rdf:first [ " + operatorFilter3 + @" ?constraint3 ] .
+        //                        ?bNode6_2 rdf:rest ?bNode7_2 .
+        //                        ?bNode7_2 rdf:first [ " + operatorFilter4 + " ?constraint4 ] . }");
+
+        //                    query.SetParameter("condition", condition);
+        //                    query.SetParameter("property", property);
+        //                    query.SetParameter("reachedInMaximumSeconds", reachedInMaximumSeconds);
+
+        //                    var queryResult = ExecuteSuppressedQuery(query);
+
+        //                    foreach (var result in queryResult.Results) {
+        //                        var leftConstraint1 = result["constraint1"].ToString().Split('^')[0];
+        //                        var leftConstraint2 = result["constraint2"].ToString().Split('^')[0];
+        //                        var rightConstraint1 = result["constraint3"].ToString().Split('^')[0];
+        //                        var rightConstraint2 = result["constraint4"].ToString().Split('^')[0];
+
+        //                        var leftConstraintExpression1 = new AtomicConstraintExpression {
+        //                            Property = leftConstraint1,
+        //                            ConstraintType = constraintType1
+        //                        };
+        //                        var leftConstraintExpression2 = new AtomicConstraintExpression {
+        //                            Property = leftConstraint2,
+        //                            ConstraintType = constraintType2
+        //                        };
+        //                        var rightConstraintExpression1 = new AtomicConstraintExpression {
+        //                            Property = rightConstraint1,
+        //                            ConstraintType = constraintType3
+        //                        };
+        //                        var rightConstraintExpression2 = new AtomicConstraintExpression {
+        //                            Property = rightConstraint2,
+        //                            ConstraintType = constraintType4
+        //                        };
+        //                        var leftConstraintExpression = new NestedConstraintExpression {
+        //                            Left = leftConstraintExpression1,
+        //                            Right = leftConstraintExpression2,
+        //                            ConstraintType = ConstraintType.And
+        //                        };
+        //                        var rightConstraintExpression = new NestedConstraintExpression {
+        //                            Left = rightConstraintExpression1,
+        //                            Right = rightConstraintExpression2,
+        //                            ConstraintType = ConstraintType.And
+        //                        };
+        //                        var disjunctiveExpression = new NestedConstraintExpression {
+        //                            Left = leftConstraintExpression,
+        //                            Right = rightConstraintExpression,
+        //                            ConstraintType = ConstraintType.Or
+        //                        };
+
+        //                        constraintExpressions.Add(disjunctiveExpression);
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
+        private static string GetOperatorObjectPropertyFromConstraintType(ConstraintType constraintType) {
             return constraintType switch {
-                ConstraintType.GreaterThan => "xsd:minExclusive",
-                ConstraintType.GreaterThanOrEqualTo => "xsd:minInclusive",
-                ConstraintType.LessThan => "xsd:maxExclusive",
-                ConstraintType.LessThanOrEqualTo => "xsd:maxInclusive",
+                ConstraintType.EqualTo => "meta:equalTo",
+                ConstraintType.GreaterThan => "meta:greaterThan",
+                ConstraintType.GreaterThanOrEqualTo => "meta:greaterThanOrEqualTo",
+                ConstraintType.LessThan => "meta:lessThan",
+                ConstraintType.LessThanOrEqualTo => "meta:lessThanOrEqualTo",
                 _ => throw new Exception($"{constraintType} is an invalid comparison operator.")
             };
         }

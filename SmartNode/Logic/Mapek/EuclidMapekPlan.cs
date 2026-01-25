@@ -36,16 +36,16 @@ namespace Logic.Mapek {
                     // We normalise the distance from the "border", values off the chart ("far left/far right") get turned into 1.
                     if (min.Count() == 1) {
                         var minC = (AtomicConstraintExpression)min.First();
-                        if (vh.IsLessThanOrEqualTo(p.Value, minC.Right)) {
-                            double v = double.Parse((string)minC.Right) - (double)p.Value;
-                            return Math.Min(1, Math.Abs(v / double.Parse((string)minC.Right)));
+                        if (vh.IsLessThanOrEqualTo(p.Value, minC.Property)) {
+                            double v = double.Parse((string)minC.Property.Value) - (double)p.Value;
+                            return Math.Min(1, Math.Abs(v / double.Parse((string)minC.Property.Value)));
                         }
                     }
                     if (max.Count() == 1) {
                         var maxC = (AtomicConstraintExpression)max.First();
-                        if (vh.IsGreaterThanOrEqualTo(p.Value, maxC.Right)) {
-                            double v = (double)p.Value - double.Parse((string)maxC.Right);
-                            return Math.Min(1, Math.Abs(v / double.Parse((string)maxC.Right)));
+                        if (vh.IsGreaterThanOrEqualTo(p.Value, maxC.Property)) {
+                            double v = (double)p.Value - double.Parse((string)maxC.Property.Value);
+                            return Math.Min(1, Math.Abs(v / double.Parse((string)maxC.Property.Value)));
                         }
                     }
                     return 0; // Fallthrough, we're in the interval!

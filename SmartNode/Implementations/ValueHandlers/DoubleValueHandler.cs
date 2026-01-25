@@ -34,7 +34,7 @@ namespace Implementations.ValueHandlers
                 // In case of finding the node type in the expression delegate map, we know it must be a binary expression with constant values
                 // to be compared.
                 var atomicConstraintExpression = (AtomicConstraintExpression)constraintExpression;
-                var right = atomicConstraintExpression.Right;
+                var right = atomicConstraintExpression.Property.Value;
 
                 if (propertyValue is not double)
                 {

@@ -214,13 +214,10 @@ namespace Logic.Mapek {
 
             foreach (var condition in conditions) {
                 var valueHandler = _factory.GetValueHandlerImplementation(condition.Property.OwlType);
-                var quantizedConstraints = new List<ConstraintExpression>();
-                foreach (var constraint in condition.Constraints) {
-                    var quantizedConstraint = GetQuantizedConditionConstraint(constraint, valueHandler);
-                    quantizedConstraints.Add(quantizedConstraint);
-                }
+                var constraint = GetQuantizedConditionConstraint(condition.Constraint, valueHandler);
+
                 quantizedConditions.Add(new Condition {
-                    Constraints = quantizedConstraints,
+                    Constraint = constraint,
                     Name = condition.Name,
                     Property = condition.Property,
                     ReachedInMaximumSeconds = condition.ReachedInMaximumSeconds

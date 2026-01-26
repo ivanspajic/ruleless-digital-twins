@@ -102,14 +102,12 @@ namespace TestProject {
                     Name = "FakeCondition1",
                     ReachedInMaximumSeconds = 0,
                     Property = quantizedProperties[0],
-                    Constraints = new List<ConstraintExpression> {
-                        new AtomicConstraintExpression {
-                            ConstraintType = ConstraintType.GreaterThan,
-                            Property = new Property {
-                                Name = "ConditionProperty1",
-                                OwlType = "http://www.w3.org/2001/XMLSchema#double",
-                                Value = 22.5
-                            }
+                    Constraint = new AtomicConstraintExpression {
+                        ConstraintType = ConstraintType.GreaterThan,
+                        Property = new Property {
+                            Name = "ConditionProperty1",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                            Value = 22.5
                         }
                     }
                 },
@@ -117,14 +115,12 @@ namespace TestProject {
                     Name = "FakeCondition2",
                     ReachedInMaximumSeconds = 0,
                     Property = quantizedProperties[1],
-                    Constraints = new List<ConstraintExpression> {
-                        new AtomicConstraintExpression {
-                            ConstraintType = ConstraintType.LessThanOrEqualTo,
-                            Property = new Property {
-                                Name = "ConditionProperty2",
-                                OwlType = "http://www.w3.org/2001/XMLSchema#double",
-                                Value = 12.25
-                            }
+                    Constraint = new AtomicConstraintExpression {
+                        ConstraintType = ConstraintType.LessThanOrEqualTo,
+                        Property = new Property {
+                            Name = "ConditionProperty2",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                            Value = 12.25
                         }
                     }
                 }
@@ -143,14 +139,12 @@ namespace TestProject {
                         Name = "FakeCondition1",
                         ReachedInMaximumSeconds = 0,
                         Property = quantizedProperties[0],
-                        Constraints = new List<ConstraintExpression> {
-                            new AtomicConstraintExpression {
-                                ConstraintType = ConstraintType.GreaterThan,
-                                Property = new Property {
-                                    Name = "ConditionProperty1",
-                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
-                                    Value = 22.5
-                                }
+                        Constraint = new AtomicConstraintExpression {
+                            ConstraintType = ConstraintType.GreaterThan,
+                            Property = new Property {
+                                Name = "ConditionProperty1",
+                                OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                Value = 22.5
                             }
                         }
                     },
@@ -158,14 +152,12 @@ namespace TestProject {
                         Name = "FakeCondition2",
                         ReachedInMaximumSeconds = 0,
                         Property = quantizedProperties[1],
-                        Constraints = new List<ConstraintExpression> {
-                            new AtomicConstraintExpression {
-                                ConstraintType = ConstraintType.LessThanOrEqualTo,
-                                Property = new Property {
-                                    Name = "ConditionProperty2",
-                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
-                                    Value = 12.25
-                                }
+                        Constraint = new AtomicConstraintExpression {
+                            ConstraintType = ConstraintType.LessThanOrEqualTo,
+                            Property = new Property {
+                                Name = "ConditionProperty2",
+                                OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                Value = 12.25
                             }
                         }
                     }
@@ -194,14 +186,12 @@ namespace TestProject {
                         Name = "FakeCondition1",
                         ReachedInMaximumSeconds = 0,
                         Property = quantizedProperties[1],
-                        Constraints = new List<ConstraintExpression> {
-                            new AtomicConstraintExpression {
-                                ConstraintType = ConstraintType.GreaterThan,
-                                Property = new Property {
-                                    Name = "ConditionProperty1",
-                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
-                                    Value = 22.75
-                                }
+                        Constraint = new AtomicConstraintExpression {
+                            ConstraintType = ConstraintType.GreaterThan,
+                            Property = new Property {
+                                Name = "ConditionProperty1",
+                                OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                Value = 22.75
                             }
                         }
                     },
@@ -209,14 +199,12 @@ namespace TestProject {
                         Name = "FakeCondition2",
                         ReachedInMaximumSeconds = 0,
                         Property = quantizedProperties[1],
-                        Constraints = new List<ConstraintExpression> {
-                            new AtomicConstraintExpression {
-                                ConstraintType = ConstraintType.LessThanOrEqualTo,
-                                Property = new Property {
-                                    Name = "ConditionProperty2",
-                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
-                                    Value = 12.25
-                                }
+                        Constraint = new AtomicConstraintExpression {
+                            ConstraintType = ConstraintType.LessThanOrEqualTo,
+                            Property = new Property {
+                                Name = "ConditionProperty2",
+                                OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                Value = 12.25
                             }
                         }
                     }
@@ -269,14 +257,12 @@ namespace TestProject {
                             OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = 22.674
                         },
-                        Constraints = new List<ConstraintExpression> {
-                            new AtomicConstraintExpression {
-                                ConstraintType = ConstraintType.GreaterThan,
-                                Property = new Property {
-                                    Name = "ConditionProperty1",
-                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
-                                    Value = 22.456
-                                }
+                        Constraint = new AtomicConstraintExpression {
+                            ConstraintType = ConstraintType.GreaterThan,
+                            Property = new Property {
+                                Name = "ConditionProperty1",
+                                OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                Value = 22.456
                             }
                         }
                     },
@@ -288,14 +274,12 @@ namespace TestProject {
                             OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = 11.995
                         },
-                        Constraints = new List<ConstraintExpression> {
-                            new AtomicConstraintExpression {
-                                ConstraintType = ConstraintType.LessThanOrEqualTo,
-                                Property = new Property {
-                                    Name = "ConditionProperty2",
-                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
-                                    Value = 12.345
-                                }
+                        Constraint = new AtomicConstraintExpression {
+                            ConstraintType = ConstraintType.LessThanOrEqualTo,
+                            Property = new Property {
+                                Name = "ConditionProperty2",
+                                OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                Value = 12.345
                             }
                         }
                     }
@@ -455,14 +439,12 @@ namespace TestProject {
                             OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = 22.674
                         },
-                        Constraints = new List<ConstraintExpression> {
-                            new AtomicConstraintExpression {
-                                ConstraintType = ConstraintType.GreaterThan,
-                                Property = new Property {
-                                    Name = "ConditionProperty1",
-                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
-                                    Value = 22.5
-                                }
+                        Constraint = new AtomicConstraintExpression {
+                            ConstraintType = ConstraintType.GreaterThan,
+                            Property = new Property {
+                                Name = "ConditionProperty1",
+                                OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                Value = 22.5
                             }
                         }
                     },
@@ -474,14 +456,12 @@ namespace TestProject {
                             OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = 11.995
                         },
-                        Constraints = new List<ConstraintExpression> {
-                            new AtomicConstraintExpression {
-                                ConstraintType = ConstraintType.LessThanOrEqualTo,
-                                Property = new Property {
-                                    Name = "ConditionProperty2",
-                                    OwlType = "http://www.w3.org/2001/XMLSchema#double",
-                                    Value = 12.25
-                                }
+                        Constraint = new AtomicConstraintExpression {
+                            ConstraintType = ConstraintType.LessThanOrEqualTo,
+                            Property = new Property {
+                                Name = "ConditionProperty2",
+                                OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                                Value = 12.25
                             }
                         }
                     }

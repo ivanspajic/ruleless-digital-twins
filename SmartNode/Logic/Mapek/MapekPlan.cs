@@ -628,11 +628,8 @@ namespace Logic.Mapek
                 }
 
                 var valueHandler = _factory.GetValueHandlerImplementation(condition.Property.OwlType);
-                // Could use .Sum() here, but if you generalise it further you'll run into CS9236.
-                foreach (var constraint in condition.Constraints) {
-                    var unsatisfiedConstraints = valueHandler.GetUnsatisfiedConstraintsFromEvaluation(constraint, p.Value);
-                    numberOfSatisfiedConditions += unsatisfiedConstraints.Any() ? 0 : 1;
-                }
+                var unsatisfiedConstraints = valueHandler.GetUnsatisfiedConstraintsFromEvaluation(condition.Constraint, p.Value);
+                numberOfSatisfiedConditions += unsatisfiedConstraints.Any() ? 0 : 1;
             }
 
             return numberOfSatisfiedConditions;

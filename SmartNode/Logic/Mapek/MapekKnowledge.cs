@@ -240,11 +240,10 @@ namespace Logic.Mapek {
                 var satisfiedByString = GetOptionalQueryResult(result, "satisfiedBy");
 
                 var property = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, propertyName);
-
-                var constraints = GetConditionConstraints(conditionNode, propertyCache);
+                var constraint = GetConditionConstraint(conditionNode, propertyCache);
 
                 var condition = new Condition {
-                    Constraints = constraints,
+                    Constraint = constraint,
                     Name = conditionNode.ToString(),
                     Property = property,
                     IsBreakable = isBreakable,
@@ -263,8 +262,8 @@ namespace Logic.Mapek {
             return queryResult.HasValue(variableName) ? queryResult[variableName].ToString().Split("^^")[0] : null!;
         }
 
-        private List<ConstraintExpression> GetConditionConstraints(INode condition, PropertyCache propertyCache) {
-            var constraintExpressions = new List<ConstraintExpression>();
+        private ConstraintExpression GetConditionConstraint(INode condition, PropertyCache propertyCache) {
+            ConstraintExpression constraintExpression = null!;
 
             // This could be made more streamlined and elegant through the use of fewer, more cleverly combined queries, however,
             // SPARQL doesn't handle bNode identities, so these can't be used as variables for later referencing.
@@ -277,69 +276,356 @@ namespace Logic.Mapek {
             // A workaround would certainly be to insert triples as markings (much like for the inference rules), but the instance
             // model should probably not be (more) polluted in light of other options.
 
-            var comparisonOperators = new List<ConstraintType> {
-                ConstraintType.EqualTo,
-                ConstraintType.GreaterThan,
-                ConstraintType.GreaterThanOrEqualTo,
-                ConstraintType.LessThan,
-                ConstraintType.LessThanOrEqualTo
-            };
+            // TODO: Should this pattern iterate over a collection of delegates instead?
 
             // Example: >15
-            AddSingleConstraints(constraintExpressions, condition, comparisonOperators, propertyCache);
-            // Example: >15 and <20
-            AddConjunctiveConstraints(constraintExpressions, condition);
-            // Example: <15 or >20
-            AddDisjunctiveSingleSingleConstraints(constraintExpressions, condition);
-            // Example: (>15 and <20) or >25
-            AddDisjunctiveDoubleSingleConstraints(constraintExpressions, condition);
-            // Example: (>15 and <20) or (>25 and <30)
-            AddDisjunctiveDoubleDoubleConstraints(constraintExpressions, condition);
+            constraintExpression = GetSingleConstraintOrNull(condition, propertyCache);
 
-            return constraintExpressions;
-        }
-
-        private void AddSingleConstraints(IList<ConstraintExpression> constraintExpressions, INode conditionNode, IEnumerable<ConstraintType> comparisonOperators, PropertyCache propertyCache) {
-            foreach (var comparisonOperator in comparisonOperators) {
-                var operatorObjectProperty = GetOperatorObjectPropertyFromConstraintType(comparisonOperator);
-
-                var query = GetParameterizedStringQuery(@"SELECT ?boundProperty ?operator WHERE {
-                    @condition rdf:type ?aNode .
-                    ?aNode rdf:type owl:Restriction .
-                    ?aNode owl:hasValue ?boundProperty .
-                    ?aNode owl:onProperty " + operatorObjectProperty + " .}");
-
-                query.SetParameter("condition", conditionNode);
-
-                var queryResult = ExecuteSuppressedQuery(query);
-
-                foreach (var result in queryResult.Results) {
-                    var boundPropertyName = result["boundProperty"].ToString();
-                    var boundProperty = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, boundPropertyName);
-
-                    constraintExpressions.Add(new AtomicConstraintExpression {
-                        ConstraintType = comparisonOperator,
-                        Property = boundProperty
-                    });
-                }
+            if (constraintExpression is not null) {
+                return constraintExpression;
             }
+
+            // Example: >15 and <20
+            constraintExpression = GetConjunctiveConstraintOrNull(condition, propertyCache);
+
+            if (constraintExpression is not null) {
+                return constraintExpression;
+            }
+
+            // Example: <15 or >20
+            constraintExpression = GetSingleSingleDisjunctiveConstraintOrNull(condition, propertyCache);
+
+            if (constraintExpression is not null) {
+                return constraintExpression;
+            }
+
+            // Example: (>15 and <20) or >25
+            constraintExpression = GetDoubleSingleDisjunctiveConstraintOrNull(condition, propertyCache);
+
+            if (constraintExpression is not null) {
+                return constraintExpression;
+            }
+
+            // Example: (>15 and <20) or (>25 and <30)
+            constraintExpression = GetDoubleDoubleDisjunctiveConstraintOrNull(condition, propertyCache);
+
+            if (constraintExpression is null) {
+                throw new Exception($"Condition {condition.ToString()} has no supported constraints.");
+            }
+
+            return constraintExpression;
         }
 
-        private void AddConjunctiveConstraints(IList<ConstraintExpression> constraintExpressions, INode conditionNode) {
+        private ConstraintExpression GetSingleConstraintOrNull(INode conditionNode, PropertyCache propertyCache) {
+            var query = GetParameterizedStringQuery(@"SELECT ?comparisonOperator ?boundProperty WHERE {
+                @condition rdf:type ?aNode .
+                ?aNode rdf:type owl:Restriction .
+                ?aNode owl:onProperty ?comparisonOperator .
+                ?aNode owl:hasValue ?boundProperty . }");
 
+            query.SetParameter("condition", conditionNode);
+
+            var queryResult = ExecuteSuppressedQuery(query);
+
+            if (queryResult.IsEmpty) {
+                return null!;
+            }
+
+            // We allow only one constraint per Condition.
+            var result = queryResult.Results[0];
+
+            var comparisonOperatorName = result["comparisonOperator"].ToString();
+            var boundPropertyName = result["boundProperty"].ToString();
+            var comparisonOperator = GetConstraintTypeFromOperatorString(comparisonOperatorName);
+            var boundProperty = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, boundPropertyName);
+
+            var constraint = new AtomicConstraintExpression {
+                ConstraintType = comparisonOperator,
+                Property = boundProperty
+            };
+
+            return constraint;
         }
 
-        private void AddDisjunctiveSingleSingleConstraints(IList<ConstraintExpression> constraintExpressions, INode conditionNode) {
+        private ConstraintExpression GetConjunctiveConstraintOrNull(INode conditionNode, PropertyCache propertyCache) {
+            var query = GetParameterizedStringQuery(@"SELECT ?comparisonOperator1 ?boundProperty1 ?comparisonOperator2 ?boundProperty2 WHERE {
+                @condition rdf:type ?aNode1 .
+                ?aNode1 owl:intersectionOf ?aList .
+                ?aList1 rdf:first ?aNode2 .
+                ?aNode2 rdf:type owl:Restriction .
+                ?aNode2 owl:onProperty ?comparisonOperator1 .
+                ?aNode2 owl:hasValue ?boundProperty1 .
+                ?aList1 rdf:rest ?aList2 .
+                ?aList2 rdf:first ?aNode3 .
+                ?aNode3 rdf:type owl:Restriction .
+                ?aNode3 owl:onProperty ?comparisonOperator2 .
+                ?aNode3 owl:hasValue ?boundProperty2 . }");
 
+            query.SetParameter("condition", conditionNode);
+
+            var queryResult = ExecuteSuppressedQuery(query);
+
+            if (queryResult.IsEmpty) {
+                return null!;
+            }
+
+            // We allow only one constraint per Condition.
+            var result = queryResult.Results[0];
+
+            var comparisonOperator1Name = result["comparisonOperator1"].ToString();
+            var boundProperty1Name = result["boundProperty1"].ToString();
+            var comparisonOperator1 = GetConstraintTypeFromOperatorString(comparisonOperator1Name);
+            var boundProperty1 = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, boundProperty1Name);
+
+            var comparisonOperator2Name = result["comparisonOperator2"].ToString();
+            var boundProperty2Name = result["boundProperty2"].ToString();
+            var comparisonOperator2 = GetConstraintTypeFromOperatorString(comparisonOperator2Name);
+            var boundProperty2 = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, boundProperty2Name);
+
+            var leftConstraint = new AtomicConstraintExpression {
+                ConstraintType = comparisonOperator1,
+                Property = boundProperty1
+            };
+            var rightConstraint = new AtomicConstraintExpression {
+                ConstraintType = comparisonOperator2,
+                Property = boundProperty2
+            };
+            var conjunctiveConstraint = new NestedConstraintExpression {
+                ConstraintType = ConstraintType.And,
+                Left = leftConstraint,
+                Right = rightConstraint
+            };
+
+            return conjunctiveConstraint;
         }
 
-        private void AddDisjunctiveDoubleSingleConstraints(IList<ConstraintExpression> constraintExpressions, INode conditionNode) {
+        private ConstraintExpression GetSingleSingleDisjunctiveConstraintOrNull(INode conditionNode, PropertyCache propertyCache) {
+            var query = GetParameterizedStringQuery(@"SELECT ?comparisonOperator1 ?boundProperty1 ?comparisonOperator2 ?boundProperty2 WHERE {
+                @condition rdf:type ?aNode1 .
+                ?aNode1 owl:unionOf ?aList1 .
+                ?aList1 rdf:first ?aNode2 .
+                ?aNode2 rdf:type owl:Restriction .
+                ?aNode2 owl:onProperty ?comparisonOperator1 .
+                ?aNode2 owl:hasValue ?boundProperty1 .
+                ?aList1 rdf:rest ?aList2 .
+                ?aList2 rdf:first ?aNode3 .
+                ?aNode3 rdf:type owl:Restriction .
+                ?aNode3 owl:onProperty ?comparisonOperator2 .
+                ?aNode3 owl:hasValue ?boundProperty2 . }");
 
+            query.SetParameter("condition", conditionNode);
+
+            var queryResult = ExecuteSuppressedQuery(query);
+
+            if (queryResult.IsEmpty) {
+                return null!;
+            }
+
+            // We allow only one constraint per Condition.
+            var result = queryResult.Results[0];
+
+            var comparisonOperator1Name = result["comparisonOperator1"].ToString();
+            var boundProperty1Name = result["boundProperty1"].ToString();
+            var comparisonOperator1 = GetConstraintTypeFromOperatorString(comparisonOperator1Name);
+            var boundProperty1 = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, boundProperty1Name);
+
+            var comparisonOperator2Name = result["comparisonOperator2"].ToString();
+            var boundProperty2Name = result["boundProperty2"].ToString();
+            var comparisonOperator2 = GetConstraintTypeFromOperatorString(comparisonOperator2Name);
+            var boundProperty2 = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, boundProperty2Name);
+
+            var leftConstraint = new AtomicConstraintExpression {
+                ConstraintType = comparisonOperator1,
+                Property = boundProperty1
+            };
+            var rightConstraint = new AtomicConstraintExpression {
+                ConstraintType = comparisonOperator2,
+                Property = boundProperty2
+            };
+            var disjunctiveConstraint = new NestedConstraintExpression {
+                ConstraintType = ConstraintType.Or,
+                Left = leftConstraint,
+                Right = rightConstraint
+            };
+
+            return disjunctiveConstraint;
         }
 
-        private void AddDisjunctiveDoubleDoubleConstraints(IList<ConstraintExpression> constraintExpressions, INode conditionNode) {
+        private ConstraintExpression GetDoubleSingleDisjunctiveConstraintOrNull(INode conditionNode, PropertyCache propertyCache) {
+            var query = GetParameterizedStringQuery(@"SELECT ?comparisonOperator1 ?boundProperty1 ?comparisonOperator2 ?boundProperty2 ?comparisonOperator3 ?boundProperty3 WHERE {
+                @condition rdf:type ?aNode1 .
+                ?aNode1 owl:unionOf ?aList1 .
+                ?aList1 rdf:first ?aNode2 .
+                ?aNode2 owl:intersectionOf ?aList2 .
+                ?aList2 rdf:first ?aNode3 .
+                ?aNode3 rdf:type owl:Restriction .
+                ?aNode3 owl:onProperty ?comparisonOperator1.
+                ?aNode3 owl:hasValue ?boundProperty1 .
+                ?aList2 rdf:rest ?aList3 .
+                ?aList3 rdf:first ?aNode4 .
+                ?aNode4 rdf:type owl:Restriction .
+                ?aNode4 owl:onProperty ?comparisonOperator2 .
+                ?aNode4 owl:hasValue ?boundProperty2 .
+                ?aList1 rdf:rest ?aList4 .
+                ?aList4 rdf:first ?aNode5 .
+                ?aNode5 rdf:type owl:Restriction .
+                ?aNode5 owl:onProperty ?comparisonOperator3 .
+                ?aNode5 owl:hasValue ?boundProperty3 . }");
 
+            query.SetParameter("condition", conditionNode);
+
+            var queryResult = ExecuteSuppressedQuery(query);
+
+            if (queryResult.IsEmpty) {
+                return null!;
+            }
+
+            // We allow only one constraint per Condition.
+            var result = queryResult.Results[0];
+
+            var comparisonOperator1Name = result["comparisonOperator1"].ToString();
+            var boundProperty1Name = result["boundProperty1"].ToString();
+            var comparisonOperator1 = GetConstraintTypeFromOperatorString(comparisonOperator1Name);
+            var boundProperty1 = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, boundProperty1Name);
+
+            var comparisonOperator2Name = result["comparisonOperator2"].ToString();
+            var boundProperty2Name = result["boundProperty2"].ToString();
+            var comparisonOperator2 = GetConstraintTypeFromOperatorString(comparisonOperator2Name);
+            var boundProperty2 = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, boundProperty2Name);
+
+            var comparisonOperator3Name = result["comparisonOperator3"].ToString();
+            var boundProperty3Name = result["boundProperty3"].ToString();
+            var comparisonOperator3 = GetConstraintTypeFromOperatorString(comparisonOperator3Name);
+            var boundProperty3 = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, boundProperty3Name);
+
+            var leftLeftConstraint = new AtomicConstraintExpression {
+                ConstraintType = comparisonOperator1,
+                Property = boundProperty1
+            };
+            var leftRightConstraint = new AtomicConstraintExpression {
+                ConstraintType = comparisonOperator2,
+                Property = boundProperty2
+            };
+            var conjunctiveConstraint = new NestedConstraintExpression {
+                ConstraintType = ConstraintType.And,
+                Left = leftLeftConstraint,
+                Right = leftRightConstraint
+            };
+            var rightConstraint = new AtomicConstraintExpression {
+                ConstraintType = comparisonOperator3,
+                Property = boundProperty3
+            };
+            var disjunctiveConstraint = new NestedConstraintExpression {
+                ConstraintType = ConstraintType.Or,
+                Left = conjunctiveConstraint,
+                Right = rightConstraint
+            };
+
+            return disjunctiveConstraint;
         }
+
+        private ConstraintExpression GetDoubleDoubleDisjunctiveConstraintOrNull(INode conditionNode, PropertyCache propertyCache) {
+            var query = GetParameterizedStringQuery(@"SELECT ?comparisonOperator1 ?boundProperty1 ?comparisonOperator2 ?boundProperty2 ?comparisonOperator3 ?boundProperty3 ?comparisonOperator4 ?boundProperty4 WHERE {
+                @condition rdf:type ?aNode1 .
+                ?aNode1 owl:unionOf ?aList1 .
+                ?aList1 rdf:first ?aNode2 .
+                ?aNode2 owl:intersectionOf ?aList2 .
+                ?aList2 rdf:first ?aNode3 .
+                ?aNode3 rdf:type owl:Restriction .
+                ?aNode3 owl:onProperty ?comparisonOperator1 .
+                ?aNode3 owl:hasValue ?boundProperty1 .
+                ?aList2 rdf:rest ?aList3 .
+                ?aList3 rdf:first ?aNode4 .
+                ?aNode4 rdf:type owl:Restriction .
+                ?aNode4 owl:onProperty ?comparisonOperator2 .
+                ?aNode4 owl:hasValue ?boundProperty2 .
+                ?aList1 rdf:rest ?aList4 .
+                ?aList4 rdf:first ?aNode5 .
+                ?aNode5 owl:intersectionOf ?aList5 .
+                ?aList5 rdf:first ?aNode6 .
+                ?aNode6 rdf:type owl:Restriction .
+                ?aNode6 owl:onProperty ?comparisonOperator3 .
+                ?aNode6 owl:hasValue ?boundProperty3 .
+                ?aList5 rdf:rest ?aList6 .
+                ?aList6 rdf:first ?aNode7 .
+                ?aNode7 rdf:type owl:Restriction .
+                ?aNode7 owl:onProperty ?comparisonOperator4 .
+                ?aNode7 owl:hasValue ?boundProperty4 . }");
+
+            query.SetParameter("condition", conditionNode);
+
+            var queryResult = ExecuteSuppressedQuery(query);
+
+            if (queryResult.IsEmpty) {
+                return null!;
+            }
+
+            // We only allow one constraint per Condition.
+            var result = queryResult.Results[0];
+
+            var comparisonOperator1Name = result["comparisonOperator1"].ToString();
+            var boundProperty1Name = result["boundProperty1"].ToString();
+            var comparisonOperator1 = GetConstraintTypeFromOperatorString(comparisonOperator1Name);
+            var boundProperty1 = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, boundProperty1Name);
+
+            var comparisonOperator2Name = result["comparisonOperator2"].ToString();
+            var boundProperty2Name = result["boundProperty2"].ToString();
+            var comparisonOperator2 = GetConstraintTypeFromOperatorString(comparisonOperator2Name);
+            var boundProperty2 = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, boundProperty2Name);
+
+            var comparisonOperator3Name = result["comparisonOperator3"].ToString();
+            var boundProperty3Name = result["boundProperty3"].ToString();
+            var comparisonOperator3 = GetConstraintTypeFromOperatorString(comparisonOperator3Name);
+            var boundProperty3 = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, boundProperty3Name);
+
+            var comparisonOperator4Name = result["comparisonOperator4"].ToString();
+            var boundProperty4Name = result["boundProperty4"].ToString();
+            var comparisonOperator4 = GetConstraintTypeFromOperatorString(comparisonOperator4Name);
+            var boundProperty4 = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, boundProperty4Name);
+
+            var leftLeftConstraint = new AtomicConstraintExpression {
+                ConstraintType = comparisonOperator1,
+                Property = boundProperty1
+            };
+            var leftRightConstraint = new AtomicConstraintExpression {
+                ConstraintType = comparisonOperator2,
+                Property = boundProperty2
+            };
+            var leftConjunctiveConstraint = new NestedConstraintExpression {
+                ConstraintType = ConstraintType.And,
+                Left = leftLeftConstraint,
+                Right = leftRightConstraint
+            };
+            var rightLeftConstraint = new AtomicConstraintExpression {
+                ConstraintType = comparisonOperator3,
+                Property = boundProperty3
+            };
+            var rightRightConstraint = new AtomicConstraintExpression {
+                ConstraintType = comparisonOperator4,
+                Property = boundProperty4
+            };
+            var rightConjunctiveConstraint = new NestedConstraintExpression {
+                ConstraintType = ConstraintType.And,
+                Left = rightLeftConstraint,
+                Right = rightRightConstraint
+            };
+            var disjunctiveConstraint = new NestedConstraintExpression {
+                ConstraintType = ConstraintType.Or,
+                Left = leftConjunctiveConstraint,
+                Right = rightConjunctiveConstraint
+            };
+
+            return disjunctiveConstraint;
+        }
+
+        private static ConstraintType GetConstraintTypeFromOperatorString(string operatorString) => operatorString switch {
+            "http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/equalTo" => ConstraintType.EqualTo,
+            "http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThan" => ConstraintType.GreaterThan,
+            "http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo" => ConstraintType.GreaterThanOrEqualTo,
+            "http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThan" => ConstraintType.LessThan,
+            "http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo" => ConstraintType.LessThanOrEqualTo,
+            _ => throw new Exception($"{operatorString} is not supported as a comparison operator.")
+        };
 
         //private void AddConstraintsOfFirstOrOnlyRangeValues(IList<ConstraintExpression> constraintExpressions,
         //    INode condition,

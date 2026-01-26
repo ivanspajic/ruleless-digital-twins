@@ -1,5 +1,4 @@
-﻿using CsvHelper;
-using Femyou;
+﻿using Femyou;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
@@ -12,10 +11,11 @@ namespace Implementations.ValueHandlers
         // In case of new ExpressionTypes being supported, this could be used to register new delegates.
         private static readonly Dictionary<ConstraintType, Func<double, double, bool>> _expressionDelegateMap = new()
         {
+            { ConstraintType.EqualTo, EvaluateEqualTo },
             { ConstraintType.GreaterThan, EvaluateGreaterThan },
             { ConstraintType.GreaterThanOrEqualTo, EvaluateGreaterThanOrEqualTo },
             { ConstraintType.LessThan, EvaluateLessThan },
-            { ConstraintType.LessThanOrEqualTo, EvaluateLessThanOrEqualTo },
+            { ConstraintType.LessThanOrEqualTo, EvaluateLessThanOrEqualTo }
         };
 
         // In case of more ways of combining constraint propositions of Conditions, this could be used to register new delegates.
@@ -194,6 +194,10 @@ namespace Implementations.ValueHandlers
             } else {
                 return Math.Floor(factor) * fuzziness;
             }
+        }
+
+        private static bool EvaluateEqualTo(double sensorValue, double conditionValue) {
+            return sensorValue == conditionValue;
         }
 
         private static bool EvaluateGreaterThan(double sensorValue, double conditionValue)

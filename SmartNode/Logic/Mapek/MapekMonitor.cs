@@ -40,7 +40,7 @@ namespace Logic.Mapek {
                 ?sensor ssn:implements ?procedure .
                 ?procedure ssn:hasOutput ?property .
                 ?property meta:hasValue ?initialValue .
-                FILTER NOT EXISTS { ?property meta:isInputOf ?otherProcedure } . }";
+                FILTER NOT EXISTS { ?property meta:isInputOf ?otherProcedure } }";
 
             var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
@@ -67,7 +67,7 @@ namespace Logic.Mapek {
             PopulateObservablePropertiesCache(cache.PropertyCache);
 
             // Get the values of Condition bound Properties in case there are any that are not handled by the above.
-            PopulateCacheWithNonObservedNonOutputProperties();
+            PopulateCacheWithConstantProperties(cache.PropertyCache);
 
             // Write Property values back to the knowledge base.
             WritePropertyValuesToKnowledgeBase(cache.PropertyCache);
@@ -252,6 +252,35 @@ namespace Logic.Mapek {
                 propertyCache.Properties.Add(observablePropertyName, observableProperty);
 
                 _logger.LogInformation("Added ObservableProperty {observableProperty} to the cache.", observablePropertyName);
+            }
+        }
+
+        private void PopulateCacheWithConstantProperties(PropertyCache propertyCache) {
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?constantProperty ?initialValue WHERE {
+                ?constantProperty rdf:type ssn:Property .
+                ?constantProperty meta:hasValue ?initialValue .
+                FILTER NOT EXISTS {
+                    ?sensor sosa:observes ?constantProperty
+                }
+                FILTER NOT EXISTS {
+                    ?sensorProcedure ssn:hasOutput ?constantProperty
+                } }");
+
+            var queryResult = _mapekKnowledge.ExecuteQuery(query);
+
+            foreach (var result in queryResult.Results) {
+                var propertyName = result["constantProperty"].ToString();
+                var initialValueSplit = result["initialValue"].ToString().Split("^^");
+
+                var constantProperty = new Property {
+                    Name = propertyName,
+                    Value = initialValueSplit[0],
+                    OwlType = initialValueSplit[1]
+                };
+
+                propertyCache.Properties.Add(propertyName, constantProperty);
+
+                _logger.LogInformation("Added constant Property {constantProperty} to the cache.", constantProperty);
             }
         }
 

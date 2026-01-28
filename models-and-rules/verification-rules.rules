@@ -215,7 +215,7 @@
 ]
 
 // Prints errors if Properties in Conditions have unsupported value types.
-[ruleVer2d: (?aNode :withPropertyCheck ?property)
+[ruleVer2c: (?aNode :withPropertyCheck ?property)
             (?condition rdf:type ?aNode)
             (?property meta:hasValue ?value)
             notDType(?value, xsd:double)
@@ -225,12 +225,35 @@
                 print("Unsupported Property value type", ?value, "used in Condition", ?condition)
 ]
 
+// These rules leave marks for subsequent rules to check that the right kinds of PropertyChanges exist for their Condition constraints.
+
+[ruleVer2d: (?aNode :withOperatorCheck meta:equalTo)
+            ->  (?aNode :withPropertyChangeCheck meta:ValueIncrease)
+                (?aNode :withPropertyChangeCheck meta:ValueDecrease)
+]
+
+[ruleVer2e: (?aNode :withOperatorCheck meta:greaterThan)
+            ->  (?aNode :withPropertyChangeCheck meta:ValueIncrease)
+]
+
+[ruleVer2f: (?aNode :withOperatorCheck meta:greaterThanOrEqualTo)
+            ->  (?aNode :withPropertyChangeCheck meta:ValueIncrease)
+]
+
+[ruleVer2g: (?aNode :withOperatorCheck meta:lessThan)
+            ->  (?aNode :withPropertyChangeCheck meta:ValueDecrease)
+]
+
+[ruleVer2h: (?aNode :withOperatorCheck meta:lessThanOrEqualTo)
+            ->  (?aNode :withPropertyChangeCheck meta:ValueDecrease)
+]
+
 
 
 // The following rules print errors in cases of Conditions that are always impossible.
 
 // = and < the same property is impossible.
-[ruleVer2e: (?aNode1 :withCheck "conjunction")
+[ruleVer2i: (?aNode1 :withCheck "conjunction")
             (?aNode2 :withCheck "conjunction")
             (?aNode1 :withCondition ?condition1)
             (?condition1 rdf:type meta:Condition)
@@ -252,7 +275,7 @@
 ]
 
 // = and > the same property is impossible.
-[ruleVer2f: (?aNode1 :withCheck "conjunction")
+[ruleVer2j: (?aNode1 :withCheck "conjunction")
             (?aNode2 :withCheck "conjunction")
             (?aNode1 :withCondition ?condition1)
             (?condition1 rdf:type meta:Condition)
@@ -274,7 +297,7 @@
 ]
 
 // < and > the same property is impossible.
-[ruleVer2g: (?aNode1 :withCheck "conjunction")
+[ruleVer2k: (?aNode1 :withCheck "conjunction")
             (?aNode2 :withCheck "conjunction")
             (?aNode1 :withCondition ?condition1)
             (?condition1 rdf:type meta:Condition)
@@ -296,7 +319,7 @@
 ]
 
 // < and >= the same property is impossible.
-[ruleVer2h: (?aNode1 :withCheck "conjunction")
+[ruleVer2l: (?aNode1 :withCheck "conjunction")
             (?aNode2 :withCheck "conjunction")
             (?aNode1 :withCondition ?condition1)
             (?condition1 rdf:type meta:Condition)
@@ -318,7 +341,7 @@
 ]
 
 // > and <= the same property is impossible.
-[ruleVer2i: (?aNode1 :withCheck "conjunction")
+[ruleVer2m: (?aNode1 :withCheck "conjunction")
             (?aNode2 :withCheck "conjunction")
             (?aNode1 :withCondition ?condition1)
             (?condition1 rdf:type meta:Condition)
@@ -345,7 +368,7 @@
 
 // Condition Properties should not also be constraint bounds since that will, depending on the operator, always
 // either be true (a tautology) or impossible (e.g., roomTemperature < roomTemperature).
-[ruleVer2k: (?aNode :withCondition ?condition)
+[ruleVer2n: (?aNode :withCondition ?condition)
             (?condition ssn:forProperty ?conditionProperty)
             (?aNode owl:hasValue ?boundProperty)
             equal(?conditionProperty, ?boundProperty)
@@ -355,7 +378,7 @@
 ]
 
 // > or <= the same property is always true.
-[ruleVer2k: (?aNode1 :withCheck "disjunction")
+[ruleVer2o: (?aNode1 :withCheck "disjunction")
             (?aNode2 :withCheck "disjunction")
             (?aNode1 :withCondition ?condition1)
             (?condition1 rdf:type meta:Condition)
@@ -373,7 +396,7 @@
 ]
 
 // < or >= the same property is always true.
-[ruleVer2l: (?aNode1 :withCheck "disjunction")
+[ruleVer2p: (?aNode1 :withCheck "disjunction")
             (?aNode2 :withCheck "disjunction")
             (?aNode1 :withCondition ?condition1)
             (?condition1 rdf:type meta:Condition)
@@ -391,7 +414,7 @@
 ]
 
 // >= or <= the same property is always true.
-[ruleVer2m: (?aNode1 :withCheck "disjunction")
+[ruleVer2q: (?aNode1 :withCheck "disjunction")
             (?aNode2 :withCheck "disjunction")
             (?aNode1 :withCondition ?condition1)
             (?condition1 rdf:type meta:Condition)
@@ -415,7 +438,7 @@
 
 // If Condition1 states some Property must be less than a Property bound, and Condition2 states that Property must
 // be greater than that same Property bound, then these are conflicting Conditions.
-[ruleVer2n: (?aNode1 :withCondition ?condition1)
+[ruleVer2r: (?aNode1 :withCondition ?condition1)
             (?condition1 rdf:type meta:Condition)
             (?condition1 ssn:forProperty ?conditionProperty1)
             (?aNode1 owl:hasValue ?boundProperty1)
@@ -435,7 +458,7 @@
 
 // If Condition1 states some Property must be less than a Property bound, and Condition2 states that Property must
 // be greater than or equal to that same Property bound, then these are conflicting Conditions.
-[ruleVer2o: (?aNode1 :withCondition ?condition1)
+[ruleVer2s: (?aNode1 :withCondition ?condition1)
             (?condition1 rdf:type meta:Condition)
             (?condition1 ssn:forProperty ?conditionProperty1)
             (?aNode1 owl:hasValue ?boundProperty1)
@@ -455,7 +478,7 @@
 
 // If Condition1 states some Property must be less than a Property bound, and Condition2 states that Property must
 // be equal to that same Property bound, then these are conflicting Conditions.
-[ruleVer2p: (?aNode1 :withCondition ?condition1)
+[ruleVer2t: (?aNode1 :withCondition ?condition1)
             (?condition1 rdf:type meta:Condition)
             (?condition1 ssn:forProperty ?conditionProperty1)
             (?aNode1 owl:hasValue ?boundProperty1)
@@ -475,7 +498,7 @@
 
 // If Condition1 states some Property must be greater than a Property bound, and Condition2 states that Property must
 // be equal to that same Property bound, then these are conflicting Conditions.
-[ruleVer2q: (?aNode1 :withCondition ?condition1)
+[ruleVer2u: (?aNode1 :withCondition ?condition1)
             (?condition1 rdf:type meta:Condition)
             (?condition1 ssn:forProperty ?conditionProperty1)
             (?aNode1 owl:hasValue ?boundProperty1)
@@ -495,7 +518,7 @@
 
 // If Condition1 states some Property must be greater than a Property bound, and Condition2 states that Property must
 // be less than or equal to that same Property bound, then these are conflicting Conditions.
-[ruleVer2r: (?aNode1 :withCondition ?condition1)
+[ruleVer2v: (?aNode1 :withCondition ?condition1)
             (?condition1 rdf:type meta:Condition)
             (?condition1 ssn:forProperty ?conditionProperty1)
             (?aNode1 owl:hasValue ?boundProperty1)
@@ -511,4 +534,22 @@
             ->  print("Error!")
                 print("Conditions", ?condition1, "and", ?condition2, "define conflicting constraints.")
                 print(?conditionProperty1, "must be both greater than and less than or equal to", ?boundProperty1)
+]
+
+
+
+// These rules check that there exists a PropertyChange that is required to mitigate unsatisfied Condition constraints.
+// Due to the OWA, we have to check all possible combinations that aren`t suitable.
+
+// TODO: think about if it`s possible to represent the other cases with missing or wrong propertychanges, and if yes, how to do this
+
+// Checks for a missing Actuator enacting the correct PropertyChange with the right Effect type for a given Condition Property.
+[ruleVer3c: (?aNode :withConditionProperty ?conditionProperty)
+            (?aNode :withPropertyChangeCheck ?effectType)
+            (?propertyChange ssn:forProperty ?conditionProperty)
+            (?propertyChange meta:affectsPropertyWith ?effectType)
+            noValue(?actuator meta:enacts ?propertyChange)
+            ->  print("Error!")
+                print("No existing Actuator/ConfigurableParameter enacts a PropertyChange causing a", ?effectType, "for Property")
+                print(?conditionProperty)
 ]

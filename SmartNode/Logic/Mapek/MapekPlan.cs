@@ -208,7 +208,7 @@ namespace Logic.Mapek
 
             process!.OutputDataReceived += (sender, e) => {
                 _logger.LogInformation(e.Data);
-                if (e.Data != null && (e.Data.Contains("Conflicting optimizations detected!") || e.Data.Contains("Conflicting conditions detected!"))) {
+                if (e.Data != null && e.Data.Contains("Error!")) {
                     SetError(); // Async was here
                 }
             };

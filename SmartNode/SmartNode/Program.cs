@@ -26,7 +26,7 @@ namespace SmartNode
             ParseResult parseResult = rootCommand.Parse(args);
             string? settingsFile = parseResult.GetValue(fileNameArg);
 
-            var appSettings = settingsFile == null ? Path.Combine("Properties", $"appsettings.json") : settingsFile;
+            var appSettings = settingsFile is not null ? Path.Combine("Properties", settingsFile) : Path.Combine("Properties", $"appsettings.json");
 
             var builder = Host.CreateApplicationBuilder(args);
             builder.Configuration.AddJsonFile(appSettings);

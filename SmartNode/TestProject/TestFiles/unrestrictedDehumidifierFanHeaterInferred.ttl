@@ -5,917 +5,69 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xml:  <http://www.w3.org/XML/1998/namespace>
 PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
 
-_:b0    rdf:type   rdf:List;
-        rdf:first  :Heater;
-        rdf:rest   () .
-
-_:b1    rdf:type   rdf:List;
-        rdf:first  :Fan_0;
-        rdf:rest   _:b2 .
-
-_:b3    rdf:type   rdf:List;
-        rdf:first  :Heater;
-        rdf:rest   () .
-
-_:b4    rdf:type   rdf:List;
-        rdf:first  :Dehumidifier_0;
-        rdf:rest   _:b2 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_0;
-            rdf:rest   _:b5
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b6
-          ]
-] .
-
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "not final";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b7;
+          _:b0;
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b8
+          _:b1
 ] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b9;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b10
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_1;
-            rdf:rest   _:b11
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b12
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_1;
-            rdf:rest   _:b13
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b14
-          ]
-] .
-
-:Heater_0  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
-                :Heater;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
-                "0"^^xsd:int .
-
-[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_1;
-            rdf:rest   _:b15
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b16
-          ]
-] .
-
-_:b14   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier;
-        rdf:rest   () .
-
-_:b17   rdf:type   rdf:List;
-        rdf:first  :Heater;
-        rdf:rest   _:b14 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate" , "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b1;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b18
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_1;
-            rdf:rest   _:b19
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b20
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b13;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b14
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater_0;
-            rdf:rest   _:b21
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater;
-            rdf:rest   _:b22
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_1;
-            rdf:rest   _:b5
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b6
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_1;
-            rdf:rest   _:b23
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b24
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_0;
-            rdf:rest   _:b9
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b10
-          ]
-] .
-
-_:b25   rdf:type   rdf:List;
-        rdf:first  :Heater;
-        rdf:rest   _:b26 .
-
-:Fan_1  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
-                :Fan;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
-                "1"^^xsd:int .
-
-_:b27   rdf:type   rdf:List;
-        rdf:first  :Fan;
-        rdf:rest   _:b0 .
-
-[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater_1;
-            rdf:rest   _:b21
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater;
-            rdf:rest   _:b22
-          ]
-] .
-
-_:b19   rdf:type   rdf:List;
-        rdf:first  :Heater_0;
-        rdf:rest   _:b28 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_0;
-            rdf:rest   _:b4
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b29
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b30;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b0
-] .
-
-_:b23   rdf:type   rdf:List;
-        rdf:first  :Heater_1;
-        rdf:rest   _:b31 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_0;
-            rdf:rest   _:b1
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b18
-          ]
-] .
-
-_:b32   rdf:type   rdf:List;
-        rdf:first  :Fan_0;
-        rdf:rest   _:b33 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b34;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b35
-] .
-
-_:b36   rdf:type   rdf:List;
-        rdf:first  :Heater_1;
-        rdf:rest   _:b28 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_0;
-            rdf:rest   _:b37
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b38
-          ]
-] .
-
-[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_0;
-            rdf:rest   _:b39
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b40
-          ]
-] .
-
-_:b41   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier_0;
-        rdf:rest   _:b30 .
-
-_:b42   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier;
-        rdf:rest   _:b43 .
-
-[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater_2;
-            rdf:rest   _:b34
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater;
-            rdf:rest   _:b35
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_0;
-            rdf:rest   _:b44
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b17
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_0;
-            rdf:rest   _:b45
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b46
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_1;
-            rdf:rest   _:b47
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b48
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_1;
-            rdf:rest   _:b37
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b38
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b49;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b50
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b51;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b52
-] .
-
-:Fan_0  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
-                :Fan;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
-                "0"^^xsd:int .
-
-_:b12   rdf:type   rdf:List;
-        rdf:first  :Fan;
-        rdf:rest   _:b53 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_1;
-            rdf:rest   _:b51
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b52
-          ]
-] .
-
-_:b54   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier_1;
-        rdf:rest   _:b7 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b19;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b20
-] .
-
-[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater_2;
-            rdf:rest   _:b21
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater;
-            rdf:rest   _:b22
-          ]
-] .
-
-[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater_1;
-            rdf:rest   _:b55
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater;
-            rdf:rest   _:b42
-          ]
-] .
-
-_:b13   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier_1;
-        rdf:rest   () .
-
-_:b55   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier_0;
-        rdf:rest   _:b31 .
-
-_:b34   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier_1;
-        rdf:rest   _:b31 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b31;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b43
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b33;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b3
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate" , "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b45;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b46
-] .
-
-_:b29   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier;
-        rdf:rest   _:b53 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate" , "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b56;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b57
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_0;
-            rdf:rest   _:b58
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b59
-          ]
-] .
-
-_:b60   rdf:type   rdf:List;
-        rdf:first  :Heater;
-        rdf:rest   _:b43 .
-
-_:b61   rdf:type   rdf:List;
-        rdf:first  :Heater;
-        rdf:rest   _:b8 .
-
-_:b59   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier;
-        rdf:rest   _:b53 .
-
-_:b24   rdf:type   rdf:List;
-        rdf:first  :Heater;
-        rdf:rest   _:b43 .
-
-_:b57   rdf:type   rdf:List;
-        rdf:first  :Fan;
-        rdf:rest   _:b3 .
-
-_:b51   rdf:type   rdf:List;
-        rdf:first  :Heater_2;
-        rdf:rest   _:b13 .
-
-_:b53   rdf:type   rdf:List;
-        rdf:first  :Heater;
-        rdf:rest   () .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_1;
-            rdf:rest   _:b45
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b46
-          ]
-] .
-
-_:b62   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier;
-        rdf:rest   _:b8 .
-
-_:b21   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier_0;
-        rdf:rest   _:b7 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_1;
-            rdf:rest   _:b1
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b18
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b39;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b40
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_1;
-            rdf:rest   _:b63
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b27
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_1;
-            rdf:rest   _:b39
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b40
-          ]
-] .
-
-_:b8    rdf:type   rdf:List;
-        rdf:first  :Fan;
-        rdf:rest   () .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater_0;
-            rdf:rest   _:b54
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater;
-            rdf:rest   _:b62
-          ]
-] .
-
-_:b2    rdf:type   rdf:List;
-        rdf:first  :Heater_2;
-        rdf:rest   () .
-
-_:b37   rdf:type   rdf:List;
-        rdf:first  :Fan_0;
-        rdf:rest   _:b30 .
-
-_:b30   rdf:type   rdf:List;
-        rdf:first  :Heater_1;
-        rdf:rest   () .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_1;
-            rdf:rest   _:b32
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b64
-          ]
-] .
-
-:Dehumidifier_1  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
-                :Dehumidifier;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
-                "1"^^xsd:int .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "not final";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           _:b2;
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b53
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b36;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b25
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b44;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b17
-] .
-
-_:b52   rdf:type   rdf:List;
-        rdf:first  :Heater;
-        rdf:rest   _:b14 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate" , "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b63;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b27
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b28;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b26
-] .
-
-_:b18   rdf:type   rdf:List;
-        rdf:first  :Fan;
-        rdf:rest   _:b53 .
-
-_:b15   rdf:type   rdf:List;
-        rdf:first  :Heater_0;
-        rdf:rest   _:b7 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_1;
-            rdf:rest   _:b65
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b66
-          ]
+          _:b3
 ] .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_1;
-            rdf:rest   _:b58
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b59
-          ]
-] .
-
-[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
             rdf:first  :Dehumidifier_0;
-            rdf:rest   _:b15
+            rdf:rest   _:b4
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
             rdf:first  :Dehumidifier;
-            rdf:rest   _:b16
+            rdf:rest   _:b5
           ]
 ] .
 
-[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater_1;
-            rdf:rest   _:b34
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater;
-            rdf:rest   _:b35
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b21;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b22
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_0;
-            rdf:rest   _:b19
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b20
-          ]
-] .
-
-:Dehumidifier_0  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
-                :Dehumidifier;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
-                "0"^^xsd:int .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_0;
-            rdf:rest   _:b28
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b26
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b67;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b60
-] .
-
-_:b26   rdf:type   rdf:List;
+_:b6    rdf:type   rdf:List;
         rdf:first  :Dehumidifier;
+        rdf:rest   _:b7 .
+
+_:b8    rdf:type   rdf:List;
+        rdf:first  :Heater_2;
         rdf:rest   () .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "duplicate";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
-            rdf:first  :Fan_0;
-            rdf:rest   _:b36
+            rdf:first  :Fan_1;
+            rdf:rest   _:b2
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
             rdf:first  :Fan;
-            rdf:rest   _:b25
+            rdf:rest   _:b3
           ]
 ] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_0;
-            rdf:rest   _:b32
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b64
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_1;
-            rdf:rest   _:b68
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b61
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate" , "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b58;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b59
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_0;
-            rdf:rest   _:b65
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b66
-          ]
-] .
-
-_:b58   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier_1;
-        rdf:rest   _:b2 .
-
-_:b38   rdf:type   rdf:List;
-        rdf:first  :Fan;
-        rdf:rest   _:b0 .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "duplicate";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
             rdf:first  :Fan_1;
-            rdf:rest   _:b49
+            rdf:rest   _:b9
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
             rdf:first  :Fan;
-            rdf:rest   _:b50
+            rdf:rest   _:b10
           ]
 ] .
 
@@ -931,140 +83,379 @@ _:b38   rdf:type   rdf:List;
   rdf:comment  "duplicate";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_0;
-            rdf:rest   _:b67
+            rdf:first  :Dehumidifier_1;
+            rdf:rest   _:b4
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
             rdf:first  :Dehumidifier;
-            rdf:rest   _:b60
+            rdf:rest   _:b5
           ]
 ] .
 
-_:b6    rdf:type   rdf:List;
-        rdf:first  :Heater;
-        rdf:rest   _:b26 .
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate" , "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b13;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b14
+] .
 
-_:b63   rdf:type   rdf:List;
-        rdf:first  :Fan_1;
-        rdf:rest   _:b30 .
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater_1;
+            rdf:rest   _:b15
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater;
+            rdf:rest   _:b16
+          ]
+] .
 
-_:b44   rdf:type   rdf:List;
+_:b12   rdf:type   rdf:List;
+        rdf:first  :Fan;
+        rdf:rest   _:b7 .
+
+:Heater_0  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
+                :Heater;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
+                "0"^^xsd:int .
+
+_:b17   rdf:type   rdf:List;
         rdf:first  :Heater_1;
-        rdf:rest   _:b13 .
+        rdf:rest   () .
+
+_:b18   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier;
+        rdf:rest   () .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "duplicate";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
             rdf:first  :Fan_1;
-            rdf:rest   _:b4
+            rdf:rest   _:b19
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
             rdf:first  :Fan;
-            rdf:rest   _:b29
+            rdf:rest   _:b20
           ]
 ] .
 
-_:b69   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier;
-        rdf:rest   _:b0 .
+[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_0;
+            rdf:rest   _:b21
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b22
+          ]
+] .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "duplicate";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_0;
-            rdf:rest   _:b63
+            rdf:first  :Fan_1;
+            rdf:rest   _:b23
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b27
+            rdf:first  :Fan;
+            rdf:rest   _:b24
           ]
 ] .
 
-_:b35   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier;
-        rdf:rest   _:b43 .
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate" , "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b25;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b26
+] .
 
-_:b50   rdf:type   rdf:List;
-        rdf:first  :Heater;
-        rdf:rest   _:b14 .
+_:b27   rdf:type   rdf:List;
+        rdf:first  :Heater_1;
+        rdf:rest   _:b28 .
+
+_:b29   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier_1;
+        rdf:rest   _:b8 .
+
+_:b16   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier;
+        rdf:rest   _:b30 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate" , "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b31;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b32
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_1;
+            rdf:rest   _:b33
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b34
+          ]
+] .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "duplicate";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
             rdf:first  :Fan_0;
-            rdf:rest   _:b49
+            rdf:rest   _:b33
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
             rdf:first  :Fan;
-            rdf:rest   _:b50
+            rdf:rest   _:b34
           ]
 ] .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate" , "not final";
+  rdf:comment  "duplicate";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b47;
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_0;
+            rdf:rest   _:b35
+          ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b48
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b36
+          ]
 ] .
 
-_:b66   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier;
-        rdf:rest   _:b0 .
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b37;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b38
+] .
+
+:Fan_1  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
+                :Fan;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
+                "1"^^xsd:int .
+
+_:b11   rdf:type   rdf:List;
+        rdf:first  :Fan_1;
+        rdf:rest   _:b8 .
+
+_:b30   rdf:type   rdf:List;
+        rdf:first  :Fan;
+        rdf:rest   () .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_0;
+            rdf:rest   _:b29
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b6
+          ]
+] .
+
+_:b39   rdf:type   rdf:List;
+        rdf:first  :Heater_0;
+        rdf:rest   _:b28 .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "duplicate";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
             rdf:first  :Fan_1;
+            rdf:rest   _:b40
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b41
+          ]
+] .
+
+[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_0;
+            rdf:rest   _:b42
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b43
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater_1;
             rdf:rest   _:b44
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b17
+            rdf:first  :Heater;
+            rdf:rest   _:b45
           ]
 ] .
 
-_:b9    rdf:type   rdf:List;
-        rdf:first  :Heater_2;
-        rdf:rest   _:b7 .
+_:b35   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier_1;
+        rdf:rest   _:b46 .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "duplicate";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
-            rdf:first  :Fan_1;
-            rdf:rest   _:b41
+            rdf:first  :Dehumidifier_0;
+            rdf:rest   _:b31
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b32
+          ]
+] .
+
+_:b32   rdf:type   rdf:List;
+        rdf:first  :Fan;
+        rdf:rest   _:b47 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater_2;
+            rdf:rest   _:b15
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater;
+            rdf:rest   _:b16
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_0;
+            rdf:rest   _:b2
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
             rdf:first  :Fan;
-            rdf:rest   _:b69
+            rdf:rest   _:b3
           ]
 ] .
 
-_:b64   rdf:type   rdf:List;
-        rdf:first  :Fan;
-        rdf:rest   _:b3 .
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b8;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b7
+] .
 
-_:b68   rdf:type   rdf:List;
-        rdf:first  :Heater_1;
-        rdf:rest   _:b7 .
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_0;
+            rdf:rest   _:b48
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b49
+          ]
+] .
+
+_:b50   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier;
+        rdf:rest   _:b30 .
+
+:Fan_0  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
+                :Fan;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
+                "0"^^xsd:int .
+
+_:b51   rdf:type   rdf:List;
+        rdf:first  :Fan_1;
+        rdf:rest   _:b46 .
+
+_:b19   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier_0;
+        rdf:rest   _:b8 .
+
+_:b52   rdf:type   rdf:List;
+        rdf:first  :Heater;
+        rdf:rest   _:b30 .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "duplicate" , "not final";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b41;
+          _:b19;
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b69
+          _:b20
+] .
+
+[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_1;
+            rdf:rest   _:b39
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b53
+          ]
+] .
+
+_:b53   rdf:type   rdf:List;
+        rdf:first  :Heater;
+        rdf:rest   _:b54 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater_0;
+            rdf:rest   _:b37
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater;
+            rdf:rest   _:b38
+          ]
 ] .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
@@ -1072,13 +463,119 @@ _:b68   rdf:type   rdf:List;
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
             rdf:first  :Dehumidifier_0;
-            rdf:rest   _:b68
+            rdf:rest   _:b55
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
             rdf:first  :Dehumidifier;
-            rdf:rest   _:b61
+            rdf:rest   _:b56
           ]
+] .
+
+_:b40   rdf:type   rdf:List;
+        rdf:first  :Heater_0;
+        rdf:rest   _:b23 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate" , "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b4;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b5
+] .
+
+_:b57   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier_0;
+        rdf:rest   _:b58 .
+
+_:b58   rdf:type   rdf:List;
+        rdf:first  :Fan_0;
+        rdf:rest   () .
+
+[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_1;
+            rdf:rest   _:b42
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b43
+          ]
+] .
+
+[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_1;
+            rdf:rest   _:b27
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b59
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_1;
+            rdf:rest   _:b0
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b1
+          ]
+] .
+
+_:b7    rdf:type   rdf:List;
+        rdf:first  :Heater;
+        rdf:rest   () .
+
+_:b1    rdf:type   rdf:List;
+        rdf:first  :Heater;
+        rdf:rest   _:b24 .
+
+_:b33   rdf:type   rdf:List;
+        rdf:first  :Heater_0;
+        rdf:rest   _:b60 .
+
+_:b36   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier;
+        rdf:rest   _:b47 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b42;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b43
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_1;
+            rdf:rest   _:b13
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b14
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b44;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b45
 ] .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
@@ -1089,51 +586,67 @@ _:b68   rdf:type   rdf:List;
           _:b16
 ] .
 
-_:b48   rdf:type   rdf:List;
+_:b14   rdf:type   rdf:List;
+        rdf:first  :Fan;
+        rdf:rest   _:b61 .
+
+_:b62   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier_1;
+        rdf:rest   _:b17 .
+
+_:b38   rdf:type   rdf:List;
         rdf:first  :Dehumidifier;
-        rdf:rest   _:b3 .
+        rdf:rest   _:b54 .
 
-[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater_0;
-            rdf:rest   _:b34
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater;
-            rdf:rest   _:b35
-          ]
-] .
-
-[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater_1;
-            rdf:rest   _:b54
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater;
-            rdf:rest   _:b62
-          ]
-] .
-
-_:b22   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier;
-        rdf:rest   _:b8 .
+_:b42   rdf:type   rdf:List;
+        rdf:first  :Heater_2;
+        rdf:rest   _:b58 .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "duplicate";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_1;
-            rdf:rest   _:b56
+            rdf:first  :Fan_1;
+            rdf:rest   _:b48
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b49
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate" , "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b9;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b10
+] .
+
+[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_0;
+            rdf:rest   _:b27
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
             rdf:first  :Dehumidifier;
-            rdf:rest   _:b57
+            rdf:rest   _:b59
+          ]
+] .
+
+[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_1;
+            rdf:rest   _:b63
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b64
           ]
 ] .
 
@@ -1151,55 +664,24 @@ _:b22   rdf:type   rdf:List;
           ]
 ] .
 
-_:b33   rdf:type   rdf:List;
-        rdf:first  :Heater_0;
-        rdf:rest   () .
-
-[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater_0;
-            rdf:rest   _:b55
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater;
-            rdf:rest   _:b42
-          ]
-] .
-
-_:b49   rdf:type   rdf:List;
-        rdf:first  :Heater_0;
-        rdf:rest   _:b13 .
+:Dehumidifier_1  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
+                :Dehumidifier;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
+                "1"^^xsd:int .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "duplicate";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
-            rdf:first  :Heater_2;
-            rdf:rest   _:b55
+            rdf:first  :Fan_0;
+            rdf:rest   _:b23
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
-            rdf:first  :Heater;
-            rdf:rest   _:b42
+            rdf:first  :Fan;
+            rdf:rest   _:b24
           ]
-] .
-
-_:b56   rdf:type   rdf:List;
-        rdf:first  :Fan_1;
-        rdf:rest   _:b33 .
-
-_:b39   rdf:type   rdf:List;
-        rdf:first  :Heater_2;
-        rdf:rest   _:b31 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate" , "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b4;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b29
 ] .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
@@ -1207,63 +689,413 @@ _:b39   rdf:type   rdf:List;
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
             rdf:first  :Fan_1;
-            rdf:rest   _:b36
+            rdf:rest   _:b62
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
             rdf:first  :Fan;
-            rdf:rest   _:b25
+            rdf:rest   _:b65
           ]
 ] .
-
-_:b20   rdf:type   rdf:List;
-        rdf:first  :Heater;
-        rdf:rest   _:b26 .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "not final";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b54;
+          _:b39;
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b62
+          _:b53
 ] .
 
-_:b40   rdf:type   rdf:List;
+_:b45   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier;
+        rdf:rest   _:b54 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_1;
+            rdf:rest   _:b29
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b6
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_1;
+            rdf:rest   _:b60
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b18
+          ]
+] .
+
+_:b59   rdf:type   rdf:List;
         rdf:first  :Heater;
-        rdf:rest   _:b43 .
+        rdf:rest   _:b54 .
+
+_:b28   rdf:type   rdf:List;
+        rdf:first  :Fan_1;
+        rdf:rest   () .
+
+_:b49   rdf:type   rdf:List;
+        rdf:first  :Heater;
+        rdf:rest   _:b18 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_0;
+            rdf:rest   _:b25
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b26
+          ]
+] .
+
+_:b47   rdf:type   rdf:List;
+        rdf:first  :Heater;
+        rdf:rest   () .
+
+[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater_2;
+            rdf:rest   _:b44
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater;
+            rdf:rest   _:b45
+          ]
+] .
+
+[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_1;
+            rdf:rest   _:b66
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b52
+          ]
+] .
+
+_:b56   rdf:type   rdf:List;
+        rdf:first  :Fan;
+        rdf:rest   _:b61 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate" , "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b51;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b67
+] .
+
+_:b41   rdf:type   rdf:List;
+        rdf:first  :Heater;
+        rdf:rest   _:b24 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater_0;
+            rdf:rest   _:b15
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater;
+            rdf:rest   _:b16
+          ]
+] .
+
+_:b37   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier_1;
+        rdf:rest   _:b28 .
+
+:Dehumidifier_0  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
+                :Dehumidifier;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
+                "0"^^xsd:int .
+
+_:b10   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier;
+        rdf:rest   _:b61 .
+
+_:b64   rdf:type   rdf:List;
+        rdf:first  :Heater;
+        rdf:rest   _:b54 .
+
+_:b67   rdf:type   rdf:List;
+        rdf:first  :Fan;
+        rdf:rest   _:b47 .
+
+_:b44   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier_0;
+        rdf:rest   _:b28 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b58;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b30
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b33;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b34
+] .
+
+_:b55   rdf:type   rdf:List;
+        rdf:first  :Fan_0;
+        rdf:rest   _:b17 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater_0;
+            rdf:rest   _:b44
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater;
+            rdf:rest   _:b45
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_0;
+            rdf:rest   _:b0
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b1
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b60;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b18
+] .
+
+_:b15   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier_1;
+        rdf:rest   _:b58 .
+
+_:b66   rdf:type   rdf:List;
+        rdf:first  :Heater_1;
+        rdf:rest   _:b58 .
+
+_:b9    rdf:type   rdf:List;
+        rdf:first  :Dehumidifier_0;
+        rdf:rest   _:b17 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_1;
+            rdf:rest   _:b35
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b36
+          ]
+] .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "duplicate";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
             rdf:first  :Dehumidifier_1;
-            rdf:rest   _:b67
+            rdf:rest   _:b11
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
             rdf:first  :Dehumidifier;
-            rdf:rest   _:b60
+            rdf:rest   _:b12
           ]
 ] .
 
-_:b16   rdf:type   rdf:List;
-        rdf:first  :Heater;
-        rdf:rest   _:b8 .
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_0;
+            rdf:rest   _:b60
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b18
+          ]
+] .
+
+_:b54   rdf:type   rdf:List;
+        rdf:first  :Fan;
+        rdf:rest   () .
+
+_:b24   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier;
+        rdf:rest   () .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate" , "not final";
+  rdf:comment  "duplicate";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b37;
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_0;
+            rdf:rest   _:b13
+          ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b38
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b14
+          ]
 ] .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "not final";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b5;
+          _:b57;
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b6
+          _:b50
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b63;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b64
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_0;
+            rdf:rest   _:b63
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b64
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b68;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b69
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_1;
+            rdf:rest   _:b21
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b22
+          ]
+] .
+
+_:b4    rdf:type   rdf:List;
+        rdf:first  :Fan_0;
+        rdf:rest   _:b8 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b17;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b61
+] .
+
+_:b21   rdf:type   rdf:List;
+        rdf:first  :Heater_1;
+        rdf:rest   _:b60 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_0;
+            rdf:rest   _:b40
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b41
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate" , "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b55;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b56
+] .
+
+_:b31   rdf:type   rdf:List;
+        rdf:first  :Fan_0;
+        rdf:rest   _:b46 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b48;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b49
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_0;
+            rdf:rest   _:b68
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b69
+          ]
 ] .
 
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
@@ -1274,43 +1106,159 @@ _:b16   rdf:type   rdf:List;
           _:b24
 ] .
 
+[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_1;
+            rdf:rest   _:b68
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b69
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b28;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b54
+] .
+
+_:b25   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier_0;
+        rdf:rest   _:b46 .
+
+_:b13   rdf:type   rdf:List;
+        rdf:first  :Fan_1;
+        rdf:rest   _:b17 .
+
+[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_0;
+            rdf:rest   _:b39
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b53
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b27;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b59
+] .
+
+_:b2    rdf:type   rdf:List;
+        rdf:first  :Heater_2;
+        rdf:rest   _:b23 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_1;
+            rdf:rest   _:b51
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b67
+          ]
+] .
+
+_:b22   rdf:type   rdf:List;
+        rdf:first  :Heater;
+        rdf:rest   _:b18 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b46;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b47
+] .
+
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   rdf:comment  "duplicate";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
             rdf:first  :Fan_0;
-            rdf:rest   _:b51
+            rdf:rest   _:b19
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
             rdf:first  :Fan;
-            rdf:rest   _:b52
+            rdf:rest   _:b20
           ]
 ] .
 
-_:b7    rdf:type   rdf:List;
-        rdf:first  :Fan_0;
-        rdf:rest   () .
-
 [ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate" , "not final";
+  rdf:comment  "duplicate";
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b65;
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_1;
+            rdf:rest   _:b55
+          ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b66
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b56
+          ]
 ] .
 
-_:b67   rdf:type   rdf:List;
-        rdf:first  :Heater_0;
-        rdf:rest   _:b31 .
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b40;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b41
+] .
 
-_:b28   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier_0;
-        rdf:rest   () .
+_:b48   rdf:type   rdf:List;
+        rdf:first  :Heater_2;
+        rdf:rest   _:b60 .
 
-_:b10   rdf:type   rdf:List;
+_:b3    rdf:type   rdf:List;
         rdf:first  :Heater;
-        rdf:rest   _:b8 .
+        rdf:rest   _:b24 .
+
+_:b63   rdf:type   rdf:List;
+        rdf:first  :Heater_2;
+        rdf:rest   _:b28 .
+
+_:b0    rdf:type   rdf:List;
+        rdf:first  :Heater_1;
+        rdf:rest   _:b23 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater_2;
+            rdf:rest   _:b57
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater;
+            rdf:rest   _:b50
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b66;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b52
+] .
 
 :Heater_2  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
@@ -1318,59 +1266,209 @@ _:b10   rdf:type   rdf:List;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
                 "2"^^xsd:int .
 
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate" , "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b32;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b64
-] .
-
-_:b11   rdf:type   rdf:List;
-        rdf:first  :Fan_1;
-        rdf:rest   _:b2 .
-
-_:b5    rdf:type   rdf:List;
-        rdf:first  :Heater_2;
-        rdf:rest   _:b28 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_0;
-            rdf:rest   _:b13
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b14
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_0;
-            rdf:rest   _:b47
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b48
-          ]
-] .
-
 [ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_1;
-            rdf:rest   _:b9
+            rdf:first  :Heater_0;
+            rdf:rest   _:b57
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater;
+            rdf:rest   _:b50
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate" , "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b62;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b65
+] .
+
+_:b5    rdf:type   rdf:List;
+        rdf:first  :Fan;
+        rdf:rest   _:b7 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_0;
+            rdf:rest   _:b66
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
             rdf:first  :Dehumidifier;
+            rdf:rest   _:b52
+          ]
+] .
+
+_:b34   rdf:type   rdf:List;
+        rdf:first  :Heater;
+        rdf:rest   _:b18 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_1;
+            rdf:rest   _:b25
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b26
+          ]
+] .
+
+_:b60   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier_0;
+        rdf:rest   () .
+
+_:b65   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier;
+        rdf:rest   _:b61 .
+
+_:b43   rdf:type   rdf:List;
+        rdf:first  :Heater;
+        rdf:rest   _:b30 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b21;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b22
+] .
+
+_:b46   rdf:type   rdf:List;
+        rdf:first  :Heater_0;
+        rdf:rest   () .
+
+_:b26   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier;
+        rdf:rest   _:b47 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater_1;
+            rdf:rest   _:b57
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater;
+            rdf:rest   _:b50
+          ]
+] .
+
+_:b61   rdf:type   rdf:List;
+        rdf:first  :Heater;
+        rdf:rest   () .
+
+_:b68   rdf:type   rdf:List;
+        rdf:first  :Heater_0;
+        rdf:rest   _:b58 .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_0;
+            rdf:rest   _:b62
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
+            rdf:rest   _:b65
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate" , "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b35;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b36
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater_1;
+            rdf:rest   _:b37
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater;
+            rdf:rest   _:b38
+          ]
+] .
+
+_:b20   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier;
+        rdf:rest   _:b7 .
+
+:Heater_1  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
+                :Heater;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
+                "1"^^xsd:int .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater_2;
+            rdf:rest   _:b37
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater;
+            rdf:rest   _:b38
+          ]
+] .
+
+_:b23   rdf:type   rdf:List;
+        rdf:first  :Dehumidifier_1;
+        rdf:rest   () .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate" , "not final";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          _:b29;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          _:b6
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier_1;
+            rdf:rest   _:b31
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Dehumidifier;
+            rdf:rest   _:b32
+          ]
+] .
+
+[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  rdf:comment  "duplicate";
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan_0;
+            rdf:rest   _:b9
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :Fan;
             rdf:rest   _:b10
           ]
 ] .
@@ -1380,120 +1478,20 @@ _:b5    rdf:type   rdf:List;
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
           [ rdf:type   rdf:List;
             rdf:first  :Dehumidifier_0;
-            rdf:rest   _:b56
+            rdf:rest   _:b51
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
           [ rdf:type   rdf:List;
             rdf:first  :Dehumidifier;
-            rdf:rest   _:b57
+            rdf:rest   _:b67
           ]
 ] .
 
-_:b46   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier;
-        rdf:rest   _:b3 .
-
-_:b65   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier_1;
+_:b69   rdf:type   rdf:List;
+        rdf:first  :Heater;
         rdf:rest   _:b30 .
 
-_:b45   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier_1;
-        rdf:rest   _:b33 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_1;
-            rdf:rest   _:b28
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b26
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater_2;
-            rdf:rest   _:b54
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Heater;
-            rdf:rest   _:b62
-          ]
-] .
-
-:Heater_1  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
-                :Heater;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
-                "1"^^xsd:int .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b55;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b42
-] .
-
-_:b31   rdf:type   rdf:List;
-        rdf:first  :Fan_1;
-        rdf:rest   () .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan_0;
-            rdf:rest   _:b41
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Fan;
-            rdf:rest   _:b69
-          ]
-] .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "duplicate";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier_0;
-            rdf:rest   _:b23
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :Dehumidifier;
-            rdf:rest   _:b24
-          ]
-] .
-
-_:b43   rdf:type   rdf:List;
-        rdf:first  :Fan;
-        rdf:rest   () .
-
-_:b47   rdf:type   rdf:List;
-        rdf:first  :Dehumidifier_0;
-        rdf:rest   _:b33 .
-
-[ rdf:type     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  rdf:comment  "not final";
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          _:b68;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          _:b61
-] .
-
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
-[ xsd:minExclusive  "10.1"^^xsd:double ] .
 
 :HumiditySensorMeasuredHumidity
         rdf:type  <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual;
@@ -1507,20 +1505,14 @@ _:b47   rdf:type   rdf:List;
         <http://www.w3.org/ns/ssn/forProperty>
                 :RoomTemperature .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
 :RoomTemperature  rdf:type  <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "20.4"^^xsd:double .
 
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
 owl:qualifiedCardinality
         rdf:type  owl:AnnotationProperty .
-
-[ xsd:maxInclusive  "28.5"^^xsd:double ] .
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
@@ -1534,46 +1526,17 @@ owl:qualifiedCardinality
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "20.4"^^xsd:double .
 
-[ xsd:minExclusive  "10.1"^^xsd:double ] .
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+[ xsd:maxInclusive  "3"^^xsd:int ] .
 
 :EnergyConsumption  rdf:type  <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "0.0"^^xsd:double .
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
-[ xsd:maxExclusive  "30.2"^^xsd:double ] .
-
-:Condition2  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Condition> , owl:NamedIndividual;
-        rdf:type  [ rdf:type            owl:Class;
-                    owl:intersectionOf  ( [ rdf:type                owl:Restriction;
-                                            :withCheck              "conjunction";
-                                            :withCondition          :Condition2;
-                                            :withConditionProperty  :RoomTemperature;
-                                            :withIdentifier         _:b70;
-                                            :withOperatorCheck      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThan>;
-                                            :withPropertyCheck      :RoomTemperatureLowerLimit2 , :RoomTemperature;
-                                            owl:hasValue            :RoomTemperatureLowerLimit2;
-                                            owl:onProperty          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThan>
-                                          ]
-                                          [ rdf:type                owl:Restriction;
-                                            :withCheck              "conjunction";
-                                            :withCondition          :Condition2;
-                                            :withConditionProperty  :RoomTemperature;
-                                            :withIdentifier         _:b70;
-                                            :withOperatorCheck      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo>;
-                                            :withPropertyCheck      :RoomTemperatureUpperLimit2;
-                                            owl:hasValue            :RoomTemperatureUpperLimit2;
-                                            owl:onProperty          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo>
-                                          ]
-                                        )
-                  ];
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>
-                "3600"^^xsd:int;
-        <http://www.w3.org/ns/ssn/forProperty>
-                :RoomTemperature .
-
-[ xsd:maxExclusive  "30.2"^^xsd:double ] .
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
@@ -1595,10 +1558,14 @@ owl:qualifiedCardinality
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
                 "2"^^xsd:int , "1"^^xsd:int , "0"^^xsd:int .
 
+[ xsd:minExclusive  "10.1"^^xsd:double ] .
+
 :RoomTemperatureUpperLimit2
         rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "28.5"^^xsd:double .
+
+[ xsd:maxExclusive  "30.2"^^xsd:double ] .
 
 :TemperatureSensor1  rdf:type  <http://www.w3.org/ns/sosa/Sensor> , owl:NamedIndividual;
         <http://www.w3.org/ns/sosa/observes>
@@ -1620,9 +1587,36 @@ owl:qualifiedCardinality
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "20.4"^^xsd:double .
 
-[ xsd:minInclusive  "27.5"^^xsd:double ] .
-
-[ xsd:maxInclusive  "28.5"^^xsd:double ] .
+:OptimalCondition2  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:NamedIndividual;
+        rdf:type  [ rdf:type            owl:Class;
+                    owl:intersectionOf  ( [ rdf:type                       owl:Restriction;
+                                            :withCheck                     "conjunction";
+                                            :withIdentifier                _:b70;
+                                            :withOperatorCheck             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThan>;
+                                            :withOptimalCondition          :OptimalCondition2;
+                                            :withOptimalConditionProperty  :RoomTemperature;
+                                            :withPropertyChangeCheck       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease>;
+                                            :withPropertyCheck             :RoomTemperatureLowerLimit2 , :RoomTemperature;
+                                            owl:hasValue                   :RoomTemperatureLowerLimit2;
+                                            owl:onProperty                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThan>
+                                          ]
+                                          [ rdf:type                       owl:Restriction;
+                                            :withCheck                     "conjunction";
+                                            :withIdentifier                _:b70;
+                                            :withOperatorCheck             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo>;
+                                            :withOptimalCondition          :OptimalCondition2;
+                                            :withOptimalConditionProperty  :RoomTemperature;
+                                            :withPropertyChangeCheck       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
+                                            :withPropertyCheck             :RoomTemperatureUpperLimit2;
+                                            owl:hasValue                   :RoomTemperatureUpperLimit2;
+                                            owl:onProperty                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo>
+                                          ]
+                                        )
+                  ];
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>
+                "3600"^^xsd:int;
+        <http://www.w3.org/ns/ssn/forProperty>
+                :RoomTemperature .
 
 :EnergyConsumptionMeter
         rdf:type  <http://www.w3.org/ns/sosa/Sensor> , owl:NamedIndividual;
@@ -1630,8 +1624,6 @@ owl:qualifiedCardinality
                 :EnergyConsumption;
         <http://www.w3.org/ns/ssn/implements>
                 :EnergyConsumptionMeterProcedure .
-
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
 :TemperatureSensor1Procedure
         rdf:type  <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual;
@@ -1641,6 +1633,8 @@ owl:qualifiedCardinality
 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1>
         rdf:type     owl:Ontology;
         owl:imports  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins> .
+
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
@@ -1657,8 +1651,6 @@ owl:qualifiedCardinality
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
 :TemperatureSensor2Procedure
         rdf:type  <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual;
         <http://www.w3.org/ns/ssn/hasOutput>
@@ -1670,9 +1662,9 @@ owl:qualifiedCardinality
         <http://www.w3.org/ns/ssn/implements>
                 :HumiditySensorProcedure .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+[ xsd:maxInclusive  "28.5"^^xsd:double ] .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+[ xsd:minExclusive  "10.1"^^xsd:double ] .
 
 :RoomM370FMU  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds>
@@ -1680,34 +1672,9 @@ owl:qualifiedCardinality
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI>
                 "roomM370.fmu"^^xsd:anyURI .
 
-:Condition1  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/Condition> , owl:NamedIndividual;
-        rdf:type  [ rdf:type            owl:Class;
-                    owl:intersectionOf  ( [ rdf:type                owl:Restriction;
-                                            :withCheck              "conjunction";
-                                            :withCondition          :Condition1;
-                                            :withConditionProperty  :RoomTemperature;
-                                            :withIdentifier         _:b71;
-                                            :withOperatorCheck      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo>;
-                                            :withPropertyCheck      :RoomTemperatureLowerLimit1 , :RoomTemperature;
-                                            owl:hasValue            :RoomTemperatureLowerLimit1;
-                                            owl:onProperty          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo>
-                                          ]
-                                          [ rdf:type                owl:Restriction;
-                                            :withCheck              "conjunction";
-                                            :withCondition          :Condition1;
-                                            :withConditionProperty  :RoomTemperature;
-                                            :withIdentifier         _:b71;
-                                            :withOperatorCheck      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThan>;
-                                            :withPropertyCheck      :RoomTemperatureUpperLimit1;
-                                            owl:hasValue            :RoomTemperatureUpperLimit1;
-                                            owl:onProperty          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThan>
-                                          ]
-                                        )
-                  ];
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>
-                "3600"^^xsd:int;
-        <http://www.w3.org/ns/ssn/forProperty>
-                :RoomTemperature .
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+[ xsd:maxExclusive  "30.2"^^xsd:double ] .
 
 :RoomTemperatureLowerLimit1
         rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
@@ -1716,21 +1683,19 @@ owl:qualifiedCardinality
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
 :RoomTemperatureUpperLimit1
         rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "30.2"^^xsd:double .
 
-[ xsd:minExclusive  "10.1"^^xsd:double ] .
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
 xsd:minInclusive  rdf:type  owl:AnnotationProperty .
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
 :RoomM370  rdf:type  <http://www.w3.org/ns/sosa/Platform> , owl:NamedIndividual;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromConditions>
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromOptimalConditions>
                 false;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel>
                 :RoomM370FMU;
@@ -1739,7 +1704,38 @@ xsd:minInclusive  rdf:type  owl:AnnotationProperty .
         <http://www.w3.org/ns/sosa/hosts>
                 :EnergyConsumptionMeter , :TemperatureSensor1 , :HumiditySensor , :Dehumidifier , :TemperatureSensor2 , :Heater , :Fan;
         <http://www.w3.org/ns/ssn/implements>
-                :Condition2 , :Condition1 .
+                :OptimalCondition1 , :OptimalCondition2 .
+
+:OptimalCondition1  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:NamedIndividual;
+        rdf:type  [ rdf:type            owl:Class;
+                    owl:intersectionOf  ( [ rdf:type                       owl:Restriction;
+                                            :withCheck                     "conjunction";
+                                            :withIdentifier                _:b71;
+                                            :withOperatorCheck             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo>;
+                                            :withOptimalCondition          :OptimalCondition1;
+                                            :withOptimalConditionProperty  :RoomTemperature;
+                                            :withPropertyChangeCheck       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease>;
+                                            :withPropertyCheck             :RoomTemperatureLowerLimit1 , :RoomTemperature;
+                                            owl:hasValue                   :RoomTemperatureLowerLimit1;
+                                            owl:onProperty                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo>
+                                          ]
+                                          [ rdf:type                       owl:Restriction;
+                                            :withCheck                     "conjunction";
+                                            :withIdentifier                _:b71;
+                                            :withOperatorCheck             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThan>;
+                                            :withOptimalCondition          :OptimalCondition1;
+                                            :withOptimalConditionProperty  :RoomTemperature;
+                                            :withPropertyChangeCheck       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
+                                            :withPropertyCheck             :RoomTemperatureUpperLimit1;
+                                            owl:hasValue                   :RoomTemperatureUpperLimit1;
+                                            owl:onProperty                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThan>
+                                          ]
+                                        )
+                  ];
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>
+                "3600"^^xsd:int;
+        <http://www.w3.org/ns/ssn/forProperty>
+                :RoomTemperature .
 
 :Dehumidifier  rdf:type  <http://www.w3.org/ns/sosa/Actuator> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts>
@@ -1750,16 +1746,18 @@ xsd:minInclusive  rdf:type  owl:AnnotationProperty .
 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>
         rdf:type  owl:Class .
 
-[ xsd:maxInclusive  "3"^^xsd:int ] .
-
-xsd:maxInclusive  rdf:type  owl:AnnotationProperty .
+[ xsd:minInclusive  "27.5"^^xsd:double ] .
 
 :HumiditySensorProcedure
         rdf:type  <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual;
         <http://www.w3.org/ns/ssn/hasOutput>
                 :HumiditySensorMeasuredHumidity .
 
-[ xsd:minInclusive  "27.5"^^xsd:double ] .
+xsd:maxInclusive  rdf:type  owl:AnnotationProperty .
+
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+[ xsd:minInclusive  "1"^^xsd:int ] .
 
 :EnergyConsumptionMeterMeasuredEnergyConsumption
         rdf:type  <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual;
@@ -1774,7 +1772,11 @@ xsd:minExclusive  rdf:type  owl:AnnotationProperty .
         <http://www.w3.org/ns/ssn/implements>
                 :TemperatureSensor2Procedure .
 
-[ xsd:minInclusive  "1"^^xsd:int ] .
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+[ xsd:minInclusive  "27.5"^^xsd:double ] .
 
 :EnergyConsumptionIncrease
         rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> , owl:NamedIndividual;
@@ -1783,9 +1785,11 @@ xsd:minExclusive  rdf:type  owl:AnnotationProperty .
         <http://www.w3.org/ns/ssn/forProperty>
                 :EnergyConsumption .
 
+[ xsd:minExclusive  "10.1"^^xsd:double ] .
+
 xsd:maxExclusive  rdf:type  owl:AnnotationProperty .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+[ xsd:maxInclusive  "28.5"^^xsd:double ] .
 
 :Fan    rdf:type  <http://www.w3.org/ns/sosa/Actuator> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts>

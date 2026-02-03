@@ -5,7 +5,7 @@
 
 
 
-// These rules are used as a verification mechanism against malformed or impossible Conditions. In cases of errors, these rules will
+// These rules are used as a verification mechanism against malformed or impossible OptimalConditions. In cases of errors, these rules will
 // explicitly print error messages such that the coordinator catches them and throws exceptions.
 
 // Verifies that system optimizations are not conflicting.
@@ -21,24 +21,24 @@
                 print(?platform, "optimizes for", ?property, "with ValueDecrease through", ?propertyChange2)
 ]
 
-// Marks single-constraint Conditions, such as >15, for operator checks.
-[ruleVer1b: (?condition rdf:type meta:Condition)
-            (?condition rdf:type ?aNode)
-            (?condition ssn:forProperty ?conditionProperty)
+// Marks single-constraint OptimalConditions, such as >15, for operator checks.
+[ruleVer1b: (?optimalCondition rdf:type meta:OptimalCondition)
+            (?optimalCondition rdf:type ?aNode)
+            (?optimalCondition ssn:forProperty ?optimalConditionProperty)
             (?aNode rdf:type owl:Restriction)
             (?aNode owl:hasValue ?boundProperty)
             (?aNode owl:onProperty ?operator)
-            ->  (?aNode :withCondition ?condition)
-                (?aNode :withConditionProperty ?conditionProperty)
+            ->  (?aNode :withOptimalCondition ?optimalCondition)
+                (?aNode :withOptimalConditionProperty ?optimalConditionProperty)
                 (?aNode :withOperatorCheck ?operator)
-                (?aNode :withPropertyCheck ?conditionProperty)
+                (?aNode :withPropertyCheck ?optimalConditionProperty)
                 (?aNode :withPropertyCheck ?boundProperty)
 ]
 
-// Marks conjunctive Conditions, such as >15 and <22, for further checks.
-[ruleVer1c: (?condition rdf:type meta:Condition)
-            (?condition rdf:type ?aNode1)
-            (?condition ssn:forProperty ?conditionProperty)
+// Marks conjunctive OptimalConditions, such as >15 and <22, for further checks.
+[ruleVer1c: (?optimalCondition rdf:type meta:OptimalCondition)
+            (?optimalCondition rdf:type ?aNode1)
+            (?optimalCondition ssn:forProperty ?optimalConditionProperty)
             (?aNode1 owl:intersectionOf ?aList1)
             (?aList1 rdf:first ?aNode2)
             (?aNode2 rdf:type owl:Restriction)
@@ -50,25 +50,25 @@
             (?aNode3 owl:hasValue ?boundProperty2)
             (?aNode3 owl:onProperty ?operator2)
             makeTemp(?identifier)
-            ->  (?aNode2 :withCondition ?condition)
+            ->  (?aNode2 :withOptimalCondition ?optimalCondition)
                 (?aNode2 :withIdentifier ?identifier)
-                (?aNode2 :withConditionProperty ?conditionProperty)
+                (?aNode2 :withOptimalConditionProperty ?optimalConditionProperty)
                 (?aNode2 :withCheck "conjunction")
                 (?aNode2 :withOperatorCheck ?operator1)
-                (?aNode2 :withPropertyCheck ?conditionProperty)
+                (?aNode2 :withPropertyCheck ?optimalConditionProperty)
                 (?aNode2 :withPropertyCheck ?boundProperty1)
-                (?aNode3 :withCondition ?condition)
+                (?aNode3 :withOptimalCondition ?optimalCondition)
                 (?aNode3 :withIdentifier ?identifier)
-                (?aNode3 :withConditionProperty ?conditionProperty)
+                (?aNode3 :withOptimalConditionProperty ?optimalConditionProperty)
                 (?aNode3 :withCheck "conjunction")
                 (?aNode3 :withOperatorCheck ?operator2)
                 (?aNode3 :withPropertyCheck ?boundProperty2)
 ]
 
-// Marks single-single-constraint disjunctive Conditions, such as <15 or >22, for further checks.
-[ruleVer1d: (?condition rdf:type meta:Condition)
-            (?condition rdf:type ?aNode1)
-            (?condition ssn:forProperty ?conditionProperty)
+// Marks single-single-constraint disjunctive OptimalConditions, such as <15 or >22, for further checks.
+[ruleVer1d: (?optimalCondition rdf:type meta:OptimalCondition)
+            (?optimalCondition rdf:type ?aNode1)
+            (?optimalCondition ssn:forProperty ?optimalConditionProperty)
             (?aNode1 owl:unionOf ?aList1)
             (?aList1 rdf:first ?aNode2)
             (?aNode2 rdf:type owl:Restriction)
@@ -79,23 +79,23 @@
             (?aNode3 rdf:type owl:Restriction)
             (?aNode3 owl:hasValue ?boundProperty2)
             (?aNode3 owl:onProperty ?operator2)
-            ->  (?aNode2 :withCondition ?condition)
-                (?aNode2 :withConditionProperty ?conditionProperty)
+            ->  (?aNode2 :withOptimalCondition ?optimalCondition)
+                (?aNode2 :withOptimalConditionProperty ?optimalConditionProperty)
                 (?aNode2 :withCheck "disjunction")
                 (?aNode2 :withOperatorCheck ?operator1)
-                (?aNode2 :withPropertyCheck ?conditionProperty)
+                (?aNode2 :withPropertyCheck ?optimalConditionProperty)
                 (?aNode2 :withPropertyCheck ?boundProperty1)
-                (?aNode3 :withCondition ?condition)
-                (?aNode3 :withConditionProperty ?conditionProperty)
+                (?aNode3 :withOptimalCondition ?optimalCondition)
+                (?aNode3 :withOptimalConditionProperty ?optimalConditionProperty)
                 (?aNode3 :withCheck "disjunction")
                 (?aNode3 :withOperatorCheck ?operator2)
                 (?aNode3 :withPropertyCheck ?boundProperty2)
 ]
 
-// Marks double-single-constraint disjunctive Conditions, such as (>15 and <22) or >34, for further checks.
-[ruleVer1e: (?condition rdf:type meta:Condition)
-            (?condition rdf:type ?aNode1)
-            (?condition ssn:forProperty ?conditionProperty)
+// Marks double-single-constraint disjunctive OptimalConditions, such as (>15 and <22) or >34, for further checks.
+[ruleVer1e: (?optimalCondition rdf:type meta:OptimalCondition)
+            (?optimalCondition rdf:type ?aNode1)
+            (?optimalCondition ssn:forProperty ?optimalConditionProperty)
             (?aNode1 owl:unionOf ?aList1)
             (?aList1 rdf:first ?aNode2)
             (?aNode2 owl:intersectionOf ?aList2)
@@ -114,29 +114,29 @@
             (?aNode5 owl:hasValue ?boundProperty3)
             (?aNode5 owl:onProperty ?operator3)
             makeTemp(?identifier)
-            ->  (?aNode3 :withCondition ?condition)
+            ->  (?aNode3 :withOptimalCondition ?optimalCondition)
                 (?aNode3 :withIdentifier ?identifier)
-                (?aNode3 :withConditionProperty ?conditionProperty)
+                (?aNode3 :withOptimalConditionProperty ?optimalConditionProperty)
                 (?aNode3 :withCheck "conjunction")
                 (?aNode3 :withOperatorCheck ?operator1)
-                (?aNode3 :withPropertyCheck ?conditionProperty)
+                (?aNode3 :withPropertyCheck ?optimalConditionProperty)
                 (?aNode3 :withPropertyCheck ?boundProperty1)
-                (?aNode4 :withCondition ?condition)
+                (?aNode4 :withOptimalCondition ?optimalCondition)
                 (?aNode4 :withIdentifier ?identifier)
-                (?aNode4 :withConditionProperty ?conditionProperty)
+                (?aNode4 :withOptimalConditionProperty ?optimalConditionProperty)
                 (?aNode4 :withCheck "conjunction")
                 (?aNode4 :withOperatorCheck ?operator2)
                 (?aNode4 :withPropertyCheck ?boundProperty2)
-                (?aNode5 :withCondition ?condition)
-                (?aNode5 :withConditionProperty ?conditionProperty)
+                (?aNode5 :withOptimalCondition ?optimalCondition)
+                (?aNode5 :withOptimalConditionProperty ?optimalConditionProperty)
                 (?aNode5 :withOperatorCheck ?operator3)
                 (?aNode5 :withPropertyCheck ?boundProperty3)
 ]
 
-// Marks double-double-constraint disjunctive Conditions such as (>15 and <22) or (>34 and <45), for further checks.
-[ruleVer1f: (?condition rdf:type meta:Condition)
-            (?condition rdf:type ?aNode1)
-            (?condition ssn:forProperty ?conditionProperty)
+// Marks double-double-constraint disjunctive OptimalConditions such as (>15 and <22) or (>34 and <45), for further checks.
+[ruleVer1f: (?optimalCondition rdf:type meta:OptimalCondition)
+            (?optimalCondition rdf:type ?aNode1)
+            (?optimalCondition ssn:forProperty ?optimalConditionProperty)
             (?aNode1 owl:unionOf ?aList1)
             (?aList1 rdf:first ?aNode2)
             (?aNode2 owl:intersectionOf ?aList2)
@@ -163,28 +163,28 @@
             (?aNode7 owl:onProperty ?operator4)
             makeTemp(?identifier1)
             makeTemp(?identifier2)
-            ->  (?aNode3 :withCondition ?condition)
+            ->  (?aNode3 :withOptimalCondition ?optimalCondition)
                 (?aNode3 :withIdentifier ?identifier1)
-                (?aNode3 :withConditionProperty ?conditionProperty)
+                (?aNode3 :withOptimalConditionProperty ?optimalConditionProperty)
                 (?aNode3 :withCheck "conjunction")
                 (?aNode3 :withOperatorCheck ?operator1)
-                (?aNode3 :withPropertyCheck ?conditionProperty)
+                (?aNode3 :withPropertyCheck ?optimalConditionProperty)
                 (?aNode3 :withPropertyCheck ?boundProperty1)
-                (?aNode4 :withCondition ?condition)
+                (?aNode4 :withOptimalCondition ?optimalCondition)
                 (?aNode4 :withIdentifier ?identifier1)
-                (?aNode4 :withConditionProperty ?conditionProperty)
+                (?aNode4 :withOptimalConditionProperty ?optimalConditionProperty)
                 (?aNode4 :withCheck "conjunction")
                 (?aNode4 :withOperatorCheck ?operator2)
                 (?aNode4 :withPropertyCheck ?boundProperty2)
-                (?aNode6 :withCondition ?condition)
+                (?aNode6 :withOptimalCondition ?optimalCondition)
                 (?aNode6 :withIdentifier ?identifier2)
-                (?aNode6 :withConditionProperty ?conditionProperty)
+                (?aNode6 :withOptimalConditionProperty ?optimalConditionProperty)
                 (?aNode6 :withCheck "conjunction")
                 (?aNode6 :withOperatorCheck ?operator3)
                 (?aNode6 :withPropertyCheck ?boundProperty3)
-                (?aNode7 :withCondition ?condition)
+                (?aNode7 :withOptimalCondition ?optimalCondition)
                 (?aNode7 :withIdentifier ?identifier2)
-                (?aNode7 :withConditionProperty ?conditionProperty)
+                (?aNode7 :withOptimalConditionProperty ?optimalConditionProperty)
                 (?aNode7 :withCheck "conjunction")
                 (?aNode7 :withOperatorCheck ?operator4)
                 (?aNode7 :withPropertyCheck ?boundProperty4)
@@ -194,38 +194,38 @@
 
 // Prints errors if constraints use disallowed object properties as operators.
 [ruleVer2a: (?aNode :withOperatorCheck ?operator)
-            (?condition rdf:type ?aNode)
+            (?optimalCondition rdf:type ?aNode)
             notEqual(?operator, meta:equalTo)
             notEqual(?operator, meta:greaterThan)
             notEqual(?operator, meta:greaterThanOrEqualTo)
             notEqual(?operator, meta:lessThan)
             notEqual(?operator, meta:lessThanOrEqualTo)
             ->  print("Error!")
-                print("Disallowed operator", ?operator, "used in Condition", ?condition)
+                print("Disallowed operator", ?operator, "used in OptimalCondition", ?optimalCondition)
 ]
 
-// Prints errors if Conditions use anything else in place of Properties.
+// Prints errors if OptimalConditions use anything else in place of Properties.
 [ruleVer2b: (?aNode :withPropertyCheck ?property)
-            (?condition rdf:type ?aNode)
+            (?optimalCondition rdf:type ?aNode)
             noValue(?property rdf:type ssn:Property)
             noValue(?property rdf:type sosa:ObservableProperty)
             noValue(?property rdf:type meta:ConfigurableParameter)
             ->  print("Error!")
-                print("Disallowed Thing", ?property, "used in place of a Property in Condition", ?condition)
+                print("Disallowed Thing", ?property, "used in place of a Property in OptimalCondition", ?optimalCondition)
 ]
 
-// Prints errors if Properties in Conditions have unsupported value types.
+// Prints errors if Properties in OptimalConditions have unsupported value types.
 [ruleVer2c: (?aNode :withPropertyCheck ?property)
-            (?condition rdf:type ?aNode)
+            (?optimalCondition rdf:type ?aNode)
             (?property meta:hasValue ?value)
             notDType(?value, xsd:double)
             notDType(?value, xsd:int)
             notDType(?value, xsd:dateTimeStamp)
             ->  print("Error!")
-                print("Unsupported Property value type", ?value, "used in Condition", ?condition)
+                print("Unsupported Property value type", ?value, "used in OptimalCondition", ?optimalCondition)
 ]
 
-// These rules leave marks for subsequent rules to check that the right kinds of PropertyChanges exist for their Condition constraints.
+// These rules leave marks for subsequent rules to check that the right kinds of PropertyChanges exist for their OptimalCondition constraints.
 
 [ruleVer2d: (?aNode :withOperatorCheck meta:equalTo)
             ->  (?aNode :withPropertyChangeCheck meta:ValueIncrease)
@@ -250,301 +250,301 @@
 
 
 
-// The following rules print errors in cases of Conditions that are always impossible.
+// The following rules print errors in cases of OptimalConditions that are always impossible.
 
 // = and < the same property is impossible.
 [ruleVer2i: (?aNode1 :withCheck "conjunction")
             (?aNode2 :withCheck "conjunction")
-            (?aNode1 :withCondition ?condition1)
-            (?condition1 rdf:type meta:Condition)
-            (?condition1 ssn:forProperty ?conditionProperty)
+            (?aNode1 :withOptimalCondition ?optimalCondition1)
+            (?optimalCondition1 rdf:type meta:OptimalCondition)
+            (?optimalCondition1 ssn:forProperty ?optimalConditionProperty)
             (?aNode1 :withIdentifier ?identifier1)
             (?aNode1 owl:hasValue ?boundProperty1)
             (?aNode1 owl:onProperty meta:equalTo)
-            (?aNode2 :withCondition ?condition2)
+            (?aNode2 :withOptimalCondition ?optimalCondition2)
             (?aNode2 :withIdentifier ?identifier2)
             (?aNode2 owl:hasValue ?boundProperty2)
             (?aNode2 owl:onProperty meta:lessThan)
             isBNode(?identifier1)
-            equal(?condition1, ?condition2)
+            equal(?optimalCondition1, ?optimalCondition2)
             equal(?identifier1, ?identifier2)
             equal(?boundProperty1, ?boundProperty2)
             ->  print("Error!")
-                print("Constraint in Condition", ?condition1, "requires that", ?conditionProperty,)
+                print("Constraint in OptimalCondition", ?optimalCondition1, "requires that", ?optimalConditionProperty,)
                 print("be both equal to and less than", ?boundProperty1)
 ]
 
 // = and > the same property is impossible.
 [ruleVer2j: (?aNode1 :withCheck "conjunction")
             (?aNode2 :withCheck "conjunction")
-            (?aNode1 :withCondition ?condition1)
-            (?condition1 rdf:type meta:Condition)
-            (?condition1 ssn:forProperty ?conditionProperty)
+            (?aNode1 :withOptimalCondition ?optimalCondition1)
+            (?optimalCondition1 rdf:type meta:OptimalCondition)
+            (?optimalCondition1 ssn:forProperty ?optimalConditionProperty)
             (?aNode1 :withIdentifier ?identifier1)
             (?aNode1 owl:hasValue ?boundProperty1)
             (?aNode1 owl:onProperty meta:equalTo)
-            (?aNode2 :withCondition ?condition2)
+            (?aNode2 :withOptimalCondition ?optimalCondition2)
             (?aNode2 :withIdentifier ?identifier2)
             (?aNode2 owl:hasValue ?boundProperty2)
             (?aNode2 owl:onProperty meta:greaterThan)
             isBNode(?identifier1)
-            equal(?condition1, ?condition2)
+            equal(?optimalCondition1, ?optimalCondition2)
             equal(?identifier1, ?identifier2)
             equal(?boundProperty1, ?boundProperty2)
             ->  print("Error!")
-                print("Constraint in Condition", ?condition1, "requires that", ?conditionProperty)
+                print("Constraint in OptimalCondition", ?optimalCondition1, "requires that", ?optimalConditionProperty)
                 print("be both equal to and greater than", ?boundProperty1)
 ]
 
 // < and > the same property is impossible.
 [ruleVer2k: (?aNode1 :withCheck "conjunction")
             (?aNode2 :withCheck "conjunction")
-            (?aNode1 :withCondition ?condition1)
-            (?condition1 rdf:type meta:Condition)
-            (?condition1 ssn:forProperty ?conditionProperty)
+            (?aNode1 :withOptimalCondition ?optimalCondition1)
+            (?optimalCondition1 rdf:type meta:OptimalCondition)
+            (?optimalCondition1 ssn:forProperty ?optimalConditionProperty)
             (?aNode1 :withIdentifier ?identifier1)
             (?aNode1 owl:hasValue ?boundProperty1)
             (?aNode1 owl:onProperty meta:lessThan)
-            (?aNode2 :withCondition ?condition2)
+            (?aNode2 :withOptimalCondition ?optimalCondition2)
             (?aNode2 :withIdentifier ?identifier2)
             (?aNode2 owl:hasValue ?boundProperty2)
             (?aNode2 owl:onProperty meta:greaterThan)
             isBNode(?identifier1)
-            equal(?condition1, ?condition2)
+            equal(?optimalCondition1, ?optimalCondition2)
             equal(?identifier1, ?identifier2)
             equal(?boundProperty1, ?boundProperty2)
             ->  print("Error!")
-                print("Constraint in Condition", ?condition1, "requires that", ?conditionProperty)
+                print("Constraint in OptimalCondition", ?optimalCondition1, "requires that", ?optimalConditionProperty)
                 print("be both less than and greater than" ?boundProperty1)
 ]
 
 // < and >= the same property is impossible.
 [ruleVer2l: (?aNode1 :withCheck "conjunction")
             (?aNode2 :withCheck "conjunction")
-            (?aNode1 :withCondition ?condition1)
-            (?condition1 rdf:type meta:Condition)
-            (?condition1 ssn:forProperty ?conditionProperty)
+            (?aNode1 :withOptimalCondition ?optimalCondition1)
+            (?optimalCondition1 rdf:type meta:OptimalCondition)
+            (?optimalCondition1 ssn:forProperty ?optimalConditionProperty)
             (?aNode1 :withIdentifier ?identifier1)
             (?aNode1 owl:hasValue ?boundProperty1)
             (?aNode1 owl:onProperty meta:lessThan)
-            (?aNode2 :withCondition ?condition2)
+            (?aNode2 :withOptimalCondition ?optimalCondition2)
             (?aNode2 :withIdentifier ?identifier2)
             (?aNode2 owl:hasValue ?boundProperty2)
             (?aNode2 owl:onProperty meta:greaterThanOrEqualTo)
             isBNode(?identifier1)
-            equal(?condition1, ?condition2)
+            equal(?optimalCondition1, ?optimalCondition2)
             equal(?identifier1, ?identifier2)
             equal(?boundProperty1, ?boundProperty2)
             ->  print("Error!")
-                print("Constraint in Condition", ?condition1, "requires that", ?conditionProperty)
+                print("Constraint in OptimalCondition", ?optimalCondition1, "requires that", ?optimalConditionProperty)
                 print("be both less than and greater than or equal to", ?boundProperty1)
 ]
 
 // > and <= the same property is impossible.
 [ruleVer2m: (?aNode1 :withCheck "conjunction")
             (?aNode2 :withCheck "conjunction")
-            (?aNode1 :withCondition ?condition1)
-            (?condition1 rdf:type meta:Condition)
-            (?condition1 ssn:forProperty ?conditionProperty)
+            (?aNode1 :withOptimalCondition ?optimalCondition1)
+            (?optimalCondition1 rdf:type meta:OptimalCondition)
+            (?optimalCondition1 ssn:forProperty ?optimalConditionProperty)
             (?aNode1 :withIdentifier ?identifier1)
             (?aNode1 owl:hasValue ?boundProperty1)
             (?aNode1 owl:onProperty meta:greaterThan)
-            (?aNode2 :withCondition ?condition2)
+            (?aNode2 :withOptimalCondition ?optimalCondition2)
             (?aNode2 :withIdentifier ?identifier2)
             (?aNode2 owl:hasValue ?boundProperty2)
             (?aNode2 owl:onProperty meta:lessThanOrEqualTo)
             isBNode(?identifier1)
-            equal(?condition1, ?condition2)
+            equal(?optimalCondition1, ?optimalCondition2)
             equal(?identifier1, ?identifier2)
             equal(?boundProperty1, ?boundProperty2)
             ->  print("Error!")
-                print("Constraint in Condition", ?condition1, "requires that", ?conditionProperty)
+                print("Constraint in OptimalCondition", ?optimalCondition1, "requires that", ?optimalConditionProperty)
                 print("be both greater than and less than or equal to", ?boundProperty1)
 ]
 
 
 
-// These rules print errors in cases of Conditions that are always true (tautologies).
+// These rules print errors in cases of OptimalConditions that are always true (tautologies).
 
-// Condition Properties should not also be constraint bounds since that will, depending on the operator, always
+// OptimalCondition Properties should not also be constraint bounds since that will, depending on the operator, always
 // either be true (a tautology) or impossible (e.g., roomTemperature < roomTemperature).
-[ruleVer2n: (?aNode :withCondition ?condition)
-            (?condition ssn:forProperty ?conditionProperty)
+[ruleVer2n: (?aNode :withOptimalCondition ?optimalCondition)
+            (?optimalCondition ssn:forProperty ?optimalConditionProperty)
             (?aNode owl:hasValue ?boundProperty)
-            equal(?conditionProperty, ?boundProperty)
+            equal(?optimalConditionProperty, ?boundProperty)
             ->  print("Error!")
-                print("Condition", ?condition, "uses", ?conditionProperty)
-                print("as both the Condition Property and constraint bound.")
+                print("OptimalCondition", ?optimalCondition, "uses", ?optimalConditionProperty)
+                print("as both the OptimalCondition Property and constraint bound.")
 ]
 
 // > or <= the same property is always true.
 [ruleVer2o: (?aNode1 :withCheck "disjunction")
             (?aNode2 :withCheck "disjunction")
-            (?aNode1 :withCondition ?condition1)
-            (?condition1 rdf:type meta:Condition)
-            (?condition1 ssn:forProperty ?conditionProperty)
+            (?aNode1 :withOptimalCondition ?optimalCondition1)
+            (?optimalCondition1 rdf:type meta:OptimalCondition)
+            (?optimalCondition1 ssn:forProperty ?optimalConditionProperty)
             (?aNode1 owl:hasValue ?boundProperty1)
             (?aNode1 owl:onProperty meta:greaterThan)
-            (?aNode2 :withCondition ?condition2)
+            (?aNode2 :withOptimalCondition ?optimalCondition2)
             (?aNode2 owl:hasValue ?boundProperty2)
             (?aNode2 owl:onProperty meta:lessThanOrEqualTo)
-            equal(?condition1, ?condition2)
+            equal(?optimalCondition1, ?optimalCondition2)
             equal(?boundProperty1, ?boundProperty2)
             ->  print("Error!")
-                print(?conditionProperty, "in Condition", ?condition1)
+                print(?optimalConditionProperty, "in OptimalCondition", ?optimalCondition1)
                 print("will always be greater than or less than or equal to", ?boundProperty1)
 ]
 
 // < or >= the same property is always true.
 [ruleVer2p: (?aNode1 :withCheck "disjunction")
             (?aNode2 :withCheck "disjunction")
-            (?aNode1 :withCondition ?condition1)
-            (?condition1 rdf:type meta:Condition)
-            (?condition1 ssn:forProperty ?conditionProperty)
+            (?aNode1 :withOptimalCondition ?optimalCondition1)
+            (?optimalCondition1 rdf:type meta:OptimalCondition)
+            (?optimalCondition1 ssn:forProperty ?optimalConditionProperty)
             (?aNode1 owl:hasValue ?boundProperty1)
             (?aNode1 owl:onProperty meta:lessThan)
-            (?aNode2 :withCondition ?condition2)
+            (?aNode2 :withOptimalCondition ?optimalCondition2)
             (?aNode2 owl:hasValue ?boundProperty2)
             (?aNode2 owl:onProperty meta:greaterThanOrEqualTo)
-            equal(?condition1, ?condition2)
+            equal(?optimalCondition1, ?optimalCondition2)
             equal(?boundProperty1, ?boundProperty2)
             ->  print("Error!")
-                print(?conditionProperty, "in Condition", ?condition1)
+                print(?optimalConditionProperty, "in OptimalCondition", ?optimalCondition1)
                 print("will always be less than or greater than or equal to", ?boundProperty1)
 ]
 
 // >= or <= the same property is always true.
 [ruleVer2q: (?aNode1 :withCheck "disjunction")
             (?aNode2 :withCheck "disjunction")
-            (?aNode1 :withCondition ?condition1)
-            (?condition1 rdf:type meta:Condition)
-            (?condition1 ssn:forProperty ?conditionProperty)
+            (?aNode1 :withOptimalCondition ?optimalCondition1)
+            (?optimalCondition1 rdf:type meta:OptimalCondition)
+            (?optimalCondition1 ssn:forProperty ?optimalConditionProperty)
             (?aNode1 owl:hasValue ?boundProperty1)
             (?aNode1 owl:onProperty meta:lessThanOrEqualTo)
-            (?aNode2 :withCondition ?condition2)
+            (?aNode2 :withOptimalCondition ?optimalCondition2)
             (?aNode2 owl:hasValue ?boundProperty2)
             (?aNode2 owl:onProperty meta:greaterThanOrEqualTo)
-            equal(?condition1, ?condition2)
+            equal(?optimalCondition1, ?optimalCondition2)
             equal(?boundProperty1, ?boundProperty2)
             ->  print("Error!")
-                print(?conditionProperty, "in Condition", ?condition1)
+                print(?optimalConditionProperty, "in OptimalCondition", ?optimalCondition1)
                 print("will always be less than or equal to or greater than or equal to", ?boundProperty1)
 ]
 
 
 
-// These rules print errors in cases of multiple Conditions with conflicting constraints, making them impossible
+// These rules print errors in cases of multiple OptimalConditions with conflicting constraints, making them impossible
 // to be satisfied at the same time.
 
-// If Condition1 states some Property must be less than a Property bound, and Condition2 states that Property must
-// be greater than that same Property bound, then these are conflicting Conditions.
-[ruleVer2r: (?aNode1 :withCondition ?condition1)
-            (?condition1 rdf:type meta:Condition)
-            (?condition1 ssn:forProperty ?conditionProperty1)
+// If OptimalCondition1 states some Property must be less than a Property bound, and OptimalCondition2 states that Property must
+// be greater than that same Property bound, then these are conflicting OptimalConditions.
+[ruleVer2r: (?aNode1 :withOptimalCondition ?optimalCondition1)
+            (?optimalCondition1 rdf:type meta:OptimalCondition)
+            (?optimalCondition1 ssn:forProperty ?optimalConditionProperty1)
             (?aNode1 owl:hasValue ?boundProperty1)
             (?aNode1 owl:onProperty meta:lessThan)
-            (?aNode2 :withCondition ?condition2)
-            (?condition2 rdf:type meta:Condition)
-            (?condition2 ssn:forProperty ?conditionProperty2)
+            (?aNode2 :withOptimalCondition ?optimalCondition2)
+            (?optimalCondition2 rdf:type meta:OptimalCondition)
+            (?optimalCondition2 ssn:forProperty ?optimalConditionProperty2)
             (?aNode2 owl:hasValue ?boundProperty2)
             (?aNode2 owl:onProperty meta:greaterThan)
-            notEqual(?condition1, ?condition2)
-            equal(?conditionProperty1, ?conditionProperty2)
+            notEqual(?optimalCondition1, ?optimalCondition2)
+            equal(?optimalConditionProperty1, ?optimalConditionProperty2)
             equal(?boundProperty1, ?boundProperty2)
             ->  print("Error!")
-                print("Conditions", ?condition1, "and", ?condition2, "define conflicting constraints.")
-                print(?conditionProperty1, "must be both less than and greater than", ?boundProperty1)
+                print("OptimalConditions", ?optimalCondition1, "and", ?optimalCondition2, "define conflicting constraints.")
+                print(?optimalConditionProperty1, "must be both less than and greater than", ?boundProperty1)
 ]
 
-// If Condition1 states some Property must be less than a Property bound, and Condition2 states that Property must
-// be greater than or equal to that same Property bound, then these are conflicting Conditions.
-[ruleVer2s: (?aNode1 :withCondition ?condition1)
-            (?condition1 rdf:type meta:Condition)
-            (?condition1 ssn:forProperty ?conditionProperty1)
+// If OptimalCondition1 states some Property must be less than a Property bound, and OptimalCondition2 states that Property must
+// be greater than or equal to that same Property bound, then these are conflicting OptimalConditions.
+[ruleVer2s: (?aNode1 :withOptimalCondition ?optimalCondition1)
+            (?optimalCondition1 rdf:type meta:OptimalCondition)
+            (?optimalCondition1 ssn:forProperty ?optimalConditionProperty1)
             (?aNode1 owl:hasValue ?boundProperty1)
             (?aNode1 owl:onProperty meta:lessThan)
-            (?aNode2 :withCondition ?condition2)
-            (?condition2 rdf:type meta:Condition)
-            (?condition2 ssn:forProperty ?conditionProperty2)
+            (?aNode2 :withOptimalCondition ?optimalCondition2)
+            (?optimalCondition2 rdf:type meta:OptimalCondition)
+            (?optimalCondition2 ssn:forProperty ?optimalConditionProperty2)
             (?aNode2 owl:hasValue ?boundProperty2)
             (?aNode2 owl:onProperty meta:greaterThanOrEqualTo)
-            notEqual(?condition1, ?condition2)
-            equal(?conditionProperty1, ?conditionProperty2)
+            notEqual(?optimalCondition1, ?optimalCondition2)
+            equal(?optimalConditionProperty1, ?optimalConditionProperty2)
             equal(?boundProperty1, ?boundProperty2)
             ->  print("Error!")
-                print("Conditions", ?condition1, "and", ?condition2, "define conflicting constraints.")
-                print(?conditionProperty1, "must be both less than and greater than or equal to", ?boundProperty1)
+                print("OptimalConditions", ?optimalCondition1, "and", ?optimalCondition2, "define conflicting constraints.")
+                print(?optimalConditionProperty1, "must be both less than and greater than or equal to", ?boundProperty1)
 ]
 
-// If Condition1 states some Property must be less than a Property bound, and Condition2 states that Property must
-// be equal to that same Property bound, then these are conflicting Conditions.
-[ruleVer2t: (?aNode1 :withCondition ?condition1)
-            (?condition1 rdf:type meta:Condition)
-            (?condition1 ssn:forProperty ?conditionProperty1)
+// If OptimalCondition1 states some Property must be less than a Property bound, and OptimalCondition2 states that Property must
+// be equal to that same Property bound, then these are conflicting OptimalConditions.
+[ruleVer2t: (?aNode1 :withOptimalCondition ?optimalCondition1)
+            (?optimalCondition1 rdf:type meta:OptimalCondition)
+            (?optimalCondition1 ssn:forProperty ?optimalConditionProperty1)
             (?aNode1 owl:hasValue ?boundProperty1)
             (?aNode1 owl:onProperty meta:lessThan)
-            (?aNode2 :withCondition ?condition2)
-            (?condition2 rdf:type meta:Condition)
-            (?condition2 ssn:forProperty ?conditionProperty2)
+            (?aNode2 :withOptimalCondition ?optimalCondition2)
+            (?optimalCondition2 rdf:type meta:OptimalCondition)
+            (?optimalCondition2 ssn:forProperty ?optimalConditionProperty2)
             (?aNode2 owl:hasValue ?boundProperty2)
             (?aNode2 owl:onProperty meta:equalTo)
-            notEqual(?condition1, ?condition2)
-            equal(?conditionProperty1, ?conditionProperty2)
+            notEqual(?optimalCondition1, ?optimalCondition2)
+            equal(?optimalConditionProperty1, ?optimalConditionProperty2)
             equal(?boundProperty1, ?boundProperty2)
             ->  print("Error!")
-                print("Conditions", ?condition1, "and", ?condition2, "define conflicting constraints.")
-                print(?conditionProperty1, "must be both less than and equal to", ?boundProperty1)
+                print("OptimalConditions", ?optimalCondition1, "and", ?optimalCondition2, "define conflicting constraints.")
+                print(?optimalConditionProperty1, "must be both less than and equal to", ?boundProperty1)
 ]
 
-// If Condition1 states some Property must be greater than a Property bound, and Condition2 states that Property must
-// be equal to that same Property bound, then these are conflicting Conditions.
-[ruleVer2u: (?aNode1 :withCondition ?condition1)
-            (?condition1 rdf:type meta:Condition)
-            (?condition1 ssn:forProperty ?conditionProperty1)
+// If OptimalCondition1 states some Property must be greater than a Property bound, and OptimalCondition2 states that Property must
+// be equal to that same Property bound, then these are conflicting OptimalConditions.
+[ruleVer2u: (?aNode1 :withOptimalCondition ?optimalCondition1)
+            (?optimalCondition1 rdf:type meta:OptimalCondition)
+            (?optimalCondition1 ssn:forProperty ?optimalConditionProperty1)
             (?aNode1 owl:hasValue ?boundProperty1)
             (?aNode1 owl:onProperty meta:greaterThan)
-            (?aNode2 :withCondition ?condition2)
-            (?condition2 rdf:type meta:Condition)
-            (?condition2 ssn:forProperty ?conditionProperty2)
+            (?aNode2 :withOptimalCondition ?optimalCondition2)
+            (?optimalCondition2 rdf:type meta:OptimalCondition)
+            (?optimalCondition2 ssn:forProperty ?optimalConditionProperty2)
             (?aNode2 owl:hasValue ?boundProperty2)
             (?aNode2 owl:onProperty meta:equalTo)
-            notEqual(?condition1, ?condition2)
-            equal(?conditionProperty1, ?conditionProperty2)
+            notEqual(?optimalCondition1, ?optimalCondition2)
+            equal(?optimalConditionProperty1, ?optimalConditionProperty2)
             equal(?boundProperty1, ?boundProperty2)
             ->  print("Error!")
-                print("Conditions", ?condition1, "and", ?condition2, "define conflicting constraints.")
-                print(?conditionProperty1, "must be both greater than and equal to", ?boundProperty1)
+                print("OptimalConditions", ?optimalCondition1, "and", ?optimalCondition2, "define conflicting constraints.")
+                print(?optimalConditionProperty1, "must be both greater than and equal to", ?boundProperty1)
 ]
 
-// If Condition1 states some Property must be greater than a Property bound, and Condition2 states that Property must
-// be less than or equal to that same Property bound, then these are conflicting Conditions.
-[ruleVer2v: (?aNode1 :withCondition ?condition1)
-            (?condition1 rdf:type meta:Condition)
-            (?condition1 ssn:forProperty ?conditionProperty1)
+// If OptimalCondition1 states some Property must be greater than a Property bound, and OptimalCondition2 states that Property must
+// be less than or equal to that same Property bound, then these are conflicting OptimalConditions.
+[ruleVer2v: (?aNode1 :withOptimalCondition ?optimalCondition1)
+            (?optimalCondition1 rdf:type meta:OptimalCondition)
+            (?optimalCondition1 ssn:forProperty ?optimalConditionProperty1)
             (?aNode1 owl:hasValue ?boundProperty1)
             (?aNode1 owl:onProperty meta:greaterThan)
-            (?aNode2 :withCondition ?condition2)
-            (?condition2 rdf:type meta:Condition)
-            (?condition2 ssn:forProperty ?conditionProperty2)
+            (?aNode2 :withOptimalCondition ?optimalCondition2)
+            (?optimalCondition2 rdf:type meta:OptimalCondition)
+            (?optimalCondition2 ssn:forProperty ?optimalConditionProperty2)
             (?aNode2 owl:hasValue ?boundProperty2)
             (?aNode2 owl:onProperty meta:lessThanOrEqualTo)
-            notEqual(?condition1, ?condition2)
-            equal(?conditionProperty1, ?conditionProperty2)
+            notEqual(?optimalCondition1, ?optimalCondition2)
+            equal(?optimalConditionProperty1, ?optimalConditionProperty2)
             equal(?boundProperty1, ?boundProperty2)
             ->  print("Error!")
-                print("Conditions", ?condition1, "and", ?condition2, "define conflicting constraints.")
-                print(?conditionProperty1, "must be both greater than and less than or equal to", ?boundProperty1)
+                print("OptimalConditions", ?optimalCondition1, "and", ?optimalCondition2, "define conflicting constraints.")
+                print(?optimalConditionProperty1, "must be both greater than and less than or equal to", ?boundProperty1)
 ]
 
 
 
-// Checks for a missing Actuator enacting the correct PropertyChange with the right Effect type for a given Condition Property.
-[ruleVer3c: (?aNode :withConditionProperty ?conditionProperty)
+// Checks for a missing Actuator enacting the correct PropertyChange with the right Effect type for a given OptimalCondition Property.
+[ruleVer3c: (?aNode :withOptimalConditionProperty ?optimalConditionProperty)
             (?aNode :withPropertyChangeCheck ?effectType)
-            (?propertyChange ssn:forProperty ?conditionProperty)
+            (?propertyChange ssn:forProperty ?optimalConditionProperty)
             (?propertyChange meta:affectsPropertyWith ?effectType)
             noValue(?actuator meta:enacts ?propertyChange)
             ->  print("Error!")
                 print("No existing Actuator/ConfigurableParameter enacts a PropertyChange causing a", ?effectType, "for Property")
-                print(?conditionProperty)
+                print(?optimalConditionProperty)
 ]

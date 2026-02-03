@@ -159,12 +159,12 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Data properties
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromConditions
-:generateCombinationsOnlyFromConditions rdf:type owl:DatatypeProperty ;
-                                        rdfs:domain <http://www.w3.org/ns/sosa/Platform> ;
-                                        rdfs:range xsd:boolean ;
-                                        rdfs:comment "Determines how ActionCombination generation for a Platforms future simulations occurs. 'false' generates all possible combinations from all actuators and their states in the instance model. 'true' restricts combination generation to only the relevant actuators and their states that potentially restore violated OptimalConditions."@en ;
-                                        rdfs:label "generateCombinationsOnlyFromConditions"@en .
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromOptimalConditions
+:generateCombinationsOnlyFromOptimalConditions rdf:type owl:DatatypeProperty ;
+                                               rdfs:domain <http://www.w3.org/ns/sosa/Platform> ;
+                                               rdfs:range xsd:boolean ;
+                                               rdfs:comment "Determines how ActionCombination generation for a Platforms future simulations occurs. 'false' generates all possible combinations from all actuators and their states in the instance model. 'true' restricts combination generation to only the relevant actuators and their states that potentially restore violated OptimalConditions."@en ;
+                                               rdfs:label "generateCombinationsOnlyFromOptimalConditions"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState
@@ -469,7 +469,7 @@ xsd:duration rdf:type rdfs:Datatype .
                                                        owl:onClass :FmuModel
                                                      ] ,
                                                      [ rdf:type owl:Restriction ;
-                                                       owl:onProperty :generateCombinationsOnlyFromConditions ;
+                                                       owl:onProperty :generateCombinationsOnlyFromOptimalConditions ;
                                                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                        owl:onDataRange xsd:boolean
                                                      ] .

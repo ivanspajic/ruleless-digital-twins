@@ -19,7 +19,7 @@ namespace TestProject {
         static bool crashed = true;
         private static MyMapekPlan _mapekPlan;
 
-        private class MyMapekPlan : MapekPlan {
+        private class MyMapekPlan : EuclidMapekPlan {
 
             public MyMapekPlan(IServiceProvider serviceProvider) : base(serviceProvider) { }
 

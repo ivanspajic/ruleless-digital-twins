@@ -3,11 +3,11 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace TestProject.Mocks.EqualityComparers
 {
-    internal class ConditionEqualityComparer : IEqualityComparer<Condition>
+    internal class OptimalConditionEqualityComparer : IEqualityComparer<OptimalCondition>
     {
         private ConstraintExpressionEqualityComparer _constraintExpressionEqualityComparer = new ConstraintExpressionEqualityComparer();
 
-        public bool Equals(Condition? x, Condition? y)
+        public bool Equals(OptimalCondition? x, OptimalCondition? y)
         {
             return x!.ReachedInMaximumSeconds == y!.ReachedInMaximumSeconds &&
                 x.Name.Equals(y.Name) &&
@@ -15,7 +15,7 @@ namespace TestProject.Mocks.EqualityComparers
                 _constraintExpressionEqualityComparer.Equals(x.Constraint, y.Constraint);
         }
 
-        public int GetHashCode([DisallowNull] Condition obj)
+        public int GetHashCode([DisallowNull] OptimalCondition obj)
         {
             return obj.Name.GetHashCode() * 
                 obj.ReachedInMaximumSeconds.GetHashCode() * 

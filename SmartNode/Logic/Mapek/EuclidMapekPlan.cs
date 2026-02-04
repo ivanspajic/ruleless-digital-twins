@@ -12,16 +12,16 @@ namespace Logic.Mapek {
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
         protected override SimulationPath GetOptimalSimulationPath(PropertyCache propertyCache,
-                IEnumerable<Condition> conditions,
+                IEnumerable<OptimalCondition> optimalConditions,
                 IEnumerable<SimulationPath> simulationPaths) {
-            return GetOptimalSimulationPathsEuclidian(simulationPaths, conditions).First().Item1;
+            return GetOptimalSimulationPathsEuclidian(simulationPaths, optimalConditions).First().Item1;
         }
 
-        internal IEnumerable<(SimulationPath, double)>? GetOptimalSimulationPathsEuclidian(IEnumerable<SimulationPath> simulationPaths, IEnumerable<Condition> conditions) {
+        internal IEnumerable<(SimulationPath, double)>? GetOptimalSimulationPathsEuclidian(IEnumerable<SimulationPath> simulationPaths, IEnumerable<OptimalCondition> optimalConditions) {
             var pathXdists = simulationPaths.Select(sp => {
                 // We only look into the final state of the simulation:
                 var lastPC = sp.Simulations.Last().PropertyCache;
-                var distances = conditions.Select(oc => {
+                var distances = optimalConditions.Select(oc => {
                     Debug.Assert(lastPC.Properties.TryGetValue(oc.Property.Name, out var p));
                     Debug.Assert(p != null);
                     if (!"http://www.w3.org/2001/XMLSchema#double".Equals(oc.Property.OwlType) || oc.Constraint.ConstraintType == ConstraintType.And || oc.Constraint.ConstraintType == ConstraintType.Or) {

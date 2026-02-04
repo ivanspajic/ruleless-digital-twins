@@ -97,28 +97,28 @@ namespace TestProject {
                     Value = 12
                 }
             };
-            var quantizedConditions = new List<Condition> {
-                new Condition {
-                    Name = "FakeCondition1",
+            var quantizedOptimalConditions = new List<OptimalCondition> {
+                new OptimalCondition {
+                    Name = "FakeOptimalCondition1",
                     ReachedInMaximumSeconds = 0,
                     Property = quantizedProperties[0],
                     Constraint = new AtomicConstraintExpression {
                         ConstraintType = ConstraintType.GreaterThan,
                         Property = new Property {
-                            Name = "ConditionProperty1",
+                            Name = "OptimalConditionProperty1",
                             OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = 22.5
                         }
                     }
                 },
-                new Condition {
-                    Name = "FakeCondition2",
+                new OptimalCondition {
+                    Name = "FakeOptimalCondition2",
                     ReachedInMaximumSeconds = 0,
                     Property = quantizedProperties[1],
                     Constraint = new AtomicConstraintExpression {
                         ConstraintType = ConstraintType.LessThanOrEqualTo,
                         Property = new Property {
-                            Name = "ConditionProperty2",
+                            Name = "OptimalConditionProperty2",
                             OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = 12.25
                         }
@@ -134,28 +134,28 @@ namespace TestProject {
                 LookAheadCycles = 2,
                 SimulationDurationSeconds = 100,
                 Simulation = simulationPath.Simulations.First(),
-                QuantizedConditions = new List<Condition> {
-                    new Condition {
-                        Name = "FakeCondition1",
+                QuantizedOptimalConditions = new List<OptimalCondition> {
+                    new OptimalCondition {
+                        Name = "FakeOptimalCondition1",
                         ReachedInMaximumSeconds = 0,
                         Property = quantizedProperties[0],
                         Constraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.GreaterThan,
                             Property = new Property {
-                                Name = "ConditionProperty1",
+                                Name = "OptimalConditionProperty1",
                                 OwlType = "http://www.w3.org/2001/XMLSchema#double",
                                 Value = 22.5
                             }
                         }
                     },
-                    new Condition {
-                        Name = "FakeCondition2",
+                    new OptimalCondition {
+                        Name = "FakeOptimalCondition2",
                         ReachedInMaximumSeconds = 0,
                         Property = quantizedProperties[1],
                         Constraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.LessThanOrEqualTo,
                             Property = new Property {
-                                Name = "ConditionProperty2",
+                                Name = "OptimalConditionProperty2",
                                 OwlType = "http://www.w3.org/2001/XMLSchema#double",
                                 Value = 12.25
                             }
@@ -181,28 +181,28 @@ namespace TestProject {
                 LookAheadCycles = 2,
                 SimulationDurationSeconds = 150,
                 Simulation = simulationPath.Simulations.First(),
-                QuantizedConditions = new List<Condition> {
-                    new Condition {
-                        Name = "FakeCondition1",
+                QuantizedOptimalConditions = new List<OptimalCondition> {
+                    new OptimalCondition {
+                        Name = "FakeOptimalCondition1",
                         ReachedInMaximumSeconds = 0,
                         Property = quantizedProperties[1],
                         Constraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.GreaterThan,
                             Property = new Property {
-                                Name = "ConditionProperty1",
+                                Name = "OptimalConditionProperty1",
                                 OwlType = "http://www.w3.org/2001/XMLSchema#double",
                                 Value = 22.75
                             }
                         }
                     },
-                    new Condition {
-                        Name = "FakeCondition2",
+                    new OptimalCondition {
+                        Name = "FakeOptimalCondition2",
                         ReachedInMaximumSeconds = 0,
                         Property = quantizedProperties[1],
                         Constraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.LessThanOrEqualTo,
                             Property = new Property {
-                                Name = "ConditionProperty2",
+                                Name = "OptimalConditionProperty2",
                                 OwlType = "http://www.w3.org/2001/XMLSchema#double",
                                 Value = 12.25
                             }
@@ -236,7 +236,7 @@ namespace TestProject {
             // Act
             caseRepository.CreateCase(expectedCase);
             caseRepository.CreateCase(otherCase);
-            var actualCase = caseRepository.ReadCase(quantizedProperties, quantizedConditions, lookAheadCycles, simulationDurationSeconds, caseIndex);
+            var actualCase = caseRepository.ReadCase(quantizedProperties, quantizedOptimalConditions, lookAheadCycles, simulationDurationSeconds, caseIndex);
 
             // Assert
             Assert.Equal(expectedCase, actualCase);
@@ -248,9 +248,9 @@ namespace TestProject {
             // Set up all the DTOs.
 
             var observedCacheMock = new Cache {
-                Conditions = new List<Condition> {
-                    new Condition {
-                        Name = "FakeCondition1",
+                OptimalConditions = new List<OptimalCondition> {
+                    new OptimalCondition {
+                        Name = "FakeOptimalCondition1",
                         ReachedInMaximumSeconds = 0,
                         Property = new Property {
                             Name = "FakeProperty1",
@@ -260,14 +260,14 @@ namespace TestProject {
                         Constraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.GreaterThan,
                             Property = new Property {
-                                Name = "ConditionProperty1",
+                                Name = "OptimalConditionProperty1",
                                 OwlType = "http://www.w3.org/2001/XMLSchema#double",
                                 Value = 22.456
                             }
                         }
                     },
-                    new Condition {
-                        Name = "FakeCondition2",
+                    new OptimalCondition {
+                        Name = "FakeOptimalCondition2",
                         ReachedInMaximumSeconds = 0,
                         Property = new Property {
                             Name = "FakeProperty2",
@@ -277,7 +277,7 @@ namespace TestProject {
                         Constraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.LessThanOrEqualTo,
                             Property = new Property {
-                                Name = "ConditionProperty2",
+                                Name = "OptimalConditionProperty2",
                                 OwlType = "http://www.w3.org/2001/XMLSchema#double",
                                 Value = 12.345
                             }
@@ -430,9 +430,9 @@ namespace TestProject {
                 LookAheadCycles = 2,
                 SimulationDurationSeconds = 100,
                 Simulation = simulationPath.Simulations.First(),
-                QuantizedConditions = new List<Condition> {
-                    new Condition {
-                        Name = "FakeCondition1",
+                QuantizedOptimalConditions = new List<OptimalCondition> {
+                    new OptimalCondition {
+                        Name = "FakeOptimalCondition1",
                         ReachedInMaximumSeconds = 0,
                         Property = new Property {
                             Name = "FakeProperty1",
@@ -442,14 +442,14 @@ namespace TestProject {
                         Constraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.GreaterThan,
                             Property = new Property {
-                                Name = "ConditionProperty1",
+                                Name = "OptimalConditionProperty1",
                                 OwlType = "http://www.w3.org/2001/XMLSchema#double",
                                 Value = 22.5
                             }
                         }
                     },
-                    new Condition {
-                        Name = "FakeCondition2",
+                    new OptimalCondition {
+                        Name = "FakeOptimalCondition2",
                         ReachedInMaximumSeconds = 0,
                         Property = new Property {
                             Name = "FakeProperty2",
@@ -459,7 +459,7 @@ namespace TestProject {
                         Constraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.LessThanOrEqualTo,
                             Property = new Property {
-                                Name = "ConditionProperty2",
+                                Name = "OptimalConditionProperty2",
                                 OwlType = "http://www.w3.org/2001/XMLSchema#double",
                                 Value = 12.25
                             }
@@ -491,7 +491,7 @@ namespace TestProject {
             Assert.Equal(expectedCase.Simulation.Index, actualCase.Simulation!.Index);
             Assert.Equal(expectedCase.Simulation.Actions, actualCase.Simulation.Actions, new ActionEqualityComparer());
             Assert.Equal(expectedCase.QuantizedProperties, actualCase.QuantizedProperties, new PropertyEqualityComparer());
-            Assert.Equal(expectedCase.QuantizedConditions, actualCase.QuantizedConditions, new ConditionEqualityComparer());
+            Assert.Equal(expectedCase.QuantizedOptimalConditions, actualCase.QuantizedOptimalConditions, new OptimalConditionEqualityComparer());
         }
     }
 }

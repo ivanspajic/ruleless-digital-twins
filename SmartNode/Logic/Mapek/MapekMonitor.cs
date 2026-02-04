@@ -27,7 +27,7 @@ namespace Logic.Mapek {
                     ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
                 },
                 SoftSensorTreeNodes = new List<SoftSensorTreeNode>(),
-                Conditions = new List<Condition>()
+                OptimalConditions = new List<OptimalCondition>()
             };
 
             // Get the values of all ConfigurableParameters and populate the cache.
@@ -66,14 +66,14 @@ namespace Logic.Mapek {
             // Get the values of all ObservableProperties and populate the cache.
             PopulateObservablePropertiesCache(cache.PropertyCache);
 
-            // Get the values of Condition bound Properties in case there are any that are not handled by the above.
+            // Get the values of OptimalCondition bound Properties in case there are any that are not handled by the above.
             PopulateCacheWithConstantProperties(cache.PropertyCache);
 
             // Write Property values back to the knowledge base.
             WritePropertyValuesToKnowledgeBase(cache.PropertyCache);
 
             // This is necessary for the current fitness function and case-based functionality.
-            cache.Conditions = _mapekKnowledge.GetAllConditions(cache.PropertyCache);
+            cache.OptimalConditions = _mapekKnowledge.GetAllOptimalConditions(cache.PropertyCache);
 
             return cache;
         }

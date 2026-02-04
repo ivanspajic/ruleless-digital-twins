@@ -15,13 +15,13 @@ namespace TestProject.Mocks.ServiceMocks {
         }
 
         public Case ReadCase(IEnumerable<Property> quantizedProperties,
-            IEnumerable<Condition> quantizedConditions,
+            IEnumerable<OptimalCondition> quantizedOptimalConditions,
             int lookAheadCycles,
             int simulationDurationSeconds,
             int index) {
             return Cases.Where(element =>
                 element.QuantizedProperties!.SequenceEqual(quantizedProperties) &&
-                element.QuantizedConditions!.SequenceEqual(quantizedConditions) &&
+                element.QuantizedOptimalConditions!.SequenceEqual(quantizedOptimalConditions) &&
                 element.Index == index &&
                 element.LookAheadCycles == lookAheadCycles &&
                 element.SimulationDurationSeconds == simulationDurationSeconds)

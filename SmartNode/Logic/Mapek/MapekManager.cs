@@ -65,7 +65,7 @@ namespace Logic.Mapek {
                 // Reload the instance model for each cycle to ensure dynamic model updates are captured.
                 _mapekKnowledge.LoadModelsFromKnowledgeBase(); // This makes sense in theory but won't work without the Factory updating as well.
 
-                // Monitor - Observe all hard and soft Sensor values, construct soft Sensor trees, and collect Conditions.
+                // Monitor - Observe all hard and soft Sensor values, construct soft Sensor trees, and collect OptimalConditions.
                 var cache = await _mapekMonitor.Monitor();
 
                 // Check for previously constructed simulation paths to pick the next simulation configuration to execute. If case-based functionality is enabled, check for preexisting
@@ -132,19 +132,19 @@ namespace Logic.Mapek {
                     potentialCase = null!;
                 }
 
-                var quantizedObservedConditions = GetQuantizedConditions(cache.Conditions);
+                var quantizedObservedOptimalConditions = GetQuantizedOptimalConditions(cache.OptimalConditions);
 
                 // If there are still remaining simulations in the simulation path, get the next potential case from it. Otherwise, try to look for it in the database.
                 if (currentOptimalSimulationPath is not null && currentOptimalSimulationPath.Simulations.Any()) {
                     
-                    potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedConditions, currentOptimalSimulationPath);
+                    potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedOptimalConditions, currentOptimalSimulationPath);
 
                     // After getting the potential case from the simulation path, reduce the number of remaining simulations.
                     currentOptimalSimulationPath.RemoveFirstRemainingSimulationFromSimulationPath();
                 } else {
-                    currentOptimalSimulationPath = GetSimulationPathFromSavedCases(quantizedObservedProperties, quantizedObservedConditions);
+                    currentOptimalSimulationPath = GetSimulationPathFromSavedCases(quantizedObservedProperties, quantizedObservedOptimalConditions);
                     if (currentOptimalSimulationPath is not null) {
-                        potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedConditions, currentOptimalSimulationPath);
+                        potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedOptimalConditions, currentOptimalSimulationPath);
 
                         // After getting the potential case from the simulation path, reduce the number of remaining simulations.
                         currentOptimalSimulationPath.RemoveFirstRemainingSimulationFromSimulationPath();
@@ -155,16 +155,16 @@ namespace Logic.Mapek {
             if (potentialCase is null) {
                 // If there are no remaining simulations to be executed from a previously created simulation path, run the planning phase again.
                 if (currentOptimalSimulationPath is null || !currentOptimalSimulationPath.Simulations.Any()) {
-                    // Plan - Simulate all Actions and check that they mitigate Conditions and optimize the system to get the most optimal configuration.
+                    // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
                     // TODO: use the simulation tree for visualization.
                     (currentSimulationTree, currentOptimalSimulationPath) = await _mapekPlan.Plan(cache);
                 }
 
                 // If case-based functionality is used, get the potential case from the new simulation path.
                 if (_coordinatorSettings.UseCaseBasedFunctionality) {
-                    var quantizedObservedConditions = GetQuantizedConditions(cache.Conditions);
+                    var quantizedObservedOptimalConditions = GetQuantizedOptimalConditions(cache.OptimalConditions);
 
-                    potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedConditions, currentOptimalSimulationPath);
+                    potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedOptimalConditions, currentOptimalSimulationPath);
                 }
 
                 if (currentOptimalSimulationPath != null) {
@@ -209,26 +209,26 @@ namespace Logic.Mapek {
             return quantizedProperties;
         }
 
-        private List<Condition> GetQuantizedConditions(IEnumerable<Condition> conditions) {
-            var quantizedConditions = new List<Condition>();
+        private List<OptimalCondition> GetQuantizedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions) {
+            var quantizedOptimalConditions = new List<OptimalCondition>();
 
-            foreach (var condition in conditions) {
-                var valueHandler = _factory.GetValueHandlerImplementation(condition.Property.OwlType);
-                var constraint = GetQuantizedConditionConstraint(condition.Constraint, valueHandler);
+            foreach (var optimalCondition in optimalConditions) {
+                var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.Property.OwlType);
+                var constraint = GetQuantizedOptimalConditionConstraint(optimalCondition.Constraint, valueHandler);
 
-                quantizedConditions.Add(new Condition {
+                quantizedOptimalConditions.Add(new OptimalCondition {
                     Constraint = constraint,
-                    Name = condition.Name,
-                    Property = condition.Property,
-                    ReachedInMaximumSeconds = condition.ReachedInMaximumSeconds
+                    Name = optimalCondition.Name,
+                    Property = optimalCondition.Property,
+                    ReachedInMaximumSeconds = optimalCondition.ReachedInMaximumSeconds
                 });
             }
 
-            return quantizedConditions;
+            return quantizedOptimalConditions;
         }
 
-        private ConstraintExpression GetQuantizedConditionConstraint(ConstraintExpression constraintExpression, IValueHandler valueHandler) {
-            // Go through the whole tree of Condition constraints and get quantized values for each one.
+        private ConstraintExpression GetQuantizedOptimalConditionConstraint(ConstraintExpression constraintExpression, IValueHandler valueHandler) {
+            // Go through the whole tree of OptimalCondition constraints and get quantized values for each one.
             if (constraintExpression is AtomicConstraintExpression atomicConstraintExpression) {
                 var quantizedProperty = new Property {
                     Name = atomicConstraintExpression.Property.Name,
@@ -245,18 +245,18 @@ namespace Logic.Mapek {
 
                 return new NestedConstraintExpression {
                     ConstraintType = nestedConstraintExpression!.ConstraintType,
-                    Left = GetQuantizedConditionConstraint(nestedConstraintExpression.Left, valueHandler),
-                    Right = GetQuantizedConditionConstraint(nestedConstraintExpression.Right, valueHandler)
+                    Left = GetQuantizedOptimalConditionConstraint(nestedConstraintExpression.Left, valueHandler),
+                    Right = GetQuantizedOptimalConditionConstraint(nestedConstraintExpression.Right, valueHandler)
                 };
             }
         }
 
-        private SimulationPath GetSimulationPathFromSavedCases(IEnumerable<Property> quantizedProperties, IEnumerable<Condition> quantizedConditions) {
+        private SimulationPath GetSimulationPathFromSavedCases(IEnumerable<Property> quantizedProperties, IEnumerable<OptimalCondition> quantizedOptimalConditions) {
             var simulations = new List<Simulation>();
 
             for (var i = 0; i < _coordinatorSettings.LookAheadMapekCycles; i++) {
                 var savedCase = _caseRepository.ReadCase(quantizedProperties,
-                    quantizedConditions,
+                    quantizedOptimalConditions,
                     _coordinatorSettings.LookAheadMapekCycles,
                     _coordinatorSettings.SimulationDurationSeconds,
                     i);
@@ -269,7 +269,7 @@ namespace Logic.Mapek {
                 simulations.Add(savedCase.Simulation);
 
                 quantizedProperties = savedCase.QuantizedProperties;
-                quantizedConditions = savedCase.QuantizedConditions;
+                quantizedOptimalConditions = savedCase.QuantizedOptimalConditions;
             }
 
             return new SimulationPath {
@@ -278,7 +278,7 @@ namespace Logic.Mapek {
         }
 
         private Case GetPotentialCaseFromSimulationPath(IEnumerable<Property> quantizedObservedProperties,
-            IEnumerable<Condition> quantizedObservedConditions,
+            IEnumerable<OptimalCondition> quantizedObservedOptimalConditions,
             SimulationPath simulationPath) {
             var firstSimulation = simulationPath.Simulations.First();
 
@@ -287,7 +287,7 @@ namespace Logic.Mapek {
                 Index = firstSimulation.Index,
                 LookAheadCycles = _coordinatorSettings.LookAheadMapekCycles,
                 SimulationDurationSeconds = _coordinatorSettings.SimulationDurationSeconds,
-                QuantizedConditions = quantizedObservedConditions,
+                QuantizedOptimalConditions = quantizedObservedOptimalConditions,
                 QuantizedProperties = quantizedObservedProperties,
                 Simulation = firstSimulation
             };

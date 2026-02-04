@@ -4,7 +4,7 @@ using Logic.Models.OntologicalModels;
 namespace Logic.CaseRepository {
     public interface ICaseRepository {
         public Case ReadCase(IEnumerable<Property> quantizedProperties,
-            IEnumerable<Condition> quantizedConditions,
+            IEnumerable<OptimalCondition> quantizedOptimalConditions,
             int lookAheadCycles,
             int simulationDurationSeconds,
             int caseIndex);

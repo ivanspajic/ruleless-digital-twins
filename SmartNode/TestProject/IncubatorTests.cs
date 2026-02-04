@@ -84,7 +84,7 @@ namespace TestProject {
             mapekKnowledge.Validate(propertyCacheMock);
 
             // TODO: Assert that there's at least one actuator that's not a parameter.
-            var (simulationTree, simulationPath) = mapekPlan.Plan(new Cache() { PropertyCache = propertyCacheMock, Conditions = [], SoftSensorTreeNodes = [] }).Result;
+            var (simulationTree, simulationPath) = mapekPlan.Plan(new Cache() { PropertyCache = propertyCacheMock, OptimalConditions = [], SoftSensorTreeNodes = [] }).Result;
             crashed = false;
 
             // Only valid AFTER focing evaluation through simulation:
@@ -93,12 +93,12 @@ namespace TestProject {
 
             Trace.WriteLine("Checking Volker's `best` solution:");
                         // We move this up here in the test since it may spam the log:
-            IEnumerable<Condition> conditions = mapekKnowledge.GetAllConditions(propertyCacheMock);
-            Assert.NotEmpty(conditions);
+            IEnumerable<OptimalCondition> optimalConditions = mapekKnowledge.GetAllOptimalConditions(propertyCacheMock);
+            Assert.NotEmpty(optimalConditions);
 
             // Note that the optimal conditions are coming from the INITIAL model, but will be evaluated in the 
             //  LAST state of the simulations!
-            var vs = mapekPlan.GetOptimalSimulationPathsEuclidian(simulationTree.SimulationPaths, conditions);
+            var vs = mapekPlan.GetOptimalSimulationPathsEuclidian(simulationTree.SimulationPaths, optimalConditions);
             Trace.WriteLine($"{vs.Count()} solutions: {string.Join(",",vs.Select(pd => pd.Item2))}");
             // We know that for OUR tests, we either pull out all stops or keep all off.
             Assert.True(!all_actuators || vs.First().Item2 < vs.ElementAt(1).Item2);
@@ -144,9 +144,9 @@ namespace TestProject {
             Assert.Equal(30, simulationTree.ChildrenCount);
 
             Trace.WriteLine("Checking Volker's `best` solution:");
-            IEnumerable<Condition> conditions = mapekKnowledge.GetAllConditions(cache.PropertyCache);
-            Assert.NotEmpty(conditions);
-            var vs = mapekPlan.GetOptimalSimulationPathsEuclidian(simulationTree.SimulationPaths, conditions);
+            IEnumerable<OptimalCondition> optimalConditions = mapekKnowledge.GetAllOptimalConditions(cache.PropertyCache);
+            Assert.NotEmpty(optimalConditions);
+            var vs = mapekPlan.GetOptimalSimulationPathsEuclidian(simulationTree.SimulationPaths, optimalConditions);
             Trace.WriteLine($"{vs.Count()} solutions: {string.Join(",",vs.Select(pd => pd.Item2))}");
             var path = vs.First().Item1;
 

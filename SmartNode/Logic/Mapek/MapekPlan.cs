@@ -17,7 +17,7 @@ namespace Logic.Mapek
         private readonly Dictionary<string, IModel> _fmuDict = [];
 	    private readonly Dictionary<string, IInstance> _iDict = [];
         // A setting that determines whether the DT operates in the 'reactive' (true) or 'proactive' (false) mode. The reactive mode generates only those Actions that will
-        // act as mitigations against violated Conditions. The proactive mode generates all possible Actions from all Actuators and/or ConfigurableParameters in the
+        // act as mitigations against violated OptimalConditions. The proactive mode generates all possible Actions from all Actuators and/or ConfigurableParameters in the
         // instance model.
         private readonly bool _restrictToReactiveActionsOnly;
         // Used for performance enhancements.
@@ -59,7 +59,7 @@ namespace Logic.Mapek
             _logger.LogInformation("Generated a total of {total} simulation paths.", simulationTree.SimulationPaths.Count());
 
             // Find the optimal simulation path.
-            var optimalSimulationPath = GetOptimalSimulationPath(cache.PropertyCache, cache.Conditions, simulationTree.SimulationPaths);
+            var optimalSimulationPath = GetOptimalSimulationPath(cache.PropertyCache, cache.OptimalConditions, simulationTree.SimulationPaths);
 
             LogOptimalSimulationPath(optimalSimulationPath);
 
@@ -80,7 +80,7 @@ namespace Logic.Mapek
 
             if (_restrictToReactiveActionsOnly) {
                 // If the RDT runs in reactive mode, then write the current simulation's values into the instance model for
-                // dynamic Condition evaluation and ActionCombination generation.
+                // dynamic OptimalCondition evaluation and ActionCombination generation.
                 if (simulationTreeNode.NodeItem.Index != -1) {
                     UpdateInstanceModelWithSimulationValues(simulationTreeNode.NodeItem.PropertyCache!);
                 }
@@ -147,7 +147,7 @@ namespace Logic.Mapek
             simulationTreeNode.Children = simulationTreeNodeChildren;
         }
 
-        // Updates the setting for restricting Actions and thus ActionCombinations only to those mitigating Conditions.
+        // Updates the setting for restricting Actions and thus ActionCombinations only to those mitigating OptimalConditions.
         private void EnsureUpdatedRestrictionSetting() {
             // Improves performance by not unnecessarily writing to disk.
             if (_restrictToReactiveActionsOnly == _restrictToReactiveActionsOnlyOld) {
@@ -157,14 +157,14 @@ namespace Logic.Mapek
             }
 
             var query = _mapekKnowledge.GetParameterizedStringQuery(@"DELETE {
-                ?platform meta:generateCombinationsOnlyFromConditions ?oldValue .
+                ?platform meta:generateCombinationsOnlyFromOptimalConditions ?oldValue .
             }
             INSERT {
-                ?platform meta:generateCombinationsOnlyFromConditions @newValue .
+                ?platform meta:generateCombinationsOnlyFromOptimalConditions @newValue .
             }
             WHERE {
                 ?platform rdf:type sosa:Platform .
-                ?platform meta:generateCombinationsOnlyFromConditions ?oldValue .
+                ?platform meta:generateCombinationsOnlyFromOptimalConditions ?oldValue .
             }");
 
             query.SetLiteral("newValue", _restrictToReactiveActionsOnly);
@@ -609,39 +609,39 @@ namespace Logic.Mapek
             _logger.LogInformation("New values:\n{vals}", logMsg);   
         }
 
-        private int GetNumberOfSatisfiedConditions(IEnumerable<Condition> conditions, PropertyCache propertyCache)
+        private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
         {
-            var numberOfSatisfiedConditions = 0;
+            var numberOfSatisfiedOptimalConditions = 0;
 
-            foreach (var condition in conditions)
+            foreach (var optimalCondition in optimalConditions)
             {
 
                 Property p;
-                if (propertyCache.ConfigurableParameters.TryGetValue(condition.Property.Name, out ConfigurableParameter? configurableParameter)) {
+                if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property.Name, out ConfigurableParameter? configurableParameter)) {
                     p = configurableParameter;
                     // Sanity-check. Seems a bit odd that we should've forgotten where this was originally coming from?
-                    Debug.Assert(!propertyCache.Properties.TryGetValue(condition.Property.Name, out Property? property), "This should probably not have happened.");
-                } else if (propertyCache.Properties.TryGetValue(condition.Property.Name, out Property? property)) {
+                    Debug.Assert(!propertyCache.Properties.TryGetValue(optimalCondition.Property.Name, out Property? property), "This should probably not have happened.");
+                } else if (propertyCache.Properties.TryGetValue(optimalCondition.Property.Name, out Property? property)) {
                     p = property;
                 } else {
-                    throw new Exception($"Property {condition.Property} was not found in the system.");
+                    throw new Exception($"Property {optimalCondition.Property} was not found in the system.");
                 }
 
-                var valueHandler = _factory.GetValueHandlerImplementation(condition.Property.OwlType);
-                var unsatisfiedConstraints = valueHandler.GetUnsatisfiedConstraintsFromEvaluation(condition.Constraint, p.Value);
-                numberOfSatisfiedConditions += unsatisfiedConstraints.Any() ? 0 : 1;
+                var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.Property.OwlType);
+                var unsatisfiedConstraints = valueHandler.GetUnsatisfiedConstraintsFromEvaluation(optimalCondition.Constraint, p.Value);
+                numberOfSatisfiedOptimalConditions += unsatisfiedConstraints.Any() ? 0 : 1;
             }
 
-            return numberOfSatisfiedConditions;
+            return numberOfSatisfiedOptimalConditions;
         }
 
         protected virtual SimulationPath GetOptimalSimulationPath(PropertyCache propertyCache,
-            IEnumerable<Condition> conditions,
+            IEnumerable<OptimalCondition> optimalConditions,
             IEnumerable<SimulationPath> simulationPaths)
         {
             // This method is a filter for finding the optimal simulation path. It works in a few steps of descending precedance, each of which further reduces the set of
             // simulation paths:
-            // 1. Filter for simulation paths that satisfy the most Conditions.
+            // 1. Filter for simulation paths that satisfy the most OptimalConditions.
             // 2. Filter for simulation paths that have the highest number of the most optimized Properties.
             // 3. Pick the first one.
 
@@ -650,18 +650,18 @@ namespace Logic.Mapek
                 return null!;
             }
 
-            // Filter for simulation configurations that satisfy the most Conditions.
-            var simulationPathsWithMostConditionsSatisfied = GetSimulationPathsWithMostConditionsSatisfied(simulationPaths,
-                conditions);
+            // Filter for simulation configurations that satisfy the most OptimalConditions.
+            var simulationPathsWithMostOptimalConditionsSatisfied = GetSimulationPathsWithMostOptimalConditionsSatisfied(simulationPaths,
+                optimalConditions);
 
-            _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationPathsWithMostConditionsSatisfied.Count);
-            if (simulationPathsWithMostConditionsSatisfied.Count == 1) {
-                return simulationPathsWithMostConditionsSatisfied.First();
+            _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationPathsWithMostOptimalConditionsSatisfied.Count);
+            if (simulationPathsWithMostOptimalConditionsSatisfied.Count == 1) {
+                return simulationPathsWithMostOptimalConditionsSatisfied.First();
             }
 
             // Filter for simulation configurations that optimize the most targeted Properties.
             var simulationPathsWithMostOptimizedProperties =
-                GetSimulationPathsWithMostOptimizedProperties(simulationPathsWithMostConditionsSatisfied,
+                GetSimulationPathsWithMostOptimizedProperties(simulationPathsWithMostOptimalConditionsSatisfied,
                     propertyCache);
 
             _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationPathsWithMostOptimizedProperties.Count);
@@ -670,22 +670,22 @@ namespace Logic.Mapek
             return simulationPathsWithMostOptimizedProperties.First();
         }
 
-        private List<SimulationPath> GetSimulationPathsWithMostConditionsSatisfied(IEnumerable<SimulationPath> simulationPaths,
-            IEnumerable<Condition> conditions)
+        private List<SimulationPath> GetSimulationPathsWithMostOptimalConditionsSatisfied(IEnumerable<SimulationPath> simulationPaths,
+            IEnumerable<OptimalCondition> optimalConditions)
         {
             var passingSimulationPaths = new List<SimulationPath>();
-            var highestNumberOfSatisfiedConditions = 0;
+            var highestNumberOfSatisfiedOptimalConditions = 0;
 
             foreach (var simulationPath in simulationPaths)
             {
-                var numberOfSatisfiedConditions = GetNumberOfSatisfiedConditions(conditions, simulationPath.Simulations.Last().PropertyCache!);
+                var numberOfSatisfiedOptimalConditions = GetNumberOfSatisfiedOptimalConditions(optimalConditions, simulationPath.Simulations.Last().PropertyCache!);
 
-                if (numberOfSatisfiedConditions > highestNumberOfSatisfiedConditions)
+                if (numberOfSatisfiedOptimalConditions > highestNumberOfSatisfiedOptimalConditions)
                 {
-                    highestNumberOfSatisfiedConditions = numberOfSatisfiedConditions;
+                    highestNumberOfSatisfiedOptimalConditions = numberOfSatisfiedOptimalConditions;
                     passingSimulationPaths = [simulationPath];
                 }
-                else if (numberOfSatisfiedConditions == highestNumberOfSatisfiedConditions)
+                else if (numberOfSatisfiedOptimalConditions == highestNumberOfSatisfiedOptimalConditions)
                 {
                     passingSimulationPaths.Add(simulationPath);
                 }

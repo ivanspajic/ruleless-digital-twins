@@ -61,19 +61,16 @@ namespace Logic.Mapek
 
         private void LogExpectedPropertyValues(Simulation simulation)
         {
-            _logger.LogInformation("Expected Property values:");
+            var msg = "Expected Property values:";
 
-            foreach (var propertyKeyValue in simulation.PropertyCache!.Properties)
-            {
-                _logger.LogInformation("{propertyName}: {propertyValue}", propertyKeyValue.Key, propertyKeyValue.Value.Value.ToString());
+            foreach (var propertyKeyValue in simulation.PropertyCache!.Properties) {
+                msg += $"\n{propertyKeyValue.Key}: {propertyKeyValue.Value.Value.ToString()}";
             }
 
-            foreach (var configurableParameterKeyValue in simulation.PropertyCache.ConfigurableParameters)
-            {
-                _logger.LogInformation("{configurableParameterName}: {configurableParameterValue}",
-                    configurableParameterKeyValue.Key,
-                    configurableParameterKeyValue.Value.Value.ToString());
+            foreach (var configurableParameterKeyValue in simulation.PropertyCache.ConfigurableParameters) {
+                msg += $"\n{configurableParameterKeyValue.Key}: {configurableParameterKeyValue.Value.Value.ToString()}";
             }
+            _logger.LogInformation(msg);
         }
     }
 }

@@ -23,6 +23,8 @@ namespace Logic.Mapek
         // Used for performance enhancements.
         private bool _restrictToReactiveActionsOnlyOld;
 
+        private bool _savedReactiveSetting = false;
+
         private readonly CoordinatorSettings _coordinatorSettings;
         private readonly ILogger<IMapekPlan> _logger;
         private readonly IFactory _factory;
@@ -149,8 +151,8 @@ namespace Logic.Mapek
 
         // Updates the setting for restricting Actions and thus ActionCombinations only to those mitigating OptimalConditions.
         private void EnsureUpdatedRestrictionSetting() {
-            // Improves performance by not unnecessarily writing to disk.
-            if (_restrictToReactiveActionsOnly == _restrictToReactiveActionsOnlyOld) {
+            // Write the setting at least once to disk. Only write again if the setting changes.
+            if (_savedReactiveSetting && _restrictToReactiveActionsOnly == _restrictToReactiveActionsOnlyOld) {
                 return;
             } else {
                 _restrictToReactiveActionsOnlyOld = _restrictToReactiveActionsOnly;

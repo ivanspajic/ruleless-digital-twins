@@ -88,13 +88,15 @@ xsd:duration rdf:type rdfs:Datatype .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint
 :hasConstraint rdf:type owl:ObjectProperty ;
                rdfs:domain :OptimalCondition ;
-               rdfs:range [ rdf:type owl:Restriction ;
-                            owl:onProperty :comparisonOperator ;
-                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                            owl:onClass <http://www.w3.org/ns/ssn/Property>
-                          ] ;
-               rdfs:comment "Represents a relation between a Condition and a Constraint."@en ;
+               rdfs:comment "Represents a relation between an OptimalCondition and a constraint on some Property values."@en ;
                rdfs:label "hasConstraint"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasEnablingConstraint
+:hasEnablingConstraint rdf:type owl:ObjectProperty ;
+                       rdfs:domain :OptimalCondition ;
+                       rdfs:comment "Represents a relation between an OptimalCondition and the constraint that enables it. E.g., one might desire a specific temperature range only if one is home or if it is a specific time of day."@en ;
+                       rdfs:label "hasEnablingConstraint"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel
@@ -332,6 +334,23 @@ xsd:duration rdf:type rdfs:Datatype .
 :OptimalCondition rdf:type owl:Class ;
                   rdfs:subClassOf [ rdf:type owl:Restriction ;
                                     owl:onProperty :hasConstraint ;
+                                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                    owl:onClass [ owl:intersectionOf ( [ rdf:type owl:Restriction ;
+                                                                         owl:onProperty :comparisonOperator ;
+                                                                         owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                                         owl:onClass <http://www.w3.org/ns/ssn/Property>
+                                                                       ]
+                                                                       [ rdf:type owl:Restriction ;
+                                                                         owl:onProperty :comparisonOperator ;
+                                                                         owl:maxQualifiedCardinality "4"^^xsd:nonNegativeInteger ;
+                                                                         owl:onClass <http://www.w3.org/ns/ssn/Property>
+                                                                       ]
+                                                                     ) ;
+                                                  rdf:type owl:Class
+                                                ]
+                                  ] ,
+                                  [ rdf:type owl:Restriction ;
+                                    owl:onProperty :hasEnablingConstraint ;
                                     owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                     owl:onClass [ owl:intersectionOf ( [ rdf:type owl:Restriction ;
                                                                          owl:onProperty :comparisonOperator ;

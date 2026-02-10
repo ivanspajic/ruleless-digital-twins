@@ -350,8 +350,13 @@ xsd:duration rdf:type rdfs:Datatype .
                                                 ]
                                   ] ,
                                   [ rdf:type owl:Restriction ;
-                                    owl:onProperty :hasEnablingConstraint ;
+                                    owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
                                     owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                    owl:onClass <http://www.w3.org/ns/ssn/Property>
+                                  ] ,
+                                  [ rdf:type owl:Restriction ;
+                                    owl:onProperty :hasEnablingConstraint ;
+                                    owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                     owl:onClass [ owl:intersectionOf ( [ rdf:type owl:Restriction ;
                                                                          owl:onProperty :comparisonOperator ;
                                                                          owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -365,11 +370,6 @@ xsd:duration rdf:type rdfs:Datatype .
                                                                      ) ;
                                                   rdf:type owl:Class
                                                 ]
-                                  ] ,
-                                  [ rdf:type owl:Restriction ;
-                                    owl:onProperty <http://www.w3.org/ns/ssn/forProperty> ;
-                                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                    owl:onClass <http://www.w3.org/ns/ssn/Property>
                                   ] ,
                                   [ rdf:type owl:Restriction ;
                                     owl:onProperty :isBreakable ;

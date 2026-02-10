@@ -57,12 +57,6 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 #    Individuals
 #################################################################
 
-###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2#OptimalCompressionRatioLimit
-:OptimalCompressionRatioLimit rdf:type owl:NamedIndividual ,
-                                       <http://www.w3.org/ns/ssn/Property> ;
-                              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.1"^^xsd:double .
-
-
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/Austevoll
 :Austevoll rdf:type owl:NamedIndividual ,
                     <http://www.w3.org/ns/sosa/Platform> ;
@@ -181,9 +175,23 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                  <http://www.w3.org/ns/ssn/forProperty> :Epsilon .
 
 
+###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/OptimalCompressionRatioLimit
+:OptimalCompressionRatioLimit rdf:type owl:NamedIndividual ,
+                                       <http://www.w3.org/ns/ssn/Property> ;
+                              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.1"^^xsd:double .
+
+
 ###  http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/OptimalCondition1
 :OptimalCondition1 rdf:type owl:NamedIndividual ,
-                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> ;
+                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint> ;
+                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onClass [ rdf:type owl:Restriction ;
+                                            owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo> ;
+                                            owl:hasValue :OptimalCompressionRatioLimit
+                                          ]
+                            ] ;
                    <http://www.w3.org/ns/ssn/forProperty> :CompressionRatio ;
                    <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> "3600"^^xsd:int .
 

@@ -10,6 +10,20 @@
 // Upon locating the marks for OptimalCondition constraints, these rules find the relevant PropertyChanges and use them as a temporary mark
 // for subsequent rules.
 
+[rule1a:    (?optimalCondition rdf:type meta:OptimalCondition)
+            (?optimalCondition rdf:type ?aNode1)
+            (?aNode1 owl:onProperty ?objectProperty)
+            (?aNode1 owl:onClass ?aNode2)
+            ->  (?aNode2 :withObjectProperty ?objectProperty)
+]
+
+// TODO: add checks for atomic enabling constraints. these should be evaluated and marked as true or false
+// with this info, check the full constraints, and mark the appropriate optimalcondition as either enabled (true) or disabled (false)
+// update the current condition-constraint-evaluating rules to check for whether the optimalcondition is enabled or disabled
+// for enabled conditions, evaluate the constraints (provided they`re valid and thus remain enabled) and mark them as true or false
+// with this info, generate propertychanges directly if the constraints are not a part of a larger disjunctive constraint
+// otherwise, generate propertychanges only if the whole disjunctive constraint evaluates to false
+
 [rule1b:    (?platform rdf:type sosa:Platform)
             (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
             (?aNode :withOptimalConditionProperty ?optimalConditionProperty)

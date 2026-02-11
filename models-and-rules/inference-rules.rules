@@ -7,312 +7,312 @@
 
 
 
-// Upon locating the marks for OptimalCondition constraints, these rules find the relevant PropertyChanges and use them as a temporary mark
-// for subsequent rules.
-
-[rule1a:    (?optimalCondition rdf:type meta:OptimalCondition)
-            (?optimalCondition rdf:type ?aNode1)
-            (?aNode1 owl:onProperty ?objectProperty)
-            (?aNode1 owl:onClass ?aNode2)
-            ->  (?aNode2 :withObjectProperty ?objectProperty)
-]
-
-// TODO: add checks for atomic enabling constraints. these should be evaluated and marked as true or false
-// with this info, check the full constraints, and mark the appropriate optimalcondition as either enabled (true) or disabled (false)
-// update the current condition-constraint-evaluating rules to check for whether the optimalcondition is enabled or disabled
-// for enabled conditions, evaluate the constraints (provided they`re valid and thus remain enabled) and mark them as true or false
-// with this info, generate propertychanges directly if the constraints are not a part of a larger disjunctive constraint
-// otherwise, generate propertychanges only if the whole disjunctive constraint evaluates to false
-
-[rule1b:    (?platform rdf:type sosa:Platform)
+// Creates containers of information for evaluating atomic constraints in OptimalConditions.
+[rule1a:    (?platform rdf:type sosa:Platform)
             (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
             (?aNode :withOptimalConditionProperty ?optimalConditionProperty)
             (?optimalConditionProperty meta:hasValue ?optimalConditionPropertyValue)
             (?aNode owl:hasValue ?boundProperty)
             (?boundProperty meta:hasValue ?boundPropertyValue)
-            (?aNode owl:onProperty meta:equalTo)
-            noValue(?aNode :withCheck "conjunction")
+            (?aNode owl:onProperty ?operator)
             makeTemp(?evaluationContainer)
-            ->  (?evaluationContainer :evaluatesGreaterThan ?boundProperty)
-                (?evaluationContainer :evaluatesLessThan ?boundProperty)
-                (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
-]
-
-[rule1c:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?aNode :withOptimalConditionProperty ?optimalConditionProperty)
-            (?optimalConditionProperty meta:hasValue ?optimalConditionPropertyValue)
-            (?aNode owl:hasValue ?boundProperty)
-            (?boundProperty meta:hasValue ?boundPropertyValue)
-            (?aNode owl:onProperty meta:lessThan)
-            noValue(?aNode :withCheck "conjunction")
-            makeTemp(?evaluationContainer)
-            ->  (?evaluationContainer :evaluatesGreaterThanOrEqualTo ?boundProperty)
-                (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
-]
-
-[rule1d:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?aNode :withOptimalConditionProperty ?optimalConditionProperty)
-            (?optimalConditionProperty meta:hasValue ?optimalConditionPropertyValue)
-            (?aNode owl:hasValue ?boundProperty)
-            (?boundProperty meta:hasValue ?boundPropertyValue)
-            (?aNode owl:onProperty meta:lessThanOrEqualTo)
-            noValue(?aNode :withCheck "conjunction")
-            makeTemp(?evaluationContainer)
-            ->  (?evaluationContainer :evaluatesGreaterThan ?boundProperty)
-                (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
-]
-
-[rule1e:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?aNode :withOptimalConditionProperty ?optimalConditionProperty)
-            (?optimalConditionProperty meta:hasValue ?optimalConditionPropertyValue)
-            (?aNode owl:hasValue ?boundProperty)
-            (?boundProperty meta:hasValue ?boundPropertyValue)
-            (?aNode owl:onProperty meta:greaterThan)
-            noValue(?aNode :withCheck "conjunction")
-            makeTemp(?evaluationContainer)
-            ->  (?evaluationContainer :evaluatesLessThanOrEqualTo ?boundProperty)
-                (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
-]
-
-[rule1f:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?aNode :withOptimalConditionProperty ?optimalConditionProperty)
-            (?optimalConditionProperty meta:hasValue ?optimalConditionPropertyValue)
-            (?aNode owl:hasValue ?boundProperty)
-            (?boundProperty meta:hasValue ?boundPropertyValue)
-            (?aNode owl:onProperty meta:greaterThanOrEqualTo)
-            noValue(?aNode :withCheck "conjunction")
-            makeTemp(?evaluationContainer)
-            ->  (?evaluationContainer :evaluatesLessThan ?boundProperty)
-                (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
-]
-
-[rule1g:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?aNode1 :withOptimalConditionProperty ?optimalConditionProperty1)
-            (?optimalConditionProperty1 meta:hasValue ?optimalConditionProperty1Value)
-            (?aNode1 :withCheck "conjunction")
-            (?aNode1 :withIdentifier ?identifier1)
-            (?aNode1 owl:hasValue ?boundProperty1)
-            (?boundProperty1 meta:hasValue ?boundProperty1Value)
-            (?aNode1 owl:onProperty meta:equalTo)
-            (?aNode2 :withOptimalConditionProperty ?optimalConditionProperty2)
-            (?optimalConditionProperty2 meta:hasValue ?optimalConditionProperty2Value)
-            (?aNode2 :withCheck "conjunction")
-            (?aNode2 :withIdentifier ?identifier2)
-            (?aNode2 owl:hasValue ?boundProperty2)
-            (?boundProperty2 meta:hasValue ?boundProperty2Value)
-            (?aNode2 owl:onProperty meta:equalTo)
-            equal(?identifier1, ?identifier2)
-            equal(?optimalConditionProperty1, ?optimalConditionProperty2)
-            notEqual(?boundProperty1, ?boundProperty2)
-            equal(?boundProperty1Value, ?boundProperty2Value)
-            makeTemp(?evaluationContainer)
-            ->  (?evaluationContainer :evaluatesLessThan ?boundProperty1)
-                (?evaluationContainer :evaluatesGreaterThan ?boundProperty1)
-                (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty1)
-]
-
-[rule1h:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?aNode1 :withOptimalConditionProperty ?optimalConditionProperty1)
-            (?optimalConditionProperty1 meta:hasValue ?optimalConditionProperty1Value)
-            (?aNode1 :withCheck "conjunction")
-            (?aNode1 :withIdentifier ?identifier1)
-            (?aNode1 owl:hasValue ?boundProperty1)
-            (?boundProperty1 meta:hasValue ?boundProperty1Value)
-            (?aNode1 owl:onProperty meta:equalTo)
-            (?aNode2 :withOptimalConditionProperty ?optimalConditionProperty2)
-            (?optimalConditionProperty2 meta:hasValue ?optimalConditionProperty2Value)
-            (?aNode2 :withCheck "conjunction")
-            (?aNode2 :withIdentifier ?identifier2)
-            (?aNode2 owl:hasValue ?boundProperty2)
-            (?boundProperty2 meta:hasValue ?boundProperty2Value)
-            (?aNode2 owl:onProperty meta:lessThanOrEqualTo)
-            equal(?identifier1, ?identifier2)
-            equal(?optimalConditionProperty1, ?optimalConditionProperty2)
-            notEqual(?boundProperty1, ?boundProperty2)
-            equal(?boundProperty1Value, ?boundProperty2Value)
-            makeTemp(?evaluationContainer)
-            ->  (?evaluationContainer :evaluatesLessThan ?boundProperty1)
-                (?evaluationContainer :evaluatesGreaterThan ?boundProperty1)
-                (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty1)
-]
-
-[rule1i:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?aNode1 :withOptimalConditionProperty ?optimalConditionProperty1)
-            (?optimalConditionProperty1 meta:hasValue ?optimalConditionProperty1Value)
-            (?aNode1 :withCheck "conjunction")
-            (?aNode1 :withIdentifier ?identifier1)
-            (?aNode1 owl:hasValue ?boundProperty1)
-            (?boundProperty1 meta:hasValue ?boundProperty1Value)
-            (?aNode1 owl:onProperty meta:equalTo)
-            (?aNode2 :withOptimalConditionProperty ?optimalConditionProperty2)
-            (?optimalConditionProperty2 meta:hasValue ?optimalConditionProperty2Value)
-            (?aNode2 :withCheck "conjunction")
-            (?aNode2 :withIdentifier ?identifier2)
-            (?aNode2 owl:hasValue ?boundProperty2)
-            (?boundProperty2 meta:hasValue ?boundProperty2Value)
-            (?aNode2 owl:onProperty meta:greaterThanOrEqualTo)
-            equal(?identifier1, ?identifier2)
-            equal(?optimalConditionProperty1, ?optimalConditionProperty2)
-            notEqual(?boundProperty1, ?boundProperty2)
-            equal(?boundProperty1Value, ?boundProperty2Value)
-            makeTemp(?evaluationContainer)
-            ->  (?evaluationContainer :evaluatesLessThan ?boundProperty1)
-                (?evaluationContainer :evaluatesGreaterThan ?boundProperty1)
-                (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty1)
-]
-
-[rule1j:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?aNode1 :withOptimalConditionProperty ?optimalConditionProperty1)
-            (?optimalConditionProperty1 meta:hasValue ?optimalConditionProperty1Value)
-            (?aNode1 :withCheck "conjunction")
-            (?aNode1 :withIdentifier ?identifier1)
-            (?aNode1 owl:hasValue ?boundProperty1)
-            (?boundProperty1 meta:hasValue ?boundProperty1Value)
-            (?aNode1 owl:onProperty meta:greaterThan)
-            (?aNode2 :withOptimalConditionProperty ?optimalConditionProperty2)
-            (?optimalConditionProperty2 meta:hasValue ?optimalConditionProperty2Value)
-            (?aNode2 :withCheck "conjunction")
-            (?aNode2 :withIdentifier ?identifier2)
-            (?aNode2 owl:hasValue ?boundProperty2)
-            (?boundProperty2 meta:hasValue ?boundProperty2Value)
-            (?aNode2 owl:onProperty meta:lessThan)
-            equal(?identifier1, ?identifier2)
-            equal(?optimalConditionProperty1, ?optimalConditionProperty2)
-            notEqual(?boundProperty1, ?boundProperty2)
-            lessThan(?boundProperty1Value, ?boundProperty2Value)
-            makeTemp(?evaluationContainer)
-            ->  (?evaluationContainer :evaluatesLessThanOrEqualTo ?boundProperty1)
-                (?evaluationContainer :evaluatesGreaterThanOrEqualTo ?boundProperty2)
-                (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty1)
-]
-
-[rule1k:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?aNode1 :withOptimalConditionProperty ?optimalConditionProperty1)
-            (?optimalConditionProperty1 meta:hasValue ?optimalConditionProperty1Value)
-            (?aNode1 :withCheck "conjunction")
-            (?aNode1 :withIdentifier ?identifier1)
-            (?aNode1 owl:hasValue ?boundProperty1)
-            (?boundProperty1 meta:hasValue ?boundProperty1Value)
-            (?aNode1 owl:onProperty meta:greaterThan)
-            (?aNode2 :withOptimalConditionProperty ?optimalConditionProperty2)
-            (?optimalConditionProperty2 meta:hasValue ?optimalConditionProperty2Value)
-            (?aNode2 :withCheck "conjunction")
-            (?aNode2 :withIdentifier ?identifier2)
-            (?aNode2 owl:hasValue ?boundProperty2)
-            (?boundProperty2 meta:hasValue ?boundProperty2Value)
-            (?aNode2 owl:onProperty meta:lessThanOrEqualTo)
-            equal(?identifier1, ?identifier2)
-            equal(?optimalConditionProperty1, ?optimalConditionProperty2)
-            notEqual(?boundProperty1, ?boundProperty2)
-            lessThan(?boundProperty1Value, ?boundProperty2Value)
-            makeTemp(?evaluationContainer)
-            ->  (?evaluationContainer :evaluatesLessThanOrEqualTo ?boundProperty1)
-                (?evaluationContainer :evaluatesGreaterThan ?boundProperty2)
-                (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty1)
-]
-
-[rule1l:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?aNode1 :withOptimalConditionProperty ?optimalConditionProperty1)
-            (?optimalConditionProperty1 meta:hasValue ?optimalConditionProperty1Value)
-            (?aNode1 :withCheck "conjunction")
-            (?aNode1 :withIdentifier ?identifier1)
-            (?aNode1 owl:hasValue ?boundProperty1)
-            (?boundProperty1 meta:hasValue ?boundProperty1Value)
-            (?aNode1 owl:onProperty meta:greaterThanOrEqualTo)
-            (?aNode2 :withOptimalConditionProperty ?optimalConditionProperty2)
-            (?optimalConditionProperty2 meta:hasValue ?optimalConditionProperty2Value)
-            (?aNode2 :withCheck "conjunction")
-            (?aNode2 :withIdentifier ?identifier2)
-            (?aNode2 owl:hasValue ?boundProperty2)
-            (?boundProperty2 meta:hasValue ?boundProperty2Value)
-            (?aNode2 owl:onProperty meta:lessThan)
-            equal(?identifier1, ?identifier2)
-            equal(?optimalConditionProperty1, ?optimalConditionProperty2)
-            notEqual(?boundProperty1, ?boundProperty2)
-            lessThan(?boundProperty1Value, ?boundProperty2Value)
-            makeTemp(?evaluationContainer)
-            ->  (?evaluationContainer :evaluatesLessThan ?boundProperty1)
-                (?evaluationContainer :evaluatesGreaterThanOrEqualTo ?boundProperty2)
-                (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty1)
-]
-
-[rule1m:    (?platform rdf:type sosa:Platform)
-            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?aNode1 :withOptimalConditionProperty ?optimalConditionProperty1)
-            (?optimalConditionProperty1 meta:hasValue ?optimalConditionProperty1Value)
-            (?aNode1 :withCheck "conjunction")
-            (?aNode1 :withIdentifier ?identifier1)
-            (?aNode1 owl:hasValue ?boundProperty1)
-            (?boundProperty1 meta:hasValue ?boundProperty1Value)
-            (?aNode1 owl:onProperty meta:greaterThanOrEqualTo)
-            (?aNode2 :withOptimalConditionProperty ?optimalConditionProperty2)
-            (?optimalConditionProperty2 meta:hasValue ?optimalConditionProperty2Value)
-            (?aNode2 :withCheck "conjunction")
-            (?aNode2 :withIdentifier ?identifier2)
-            (?aNode2 owl:hasValue ?boundProperty2)
-            (?boundProperty2 meta:hasValue ?boundProperty2Value)
-            (?aNode2 owl:onProperty meta:lessThanOrEqualTo)
-            equal(?identifier1, ?identifier2)
-            equal(?optimalConditionProperty1, ?optimalConditionProperty2)
-            notEqual(?boundProperty1, ?boundProperty2)
-            le(?boundProperty1Value, ?boundProperty2Value)
-            makeTemp(?evaluationContainer)
-            ->  (?evaluationContainer :evaluatesLessThan ?boundProperty1)
-                (?evaluationContainer :evaluatesGreaterThan ?boundProperty2)
-                (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty1)
+            ->  (?evaluationContainer :withOperator ?operator)
+                (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
+                (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
+                (?evaluationContainer :withAtomicConstraintContainer ?aNode)
 ]
 
 
 
-// These rules locate the temporary containers produced by the first rules, evaluate them, and mark the required PropertyChanges.
+// The following rules find atomic constraint information containers, evaluate them, and mark them with the result.
 
-[rule2a:    (?bNode :withOptimalConditionProperty ?optimalConditionProperty)
-            (?optimalConditionProperty meta:hasValue ?optimalConditionPropertyValue)
-            (?bNode :evaluatesGreaterThan ?boundProperty)
-            (?boundProperty meta:hasValue ?boundPropertyValue)
-            (?propertyChange ssn:forProperty ?optimalConditionProperty)
-            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
-            greaterThan(?optimalConditionPropertyValue, ?boundPropertyValue)
-            ->  (_: :withPropertyChange ?propertyChange)
+// If the comparison operator is equalTo (=) and the condition and bound Properties are equal, mark the container with a true evaluation result.
+[rule2a:    (?evaluationContainer :withOperator meta:equalTo)
+            (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
+            (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
+            (?evaluationContainer :withAtomicConstraintContainer ?aNode)
+            equal(?optimalConditionPropertyValue, ?boundPropertyValue)
+            ->  (?aNode :withEvaluationResult "true"^^xsd:boolean)
 ]
 
-[rule2b:    (?bNode :withOptimalConditionProperty ?optimalConditionProperty)
-            (?optimalConditionProperty meta:hasValue ?optimalConditionPropertyValue)
-            (?bNode :evaluatesGreaterThanOrEqualTo ?boundProperty)
-            (?boundProperty meta:hasValue ?boundPropertyValue)
-            (?propertyChange ssn:forProperty ?optimalConditionProperty)
-            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
-            ge(?optimalConditionPropertyValue, ?boundPropertyValue)
-            ->  (_: :withPropertyChange ?propertyChange)
-]
-
-[rule2c:    (?bNode :withOptimalConditionProperty ?optimalConditionProperty)
-            (?optimalConditionProperty meta:hasValue ?optimalConditionPropertyValue)
-            (?bNode :evaluatesLessThan ?boundProperty)
-            (?boundProperty meta:hasValue ?boundPropertyValue)
-            (?propertyChange ssn:forProperty ?optimalConditionProperty)
-            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
+// If the comparison operator is equalTo (=) and the condition Property is less than the bound Property, mark the container with a false
+// evaluation result.
+[rule2b:    (?evaluationContainer :withOperator meta:equalTo)
+            (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
+            (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
+            (?evaluationContainer :withAtomicConstraintContainer ?aNode)
             lessThan(?optimalConditionPropertyValue, ?boundPropertyValue)
+            ->  (?aNode :withEvaluationResult "false"^^xsd:boolean)
+]
+
+// If the comparison operator is equalTo (=) and the condition Property is greater than the bound Property, mark the container with a false
+// evaluation result.
+[rule2c:    (?evaluationContainer :withOperator meta:equalTo)
+            (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
+            (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
+            (?evaluationContainer :withAtomicConstraintContainer ?aNode)
+            greaterThan(?optimalConditionPropertyValue, ?boundPropertyValue)
+            ->  (?aNode :withEvaluationResult "false"^^xsd:boolean)
+]
+
+// If the comparison operator is lessThan (<) and the condition Property is less than the bound Property, mark the container with a true
+// evaluation result.
+[rule2d:    (?evaluationContainer :withOperator meta:lessThan)
+            (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
+            (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
+            (?evaluationContainer :withAtomicConstraintContainer ?aNode)
+            lessThan(?optimalConditionPropertyValue, ?boundPropertyValue)
+            ->  (?aNode :withEvaluationResult "true"^^xsd:boolean)
+]
+
+// If the comparison operator is lessThan (<) and the condition Property is greater than or equal to the bound Property, mark the container
+// with a false evaluation result.
+[rule2e:    (?evaluationContainer :withOperator meta:lessThan)
+            (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
+            (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
+            (?evaluationContainer :withAtomicConstraintContainer ?aNode)
+            ge(?optimalConditionPropertyValue, ?boundPropertyValue)
+            ->  (?aNode :withEvaluationResult "false"^^xsd:boolean)
+]
+
+// If the comparison operator is lessThanOrEqualTo (<=) and the condition Property is less than or equal to the bound Property, mark the
+// container with a true evaluation result.
+[rule2f:    (?evaluationContainer :withOperator meta:lessThanOrEqualTo)
+            (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
+            (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
+            (?evaluationContainer :withAtomicConstraintContainer ?aNode)
+            le(?optimalConditionPropertyValue, ?boundPropertyValue)
+            ->  (?aNode :withEvaluationResult "true"^^xsd:boolean)
+]
+
+// If the comparison operator is lessThanOrEqualTo (<=) and the condition Property is greater than the bound Property, mark the container with
+// a false evaluation result.
+[rule2g:    (?evaluationContainer :withOperator meta:lessThanOrEqualTo)
+            (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
+            (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
+            (?evaluationContainer :withAtomicConstraintContainer ?aNode)
+            greaterThan(?optimalConditionPropertyValue, ?boundPropertyValue)
+            ->  (?aNode :withEvaluationResult "false"^^xsd:boolean)
+]
+
+// If the comparison operator is greaterThan (>) and the condition Property is greater than the bound Property, mark the container with a true
+// evaluation result.
+[rule2h:    (?evaluationContainer :withOperator meta:greaterThan)
+            (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
+            (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
+            (?evaluationContainer :withAtomicConstraintContainer ?aNode)
+            greaterThan(?optimalConditionPropertyValue, ?boundPropertyValue)
+            ->  (?aNode :withEvaluationResult "true"^^xsd:boolean)
+]
+
+// If the comparison operator is greaterThan (>) and the condition Property is less than or equal to the bound Property, mark the container
+// with a false evaluation result.
+[rule2i:    (?evaluationContainer :withOperator meta:greaterThan)
+            (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
+            (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
+            (?evaluationContainer :withAtomicConstraintContainer ?aNode)
+            le(?optimalConditionPropertyValue, ?boundPropertyValue)
+            ->  (?aNode :withEvaluationResult "false"^^xsd:boolean)
+]
+
+// If the comparison operator is greaterThanOrEqualTo (>=) and the condition Property is greater than or equal to the bound Property, mark the
+// container with a true evaluation result.
+[rule2j:    (?evaluationContainer :withOperator meta:greaterThanOrEqualTo)
+            (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
+            (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
+            (?evaluationContainer :withAtomicConstraintContainer ?aNode)
+            ge(?optimalConditionPropertyValue, ?boundPropertyValue)
+            ->  (?aNode :withEvaluationResult "true"^^xsd:boolean)
+]
+
+// If the comparison operator is greaterThanOrEqualTo (>=) and the condition Property is less than the bound Property, mark the container with
+// a false evaluation result.
+[rule2k:    (?evaluationContainer :withOperator meta:greaterThanOrEqualTo)
+            (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
+            (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
+            (?evaluationContainer :withAtomicConstraintContainer ?aNode)
+            lessThan(?optimalConditionPropertyValue, ?boundPropertyValue)
+            ->  (?aNode :withEvaluationResult "false"^^xsd:boolean)
+]
+
+
+
+// The following rules add an evaluation result to a conjunctive constraint node based on the evaluations of its atomic constraints. This step
+// simplifies further checks for whether an OptimalCondition is satisfied.
+
+// If both conjunctive children evaluate to true, mark their shared ancestor node as true as well.
+[rule3a:    (?aNode1 owl:intersectionOf ?aList)
+            (?aList rdf:first ?aNode2)
+            (?aNode2 rdf:type owl:Restriction)
+            (?aNode2 :withCheck "conjunction")
+            (?aNode2 :withEvaluationResult "true"^^xsd:boolean)
+            (?aNode2 :withOptimalCondition ?optimalCondition)
+            (?aNode2 :withIdentifier ?identifier)
+            (?aNode3 rdf:type owl:Restriction)
+            (?aNode3 :withCheck "conjunction")
+            (?aNode3 :withEvaluationResult "true"^^xsd:boolean)
+            (?aNode3 :withOptimalCondition ?optimalCondition)
+            (?aNode3 :withIdentifier ?identifier)
+            ->  (?aNode1 :withEvaluationResult "true"^^xsd:boolean)
+]
+
+// If the first conjunctive child evaluates to false, mark the shared ancestor node as false.
+[rule3b:    (?aNode1 owl:intersectionOf ?aList)
+            (?aList rdf:first ?aNode2)
+            (?aNode2 rdf:type owl:Restriction)
+            (?aNode2 :withCheck "conjunction")
+            (?aNode2 :withEvaluationResult "true"^^xsd:boolean)
+            (?aNode2 :withOptimalCondition ?optimalCondition)
+            (?aNode2 :withIdentifier ?identifier)
+            (?aNode3 rdf:type owl:Restriction)
+            (?aNode3 :withCheck "conjunction")
+            (?aNode3 :withEvaluationResult "false"^^xsd:boolean)
+            (?aNode3 :withOptimalCondition ?optimalCondition)
+            (?aNode3 :withIdentifier ?identifier)
+            ->  (?aNode1 :withEvaluationResult "false"^^xsd:boolean)
+]
+
+// If the second conjunctive child evaluates to false, mark the shared ancestor node as false.
+[rule3c:    (?aNode1 owl:intersectionOf ?aList)
+            (?aList rdf:first ?aNode2)
+            (?aNode2 rdf:type owl:Restriction)
+            (?aNode2 :withCheck "conjunction")
+            (?aNode2 :withEvaluationResult "false"^^xsd:boolean)
+            (?aNode2 :withOptimalCondition ?optimalCondition)
+            (?aNode2 :withIdentifier ?identifier)
+            (?aNode3 rdf:type owl:Restriction)
+            (?aNode3 :withCheck "conjunction")
+            (?aNode3 :withEvaluationResult "true"^^xsd:boolean)
+            (?aNode3 :withOptimalCondition ?optimalCondition)
+            (?aNode3 :withIdentifier ?identifier)
+            ->  (?aNode1 :withEvaluationResult "false"^^xsd:boolean)
+]
+
+
+
+// These rules mark OptimalConditions as enabled provided their respective enabling constraints evaluate to true.
+
+// If the enabling constraint is a single constraint (e.g., >15) and it`s true, enable the OptimalCondition.
+[rule4a:    (?optimalCondition rdf:type meta:OptimalCondition)
+            (?optimalCondition rdf:type ?aNode1)
+            (?aNode1 rdf:type owl:Restriction)
+            (?aNode1 owl:onProperty meta:hasEnablingConstraint)
+            (?aNode1 owl:onClass ?aNode2)
+            (?aNode2 :withEvaluationResult "true"^^xsd:boolean)
+            ->  (?optimalCondition :isEnabled "true"^^xsd:boolean)
+]
+
+// If the enabling constraint is a conjunctive constraint (e.g., >15 and <22) and it`s true, enable the OptimalCondition.
+[rule4b:    (?optimalCondition rdf:type meta:OptimalCondition)
+            (?optimalCondition rdf:type ?aNode1)
+            (?aNode1 rdf:type owl:Restriction)
+            (?aNode1 owl:onProperty meta:hasEnablingConstraint)
+            (?aNode1 owl:onClass ?aNode2)
+            (?aNode2 :withEvaluationResult "true"^^xsd:boolean)
+            ->  (?optimalCondition :isEnabled "true"^^xsd:boolean)
+]
+
+// If the enabling constraint is a disjunctive constraint (e.g., <15 or >22) and it`s true, enable the OptimalCondition.
+[rule4c:    (?aNode rdf:type owl:Restriction)
+            (?aNode :withOptimalCondition ?optimalCondition)
+            (?aNode :withConstraintType meta:hasEnablingConstraint)
+            (?aNode :withCheck "disjunction")
+            (?aNode :withEvaluationResult "true"^^xsd:boolean)
+            noValue(?aNode :withCheck "conjunction")
+            ->  (?optimalCondition :isEnabled "true"^^xsd:boolean)
+]
+
+// In case the OptimalCondition has no enabling constraints, it is enabled by default.
+[rule4d:    (?optimalCondition rdf:type meta:OptimalCondition)
+            (?optimalCondition rdf:type ?aNode)
+            (?aNode rdf:type owl:Restriction)
+            noValue(?aNode owl:onProperty meta:hasEnablingConstraint)
+            ->  (?optimalCondition :isEnabled "true"^^xsd:boolean)
+]
+
+
+
+// The following rules mark specific types of unsatisfied operators based on their evaluation result.
+
+// All non-disjunctive constraints evaluating to false should generate mitigation Actions. Thus, their operators are marked as unsatisfied.
+[rule5a:    (?aNode rdf:type owl:Restriction)
+            (?aNode :withOptimalCondition ?optimalCondition)
+            (?optimalCondition :isEnabled "true"^^xsd:boolean)
+            (?aNode :withOptimalConditionProperty ?optimalConditionProperty)
+            (?aNode :withConstraintType meta:hasConstraint)
+            (?aNode :withOperatorCheck ?operator)
+            (?aNode :withEvaluationResult "false"^^xsd:boolean)
+            noValue(?aNode :withCheck "disjunction")
+            makeTemp(?evaluationContainer)
+            ->  (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
+                (?evaluationContainer :withUnsatisfiedOperator ?operator)
+]
+
+// In case both sides of a disjunctive constraint evaluate to false, the OptimalCondition should generate mitigation Actions. Since
+// disjunctive OptimalConditions only become unsatisfied if their condition Property is between the two range constraints, the
+// OptimalCondition can be restored by both a ValueIncrease and a ValueDecrease on that Property. For simplicity, we therefore say
+// that an equalTo is the unsatisfied operator.
+[rule5b:    (?optimalCondition rdf:type meta:OptimalCondition)
+            (?optimalCondition :isEnabled "true"^^xsd:boolean)
+            (?optimalCondition rdf:type ?aNode1)
+            (?optimalCondition ssn:forProperty ?optimalConditionProperty)
+            (?aNode1 rdf:type owl:Restriction)
+            (?aNode1 owl:onProperty meta:hasConstraint)
+            (?aNode1 owl:onClass ?aNode2)
+            (?aNode2 owl:unionOf ?aList1)
+            (?aList1 rdf:first ?aNode3)
+            (?aNode3 :withEvaluationResult "false"^^xsd:boolean)
+            (?aList1 rdf:rest ?aList2)
+            (?aList2 rdf:first ?aNode4)
+            (?aNode4 :withEvaluationResult "false"^^xsd:boolean)
+            makeTemp(?evaluationContainer)
+            ->  (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
+                (?evaluationContainer :withUnsatisfiedOperator meta:equalTo)
+]
+
+
+
+// The following rules match on unsatisfied operators and find PropertyChanges that will cause the respective Property value changes.
+
+[rule6a:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
+            (?evaluationContainer :withUnsatisfiedOperator meta:equalTo)
+            (?propertyChange ssn:forProperty ?optimalConditionProperty)
+            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             ->  (_: :withPropertyChange ?propertyChange)
 ]
 
-[rule2d:    (?bNode :withOptimalConditionProperty ?optimalConditionProperty)
-            (?optimalConditionProperty meta:hasValue ?optimalConditionPropertyValue)
-            (?bNode :evaluatesLessThanOrEqualTo ?boundProperty)
-            (?boundProperty meta:hasValue ?boundPropertyValue)
+[rule6b:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
+            (?evaluationContainer :withUnsatisfiedOperator meta:equalTo)
+            (?propertyChange ssn:forProperty ?optimalConditionProperty)
+            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
+            ->  (_: :withPropertyChange ?propertyChange)
+]
+
+[rule6c:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
+            (?evaluationContainer :withUnsatisfiedOperator meta:greaterThan)
             (?propertyChange ssn:forProperty ?optimalConditionProperty)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
-            le(?optimalConditionPropertyValue, ?boundPropertyValue)
+            ->  (_: :withPropertyChange ?propertyChange)
+]
+
+[rule6d:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
+            (?evaluationContainer :withUnsatisfiedOperator meta:greaterThanOrEqualTo)
+            (?propertyChange ssn:forProperty ?optimalConditionProperty)
+            (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
+            ->  (_: :withPropertyChange ?propertyChange)
+]
+
+[rule6e:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
+            (?evaluationContainer :withUnsatisfiedOperator meta:lessThan)
+            (?propertyChange ssn:forProperty ?optimalConditionProperty)
+            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
+            ->  (_: :withPropertyChange ?propertyChange)
+]
+
+[rule6f:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
+            (?evaluationContainer :withUnsatisfiedOperator meta:lessThanOrEqualTo)
+            (?propertyChange ssn:forProperty ?optimalConditionProperty)
+            (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             ->  (_: :withPropertyChange ?propertyChange)
 ]
 
@@ -322,7 +322,7 @@
 // concatinations are used for generating unique names for unique combinations of elements in an Action. This ensures that no duplicate Actions
 // are generated in cases of, e.g., multiple actuators causing multiple different PropertyChanges.
 
-[rule3a:   (?thing :withPropertyChange ?propertyChange)
+[rule7a:   (?thing :withPropertyChange ?propertyChange)
            (?actuator meta:enacts ?propertyChange)
            (?actuator rdf:type sosa:Actuator)
            (?actuator meta:hasActuatorState ?actuatorState)
@@ -333,7 +333,7 @@
                print("Generated ActuationAction", ?actionName)
 ]
 
-[rule3b:   (?thing :withPropertyChange ?propertyChange)
+[rule7b:   (?thing :withPropertyChange ?propertyChange)
            (?configurableParameter meta:enacts ?propertyChange)
            (?configurableParameter rdf:type meta:ConfigurableParameter)
            (?configurableParameter meta:hasPossibleValue ?configurableParameterValue)
@@ -347,7 +347,7 @@
 // The following rules generate Actions provided the switch for generating restrictive combinations (only based on unsatisfied OptimalConditions)
 // is disabled.
 
-[rule3c:    (?platform rdf:type sosa:Platform)
+[rule7c:    (?platform rdf:type sosa:Platform)
             (?platform meta:generateCombinationsOnlyFromOptimalConditions "false"^^xsd:boolean)
             (?actuator rdf:type sosa:Actuator)
             (?actuator meta:hasActuatorState ?actuatorState)
@@ -358,7 +358,7 @@
                 print("Generated ActuationAction", ?actionName)
 ]
 
-[rule3d:    (?platform rdf:type sosa:Platform)
+[rule7d:    (?platform rdf:type sosa:Platform)
             (?platform meta:generateCombinationsOnlyFromOptimalConditions "false"^^xsd:boolean)
             (?configurableParameter rdf:type meta:ConfigurableParameter)
             (?configurableParameter meta:hasPossibleValue ?configurableParameterValue)
@@ -384,7 +384,7 @@
 // In the end, all ActionCombinations that are NOT marked with "duplicate" (same combination already exists) or "not final" (the combination
 // contains fewer Actions than it should) are final.
 
-[rule4a:    (?actuationAction rdf:type meta:ActuationAction)
+[rule8a:    (?actuationAction rdf:type meta:ActuationAction)
             (?actuationAction meta:hasActuator ?actuator)
             makeTemp(?actionCombination)
             makeTemp(?actionList)
@@ -400,7 +400,7 @@
                 (?actuatorList rdf:rest rdf:nil)
 ]
 
-[rule4b:    (?reconfigurationAction rdf:type meta:ReconfigurationAction)
+[rule8b:    (?reconfigurationAction rdf:type meta:ReconfigurationAction)
             (?reconfigurationAction ssn:forProperty ?configurableParameter)
             makeTemp(?actionCombination)
             makeTemp(?actionList)
@@ -416,7 +416,7 @@
                 (?configurableParameterList rdf:rest rdf:nil)
 ]
 
-[rule4c:    (?actionCombination rdf:type meta:ActionCombination)
+[rule8c:    (?actionCombination rdf:type meta:ActionCombination)
             (?actionCombination meta:hasActions ?actionList)
             (?actionCombination meta:hasActuators ?actuatorList)
             (?actuationAction rdf:type meta:ActuationAction)
@@ -438,7 +438,7 @@
                 (?actionCombination rdf:comment "not final")
 ]
 
-[rule4d:    (?actionCombination rdf:type meta:ActionCombination)
+[rule8d:    (?actionCombination rdf:type meta:ActionCombination)
             (?actionCombination meta:hasActions ?actionList)
             (?actionCombination meta:hasConfigurableParameters ?configurableParameterList)
             (?reconfigurationAction rdf:type meta:ReconfigurationAction)
@@ -460,7 +460,7 @@
                 (?actionCombination rdf:comment "not final")
 ]
 
-[rule4e:    (?actionCombination1 rdf:type meta:ActionCombination)
+[rule8e:    (?actionCombination1 rdf:type meta:ActionCombination)
             (?actionCombination1 meta:hasActions ?actionList1)
             (?actionCombination2 rdf:type meta:ActionCombination)
             (?actionCombination2 meta:hasActions ?actionList2)

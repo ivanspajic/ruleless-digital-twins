@@ -318,10 +318,13 @@ namespace Logic.Mapek {
 
         private ConstraintExpression GetSingleConstraintOrNull(INode optimalConditionNode, PropertyCache propertyCache) {
             var query = GetParameterizedStringQuery(@"SELECT ?comparisonOperator ?boundProperty WHERE {
-                @optimalCondition rdf:type ?aNode .
-                ?aNode rdf:type owl:Restriction .
-                ?aNode owl:onProperty ?comparisonOperator .
-                ?aNode owl:hasValue ?boundProperty . }");
+                @optimalCondition rdf:type ?aNode1 .
+                ?aNode1 rdf:type owl:Restriction .
+                ?aNode1 owl:onProperty meta:hasConstraint .
+                ?aNode1 owl:onClass ?aNode2 .
+                ?aNode2 rdf:type owl:Restriction .
+                ?aNode2 owl:onProperty ?comparisonOperator .
+                ?aNode2 owl:hasValue ?boundProperty . }");
 
             query.SetParameter("optimalCondition", optimalConditionNode);
 
@@ -350,16 +353,19 @@ namespace Logic.Mapek {
         private ConstraintExpression GetConjunctiveConstraintOrNull(INode optimalConditionNode, PropertyCache propertyCache) {
             var query = GetParameterizedStringQuery(@"SELECT ?comparisonOperator1 ?boundProperty1 ?comparisonOperator2 ?boundProperty2 WHERE {
                 @optimalCondition rdf:type ?aNode1 .
-                ?aNode1 owl:intersectionOf ?aList .
-                ?aList1 rdf:first ?aNode2 .
-                ?aNode2 rdf:type owl:Restriction .
-                ?aNode2 owl:onProperty ?comparisonOperator1 .
-                ?aNode2 owl:hasValue ?boundProperty1 .
-                ?aList1 rdf:rest ?aList2 .
-                ?aList2 rdf:first ?aNode3 .
+                ?aNode1 rdf:type owl:Restriction .
+                ?aNode1 owl:onProperty meta:hasConstraint .
+                ?aNode1 owl:onClass ?aNode2 .
+                ?aNode2 owl:intersectionOf ?aList1 .
+                ?aList1 rdf:first ?aNode3 .
                 ?aNode3 rdf:type owl:Restriction .
-                ?aNode3 owl:onProperty ?comparisonOperator2 .
-                ?aNode3 owl:hasValue ?boundProperty2 . }");
+                ?aNode3 owl:onProperty ?comparisonOperator1 .
+                ?aNode3 owl:hasValue ?boundProperty1 .
+                ?aList1 rdf:rest ?aList2 .
+                ?aList2 rdf:first ?aNode4 .
+                ?aNode4 rdf:type owl:Restriction .
+                ?aNode4 owl:onProperty ?comparisonOperator2 .
+                ?aNode4 owl:hasValue ?boundProperty2 . }");
 
             query.SetParameter("optimalCondition", optimalConditionNode);
 
@@ -402,16 +408,19 @@ namespace Logic.Mapek {
         private ConstraintExpression GetSingleSingleDisjunctiveConstraintOrNull(INode optimalConditionNode, PropertyCache propertyCache) {
             var query = GetParameterizedStringQuery(@"SELECT ?comparisonOperator1 ?boundProperty1 ?comparisonOperator2 ?boundProperty2 WHERE {
                 @optimalCondition rdf:type ?aNode1 .
-                ?aNode1 owl:unionOf ?aList1 .
-                ?aList1 rdf:first ?aNode2 .
-                ?aNode2 rdf:type owl:Restriction .
-                ?aNode2 owl:onProperty ?comparisonOperator1 .
-                ?aNode2 owl:hasValue ?boundProperty1 .
-                ?aList1 rdf:rest ?aList2 .
-                ?aList2 rdf:first ?aNode3 .
+                ?aNode1 rdf:type owl:Restriction .
+                ?aNode1 owl:onProperty meta:hasConstraint .
+                ?aNode1 owl:onClass ?aNode2 .
+                ?aNode2 owl:unionOf ?aList1 .
+                ?aList1 rdf:first ?aNode3 .
                 ?aNode3 rdf:type owl:Restriction .
-                ?aNode3 owl:onProperty ?comparisonOperator2 .
-                ?aNode3 owl:hasValue ?boundProperty2 . }");
+                ?aNode3 owl:onProperty ?comparisonOperator1 .
+                ?aNode3 owl:hasValue ?boundProperty1 .
+                ?aList1 rdf:rest ?aList2 .
+                ?aList2 rdf:first ?aNode4 .
+                ?aNode4 rdf:type owl:Restriction .
+                ?aNode4 owl:onProperty ?comparisonOperator2 .
+                ?aNode4 owl:hasValue ?boundProperty2 . }");
 
             query.SetParameter("optimalCondition", optimalConditionNode);
 
@@ -454,23 +463,26 @@ namespace Logic.Mapek {
         private ConstraintExpression GetDoubleSingleDisjunctiveConstraintOrNull(INode optimalConditionNode, PropertyCache propertyCache) {
             var query = GetParameterizedStringQuery(@"SELECT ?comparisonOperator1 ?boundProperty1 ?comparisonOperator2 ?boundProperty2 ?comparisonOperator3 ?boundProperty3 WHERE {
                 @optimalCondition rdf:type ?aNode1 .
-                ?aNode1 owl:unionOf ?aList1 .
-                ?aList1 rdf:first ?aNode2 .
-                ?aNode2 owl:intersectionOf ?aList2 .
-                ?aList2 rdf:first ?aNode3 .
-                ?aNode3 rdf:type owl:Restriction .
-                ?aNode3 owl:onProperty ?comparisonOperator1.
-                ?aNode3 owl:hasValue ?boundProperty1 .
-                ?aList2 rdf:rest ?aList3 .
-                ?aList3 rdf:first ?aNode4 .
+                ?aNode1 rdf:type owl:Restriction .
+                ?aNode1 owl:onProperty meta:hasConstraint .
+                ?aNode1 owl:onClass ?aNode2 .
+                ?aNode2 owl:unionOf ?aList1 .
+                ?aList1 rdf:first ?aNode3 .
+                ?aNode3 owl:intersectionOf ?aList2 .
+                ?aList2 rdf:first ?aNode4 .
                 ?aNode4 rdf:type owl:Restriction .
-                ?aNode4 owl:onProperty ?comparisonOperator2 .
-                ?aNode4 owl:hasValue ?boundProperty2 .
-                ?aList1 rdf:rest ?aList4 .
-                ?aList4 rdf:first ?aNode5 .
+                ?aNode4 owl:onProperty ?comparisonOperator1.
+                ?aNode4 owl:hasValue ?boundProperty1 .
+                ?aList2 rdf:rest ?aList3 .
+                ?aList3 rdf:first ?aNode5 .
                 ?aNode5 rdf:type owl:Restriction .
-                ?aNode5 owl:onProperty ?comparisonOperator3 .
-                ?aNode5 owl:hasValue ?boundProperty3 . }");
+                ?aNode5 owl:onProperty ?comparisonOperator2 .
+                ?aNode5 owl:hasValue ?boundProperty2 .
+                ?aList1 rdf:rest ?aList4 .
+                ?aList4 rdf:first ?aNode6 .
+                ?aNode6 rdf:type owl:Restriction .
+                ?aNode6 owl:onProperty ?comparisonOperator3 .
+                ?aNode6 owl:hasValue ?boundProperty3 . }");
 
             query.SetParameter("optimalCondition", optimalConditionNode);
 
@@ -527,30 +539,33 @@ namespace Logic.Mapek {
         private ConstraintExpression GetDoubleDoubleDisjunctiveConstraintOrNull(INode optimalConditionNode, PropertyCache propertyCache) {
             var query = GetParameterizedStringQuery(@"SELECT ?comparisonOperator1 ?boundProperty1 ?comparisonOperator2 ?boundProperty2 ?comparisonOperator3 ?boundProperty3 ?comparisonOperator4 ?boundProperty4 WHERE {
                 @optimalCondition rdf:type ?aNode1 .
-                ?aNode1 owl:unionOf ?aList1 .
-                ?aList1 rdf:first ?aNode2 .
-                ?aNode2 owl:intersectionOf ?aList2 .
-                ?aList2 rdf:first ?aNode3 .
-                ?aNode3 rdf:type owl:Restriction .
-                ?aNode3 owl:onProperty ?comparisonOperator1 .
-                ?aNode3 owl:hasValue ?boundProperty1 .
-                ?aList2 rdf:rest ?aList3 .
-                ?aList3 rdf:first ?aNode4 .
+                ?aNode1 rdf:type owl:Restriction .
+                ?aNode1 owl:onProperty meta:hasConstraint .
+                ?aNode1 owl:onClass ?aNode2 .
+                ?aNode2 owl:unionOf ?aList1 .
+                ?aList1 rdf:first ?aNode3 .
+                ?aNode3 owl:intersectionOf ?aList2 .
+                ?aList2 rdf:first ?aNode4 .
                 ?aNode4 rdf:type owl:Restriction .
-                ?aNode4 owl:onProperty ?comparisonOperator2 .
-                ?aNode4 owl:hasValue ?boundProperty2 .
+                ?aNode4 owl:onProperty ?comparisonOperator1 .
+                ?aNode4 owl:hasValue ?boundProperty1 .
+                ?aList2 rdf:rest ?aList3 .
+                ?aList3 rdf:first ?aNode5 .
+                ?aNode5 rdf:type owl:Restriction .
+                ?aNode5 owl:onProperty ?comparisonOperator2 .
+                ?aNode5 owl:hasValue ?boundProperty2 .
                 ?aList1 rdf:rest ?aList4 .
-                ?aList4 rdf:first ?aNode5 .
-                ?aNode5 owl:intersectionOf ?aList5 .
-                ?aList5 rdf:first ?aNode6 .
-                ?aNode6 rdf:type owl:Restriction .
-                ?aNode6 owl:onProperty ?comparisonOperator3 .
-                ?aNode6 owl:hasValue ?boundProperty3 .
-                ?aList5 rdf:rest ?aList6 .
-                ?aList6 rdf:first ?aNode7 .
+                ?aList4 rdf:first ?aNode6 .
+                ?aNode6 owl:intersectionOf ?aList5 .
+                ?aList5 rdf:first ?aNode7 .
                 ?aNode7 rdf:type owl:Restriction .
-                ?aNode7 owl:onProperty ?comparisonOperator4 .
-                ?aNode7 owl:hasValue ?boundProperty4 . }");
+                ?aNode7 owl:onProperty ?comparisonOperator3 .
+                ?aNode7 owl:hasValue ?boundProperty3 .
+                ?aList5 rdf:rest ?aList6 .
+                ?aList6 rdf:first ?aNode8 .
+                ?aNode8 rdf:type owl:Restriction .
+                ?aNode8 owl:onProperty ?comparisonOperator4 .
+                ?aNode8 owl:hasValue ?boundProperty4 . }");
 
             query.SetParameter("optimalCondition", optimalConditionNode);
 

@@ -8,6 +8,7 @@ using Logic.Utilities;
 using Logic.ValueHandlerInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("TestProject")]
@@ -85,7 +86,10 @@ namespace Logic.Mapek {
                 // If configured, write MAPE-K state to CSV.
                 if (_coordinatorSettings.SaveMapekCycleData) {
                     CsvUtils.WritePropertyStatesToCsv(_filepathArguments.DataDirectory, currentRound, cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
-                    CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentRound, potentialCase.Simulation);
+                    CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentRound, simulationToExecute);
+
+                    var simulationTreeJson = JsonConvert.SerializeObject(currentSimulationTree);
+                    File.WriteAllText(Path.Combine(_filepathArguments.DataDirectory, "simulation-tree.json"), simulationTreeJson);
                 }
 
                 if (_coordinatorSettings.MaximumMapekRounds > 0) {

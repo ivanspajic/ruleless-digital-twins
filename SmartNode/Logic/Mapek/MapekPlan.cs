@@ -110,9 +110,9 @@ namespace Logic.Mapek
             foreach (var actionCombination in actionCombinations) {
                 // TODO: partition more efficiently:
                 // var actionPartition = actionCombination.ToLookup(action => action is FMUParameterAction);
-                var simulation = new Simulation(GetPropertyCacheCopy(simulationTreeNode.NodeItem.PropertyCache!)) {
-                    Actions = actionCombination.Where(action => action is not FMUParameterAction).ToList(),
-                    InitializationActions = actionCombination.Where(action => action is FMUParameterAction).Select(a => (FMUParameterAction)a).ToList(),
+                var simulation = new Simulation(GetPropertyCacheCopy(simulationTreeNode.NodeItem.PropertyCache)) {
+                    Actions = actionCombination.Where(action => action is not FMUParameterAction),
+                    InitializationActions = actionCombination.Where(action => action is FMUParameterAction).Select(a => (FMUParameterAction)a),
                     Index = currentCycle
                 };
 
@@ -152,11 +152,15 @@ namespace Logic.Mapek
         // Updates the setting for restricting Actions and thus ActionCombinations only to those mitigating OptimalConditions.
         private void EnsureUpdatedRestrictionSetting() {
             // Write the setting at least once to disk. Only write again if the setting changes.
-            if (_savedReactiveSetting && _restrictToReactiveActionsOnly == _restrictToReactiveActionsOnlyOld) {
-                return;
+            if (_savedReactiveSetting) {
+                if (_restrictToReactiveActionsOnly == _restrictToReactiveActionsOnlyOld) {
+                    return;
+                }
             } else {
-                _restrictToReactiveActionsOnlyOld = _restrictToReactiveActionsOnly;
+                _savedReactiveSetting = true;
             }
+
+            _restrictToReactiveActionsOnlyOld = _restrictToReactiveActionsOnly;
 
             var query = _mapekKnowledge.GetParameterizedStringQuery(@"DELETE {
                 ?platform meta:generateCombinationsOnlyFromOptimalConditions ?oldValue .

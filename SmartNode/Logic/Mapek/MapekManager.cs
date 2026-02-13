@@ -218,10 +218,10 @@ namespace Logic.Mapek {
 
             foreach (var optimalCondition in optimalConditions) {
                 var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.Property.OwlType);
-                var constraint = GetQuantizedOptimalConditionConstraint(optimalCondition.Constraint, valueHandler);
+                var constraint = GetQuantizedOptimalConditionConstraint(optimalCondition.ConditionConstraint, valueHandler);
 
                 quantizedOptimalConditions.Add(new OptimalCondition {
-                    Constraint = constraint,
+                    ConditionConstraint = constraint,
                     Name = optimalCondition.Name,
                     Property = optimalCondition.Property,
                     ReachedInMaximumSeconds = optimalCondition.ReachedInMaximumSeconds

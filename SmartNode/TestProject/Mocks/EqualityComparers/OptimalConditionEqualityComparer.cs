@@ -12,7 +12,7 @@ namespace TestProject.Mocks.EqualityComparers
             return x!.ReachedInMaximumSeconds == y!.ReachedInMaximumSeconds &&
                 x.Name.Equals(y.Name) &&
                 x.Property.Equals(y.Property) &&
-                _constraintExpressionEqualityComparer.Equals(x.Constraint, y.Constraint);
+                _constraintExpressionEqualityComparer.Equals(x.ConditionConstraint, y.ConditionConstraint);
         }
 
         public int GetHashCode([DisallowNull] OptimalCondition obj)
@@ -20,7 +20,7 @@ namespace TestProject.Mocks.EqualityComparers
             return obj.Name.GetHashCode() * 
                 obj.ReachedInMaximumSeconds.GetHashCode() * 
                 obj.Property.GetHashCode() *
-                obj.Constraint.GetHashCode();
+                obj.ConditionConstraint.GetHashCode();
         }
     }
 }

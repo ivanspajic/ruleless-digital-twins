@@ -634,7 +634,7 @@ namespace Logic.Mapek
                 }
 
                 var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.Property.OwlType);
-                var unsatisfiedConstraints = valueHandler.GetUnsatisfiedConstraintsFromEvaluation(optimalCondition.Constraint, p.Value);
+                var unsatisfiedConstraints = valueHandler.GetUnsatisfiedConstraintsFromEvaluation(optimalCondition.ConditionConstraint, p.Value);
                 numberOfSatisfiedOptimalConditions += unsatisfiedConstraints.Any() ? 0 : 1;
             }
 

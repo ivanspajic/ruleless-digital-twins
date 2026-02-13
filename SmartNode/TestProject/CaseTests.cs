@@ -102,7 +102,7 @@ namespace TestProject {
                     Name = "FakeOptimalCondition1",
                     ReachedInMaximumSeconds = 0,
                     Property = quantizedProperties[0],
-                    Constraint = new AtomicConstraintExpression {
+                    ConditionConstraint = new AtomicConstraintExpression {
                         ConstraintType = ConstraintType.GreaterThan,
                         Property = new Property {
                             Name = "OptimalConditionProperty1",
@@ -115,7 +115,7 @@ namespace TestProject {
                     Name = "FakeOptimalCondition2",
                     ReachedInMaximumSeconds = 0,
                     Property = quantizedProperties[1],
-                    Constraint = new AtomicConstraintExpression {
+                    ConditionConstraint = new AtomicConstraintExpression {
                         ConstraintType = ConstraintType.LessThanOrEqualTo,
                         Property = new Property {
                             Name = "OptimalConditionProperty2",
@@ -139,7 +139,7 @@ namespace TestProject {
                         Name = "FakeOptimalCondition1",
                         ReachedInMaximumSeconds = 0,
                         Property = quantizedProperties[0],
-                        Constraint = new AtomicConstraintExpression {
+                        ConditionConstraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.GreaterThan,
                             Property = new Property {
                                 Name = "OptimalConditionProperty1",
@@ -152,7 +152,7 @@ namespace TestProject {
                         Name = "FakeOptimalCondition2",
                         ReachedInMaximumSeconds = 0,
                         Property = quantizedProperties[1],
-                        Constraint = new AtomicConstraintExpression {
+                        ConditionConstraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.LessThanOrEqualTo,
                             Property = new Property {
                                 Name = "OptimalConditionProperty2",
@@ -186,7 +186,7 @@ namespace TestProject {
                         Name = "FakeOptimalCondition1",
                         ReachedInMaximumSeconds = 0,
                         Property = quantizedProperties[1],
-                        Constraint = new AtomicConstraintExpression {
+                        ConditionConstraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.GreaterThan,
                             Property = new Property {
                                 Name = "OptimalConditionProperty1",
@@ -199,7 +199,7 @@ namespace TestProject {
                         Name = "FakeOptimalCondition2",
                         ReachedInMaximumSeconds = 0,
                         Property = quantizedProperties[1],
-                        Constraint = new AtomicConstraintExpression {
+                        ConditionConstraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.LessThanOrEqualTo,
                             Property = new Property {
                                 Name = "OptimalConditionProperty2",
@@ -257,7 +257,7 @@ namespace TestProject {
                             OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = 22.674
                         },
-                        Constraint = new AtomicConstraintExpression {
+                        ConditionConstraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.GreaterThan,
                             Property = new Property {
                                 Name = "OptimalConditionProperty1",
@@ -274,7 +274,7 @@ namespace TestProject {
                             OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = 11.995
                         },
-                        Constraint = new AtomicConstraintExpression {
+                        ConditionConstraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.LessThanOrEqualTo,
                             Property = new Property {
                                 Name = "OptimalConditionProperty2",
@@ -439,7 +439,7 @@ namespace TestProject {
                             OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = 22.674
                         },
-                        Constraint = new AtomicConstraintExpression {
+                        ConditionConstraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.GreaterThan,
                             Property = new Property {
                                 Name = "OptimalConditionProperty1",
@@ -456,7 +456,7 @@ namespace TestProject {
                             OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = 11.995
                         },
-                        Constraint = new AtomicConstraintExpression {
+                        ConditionConstraint = new AtomicConstraintExpression {
                             ConstraintType = ConstraintType.LessThanOrEqualTo,
                             Property = new Property {
                                 Name = "OptimalConditionProperty2",

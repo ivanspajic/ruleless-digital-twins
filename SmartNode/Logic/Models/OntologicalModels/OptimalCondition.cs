@@ -6,7 +6,9 @@ namespace Logic.Models.OntologicalModels
     {
         public required Property Property { get; init; }
 
-        public required ConstraintExpression Constraint { get; init; }
+        public required ConstraintExpression ConditionConstraint { get; init; }
+
+        public ConstraintExpression? EnablingConstraint { get; init; }
 
         public int? ReachedInMaximumSeconds { get; init; }
 

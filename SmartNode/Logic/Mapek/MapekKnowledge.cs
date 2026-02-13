@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using Logic.FactoryInterface;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
@@ -240,10 +241,12 @@ namespace Logic.Mapek {
                 var satisfiedByString = GetOptionalQueryResult(result, "satisfiedBy");
 
                 var property = MapekUtilities.GetPropertyFromPropertyCacheByName(propertyCache, propertyName);
-                var constraint = GetOptimalConditionConstraint(optimalConditionNode, propertyCache);
+                var conditionConstraint = GetOptimalConditionConstraint(optimalConditionNode, propertyCache);
+                var enablingConstraint = GetOptimalConditionConstraint(optimalConditionNode, propertyCache, true);
 
                 var optimalCondition = new OptimalCondition {
-                    Constraint = constraint,
+                    ConditionConstraint = conditionConstraint,
+                    EnablingConstraint = enablingConstraint,
                     Name = optimalConditionNode.ToString(),
                     Property = property,
                     IsBreakable = isBreakable,
@@ -262,7 +265,7 @@ namespace Logic.Mapek {
             return queryResult.HasValue(variableName) ? queryResult[variableName].ToString().Split("^^")[0] : null!;
         }
 
-        private ConstraintExpression GetOptimalConditionConstraint(INode optimalCondition, PropertyCache propertyCache) {
+        private ConstraintExpression GetOptimalConditionConstraint(INode optimalCondition, PropertyCache propertyCache, bool enablingConstraint = false) {
             ConstraintExpression constraintExpression;
 
             // This could be made more streamlined and elegant through the use of fewer, more cleverly combined queries, however,
@@ -279,48 +282,50 @@ namespace Logic.Mapek {
             // TODO: Should this pattern iterate over a collection of delegates instead?
 
             // Example: >15
-            constraintExpression = GetSingleConstraintOrNull(optimalCondition, propertyCache);
+            constraintExpression = GetSingleConstraintOrNull(optimalCondition, propertyCache, enablingConstraint);
 
             if (constraintExpression is not null) {
                 return constraintExpression;
             }
 
             // Example: >15 and <20
-            constraintExpression = GetConjunctiveConstraintOrNull(optimalCondition, propertyCache);
+            constraintExpression = GetConjunctiveConstraintOrNull(optimalCondition, propertyCache, enablingConstraint);
 
             if (constraintExpression is not null) {
                 return constraintExpression;
             }
 
             // Example: <15 or >20
-            constraintExpression = GetSingleSingleDisjunctiveConstraintOrNull(optimalCondition, propertyCache);
+            constraintExpression = GetSingleSingleDisjunctiveConstraintOrNull(optimalCondition, propertyCache, enablingConstraint);
 
             if (constraintExpression is not null) {
                 return constraintExpression;
             }
 
             // Example: (>15 and <20) or >25
-            constraintExpression = GetDoubleSingleDisjunctiveConstraintOrNull(optimalCondition, propertyCache);
+            constraintExpression = GetDoubleSingleDisjunctiveConstraintOrNull(optimalCondition, propertyCache, enablingConstraint);
 
             if (constraintExpression is not null) {
                 return constraintExpression;
             }
 
             // Example: (>15 and <20) or (>25 and <30)
-            constraintExpression = GetDoubleDoubleDisjunctiveConstraintOrNull(optimalCondition, propertyCache);
+            constraintExpression = GetDoubleDoubleDisjunctiveConstraintOrNull(optimalCondition, propertyCache, enablingConstraint);
 
-            if (constraintExpression is null) {
-                throw new Exception($"OptimalCondition {optimalCondition.ToString()} has no supported constraints.");
+            if (!enablingConstraint && constraintExpression is null) {
+                throw new Exception($"OptimalCondition {optimalCondition.ToString()} has no supported condition constraint.");
             }
 
             return constraintExpression;
         }
 
-        private ConstraintExpression GetSingleConstraintOrNull(INode optimalConditionNode, PropertyCache propertyCache) {
+        private ConstraintExpression GetSingleConstraintOrNull(INode optimalConditionNode, PropertyCache propertyCache, bool enablingConstraint) {
+            var constraintObjectProperty = enablingConstraint ? "meta:hasEnablingConstraint" : "meta:hasConstraint";
+
             var query = GetParameterizedStringQuery(@"SELECT ?comparisonOperator ?boundProperty WHERE {
                 @optimalCondition rdf:type ?aNode1 .
                 ?aNode1 rdf:type owl:Restriction .
-                ?aNode1 owl:onProperty meta:hasConstraint .
+                ?aNode1 owl:onProperty " + constraintObjectProperty + @" .
                 ?aNode1 owl:onClass ?aNode2 .
                 ?aNode2 rdf:type owl:Restriction .
                 ?aNode2 owl:onProperty ?comparisonOperator .
@@ -350,11 +355,13 @@ namespace Logic.Mapek {
             return constraint;
         }
 
-        private ConstraintExpression GetConjunctiveConstraintOrNull(INode optimalConditionNode, PropertyCache propertyCache) {
+        private ConstraintExpression GetConjunctiveConstraintOrNull(INode optimalConditionNode, PropertyCache propertyCache, bool enablingConstraint) {
+            var constraintObjectProperty = enablingConstraint ? "meta:hasEnablingConstraint" : "meta:hasConstraint";
+
             var query = GetParameterizedStringQuery(@"SELECT ?comparisonOperator1 ?boundProperty1 ?comparisonOperator2 ?boundProperty2 WHERE {
                 @optimalCondition rdf:type ?aNode1 .
                 ?aNode1 rdf:type owl:Restriction .
-                ?aNode1 owl:onProperty meta:hasConstraint .
+                ?aNode1 owl:onProperty " + constraintObjectProperty + @" .
                 ?aNode1 owl:onClass ?aNode2 .
                 ?aNode2 owl:intersectionOf ?aList1 .
                 ?aList1 rdf:first ?aNode3 .
@@ -405,11 +412,13 @@ namespace Logic.Mapek {
             return conjunctiveConstraint;
         }
 
-        private ConstraintExpression GetSingleSingleDisjunctiveConstraintOrNull(INode optimalConditionNode, PropertyCache propertyCache) {
+        private ConstraintExpression GetSingleSingleDisjunctiveConstraintOrNull(INode optimalConditionNode, PropertyCache propertyCache, bool enablingConstraint) {
+            var constraintObjectProperty = enablingConstraint ? "meta:hasEnablingConstraint" : "meta:hasConstraint";
+
             var query = GetParameterizedStringQuery(@"SELECT ?comparisonOperator1 ?boundProperty1 ?comparisonOperator2 ?boundProperty2 WHERE {
                 @optimalCondition rdf:type ?aNode1 .
                 ?aNode1 rdf:type owl:Restriction .
-                ?aNode1 owl:onProperty meta:hasConstraint .
+                ?aNode1 owl:onProperty " + constraintObjectProperty + @" .
                 ?aNode1 owl:onClass ?aNode2 .
                 ?aNode2 owl:unionOf ?aList1 .
                 ?aList1 rdf:first ?aNode3 .
@@ -460,11 +469,13 @@ namespace Logic.Mapek {
             return disjunctiveConstraint;
         }
 
-        private ConstraintExpression GetDoubleSingleDisjunctiveConstraintOrNull(INode optimalConditionNode, PropertyCache propertyCache) {
+        private ConstraintExpression GetDoubleSingleDisjunctiveConstraintOrNull(INode optimalConditionNode, PropertyCache propertyCache, bool enablingConstraint) {
+            var constraintObjectProperty = enablingConstraint ? "meta:hasEnablingConstraint" : "meta:hasConstraint";
+
             var query = GetParameterizedStringQuery(@"SELECT ?comparisonOperator1 ?boundProperty1 ?comparisonOperator2 ?boundProperty2 ?comparisonOperator3 ?boundProperty3 WHERE {
                 @optimalCondition rdf:type ?aNode1 .
                 ?aNode1 rdf:type owl:Restriction .
-                ?aNode1 owl:onProperty meta:hasConstraint .
+                ?aNode1 owl:onProperty " + constraintObjectProperty + @" .
                 ?aNode1 owl:onClass ?aNode2 .
                 ?aNode2 owl:unionOf ?aList1 .
                 ?aList1 rdf:first ?aNode3 .
@@ -536,11 +547,13 @@ namespace Logic.Mapek {
             return disjunctiveConstraint;
         }
 
-        private ConstraintExpression GetDoubleDoubleDisjunctiveConstraintOrNull(INode optimalConditionNode, PropertyCache propertyCache) {
+        private ConstraintExpression GetDoubleDoubleDisjunctiveConstraintOrNull(INode optimalConditionNode, PropertyCache propertyCache, bool enablingConstraint) {
+            var constraintObjectProperty = enablingConstraint ? "meta:hasEnablingConstraint" : "meta:hasConstraint";
+
             var query = GetParameterizedStringQuery(@"SELECT ?comparisonOperator1 ?boundProperty1 ?comparisonOperator2 ?boundProperty2 ?comparisonOperator3 ?boundProperty3 ?comparisonOperator4 ?boundProperty4 WHERE {
                 @optimalCondition rdf:type ?aNode1 .
                 ?aNode1 rdf:type owl:Restriction .
-                ?aNode1 owl:onProperty meta:hasConstraint .
+                ?aNode1 owl:onProperty " + constraintObjectProperty + @" .
                 ?aNode1 owl:onClass ?aNode2 .
                 ?aNode2 owl:unionOf ?aList1 .
                 ?aList1 rdf:first ?aNode3 .

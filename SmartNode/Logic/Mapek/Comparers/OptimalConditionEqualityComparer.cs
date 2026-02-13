@@ -11,14 +11,14 @@ namespace Logic.Mapek.Comparers {
             return x!.Name.Equals(y!.Name) &&
                 _propertyEqualityComparer.Equals(x!.Property, y!.Property) &&
                 x.ReachedInMaximumSeconds == y.ReachedInMaximumSeconds &&
-                _constraintExpressionEqualityComparer.Equals(x.Constraint, y.Constraint);
+                _constraintExpressionEqualityComparer.Equals(x.ConditionConstraint, y.ConditionConstraint);
         }
 
         public int GetHashCode([DisallowNull] OptimalCondition obj) {
             return obj.GetHashCode() *
                 obj.Property.GetHashCode() *
                 obj.ReachedInMaximumSeconds.GetHashCode() *
-                obj.Constraint.GetHashCode() *
+                obj.ConditionConstraint.GetHashCode() *
                 obj.Name.GetHashCode();
         }
     }

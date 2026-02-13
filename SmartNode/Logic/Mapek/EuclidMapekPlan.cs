@@ -24,22 +24,22 @@ namespace Logic.Mapek {
                 var distances = optimalConditions.Select(oc => {
                     Debug.Assert(lastPC.Properties.TryGetValue(oc.Property.Name, out var p));
                     Debug.Assert(p != null);
-                    if (!"http://www.w3.org/2001/XMLSchema#double".Equals(oc.Property.OwlType) || oc.Constraint.ConstraintType == ConstraintType.And || oc.Constraint.ConstraintType == ConstraintType.Or) {
+                    if (!"http://www.w3.org/2001/XMLSchema#double".Equals(oc.Property.OwlType) || oc.ConditionConstraint.ConstraintType == ConstraintType.And || oc.ConditionConstraint.ConstraintType == ConstraintType.Or) {
                         // Coward.
                         Debug.WriteLine("Cowardly refusing do to anything here.");
                         return 1;
                     }
                     var vh = _factory.GetValueHandlerImplementation(p.OwlType);
                     // We normalise the distance from the "border", values off the chart ("far left/far right") get turned into 1.
-                    if (oc.Constraint.ConstraintType == ConstraintType.LessThan || oc.Constraint.ConstraintType == ConstraintType.LessThanOrEqualTo) {
-                        var minC = (AtomicConstraintExpression)oc.Constraint;
+                    if (oc.ConditionConstraint.ConstraintType == ConstraintType.LessThan || oc.ConditionConstraint.ConstraintType == ConstraintType.LessThanOrEqualTo) {
+                        var minC = (AtomicConstraintExpression)oc.ConditionConstraint;
                         if (vh.IsLessThanOrEqualTo(p.Value, minC.Property)) {
                             double v = double.Parse((string)minC.Property.Value) - (double)p.Value;
                             return Math.Min(1, Math.Abs(v / double.Parse((string)minC.Property.Value)));
                         }
                     }
-                    if (oc.Constraint.ConstraintType == ConstraintType.GreaterThan || oc.Constraint.ConstraintType == ConstraintType.GreaterThanOrEqualTo) {
-                        var maxC = (AtomicConstraintExpression)oc.Constraint;
+                    if (oc.ConditionConstraint.ConstraintType == ConstraintType.GreaterThan || oc.ConditionConstraint.ConstraintType == ConstraintType.GreaterThanOrEqualTo) {
+                        var maxC = (AtomicConstraintExpression)oc.ConditionConstraint;
                         if (vh.IsGreaterThanOrEqualTo(p.Value, maxC.Property)) {
                             double v = (double)p.Value - double.Parse((string)maxC.Property.Value);
                             return Math.Min(1, Math.Abs(v / double.Parse((string)maxC.Property.Value)));

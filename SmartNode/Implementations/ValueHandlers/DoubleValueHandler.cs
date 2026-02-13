@@ -196,28 +196,28 @@ namespace Implementations.ValueHandlers
             }
         }
 
-        private static bool EvaluateEqualTo(double sensorValue, double conditionValue) {
-            return sensorValue == conditionValue;
+        private static bool EvaluateEqualTo(double sensorValue, double optimalConditionValue) {
+            return sensorValue == optimalConditionValue;
         }
 
-        private static bool EvaluateGreaterThan(double sensorValue, double conditionValue)
+        private static bool EvaluateGreaterThan(double sensorValue, double optimalConditionValue)
         {
-            return sensorValue > conditionValue;
+            return sensorValue > optimalConditionValue;
         }
 
-        private static bool EvaluateGreaterThanOrEqualTo(double sensorValue, double conditionValue)
+        private static bool EvaluateGreaterThanOrEqualTo(double sensorValue, double optimalConditionValue)
         {
-            return sensorValue >= conditionValue;
+            return sensorValue >= optimalConditionValue;
         }
 
-        private static bool EvaluateLessThan(double sensorValue, double conditionValue)
+        private static bool EvaluateLessThan(double sensorValue, double optimalConditionValue)
         {
-            return sensorValue < conditionValue;
+            return sensorValue < optimalConditionValue;
         }
 
-        private static bool EvaluateLessThanOrEqualTo(double sensorValue, double conditionValue)
+        private static bool EvaluateLessThanOrEqualTo(double sensorValue, double optimalConditionValue)
         {
-            return sensorValue <= conditionValue;
+            return sensorValue <= optimalConditionValue;
         }
 
         private static bool EvaluateAnd(bool left, bool right)

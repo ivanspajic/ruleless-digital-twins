@@ -8,6 +8,8 @@ namespace Implementations.ValueHandlers
 {
     public class DoubleValueHandler : IValueHandler
     {
+        private const double FloatingEpsilon = 1e-9;
+
         // In case of new ExpressionTypes being supported, this could be used to register new delegates.
         private static readonly Dictionary<ConstraintType, Func<double, double, bool>> _expressionDelegateMap = new()
         {
@@ -197,7 +199,8 @@ namespace Implementations.ValueHandlers
         }
 
         private static bool EvaluateEqualTo(double sensorValue, double optimalConditionValue) {
-            return sensorValue == optimalConditionValue;
+            return sensorValue <= optimalConditionValue + FloatingEpsilon &&
+                sensorValue >= optimalConditionValue - FloatingEpsilon;
         }
 
         private static bool EvaluateGreaterThan(double sensorValue, double optimalConditionValue)

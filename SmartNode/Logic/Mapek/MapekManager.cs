@@ -85,7 +85,7 @@ namespace Logic.Mapek {
                 await _mapekExecute.Execute(simulationToExecute);
 
                 // If configured, write MAPE-K state to CSV.
-                if (_coordinatorSettings.SaveMapekCycleData) {
+                if (_coordinatorSettings.SaveMapekCycleData && simulationToExecute is not null && currentSimulationTree is not null) {
                     CsvUtils.WritePropertyStatesToCsv(_filepathArguments.DataDirectory, currentRound, cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
                     CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentRound, simulationToExecute);
 

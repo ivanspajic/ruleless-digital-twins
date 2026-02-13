@@ -23,13 +23,10 @@ namespace Logic.Models.MapekModels
 
         public SerializableSimulation SerializableSimulation => new() {
             Index = Index,
-            Actions = Actions.Select(action => {
-                if (action is ActuationAction actuationAction) {
-                    return actuationAction.SerializableAction;
-                } else {
-                    return ((ReconfigurationAction)action).SerializableAction;
-                }
-            }),
+            Actions = Actions.Select(action =>
+                action is ActuationAction actuationAction
+                    ? actuationAction.SerializableAction
+                    : ((ReconfigurationAction)action).SerializableAction),
             PropertyCache = PropertyCache.SerializablePropertyCache
         };
     }

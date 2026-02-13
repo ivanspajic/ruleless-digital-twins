@@ -1,5 +1,4 @@
-﻿using CsvHelper;
-using Femyou;
+﻿using Femyou;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
@@ -9,17 +8,19 @@ namespace Implementations.ValueHandlers
 {
     public class DoubleValueHandler : IValueHandler
     {
+        private const double FloatingEpsilon = 1e-9;
+
         // In case of new ExpressionTypes being supported, this could be used to register new delegates.
         private static readonly Dictionary<ConstraintType, Func<double, double, bool>> _expressionDelegateMap = new()
         {
+            { ConstraintType.EqualTo, EvaluateEqualTo },
             { ConstraintType.GreaterThan, EvaluateGreaterThan },
             { ConstraintType.GreaterThanOrEqualTo, EvaluateGreaterThanOrEqualTo },
             { ConstraintType.LessThan, EvaluateLessThan },
-            { ConstraintType.LessThanOrEqualTo, EvaluateLessThanOrEqualTo },
+            { ConstraintType.LessThanOrEqualTo, EvaluateLessThanOrEqualTo }
         };
 
-        // In case of more ways of combining constraint propositions of OptimalConditions, this could be used to register new
-        // delegates.
+        // In case of more ways of combining constraint propositions of Conditions, this could be used to register new delegates.
         private static readonly Dictionary<ConstraintType, Func<bool, bool, bool>> _expressionCombinationDelegateMap = new()
         {
             { ConstraintType.And, EvaluateAnd },
@@ -35,7 +36,7 @@ namespace Implementations.ValueHandlers
                 // In case of finding the node type in the expression delegate map, we know it must be a binary expression with constant values
                 // to be compared.
                 var atomicConstraintExpression = (AtomicConstraintExpression)constraintExpression;
-                var right = atomicConstraintExpression.Right;
+                var right = atomicConstraintExpression.Property.Value;
 
                 if (propertyValue is not double)
                 {
@@ -195,6 +196,11 @@ namespace Implementations.ValueHandlers
             } else {
                 return Math.Floor(factor) * fuzziness;
             }
+        }
+
+        private static bool EvaluateEqualTo(double sensorValue, double optimalConditionValue) {
+            return sensorValue <= optimalConditionValue + FloatingEpsilon &&
+                sensorValue >= optimalConditionValue - FloatingEpsilon;
         }
 
         private static bool EvaluateGreaterThan(double sensorValue, double optimalConditionValue)

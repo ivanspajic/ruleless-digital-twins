@@ -1,4 +1,5 @@
-﻿using Logic.Models.OntologicalModels;
+﻿using Logic.Models.MapekModels.Serializables;
+using Logic.Models.OntologicalModels;
 
 namespace Logic.Models.MapekModels
 {
@@ -19,5 +20,14 @@ namespace Logic.Models.MapekModels
         public PropertyCache PropertyCache { get; set; }
 
         public IEnumerable<FMUParameterAction> InitializationActions { get; set; }
+
+        public SerializableSimulation SerializableSimulation => new() {
+            Index = Index,
+            Actions = Actions.Select(action =>
+                action is ActuationAction actuationAction
+                    ? actuationAction.SerializableAction
+                    : ((ReconfigurationAction)action).SerializableAction),
+            PropertyCache = PropertyCache.SerializablePropertyCache
+        };
     }
 }

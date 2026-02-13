@@ -4,6 +4,14 @@ using System.Diagnostics.CodeAnalysis;
 namespace Logic.Mapek.Comparers {
     internal class ConstraintExpressionEqualityComparer : IEqualityComparer<ConstraintExpression> {
         public bool Equals(ConstraintExpression? x, ConstraintExpression? y) {
+            if (x is null) {
+                return y is null;
+            }
+
+            if (y is null) {
+                return false;
+            }
+
             if (x is NestedConstraintExpression nestedX && y is NestedConstraintExpression nestedY) {
                 return nestedX.ConstraintType == nestedY.ConstraintType &&
                     Equals(nestedX.Left, nestedY.Left);
@@ -12,7 +20,7 @@ namespace Logic.Mapek.Comparers {
                 var atomicY = (AtomicConstraintExpression)y!;
 
                 return atomicX.ConstraintType == atomicY.ConstraintType &&
-                    atomicX.Right.ToString()!.Equals(atomicY.Right.ToString());
+                    atomicX.Property.ToString()!.Equals(atomicY.Property.ToString());
             }
         }
 
@@ -27,7 +35,7 @@ namespace Logic.Mapek.Comparers {
 
                 return atomicObj.GetHashCode() *
                     atomicObj.ConstraintType.GetHashCode() *
-                    atomicObj.Right.GetHashCode();
+                    atomicObj.Property.GetHashCode();
             }
         }
     }

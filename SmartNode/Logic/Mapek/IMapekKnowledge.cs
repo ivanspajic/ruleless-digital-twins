@@ -10,8 +10,6 @@ namespace Logic.Mapek {
 
         public SparqlResultSet ExecuteQuery(SparqlParameterizedString query, bool useInferredModel = false);
 
-        public string GetPropertyType(string propertyName);
-
         public void UpdatePropertyValue(Property property);
 
         public void UpdateConfigurableParameterValue(ConfigurableParameter configurableParameter);

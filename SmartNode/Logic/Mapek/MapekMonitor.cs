@@ -35,26 +35,28 @@ namespace Logic.Mapek {
 
             // Get all measured Properties (Sensor Outputs) that aren't Inputs to other soft Sensors. Since soft Sensors may use
             // other Sensors' Outputs as their own Inputs, this query effectively gets the roots of the Sensor trees in the system.
-            var query = @"SELECT ?property WHERE {
+            var query = @"SELECT ?property ?initialValue WHERE {
                 ?sensor rdf:type sosa:Sensor .
                 ?sensor ssn:implements ?procedure .
                 ?procedure ssn:hasOutput ?property .
-                FILTER NOT EXISTS { ?property meta:isInputOf ?otherProcedure } . }";
+                ?property meta:hasValue ?initialValue .
+                FILTER NOT EXISTS { ?property meta:isInputOf ?otherProcedure } }";
 
             var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
             // Make a dictionary to check for already made soft Sensors in the tree.
             var softSensorDictionary = new Dictionary<string, SoftSensorTreeNode>();
 
-            // Get the values of all measured Properties (Sensor Inputs/Outputs and ConfigurableParameters) and populate the
-            // cache.
+            // Get the values of all measured Properties (Sensor Inputs/Outputs and ConfigurableParameters) and populate the cache.
             var softSensorTreeNodes = new List<SoftSensorTreeNode>();
 
             foreach (var result in queryResult.Results) {
                 var property = result["property"];
+                var valueType = result["initialValue"].ToString().Split("^^")[1];
+
                 var softSensorTreeNode = new SoftSensorTreeNode();
                 
-                await PopulateCacheWithPropertiesSoftSensors(property, cache.PropertyCache, softSensorTreeNode, softSensorDictionary);
+                await PopulateCacheWithPropertiesSoftSensors(property, valueType, cache.PropertyCache, softSensorTreeNode, softSensorDictionary);
 
                 softSensorTreeNodes.Add(softSensorTreeNode);
             }
@@ -63,6 +65,9 @@ namespace Logic.Mapek {
 
             // Get the values of all ObservableProperties and populate the cache.
             PopulateObservablePropertiesCache(cache.PropertyCache);
+
+            // Get the values of OptimalCondition bound Properties in case there are any that are not handled by the above.
+            PopulateCacheWithConstantProperties(cache.PropertyCache);
 
             // Write Property values back to the knowledge base.
             WritePropertyValuesToKnowledgeBase(cache.PropertyCache);
@@ -76,23 +81,19 @@ namespace Logic.Mapek {
         private void PopulateConfigurableParametersCache(PropertyCache propertyCache) {
             var query = @"SELECT ?configurableParameter ?initialValue WHERE {
                 ?configurableParameter rdf:type meta:ConfigurableParameter .
-                ?configurableParameter rdf:type ?bNode .
-                ?bNode rdf:type owl:Restriction .
-                ?bNode owl:onProperty meta:hasValue .
-                ?bNode owl:hasValue ?initialValue . }";
+                ?configurableParameter meta:hasValue ?initialValue . }";
 
             var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
             foreach (var results in queryResult.Results) {
                 var propertyName = results["configurableParameter"].ToString();
-                var initialValue = results["initialValue"].ToString().Split("^^")[0];
-                var propertyType = _mapekKnowledge.GetPropertyType(propertyName);
+                var initialValueTypeSplit = results["initialValue"].ToString().Split("^^");
 
                 // Instantiate the new ConfigurableParameter and add it to the cache.
                 var configurableParameter = new ConfigurableParameter {
                     Name = propertyName,
-                    Value = initialValue,
-                    OwlType = propertyType
+                    Value = initialValueTypeSplit[0],
+                    OwlType = initialValueTypeSplit[1]
                 };
                 propertyCache.ConfigurableParameters.Add(propertyName, configurableParameter);
 
@@ -101,6 +102,7 @@ namespace Logic.Mapek {
         }
 
         private async Task PopulateCacheWithPropertiesSoftSensors(INode propertyNode,
+            string propertyType,
             PropertyCache propertyCache,
             SoftSensorTreeNode softSensorTreeNode,
             Dictionary<string, SoftSensorTreeNode> softSensorDictionary) {
@@ -144,8 +146,9 @@ namespace Logic.Mapek {
             // Get an instance of a Sensor from the factory.
             var sensor = _factory.GetSensorImplementation(sensorNode.ToString(), procedureNode.ToString());
 
-            query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?inputProperty WHERE {
+            query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?inputProperty ?initialValue WHERE {
                     @procedure ssn:hasInput ?inputProperty .
+                    ?inputProperty meta:hasValue ?initialValue .
                     @sensor ssn:implements @procedure .
                     FILTER NOT EXISTS { ?inputProperty rdf:type meta:ConfigurableParameter . } }");
 
@@ -164,7 +167,8 @@ namespace Logic.Mapek {
                 var softSensorTreeChildNode = new SoftSensorTreeNode();
 
                 var inputProperty = innerQueryResult.Results[i]["inputProperty"];
-                await PopulateCacheWithPropertiesSoftSensors(inputProperty, propertyCache, softSensorTreeChildNode, softSensorDictionary);
+                var valueType = innerQueryResult.Results[i]["initialValue"].ToString().Split("^^")[1];
+                await PopulateCacheWithPropertiesSoftSensors(inputProperty, valueType, propertyCache, softSensorTreeChildNode, softSensorDictionary);
 
                 if (propertyCache.Properties.ContainsKey(inputProperty.ToString())) {
                     inputProperties[i] = propertyCache.Properties[inputProperty.ToString()].Value;
@@ -179,8 +183,8 @@ namespace Logic.Mapek {
 
             var propertyValue = await sensor.ObservePropertyValue(inputProperties);
             var property = new Property {
-                Name = propertyNode.ToString(),
-                OwlType = _mapekKnowledge.GetPropertyType(propertyName),
+                Name = propertyName,
+                OwlType = propertyType,
                 Value = propertyValue
             };
 
@@ -199,10 +203,11 @@ namespace Logic.Mapek {
 
         private void PopulateObservablePropertiesCache(PropertyCache propertyCache) {
             // Get all ObservableProperties.
-            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty WHERE {
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty ?initialValue WHERE {
                 ?sensor rdf:type sosa:Sensor .
                 ?sensor sosa:observes ?observableProperty . 
-                ?observableProperty rdf:type sosa:ObservableProperty . }");
+                ?observableProperty rdf:type sosa:ObservableProperty .
+                ?observableProperty meta:hasValue ?initialValue . }");
 
             var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
@@ -215,7 +220,7 @@ namespace Logic.Mapek {
             foreach (var result in queryResult.Results) {
                 var observablePropertyNode = result["observableProperty"];
                 var observablePropertyName = observablePropertyNode.ToString();
-                var valueType = _mapekKnowledge.GetPropertyType(observablePropertyName);
+                var observablePropertyType = result["initialValue"].ToString().Split("^^")[1];
 
                 innerQuery.SetParameter("observableProperty", observablePropertyNode);
 
@@ -236,17 +241,46 @@ namespace Logic.Mapek {
                     }
                 }
 
-                var valueHandler = _factory.GetValueHandlerImplementation(valueType);
+                var valueHandler = _factory.GetValueHandlerImplementation(observablePropertyType);
                 var observablePropertyValue = valueHandler.GetObservablePropertyValueFromMeasuredPropertyValues(measuredPropertyValues);
                 var observableProperty = new Property {
                     Name = observablePropertyName,
-                    OwlType = valueType,
+                    OwlType = observablePropertyType,
                     Value = observablePropertyValue
                 };
 
                 propertyCache.Properties.Add(observablePropertyName, observableProperty);
 
                 _logger.LogInformation("Added ObservableProperty {observableProperty} to the cache.", observablePropertyName);
+            }
+        }
+
+        private void PopulateCacheWithConstantProperties(PropertyCache propertyCache) {
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?constantProperty ?initialValue WHERE {
+                ?constantProperty rdf:type ssn:Property .
+                ?constantProperty meta:hasValue ?initialValue .
+                FILTER NOT EXISTS {
+                    ?sensor sosa:observes ?constantProperty
+                }
+                FILTER NOT EXISTS {
+                    ?sensorProcedure ssn:hasOutput ?constantProperty
+                } }");
+
+            var queryResult = _mapekKnowledge.ExecuteQuery(query);
+
+            foreach (var result in queryResult.Results) {
+                var propertyName = result["constantProperty"].ToString();
+                var initialValueSplit = result["initialValue"].ToString().Split("^^");
+
+                var constantProperty = new Property {
+                    Name = propertyName,
+                    Value = initialValueSplit[0],
+                    OwlType = initialValueSplit[1]
+                };
+
+                propertyCache.Properties.Add(propertyName, constantProperty);
+
+                _logger.LogInformation("Added constant Property {constantProperty} to the cache.", constantProperty);
             }
         }
 

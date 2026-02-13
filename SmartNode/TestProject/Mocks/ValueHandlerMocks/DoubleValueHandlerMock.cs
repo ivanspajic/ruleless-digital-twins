@@ -1,5 +1,6 @@
 ﻿using Femyou;
 using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 using TestProject.Mocks.EqualityComparers;
 
@@ -13,7 +14,11 @@ namespace TestProject.Mocks.ValueHandlerMocks
                 (new AtomicConstraintExpression
                 {
                     ConstraintType = ConstraintType.GreaterThan,
-                    Right = "10.1"
+                    Property = new Property {
+                        Name = "FakeProperty",
+                        OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                        Value = 10.1
+                    }
                 },
                 1.02),
                 new List<AtomicConstraintExpression>
@@ -21,7 +26,11 @@ namespace TestProject.Mocks.ValueHandlerMocks
                     new AtomicConstraintExpression
                     {
                         ConstraintType = ConstraintType.GreaterThan,
-                        Right = "10.1"
+                        Property = new Property {
+                            Name = "FakeProperty",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                            Value = 10.1
+                        }
                     }
                 }
             },
@@ -29,7 +38,11 @@ namespace TestProject.Mocks.ValueHandlerMocks
                 (new AtomicConstraintExpression
                 {
                     ConstraintType = ConstraintType.LessThanOrEqualTo,
-                    Right = "28.5"
+                    Property = new Property {
+                        Name = "FakeProperty",
+                        OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                        Value = 28.5
+                    }
                 },
                 1.02),
                 new List<AtomicConstraintExpression> { }
@@ -38,7 +51,11 @@ namespace TestProject.Mocks.ValueHandlerMocks
                 (new AtomicConstraintExpression
                 {
                     ConstraintType = ConstraintType.GreaterThanOrEqualTo,
-                    Right = "27.5"
+                    Property = new Property {
+                        Name = "FakeProperty",
+                        OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                        Value = 27.5
+                    }
                 },
                 1.02),
                 new List<AtomicConstraintExpression>
@@ -46,7 +63,11 @@ namespace TestProject.Mocks.ValueHandlerMocks
                     new AtomicConstraintExpression
                     {
                         ConstraintType = ConstraintType.GreaterThanOrEqualTo,
-                        Right = "27.5"
+                        Property = new Property {
+                        Name = "FakeProperty",
+                        OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                        Value = 27.5
+                    }
                     }
                 }
             },
@@ -54,7 +75,11 @@ namespace TestProject.Mocks.ValueHandlerMocks
                 (new AtomicConstraintExpression
                 {
                     ConstraintType = ConstraintType.LessThan,
-                    Right = "30.2"
+                    Property = new Property {
+                        Name = "FakeProperty",
+                        OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                        Value = 30.2
+                    }
                 },
                 1.02),
                 new List<AtomicConstraintExpression> { }

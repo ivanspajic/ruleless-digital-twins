@@ -12,7 +12,7 @@ namespace TestProject.Mocks.EqualityComparers
                 var xAtomic = x as AtomicConstraintExpression;
                 var yAtomic = y as AtomicConstraintExpression;
 
-                if (xAtomic!.ConstraintType == yAtomic!.ConstraintType && xAtomic!.Right.Equals(yAtomic!.Right))
+                if (xAtomic!.ConstraintType == yAtomic!.ConstraintType && xAtomic!.Property.Equals(yAtomic!.Property))
                 {
                     return true;
                 }
@@ -39,7 +39,7 @@ namespace TestProject.Mocks.EqualityComparers
             {
                 var objAtomic = obj as AtomicConstraintExpression;
 
-                return objAtomic!.ConstraintType.GetHashCode() * objAtomic!.Right.GetHashCode();
+                return objAtomic!.ConstraintType.GetHashCode() * objAtomic!.Property.GetHashCode();
             }
             else
             {

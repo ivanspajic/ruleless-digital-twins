@@ -1,7 +1,9 @@
-﻿namespace Logic.Models.MapekModels
+﻿using Logic.Models.OntologicalModels;
+
+namespace Logic.Models.MapekModels
 {
     public class AtomicConstraintExpression : ConstraintExpression
     {
-        public required object Right { get; init; }
+        public required Property Property { get; init; }
     }
 }

@@ -72,7 +72,7 @@ class OptimalConditionDouble(OptimalCondition):
         g.add((self.node, RDT["reachedInMaximumSeconds"], Literal(reachedInMaximumSeconds, datatype=XSD.nonNegativeInteger)))
         res = BNode()
         g.add((res, RDF["type"], OWL["Restriction"]))
-        g.add((res, OWL["onProperty"], RDT["hasValueConstraint"]))
+        g.add((res, OWL["onProperty"], RDT["hasConstraint"]))
         g.add((res, OWL["qualifiedCardinality"], Literal(1, datatype=XSD.nonNegativeInteger)))
         minmax = BNode()
         g.add((minmax, RDF["type"], RDFS["Datatype"]))

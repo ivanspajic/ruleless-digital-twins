@@ -5,476 +5,68 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xml:  <http://www.w3.org/XML/1998/namespace>
 PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
 
-xsd:decimal  rdf:type     rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class;
-        owl:disjointWith  xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration .
-
-xsd:byte  rdf:type           rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      xsd:byte , xsd:short , xsd:integer , xsd:long , xsd:int;
-        owl:disjointWith     xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration;
-        owl:equivalentClass  xsd:byte .
-
-<http://www.w3.org/ns/ssn/implements>
-        rdf:type            rdf:Property , owl:AnnotationProperty , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.w3.org/ns/ssn/implements> .
-
-xsd:positiveInteger  rdf:type  rdfs:Datatype , rdfs:Resource , rdfs:Class .
-
-rdf:Property  rdf:type       rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , rdf:Property;
-        owl:equivalentClass  rdf:Property .
-
-rdfs:Resource  rdf:type      rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      rdfs:Resource;
-        owl:equivalentClass  rdfs:Resource .
-
-xsd:dateTime  rdf:type    rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class;
-        owl:disjointWith  xsd:nonNegativeInteger , xsd:int , xsd:decimal , xsd:time , xsd:nonPositiveInteger , xsd:short , xsd:boolean , xsd:float , xsd:date , xsd:string , xsd:duration , xsd:integer , xsd:byte , xsd:unsignedLong , xsd:long , xsd:unsignedByte , xsd:unsignedShort , xsd:unsignedInt .
-
-rdfs:ContainerMembershipProperty
-        rdf:type         rdfs:Class , rdfs:Resource;
-        rdfs:subClassOf  rdf:Property .
-
-owl:intersectionOf  rdf:type  rdf:Property , rdfs:Resource;
-        rdfs:domain         owl:Class , rdfs:Class , rdfs:Resource;
-        rdfs:subPropertyOf  owl:intersectionOf .
-
-owl:qualifiedCardinality
-        rdf:type            rdf:Property , owl:AnnotationProperty , rdfs:Resource;
-        rdfs:subPropertyOf  owl:qualifiedCardinality .
-
-owl:Property  rdf:type       rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , owl:Property;
-        owl:equivalentClass  owl:Property .
-
-xsd:nonNegativeInteger
-        rdf:type             rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      xsd:integer , xsd:nonNegativeInteger;
-        owl:disjointWith     xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration;
-        owl:equivalentClass  xsd:nonNegativeInteger .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
-        rdf:type            rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator> .
-
-rdf:Statement  rdf:type      rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , rdf:Statement;
-        owl:equivalentClass  rdf:Statement .
-
-owl:Ontology  rdf:type       rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , owl:Ontology;
-        owl:equivalentClass  owl:Ontology .
-
-rdfs:domain  rdf:type       rdf:Property , rdfs:Resource;
-        rdfs:domain         rdf:Property , rdfs:Resource;
-        rdfs:range          rdfs:Class , rdfs:Resource;
-        rdfs:subPropertyOf  rdfs:domain .
-
-owl:sameAs  rdf:type        owl:SymmetricProperty , rdf:Property , owl:ObjectProperty , rdfs:Resource;
-        rdfs:subPropertyOf  owl:sameAs .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-        rdf:type            rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions> .
-
-owl:DatatypeProperty  rdf:type  rdfs:Resource , rdfs:Class;
-        rdfs:subClassOf  rdf:Property .
-
-rdf:object  rdf:type        rdf:Property , rdfs:Resource;
-        rdfs:domain         rdf:Statement , rdfs:Resource;
-        rdfs:subPropertyOf  rdf:object .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel>
-        rdf:type            rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel> .
-
-_:b0    rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource;
-        rdfs:subClassOf           _:b0 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b0;
-        owl:onDataRange           xsd:double;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger .
-
-xsd:time  rdf:type        rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class;
-        owl:disjointWith  xsd:nonNegativeInteger , xsd:int , xsd:decimal , xsd:nonPositiveInteger , xsd:short , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration , xsd:integer , xsd:byte , xsd:unsignedLong , xsd:long , xsd:unsignedByte , xsd:unsignedShort , xsd:unsignedInt .
-
-rdfs:range  rdf:type        rdf:Property , rdfs:Resource;
-        rdfs:domain         rdf:Property , rdfs:Resource;
-        rdfs:range          rdfs:Class , rdfs:Resource;
-        rdfs:subPropertyOf  rdfs:range .
-
-_:b1    rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource;
-        rdfs:subClassOf           _:b1 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b1;
-        owl:onDataRange           xsd:double;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger .
-
-xsd:date  rdf:type        rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class;
-        owl:disjointWith  xsd:nonNegativeInteger , xsd:int , xsd:decimal , xsd:time , xsd:nonPositiveInteger , xsd:short , xsd:boolean , xsd:float , xsd:dateTime , xsd:string , xsd:duration , xsd:integer , xsd:byte , xsd:unsignedLong , xsd:long , xsd:unsignedByte , xsd:unsignedShort , xsd:unsignedInt .
-
-owl:onProperty  rdf:type    rdf:Property , rdfs:Resource;
-        rdfs:domain         owl:Restriction , owl:Class , rdfs:Resource , rdfs:Class;
-        rdfs:range          owl:Property , rdfs:Resource;
-        rdfs:subPropertyOf  owl:onProperty .
-
-<http://www.w3.org/ns/sosa/observes>
-        rdf:type            rdf:Property , owl:AnnotationProperty , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.w3.org/ns/sosa/observes> .
-
-rdfs:Literal  rdf:type       rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , rdfs:Literal;
-        owl:equivalentClass  rdfs:Literal .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI>
-        rdf:type            rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI> .
-
-xsd:int  rdf:type            rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      xsd:integer , xsd:long , xsd:int;
-        owl:disjointWith     xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration;
-        owl:equivalentClass  xsd:int .
-
-_:b2    rdf:type             rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource;
-        rdfs:subClassOf      _:b2 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass  _:b2;
-        owl:hasValue         "20.4"^^xsd:double;
-        owl:onProperty       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> .
-
-xsd:nonPositiveInteger
-        rdf:type          rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Class;
-        owl:disjointWith  xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration .
-
-owl:Nothing  rdf:type        owl:Class , rdfs:Class , rdfs:Resource;
-        rdfs:subClassOf      owl:Thing , rdfs:Resource , owl:Nothing;
-        owl:equivalentClass  owl:Nothing .
-
-owl:onDataRange  rdf:type   rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  owl:onDataRange .
-
-owl:Class  rdf:type          rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      rdfs:Class , rdfs:Resource , owl:Class;
-        owl:equivalentClass  owl:Class .
-
-rdf:List  rdf:type           rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , rdf:List;
-        owl:equivalentClass  rdf:List .
-
-xsd:hexBinary  rdf:type  rdfs:Datatype , rdfs:Class , rdfs:Resource .
-
-:Heater_0  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
-                :Heater;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
-                "0"^^xsd:int .
-
-<http://www.w3.org/ns/ssn/hasOutput>
-        rdf:type            rdf:Property , owl:AnnotationProperty , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.w3.org/ns/ssn/hasOutput> .
-
-rdf:Bag  rdf:type        rdfs:Resource , rdfs:Class;
-        rdfs:subClassOf  rdfs:Container .
-
-rdfs:Class  rdf:type         rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      rdfs:Resource , rdfs:Class;
-        owl:equivalentClass  rdfs:Class .
-
-owl:equivalentClass  rdf:type  rdf:Property , rdfs:Resource;
-        rdfs:domain         owl:Class , rdfs:Class , rdfs:Resource;
-        rdfs:range          owl:Class , rdfs:Class , rdfs:Resource;
-        rdfs:subPropertyOf  owl:equivalentClass .
-
-owl:TransitiveProperty
-        rdf:type         rdfs:Class , rdfs:Resource;
-        rdfs:subClassOf  owl:ObjectProperty .
-
-xsd:string  rdf:type      rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Class;
-        owl:disjointWith  xsd:nonNegativeInteger , xsd:int , xsd:decimal , xsd:time , xsd:nonPositiveInteger , xsd:short , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:duration , xsd:integer , xsd:byte , xsd:unsignedLong , xsd:long , xsd:unsignedByte , xsd:unsignedShort , xsd:unsignedInt .
-
-owl:imports  rdf:type       rdf:Property , owl:OntologyProperty , rdfs:Resource;
-        rdfs:domain         owl:Ontology , rdfs:Resource;
-        rdfs:range          owl:Ontology , rdfs:Resource;
-        rdfs:subPropertyOf  owl:imports .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromOptimalConditions>
-        rdf:type            rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromOptimalConditions> .
-
-rdf:first  rdf:type         rdf:Property , owl:FunctionalProperty , rdfs:Resource;
-        rdfs:domain         rdf:List , rdfs:Resource;
-        rdfs:subPropertyOf  rdf:first .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>
-        rdf:type            rdf:Property , owl:AnnotationProperty , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> .
-
-owl:SymmetricProperty
-        rdf:type         rdfs:Class , rdfs:Resource;
-        rdfs:subClassOf  owl:ObjectProperty .
-
-xsd:double  rdf:type  rdfs:Datatype , rdfs:Resource , rdfs:Class .
-
-xsd:unsignedShort  rdf:type  rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      xsd:unsignedLong , xsd:short , xsd:integer , xsd:long , xsd:nonNegativeInteger , xsd:unsignedInt , xsd:unsignedShort , xsd:int;
-        owl:disjointWith     xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration;
-        owl:equivalentClass  xsd:unsignedShort .
-
-rdf:Alt  rdf:type        rdfs:Resource , rdfs:Class;
-        rdfs:subClassOf  rdfs:Container .
-
-owl:InverseFunctionalProperty
-        rdf:type         rdfs:Resource , rdfs:Class;
-        rdfs:subClassOf  owl:ObjectProperty .
-
-owl:backwardCompatibleWith
-        rdf:type            rdf:Property , rdfs:Resource;
-        rdfs:domain         owl:Ontology , rdfs:Resource;
-        rdfs:range          owl:Ontology , rdfs:Resource;
-        rdfs:subPropertyOf  owl:backwardCompatibleWith .
-
-xsd:gYear  rdf:type  rdfs:Datatype , rdfs:Resource , rdfs:Class .
-
-_:b3    rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource;
-        rdfs:subClassOf           _:b3 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b3;
-        owl:onDataRange           [ rdf:type              rdfs:Datatype , rdfs:Class , rdfs:Resource;
-                                    owl:onDatatype        xsd:double;
-                                    owl:withRestrictions  [ rdf:type   rdfs:Resource , rdf:List;
-                                                            rdf:first  [ rdf:comment       "verification mark";
-                                                                         rdf:comment       :RoomTemperature;
-                                                                         xsd:minExclusive  "10.1"^^xsd:double
-                                                                       ];
-                                                            rdf:rest   [ rdf:type   rdf:List , rdfs:Resource;
-                                                                         rdf:first  [ rdf:comment       "verification mark";
-                                                                                      rdf:comment       :RoomTemperature;
-                                                                                      xsd:maxInclusive  "28.5"^^xsd:double
-                                                                                    ];
-                                                                         rdf:rest   ()
-                                                                       ]
-                                                          ]
-                                  ];
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValueConstraint>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger .
-
-owl:Thing  rdf:type          owl:Class , rdfs:Class , rdfs:Resource;
-        rdfs:subClassOf      owl:Thing , rdfs:Resource;
-        owl:equivalentClass  owl:Thing .
-
-xsd:unsignedInt  rdf:type    rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      xsd:unsignedLong , xsd:integer , xsd:long , xsd:nonNegativeInteger , xsd:unsignedInt , xsd:int;
-        owl:disjointWith     xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration;
-        owl:equivalentClass  xsd:unsignedInt .
-
-:Heater_2  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
-                :Heater;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
-                "2"^^xsd:int .
-
-xsd:integer  rdf:type        rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      xsd:decimal , xsd:integer;
-        owl:disjointWith     xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration;
-        owl:equivalentClass  xsd:integer .
-
-rdfs:isDefinedBy  rdf:type  rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  rdfs:seeAlso , rdfs:isDefinedBy .
-
 [ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List , rdfs:Resource;
+          [ rdf:type   rdf:List;
             rdf:first  :Heater_0;
             rdf:rest   ()
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List , rdfs:Resource;
+          [ rdf:type   rdf:List;
             rdf:first  :Heater;
             rdf:rest   ()
           ]
 ] .
 
-rdfs:Datatype  rdf:type  rdfs:Class , rdfs:Resource;
-        rdfs:subClassOf  rdfs:Class .
-
-_:b4    rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource;
-        rdfs:subClassOf           _:b4 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b4;
-        owl:onDataRange           xsd:double;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger .
-
-xsd:anyURI  rdf:type  rdfs:Datatype , rdfs:Class , rdfs:Resource .
-
-xsd:gMonth  rdf:type  rdfs:Datatype , rdfs:Class , rdfs:Resource .
-
-rdfs:subClassOf  rdf:type   rdf:Property , rdfs:Resource;
-        rdfs:domain         rdfs:Class , rdfs:Resource;
-        rdfs:range          rdfs:Class , rdfs:Resource;
-        rdfs:subPropertyOf  rdfs:subClassOf .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds>
-        rdf:type            rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds> .
-
-xsd:gMonthDay  rdf:type  rdfs:Datatype , rdfs:Resource , rdfs:Class .
-
-owl:onDatatype  rdf:type    rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  owl:onDatatype .
-
-owl:oneOf  rdf:type         rdf:Property , rdfs:Resource;
-        rdfs:domain         owl:Class , rdfs:Class , rdfs:Resource;
-        rdfs:subPropertyOf  owl:oneOf .
-
-owl:ObjectProperty  rdf:type  rdfs:Class , rdfs:Resource;
-        rdfs:subClassOf  rdf:Property .
-
-xsd:gDay  rdf:type  rdfs:Datatype , rdfs:Resource , rdfs:Class .
-
-rdf:subject  rdf:type       rdf:Property , rdfs:Resource;
-        rdfs:domain         rdf:Statement , rdfs:Resource;
-        rdfs:subPropertyOf  rdf:subject .
-
-rdf:nil  rdf:type  rdf:List , rdfs:Resource .
-
-rdf:Seq  rdf:type        rdfs:Class , rdfs:Resource;
-        rdfs:subClassOf  rdfs:Container .
-
-owl:OntologyProperty  rdf:type  rdfs:Class , rdfs:Resource;
-        rdfs:subClassOf  rdf:Property .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith>
-        rdf:type            rdf:Property , owl:AnnotationProperty , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> .
-
-owl:differentFrom  rdf:type  owl:SymmetricProperty , owl:ObjectProperty , rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  owl:differentFrom .
-
-rdf:type  rdf:type          rdf:Property , rdfs:Resource;
-        rdfs:range          rdfs:Class , rdfs:Resource;
-        rdfs:subPropertyOf  rdf:type .
-
-owl:versionInfo  rdf:type  owl:AnnotationProperty .
-
-owl:withRestrictions  rdf:type  rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  owl:withRestrictions .
-
-xsd:unsignedLong  rdf:type   rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      xsd:unsignedLong , xsd:integer , xsd:long , xsd:nonNegativeInteger;
-        owl:disjointWith     xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration;
-        owl:equivalentClass  xsd:unsignedLong .
-
-<urn:x-hp-jena:rubrik/validation>
-        rdf:type            rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  <urn:x-hp-jena:rubrik/validation> .
-
-<http://www.w3.org/ns/ssn/forProperty>
-        rdf:type            rdf:Property , owl:AnnotationProperty , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.w3.org/ns/ssn/forProperty> .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor>
-        rdf:type            rdf:Property , owl:AnnotationProperty , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor> .
-
-owl:hasValue  rdf:type      rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  owl:hasValue .
-
-<http://www.w3.org/ns/sosa/hosts>
-        rdf:type            rdf:Property , owl:AnnotationProperty , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.w3.org/ns/sosa/hosts> .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts>
-        rdf:type            rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> .
-
-xsd:unsignedByte  rdf:type   rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      xsd:unsignedByte , xsd:unsignedLong , xsd:byte , xsd:short , xsd:integer , xsd:long , xsd:nonNegativeInteger , xsd:unsignedInt , xsd:unsignedShort , xsd:int;
-        owl:disjointWith     xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration;
-        owl:equivalentClass  xsd:unsignedByte .
-
-xsd:float  rdf:type       rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Class;
-        owl:disjointWith  xsd:nonNegativeInteger , xsd:int , xsd:decimal , xsd:time , xsd:nonPositiveInteger , xsd:short , xsd:boolean , xsd:date , xsd:dateTime , xsd:string , xsd:duration , xsd:integer , xsd:byte , xsd:unsignedLong , xsd:long , xsd:unsignedByte , xsd:unsignedShort , xsd:unsignedInt .
-
-xsd:minInclusive  rdf:type  rdf:Property , owl:AnnotationProperty , rdfs:Resource;
-        rdfs:subPropertyOf  xsd:minInclusive .
-
-xsd:short  rdf:type          rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      xsd:short , xsd:integer , xsd:long , xsd:int;
-        owl:disjointWith     xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration;
-        owl:equivalentClass  xsd:short .
-
-rdfs:subPropertyOf  rdf:type  rdf:Property , rdfs:Resource;
-        rdfs:domain         rdf:Property , rdfs:Resource;
-        rdfs:range          rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  rdfs:subPropertyOf .
-
-owl:disjointWith  rdf:type  owl:SymmetricProperty , owl:ObjectProperty , rdf:Property , rdfs:Resource;
-        rdfs:domain         owl:Class , rdfs:Class , rdfs:Resource;
-        rdfs:range          owl:Class , rdfs:Class , rdfs:Resource;
-        rdfs:subPropertyOf  owl:disjointWith .
-
-xsd:gYearMonth  rdf:type  rdfs:Datatype , rdfs:Class , rdfs:Resource .
-
-xsd:maxInclusive  rdf:type  rdf:Property , owl:AnnotationProperty , rdfs:Resource;
-        rdfs:subPropertyOf  xsd:maxInclusive .
-
-_:b5    rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource;
-        rdfs:subClassOf           _:b5 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b5;
-        owl:onDataRange           xsd:double;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger .
-
-[ rdf:comment  :RoomTemperatureIncrease ] .
-
-rdf:rest  rdf:type          rdf:Property , owl:FunctionalProperty , rdfs:Resource;
-        rdfs:domain         rdf:List , rdfs:Resource;
-        rdfs:range          rdf:List , rdfs:Resource;
-        rdfs:subPropertyOf  rdf:rest .
-
-xsd:boolean  rdf:type     rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class;
-        owl:disjointWith  xsd:nonNegativeInteger , xsd:int , xsd:decimal , xsd:time , xsd:nonPositiveInteger , xsd:short , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration , xsd:integer , xsd:byte , xsd:unsignedLong , xsd:long , xsd:unsignedByte , xsd:unsignedShort , xsd:unsignedInt .
-
-rdf:comment  rdf:type       rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  rdf:comment .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
-        rdf:type            rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> .
+_:b0    rdf:type                       owl:Restriction;
+        :withCheck                     "conjunction";
+        :withConstraintType            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
+        :withEvaluationResult          true;
+        :withIdentifier                _:b1;
+        :withOperatorCheck             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThan>;
+        :withOptimalCondition          :OptimalCondition1;
+        :withOptimalConditionProperty  :RoomTemperature;
+        :withPropertyChangeCheck       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
+        :withPropertyCheck             :RoomTemperatureUpperLimit1;
+        owl:hasValue                   :RoomTemperatureUpperLimit1;
+        owl:onProperty                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThan> .
 
 [ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List , rdfs:Resource;
-            rdf:first  :Heater_2;
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater_1;
             rdf:rest   ()
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List , rdfs:Resource;
+          [ rdf:type   rdf:List;
             rdf:first  :Heater;
             rdf:rest   ()
           ]
 ] .
 
-_:b6    rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource;
-        rdfs:subClassOf           _:b6 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b6;
-        owl:onDataRange           xsd:double;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger .
+[ :withAtomicConstraintContainer  _:b2;
+  :withBoundPropertyValue         "27.5"^^xsd:double;
+  :withOperator                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo>;
+  :withOptimalConditionPropertyValue
+          "20.4"^^xsd:double
+] .
 
-owl:incompatibleWith  rdf:type  rdf:Property , rdfs:Resource;
-        rdfs:domain         owl:Ontology , rdfs:Resource;
-        rdfs:range          owl:Ontology , rdfs:Resource;
-        rdfs:subPropertyOf  owl:incompatibleWith .
-
-owl:priorVersion  rdf:type  rdf:Property , rdfs:Resource;
-        rdfs:domain         owl:Ontology , rdfs:Resource;
-        rdfs:range          owl:Ontology , rdfs:Resource;
-        rdfs:subPropertyOf  owl:priorVersion .
-
-xsd:base64Binary  rdf:type  rdfs:Datatype , rdfs:Class , rdfs:Resource .
-
-xsd:negativeInteger  rdf:type  rdfs:Datatype , rdfs:Resource , rdfs:Class .
-
-xsd:minExclusive  rdf:type  rdf:Property , owl:AnnotationProperty , rdfs:Resource;
-        rdfs:subPropertyOf  xsd:minExclusive .
+:OptimalCondition2  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:NamedIndividual;
+        rdf:type    [ rdf:type                  owl:Restriction;
+                      owl:onClass               [ rdf:type               owl:Class;
+                                                  :withEvaluationResult  true;
+                                                  owl:intersectionOf     ( _:b3
+                                                                           _:b4
+                                                                         )
+                                                ];
+                      owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
+                      owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger
+                    ];
+        :isEnabled  true;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>
+                "3600"^^xsd:int;
+        <http://www.w3.org/ns/ssn/forProperty>
+                :RoomTemperature .
 
 :Heater_1  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
@@ -482,80 +74,118 @@ xsd:minExclusive  rdf:type  rdf:Property , owl:AnnotationProperty , rdfs:Resourc
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
                 "1"^^xsd:int .
 
-rdf:XMLLiteral  rdf:type  rdfs:Datatype , rdfs:Class , rdfs:Resource .
-
-owl:Restriction  rdf:type    rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      owl:Class , rdfs:Resource , owl:Restriction;
-        owl:equivalentClass  owl:Restriction .
-
-rdf:predicate  rdf:type     rdf:Property , rdfs:Resource;
-        rdfs:domain         rdf:Statement , rdfs:Resource;
-        rdfs:subPropertyOf  rdf:predicate .
-
-_:b7    rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource;
-        rdfs:subClassOf           _:b7 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b7;
-        owl:onDataRange           xsd:double;
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger .
-
-_:b8    rdf:type                  rdfs:Class , owl:Class , owl:Restriction , rdfs:Resource;
-        rdfs:subClassOf           _:b8 , rdfs:Resource , owl:Thing;
-        owl:equivalentClass       _:b8;
-        owl:onDataRange           [ rdf:type              rdfs:Datatype , rdfs:Class , rdfs:Resource;
-                                    owl:onDatatype        xsd:double;
-                                    owl:withRestrictions  [ rdf:type   rdfs:Resource , rdf:List;
-                                                            rdf:first  [ rdf:comment       "verification mark";
-                                                                         rdf:comment       :RoomTemperature;
-                                                                         xsd:minInclusive  "27.5"^^xsd:double
-                                                                       ];
-                                                            rdf:rest   [ rdf:type   rdf:List , rdfs:Resource;
-                                                                         rdf:first  [ rdf:comment       "verification mark";
-                                                                                      rdf:comment       :RoomTemperature;
-                                                                                      xsd:maxExclusive  "30.2"^^xsd:double
-                                                                                    ];
-                                                                         rdf:rest   ()
-                                                                       ]
-                                                          ]
-                                  ];
-        owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValueConstraint>;
-        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger .
-
-xsd:long  rdf:type           rdfs:Datatype , rdfs:Class , rdfs:Resource , owl:Class;
-        rdfs:subClassOf      xsd:integer , xsd:long;
-        owl:disjointWith     xsd:time , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:duration;
-        owl:equivalentClass  xsd:long .
-
-owl:FunctionalProperty
-        rdf:type         rdfs:Class , rdfs:Resource;
-        rdfs:subClassOf  rdf:Property .
-
-xsd:duration  rdf:type    rdfs:Datatype , rdfs:Resource , rdfs:Class , owl:Class;
-        owl:disjointWith  xsd:nonNegativeInteger , xsd:int , xsd:decimal , xsd:time , xsd:nonPositiveInteger , xsd:short , xsd:boolean , xsd:float , xsd:date , xsd:dateTime , xsd:string , xsd:integer , xsd:byte , xsd:unsignedLong , xsd:long , xsd:unsignedByte , xsd:unsignedShort , xsd:unsignedInt .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-        rdf:type            rdf:Property , rdfs:Resource;
-        rdfs:subPropertyOf  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators> .
-
 [ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List , rdfs:Resource;
-            rdf:first  :Heater_1;
+          [ rdf:type   rdf:List;
+            rdf:first  :Heater_2;
             rdf:rest   ()
           ];
   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List , rdfs:Resource;
+          [ rdf:type   rdf:List;
             rdf:first  :Heater;
             rdf:rest   ()
           ]
 ] .
 
-xsd:maxExclusive  rdf:type  rdf:Property , owl:AnnotationProperty , rdfs:Resource;
-        rdfs:subPropertyOf  xsd:maxExclusive .
+[ :withAtomicConstraintContainer  _:b4;
+  :withBoundPropertyValue         "28.5"^^xsd:double;
+  :withOperator                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo>;
+  :withOptimalConditionPropertyValue
+          "20.4"^^xsd:double
+] .
+
+[ :withOptimalConditionProperty  :RoomTemperature;
+  :withUnsatisfiedOperator       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo>
+] .
+
+[ :withAtomicConstraintContainer  _:b3;
+  :withBoundPropertyValue         "10.1"^^xsd:double;
+  :withOperator                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThan>;
+  :withOptimalConditionPropertyValue
+          "20.4"^^xsd:double
+] .
+
+_:b4    rdf:type                       owl:Restriction;
+        :withCheck                     "conjunction";
+        :withConstraintType            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
+        :withEvaluationResult          true;
+        :withIdentifier                _:b5;
+        :withOperatorCheck             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo>;
+        :withOptimalCondition          :OptimalCondition2;
+        :withOptimalConditionProperty  :RoomTemperature;
+        :withPropertyChangeCheck       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
+        :withPropertyCheck             :RoomTemperatureUpperLimit2;
+        owl:hasValue                   :RoomTemperatureUpperLimit2;
+        owl:onProperty                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo> .
+
+:Heater_2  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
+                :Heater;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
+                "2"^^xsd:int .
+
+_:b3    rdf:type                       owl:Restriction;
+        :withCheck                     "conjunction";
+        :withConstraintType            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
+        :withEvaluationResult          true;
+        :withIdentifier                _:b5;
+        :withOperatorCheck             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThan>;
+        :withOptimalCondition          :OptimalCondition2;
+        :withOptimalConditionProperty  :RoomTemperature;
+        :withPropertyChangeCheck       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease>;
+        :withPropertyCheck             :RoomTemperature , :RoomTemperatureLowerLimit2;
+        owl:hasValue                   :RoomTemperatureLowerLimit2;
+        owl:onProperty                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThan> .
+
+[ :withPropertyChange  :RoomTemperatureIncrease ] .
+
+_:b2    rdf:type                       owl:Restriction;
+        :withCheck                     "conjunction";
+        :withConstraintType            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
+        :withEvaluationResult          false;
+        :withIdentifier                _:b1;
+        :withOperatorCheck             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo>;
+        :withOptimalCondition          :OptimalCondition1;
+        :withOptimalConditionProperty  :RoomTemperature;
+        :withPropertyChangeCheck       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease>;
+        :withPropertyCheck             :RoomTemperature , :RoomTemperatureLowerLimit1;
+        owl:hasValue                   :RoomTemperatureLowerLimit1;
+        owl:onProperty                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo> .
+
+[ :withAtomicConstraintContainer  _:b0;
+  :withBoundPropertyValue         "30.2"^^xsd:double;
+  :withOperator                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThan>;
+  :withOptimalConditionPropertyValue
+          "20.4"^^xsd:double
+] .
+
+:OptimalCondition1  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:NamedIndividual;
+        rdf:type    [ rdf:type                  owl:Restriction;
+                      owl:onClass               [ rdf:type               owl:Class;
+                                                  :withEvaluationResult  false;
+                                                  owl:intersectionOf     ( _:b2
+                                                                           _:b0
+                                                                         )
+                                                ];
+                      owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
+                      owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger
+                    ];
+        :isEnabled  true;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>
+                "3600"^^xsd:int;
+        <http://www.w3.org/ns/ssn/forProperty>
+                :RoomTemperature .
+
+:Heater_0  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
+                :Heater;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
+                "0"^^xsd:int .
 
 :HumiditySensorMeasuredHumidity
-        rdf:type    _:b0 , <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual , rdfs:Resource , owl:Thing;
-        owl:sameAs  :HumiditySensorMeasuredHumidity .
+        rdf:type  <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "10.2"^^xsd:double .
 
 :RoomTemperatureIncrease
         rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> , owl:NamedIndividual;
@@ -564,32 +194,47 @@ xsd:maxExclusive  rdf:type  rdf:Property , owl:AnnotationProperty , rdfs:Resourc
         <http://www.w3.org/ns/ssn/forProperty>
                 :RoomTemperature .
 
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationTickSizeInSeconds>
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+:RoomTemperature  rdf:type  <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "20.4"^^xsd:double .
+
+[ xsd:maxExclusive  "30.2"^^xsd:double ] .
+
+owl:qualifiedCardinality
         rdf:type  owl:AnnotationProperty .
 
-:RoomTemperature  rdf:type  _:b2 , <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual , rdfs:Resource , owl:Thing;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "20.4"^^xsd:double;
-        owl:sameAs  :RoomTemperature .
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+[ xsd:maxExclusive  "30.2"^^xsd:double ] .
 
 :EnergyConsumptionMeterProcedure
         rdf:type  <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual;
         <http://www.w3.org/ns/ssn/hasOutput>
                 :EnergyConsumptionMeterMeasuredEnergyConsumption .
 
-[ xsd:minExclusive  "10.1"^^xsd:double ] .
+:TemperatureSensor1MeasuredTemperature
+        rdf:type  <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "20.4"^^xsd:double .
+
+:EnergyConsumption  rdf:type  <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "0.0"^^xsd:double .
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
-:TemperatureSensor1MeasuredTemperature
-        rdf:type    _:b4 , <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual , rdfs:Resource , owl:Thing;
-        owl:sameAs  :TemperatureSensor1MeasuredTemperature .
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasModel>
-        rdf:type  owl:AnnotationProperty .
+[ xsd:minExclusive  "10.1"^^xsd:double ] .
 
-:EnergyConsumption  rdf:type  _:b1 , <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual , rdfs:Resource , owl:Thing;
-        owl:sameAs  :EnergyConsumption .
+[ xsd:minExclusive  "10.1"^^xsd:double ] .
+
+:RoomTemperatureLowerLimit2
+        rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "10.1"^^xsd:double .
 
 :EnergyConsumptionDecrease
         rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> , owl:NamedIndividual;
@@ -604,17 +249,16 @@ xsd:maxExclusive  rdf:type  rdf:Property , owl:AnnotationProperty , rdfs:Resourc
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
                 "2"^^xsd:int , "1"^^xsd:int , "0"^^xsd:int .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+:RoomTemperatureUpperLimit2
+        rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "28.5"^^xsd:double .
 
 :TemperatureSensor1  rdf:type  <http://www.w3.org/ns/sosa/Sensor> , owl:NamedIndividual;
         <http://www.w3.org/ns/sosa/observes>
                 :RoomTemperature;
         <http://www.w3.org/ns/ssn/implements>
                 :TemperatureSensor1Procedure .
-
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
 :RoomTemperatureDecrease
         rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> , owl:NamedIndividual;
@@ -624,17 +268,11 @@ xsd:maxExclusive  rdf:type  rdf:Property , owl:AnnotationProperty , rdfs:Resourc
                 :RoomTemperature .
 
 :TemperatureSensor2MeasuredTemperature
-        rdf:type    _:b5 , <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual , owl:Thing , rdfs:Resource;
-        owl:sameAs  :TemperatureSensor2MeasuredTemperature .
+        rdf:type  <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "20.4"^^xsd:double .
 
-:OptimalCondition2  rdf:type  _:b3 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:NamedIndividual , rdfs:Resource , owl:Thing;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>
-                "3600"^^xsd:int;
-        owl:sameAs  :OptimalCondition2;
-        <http://www.w3.org/ns/ssn/forProperty>
-                :RoomTemperature .
-
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+[ xsd:minInclusive  "1"^^xsd:int ] .
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
@@ -645,27 +283,26 @@ xsd:maxExclusive  rdf:type  rdf:Property , owl:AnnotationProperty , rdfs:Resourc
         <http://www.w3.org/ns/ssn/implements>
                 :EnergyConsumptionMeterProcedure .
 
-[ xsd:minInclusive  "1"^^xsd:int ] .
-
 :TemperatureSensor1Procedure
         rdf:type  <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual;
         <http://www.w3.org/ns/ssn/hasOutput>
                 :TemperatureSensor1MeasuredTemperature .
 
 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1>
-        rdf:type     owl:Ontology , rdfs:Resource;
+        rdf:type     owl:Ontology;
         owl:imports  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins> .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+[ xsd:maxInclusive  "28.5"^^xsd:double ] .
+
+[ xsd:maxInclusive  "28.5"^^xsd:double ] .
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
-[ xsd:maxExclusive  "30.2"^^xsd:double ] .
+[ xsd:minExclusive  "10.1"^^xsd:double ] .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
-:RoomHumidity  rdf:type  _:b7 , <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual , rdfs:Resource , owl:Thing;
-        owl:sameAs  :RoomHumidity .
+:RoomHumidity  rdf:type  <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "10.2"^^xsd:double .
 
 :RoomHumidityDecrease
         rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> , owl:NamedIndividual;
@@ -675,6 +312,10 @@ xsd:maxExclusive  rdf:type  rdf:Property , owl:AnnotationProperty , rdfs:Resourc
                 :RoomHumidity .
 
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+[ xsd:maxExclusive  "30.2"^^xsd:double ] .
 
 :TemperatureSensor2Procedure
         rdf:type  <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual;
@@ -687,21 +328,33 @@ xsd:maxExclusive  rdf:type  rdf:Property , owl:AnnotationProperty , rdfs:Resourc
         <http://www.w3.org/ns/ssn/implements>
                 :HumiditySensorProcedure .
 
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
-[ xsd:minExclusive  "10.1"^^xsd:double ] .
-
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
 :RoomM370FMU  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds>
                 "100"^^xsd:int;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI>
                 "roomM370.fmu"^^xsd:anyURI .
 
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+:RoomTemperatureLowerLimit1
+        rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "27.5"^^xsd:double .
+
 [ xsd:minInclusive  "27.5"^^xsd:double ] .
 
+:RoomTemperatureUpperLimit1
+        rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "30.2"^^xsd:double .
+
 [ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+xsd:minInclusive  rdf:type  owl:AnnotationProperty .
+
+[ xsd:maxInclusive  "3"^^xsd:int ] .
 
 :RoomM370  rdf:type  <http://www.w3.org/ns/sosa/Platform> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromOptimalConditions>
@@ -715,12 +368,7 @@ xsd:maxExclusive  rdf:type  rdf:Property , owl:AnnotationProperty , rdfs:Resourc
         <http://www.w3.org/ns/ssn/implements>
                 :OptimalCondition1 , :OptimalCondition2 .
 
-:OptimalCondition1  rdf:type  _:b8 , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:NamedIndividual , owl:Thing , rdfs:Resource;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds>
-                "3600"^^xsd:int;
-        owl:sameAs  :OptimalCondition1;
-        <http://www.w3.org/ns/ssn/forProperty>
-                :RoomTemperature .
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
 :Dehumidifier  rdf:type  <http://www.w3.org/ns/sosa/Actuator> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts>
@@ -728,30 +376,38 @@ xsd:maxExclusive  rdf:type  rdf:Property , owl:AnnotationProperty , rdfs:Resourc
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
                 "1"^^xsd:int , "0"^^xsd:int .
 
-[ xsd:maxInclusive  "3"^^xsd:int ] .
+<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>
+        rdf:type  owl:Class .
+
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+xsd:maxInclusive  rdf:type  owl:AnnotationProperty .
+
+[ xsd:minInclusive  "27.5"^^xsd:double ] .
 
 :HumiditySensorProcedure
         rdf:type  <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual;
         <http://www.w3.org/ns/ssn/hasOutput>
                 :HumiditySensorMeasuredHumidity .
 
-[ xsd:maxInclusive  "28.5"^^xsd:double ] .
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
-[ xsd:maxExclusive  "30.2"^^xsd:double ] .
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
 :EnergyConsumptionMeterMeasuredEnergyConsumption
-        rdf:type    _:b6 , <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual , rdfs:Resource , owl:Thing;
-        owl:sameAs  :EnergyConsumptionMeterMeasuredEnergyConsumption .
+        rdf:type  <http://www.w3.org/ns/ssn/Property> , <http://www.w3.org/ns/ssn/Output> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "0.0"^^xsd:double .
+
+xsd:minExclusive  rdf:type  owl:AnnotationProperty .
 
 :TemperatureSensor2  rdf:type  <http://www.w3.org/ns/sosa/Sensor> , owl:NamedIndividual;
         <http://www.w3.org/ns/sosa/observes>
                 :RoomTemperature;
         <http://www.w3.org/ns/ssn/implements>
                 :TemperatureSensor2Procedure .
-
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
-
-[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
 
 :EnergyConsumptionIncrease
         rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> , owl:NamedIndividual;
@@ -760,66 +416,12 @@ xsd:maxExclusive  rdf:type  rdf:Property , owl:AnnotationProperty , rdfs:Resourc
         <http://www.w3.org/ns/ssn/forProperty>
                 :EnergyConsumption .
 
+xsd:maxExclusive  rdf:type  owl:AnnotationProperty .
+
+[ owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger ] .
+
 :Fan    rdf:type  <http://www.w3.org/ns/sosa/Actuator> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts>
                 :RoomTemperatureDecrease , :EnergyConsumptionIncrease;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
                 "1"^^xsd:int , "0"^^xsd:int .
-
-rdfs:seeAlso  rdf:type      rdfs:Resource , rdf:Property;
-        rdfs:subPropertyOf  rdfs:seeAlso .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins>
-        rdf:type  owl:Ontology , rdfs:Resource .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-        rdf:type  owl:Property , rdfs:Resource .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValueConstraint>
-        rdf:type  owl:Property , rdfs:Resource .
-
-rdfs:Container  rdf:type  rdfs:Class , rdfs:Resource .
-
-owl:AnnotationProperty
-        rdf:type  rdfs:Class , rdfs:Resource .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>
-        rdf:type  rdfs:Class , rdfs:Resource .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>
-        rdf:type  rdfs:Class , rdfs:Resource .
-
-owl:NamedIndividual  rdf:type  rdfs:Class , rdfs:Resource .
-
-<http://www.w3.org/ns/ssn/Output>
-        rdf:type  rdfs:Class , rdfs:Resource .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation>
-        rdf:type  rdfs:Class , rdfs:Resource .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel>
-        rdf:type  rdfs:Class , rdfs:Resource .
-
-<http://www.w3.org/ns/ssn/Property>
-        rdf:type  rdfs:Class , rdfs:Resource .
-
-<http://www.w3.org/ns/sosa/ObservableProperty>
-        rdf:type  rdfs:Class , rdfs:Resource .
-
-<http://www.w3.org/ns/sosa/Sensor>
-        rdf:type  rdfs:Class , rdfs:Resource .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>
-        rdf:type  rdfs:Class , rdfs:Resource .
-
-<http://www.w3.org/ns/sosa/Platform>
-        rdf:type  rdfs:Class , rdfs:Resource .
-
-<http://www.w3.org/ns/sosa/Actuator>
-        rdf:type  rdfs:Class , rdfs:Resource .
-
-<http://www.w3.org/ns/sosa/Procedure>
-        rdf:type  rdfs:Class , rdfs:Resource .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>
-        rdf:type  rdfs:Class , rdfs:Resource .

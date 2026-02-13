@@ -1,4 +1,6 @@
-﻿namespace Logic.Models.MapekModels {
+﻿using Logic.Models.MapekModels.Serializables;
+
+namespace Logic.Models.MapekModels {
     public class SimulationTreeNode : ITreeNode<Simulation, SimulationTreeNode> {
         public Simulation NodeItem { get; set; }
 
@@ -52,5 +54,10 @@
                 return simulationPaths;
             }
         }
+
+        public SerializableSimulationTreeNode SerializableSimulationTreeNode => new() {
+            NodeItem = NodeItem.SerializableSimulation,
+            Children = Children.Select(child => child.SerializableSimulationTreeNode)
+        };
     }
 }

@@ -23,6 +23,8 @@ namespace Logic.Mapek
         // Used for performance enhancements.
         private bool _restrictToReactiveActionsOnlyOld;
 
+        private bool _savedReactiveSetting = false;
+
         private readonly CoordinatorSettings _coordinatorSettings;
         private readonly ILogger<IMapekPlan> _logger;
         private readonly IFactory _factory;
@@ -45,11 +47,6 @@ namespace Logic.Mapek
             _logger.LogInformation("Starting the Plan phase.");
 
             _logger.LogInformation("Generating simulations.");
-
-            // TODO: This is now in Plan(), but we may need it here as well later?
-            // This is necessary for the fitness function. This might change as we reevaluate how the fitness function should work
-            // and how it should be specified.
-            // var optimalConditions = GetAllOptimalConditions(propertyCache);
 
             // Get all combinations of possible simulation configurations for the given number of cycles.
             var simulationTree = new SimulationTreeNode {
@@ -113,9 +110,9 @@ namespace Logic.Mapek
             foreach (var actionCombination in actionCombinations) {
                 // TODO: partition more efficiently:
                 // var actionPartition = actionCombination.ToLookup(action => action is FMUParameterAction);
-                var simulation = new Simulation(GetPropertyCacheCopy(simulationTreeNode.NodeItem.PropertyCache!)) {
-                    Actions = actionCombination.Where(action => action is not FMUParameterAction).ToList(),
-                    InitializationActions = actionCombination.Where(action => action is FMUParameterAction).Select(a => (FMUParameterAction)a).ToList(),
+                var simulation = new Simulation(GetPropertyCacheCopy(simulationTreeNode.NodeItem.PropertyCache)) {
+                    Actions = actionCombination.Where(action => action is not FMUParameterAction),
+                    InitializationActions = actionCombination.Where(action => action is FMUParameterAction).Select(a => (FMUParameterAction)a),
                     Index = currentCycle
                 };
 
@@ -154,12 +151,16 @@ namespace Logic.Mapek
 
         // Updates the setting for restricting Actions and thus ActionCombinations only to those mitigating OptimalConditions.
         private void EnsureUpdatedRestrictionSetting() {
-            // Improves performance by not unnecessarily writing to disk.
-            if (_restrictToReactiveActionsOnly == _restrictToReactiveActionsOnlyOld) {
-                return;
+            // Write the setting at least once to disk. Only write again if the setting changes.
+            if (_savedReactiveSetting) {
+                if (_restrictToReactiveActionsOnly == _restrictToReactiveActionsOnlyOld) {
+                    return;
+                }
             } else {
-                _restrictToReactiveActionsOnlyOld = _restrictToReactiveActionsOnly;
+                _savedReactiveSetting = true;
             }
+
+            _restrictToReactiveActionsOnlyOld = _restrictToReactiveActionsOnly;
 
             var query = _mapekKnowledge.GetParameterizedStringQuery(@"DELETE {
                 ?platform meta:generateCombinationsOnlyFromOptimalConditions ?oldValue .
@@ -213,7 +214,7 @@ namespace Logic.Mapek
 
             process!.OutputDataReceived += (sender, e) => {
                 _logger.LogInformation(e.Data);
-                if (e.Data != null && (e.Data.Contains("Conflicting optimizations detected!") || e.Data.Contains("Conflicting conditions detected!"))) {
+                if (e.Data != null && e.Data.Contains("Error!")) {
                     SetError(); // Async was here
                 }
             };
@@ -622,22 +623,19 @@ namespace Logic.Mapek
             {
 
                 Property p;
-                if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property, out ConfigurableParameter? configurableParameter)) {
+                if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property.Name, out ConfigurableParameter? configurableParameter)) {
                     p = configurableParameter;
                     // Sanity-check. Seems a bit odd that we should've forgotten where this was originally coming from?
-                    Debug.Assert(!propertyCache.Properties.TryGetValue(optimalCondition.Property, out Property? property), "This should probably not have happened.");
-                } else if (propertyCache.Properties.TryGetValue(optimalCondition.Property, out Property? property)) {
+                    Debug.Assert(!propertyCache.Properties.TryGetValue(optimalCondition.Property.Name, out Property? property), "This should probably not have happened.");
+                } else if (propertyCache.Properties.TryGetValue(optimalCondition.Property.Name, out Property? property)) {
                     p = property;
                 } else {
                     throw new Exception($"Property {optimalCondition.Property} was not found in the system.");
                 }
 
-                var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.ConstraintValueType);
-                // Could use .Sum() here, but if you generalise it further you'll run into CS9236.
-                foreach (var constraint in optimalCondition.Constraints) {
-                    var unsatisfiedConstraints = valueHandler.GetUnsatisfiedConstraintsFromEvaluation(constraint, p.Value);
-                    numberOfSatisfiedOptimalConditions += unsatisfiedConstraints.Any() ? 0 : 1;
-                }
+                var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.Property.OwlType);
+                var unsatisfiedConstraints = valueHandler.GetUnsatisfiedConstraintsFromEvaluation(optimalCondition.ConditionConstraint, p.Value);
+                numberOfSatisfiedOptimalConditions += unsatisfiedConstraints.Any() ? 0 : 1;
             }
 
             return numberOfSatisfiedOptimalConditions;
@@ -768,6 +766,10 @@ namespace Logic.Mapek
 
         internal void LogOptimalSimulationPath(SimulationPath optimalSimulationPath)
         {
+            if (optimalSimulationPath is null) {
+                return;
+            }
+
             var logMsg = "Chosen optimal path, Actuation actions:\n";
 
             // Convert to a list to use indexing.

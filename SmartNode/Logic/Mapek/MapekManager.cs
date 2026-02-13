@@ -8,12 +8,14 @@ using Logic.Utilities;
 using Logic.ValueHandlerInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("TestProject")]
 
 namespace Logic.Mapek {
     public class MapekManager : IMapekManager {
+        private const string SimulationTreeFilename = "simulation-tree.json";
 
         private readonly FilepathArguments _filepathArguments;
         private readonly CoordinatorSettings _coordinatorSettings;
@@ -83,9 +85,12 @@ namespace Logic.Mapek {
                 await _mapekExecute.Execute(simulationToExecute);
 
                 // If configured, write MAPE-K state to CSV.
-                if (_coordinatorSettings.SaveMapekCycleData) {
+                if (_coordinatorSettings.SaveMapekCycleData && simulationToExecute is not null && currentSimulationTree is not null) {
                     CsvUtils.WritePropertyStatesToCsv(_filepathArguments.DataDirectory, currentRound, cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
-                    CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentRound, potentialCase.Simulation);
+                    CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentRound, simulationToExecute);
+
+                    var serializedSimulationTree = JsonConvert.SerializeObject(currentSimulationTree.SerializableSimulationTreeNode);
+                    File.WriteAllText(Path.Combine(_filepathArguments.DataDirectory, SimulationTreeFilename), serializedSimulationTree);
                 }
 
                 if (_coordinatorSettings.MaximumMapekRounds > 0) {
@@ -167,10 +172,14 @@ namespace Logic.Mapek {
                     potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedOptimalConditions, currentOptimalSimulationPath);
                 }
 
-                simulationToExecute = currentOptimalSimulationPath.Simulations.First();
+                if (currentOptimalSimulationPath != null) {
+                    simulationToExecute = currentOptimalSimulationPath.Simulations.First();
 
-                // After getting the simulation from the simulation path, reduce the number of remaining simulations.
-                currentOptimalSimulationPath.RemoveFirstRemainingSimulationFromSimulationPath();
+                    // After getting the simulation from the simulation path, reduce the number of remaining simulations.
+                    currentOptimalSimulationPath.RemoveFirstRemainingSimulationFromSimulationPath();
+                } else {
+                    simulationToExecute = null!;
+                }
             }
 
             return (simulationToExecute, potentialCase, currentSimulationTree, currentOptimalSimulationPath)!;
@@ -209,19 +218,14 @@ namespace Logic.Mapek {
             var quantizedOptimalConditions = new List<OptimalCondition>();
 
             foreach (var optimalCondition in optimalConditions) {
-                var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.ConstraintValueType);
-                var quantizedConstraints = new List<ConstraintExpression>();
-                foreach (var constraint in optimalCondition.Constraints) {
-                    var quantizedConstraint = GetQuantizedOptimalConditionConstraint(constraint, valueHandler);
-                    quantizedConstraints.Add(quantizedConstraint);
-                }
+                var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.Property.OwlType);
+                var constraint = GetQuantizedOptimalConditionConstraint(optimalCondition.ConditionConstraint, valueHandler);
+
                 quantizedOptimalConditions.Add(new OptimalCondition {
-                    Constraints = quantizedConstraints,
-                    ConstraintValueType = optimalCondition.ConstraintValueType,
+                    ConditionConstraint = constraint,
                     Name = optimalCondition.Name,
                     Property = optimalCondition.Property,
-                    ReachedInMaximumSeconds = optimalCondition.ReachedInMaximumSeconds,
-                    UnsatisfiedAtomicConstraints = []
+                    ReachedInMaximumSeconds = optimalCondition.ReachedInMaximumSeconds
                 });
             }
 
@@ -231,9 +235,15 @@ namespace Logic.Mapek {
         private ConstraintExpression GetQuantizedOptimalConditionConstraint(ConstraintExpression constraintExpression, IValueHandler valueHandler) {
             // Go through the whole tree of OptimalCondition constraints and get quantized values for each one.
             if (constraintExpression is AtomicConstraintExpression atomicConstraintExpression) {
+                var quantizedProperty = new Property {
+                    Name = atomicConstraintExpression.Property.Name,
+                    OwlType = atomicConstraintExpression.Property.OwlType,
+                    Value = valueHandler.GetQuantizedValue(atomicConstraintExpression.Property.Value, _coordinatorSettings.PropertyValueFuzziness)
+                };
+
                 return new AtomicConstraintExpression {
                     ConstraintType = atomicConstraintExpression.ConstraintType,
-                    Right = valueHandler.GetQuantizedValue(atomicConstraintExpression.Right, _coordinatorSettings.PropertyValueFuzziness)
+                    Property = quantizedProperty
                 };
             } else {
                 var nestedConstraintExpression = constraintExpression as NestedConstraintExpression;

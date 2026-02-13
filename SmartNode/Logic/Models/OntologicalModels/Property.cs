@@ -1,9 +1,17 @@
-﻿namespace Logic.Models.OntologicalModels
+﻿using Logic.Mapek;
+using Logic.Models.MapekModels.Serializables;
+
+namespace Logic.Models.OntologicalModels
 {
     public class Property : NamedIndividual
     {
         public required object Value { get; set; }
 
         public required string OwlType { get; init; }
+
+        public SerializableProperty SerializableProperty => new() {
+            Name = Name.GetSimpleName(),
+            Value = Value
+        };
     }
 }

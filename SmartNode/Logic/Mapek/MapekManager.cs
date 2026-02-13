@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 
 namespace Logic.Mapek {
     public class MapekManager : IMapekManager {
+        private const string SimulationTreeFilename = "simulation-tree.json";
 
         private readonly FilepathArguments _filepathArguments;
         private readonly CoordinatorSettings _coordinatorSettings;
@@ -88,8 +89,8 @@ namespace Logic.Mapek {
                     CsvUtils.WritePropertyStatesToCsv(_filepathArguments.DataDirectory, currentRound, cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
                     CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentRound, simulationToExecute);
 
-                    var simulationTreeJson = JsonConvert.SerializeObject(currentSimulationTree);
-                    File.WriteAllText(Path.Combine(_filepathArguments.DataDirectory, "simulation-tree.json"), simulationTreeJson);
+                    var serializedSimulationTree = JsonConvert.SerializeObject(currentSimulationTree.SerializableSimulationTreeNode);
+                    File.WriteAllText(Path.Combine(_filepathArguments.DataDirectory, SimulationTreeFilename), serializedSimulationTree);
                 }
 
                 if (_coordinatorSettings.MaximumMapekRounds > 0) {

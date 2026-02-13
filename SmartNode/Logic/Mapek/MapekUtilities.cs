@@ -3,7 +3,7 @@ using Logic.Models.OntologicalModels;
 
 namespace Logic.Mapek {
     internal static class MapekUtilities {
-        public static string GetSimpleName(string longName) {
+        public static string GetSimpleName(this string longName) {
             string simpleName;
             var simpleNameArray = longName.Split('#');
 

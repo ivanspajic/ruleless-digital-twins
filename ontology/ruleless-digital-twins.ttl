@@ -21,6 +21,26 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Object Properties
 #################################################################
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#forEnablingProperty
+:forEnablingProperty rdf:type owl:ObjectProperty ;
+                     rdfs:domain :OptimalCondition ;
+                     rdfs:range <http://www.w3.org/ns/ssn/Property> ;
+                     rdfs:comment "Represents the relation between an OptimalCondition and a Property that enables it."@en ;
+                     rdfs:label "forEnablingProperty"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#maximizes
+:maximizes rdf:type owl:ObjectProperty ;
+           rdfs:comment "Represents the relation between a Platform and a Property it wants to maximize."@en ;
+           rdfs:label "maximizes"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#minimizes
+:minimizes rdf:type owl:ObjectProperty ;
+           rdfs:comment "Represents the relation between a Platform and a Property it wants to minimize."@en ;
+           rdfs:label "minimizes"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith
 :affectsPropertyWith rdf:type owl:ObjectProperty ;
                      rdfs:range :Effect ;
@@ -40,13 +60,6 @@ xsd:duration rdf:type rdfs:Datatype .
 :comparisonOperator rdf:type owl:ObjectProperty ;
                     rdfs:comment "Required to enable OptimalCondition constraints on variable Property values. Since it is not possible to use the standard comparison operators (>, <, >=, <=) on non-literals, this property allows us to do so."@en ;
                     rdfs:label "comparisonOperator"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enactedBy
-:enactedBy rdf:type owl:ObjectProperty ;
-           owl:inverseOf :enacts ;
-           rdfs:comment "Represents a relation between a PropertyChange and a thing, such as a System or Actuator."@en ;
-           rdfs:label "enactedBy"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts
@@ -135,41 +148,9 @@ xsd:duration rdf:type rdfs:Datatype .
                    rdfs:label "lessThanOrEqualTo"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizedBy
-:optimizedBy rdf:type owl:ObjectProperty ;
-             owl:inverseOf :optimizesFor ;
-             rdfs:comment "A relation between a Property and a Platform optimizing for it."@en ;
-             rdfs:label "optimizedBy"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor
-:optimizesFor rdf:type owl:ObjectProperty ;
-              rdfs:domain <http://www.w3.org/ns/sosa/Platform> ;
-              rdfs:range :PropertyChange ;
-              rdfs:comment "Represents a relation between a platform and a PropertyChange that indicates that platform's optimization of those properties."@en ;
-              rdfs:label "optimizesFor"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/propertyFor
-:propertyFor rdf:type owl:ObjectProperty ;
-             owl:inverseOf <http://www.w3.org/ns/ssn/forProperty> ;
-             rdfs:comment "A relation between some property and an entity."@en ;
-             rdfs:label "property for"@en .
-
-
 #################################################################
 #    Data properties
 #################################################################
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#hasActuatorName
-:hasActuatorName rdf:type owl:DatatypeProperty ;
-                 rdfs:comment "Work in progress. Currently enables cohesion with some models and their respective FMUs." .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#isParameter
-:isParameter rdf:type owl:DatatypeProperty ;
-             rdfs:comment "Work in progress. Currently enables cohesion with some models and their respective FMUs." .
-
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromOptimalConditions
 :generateCombinationsOnlyFromOptimalConditions rdf:type owl:DatatypeProperty ;
@@ -177,6 +158,11 @@ xsd:duration rdf:type rdfs:Datatype .
                                                rdfs:range xsd:boolean ;
                                                rdfs:comment "Determines how ActionCombination generation for a Platforms future simulations occurs. 'false' generates all possible combinations from all actuators and their states in the instance model. 'true' restricts combination generation to only the relevant actuators and their states that potentially restore violated OptimalConditions."@en ;
                                                rdfs:label "generateCombinationsOnlyFromOptimalConditions"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorName
+:hasActuatorName rdf:type owl:DatatypeProperty ;
+                 rdfs:comment "Work in progress. Currently enables cohesion with some models and their respective FMUs." .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState
@@ -249,6 +235,11 @@ xsd:duration rdf:type rdfs:Datatype .
              rdfs:range xsd:boolean ;
              rdfs:comment "Represents the relation between an OptimalCondition and a boolean that determines whether that OptimalCondition is breakable (soft) or non-breakable (hard)."@en ;
              rdfs:label "isBreakable"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/isParameter
+:isParameter rdf:type owl:DatatypeProperty ;
+             rdfs:comment "Work in progress. Currently enables cohesion with some models and their respective FMUs." .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/satisfiedBy
@@ -410,12 +401,7 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation
 :PropertyChangeByActuation rdf:type owl:Class ;
-                           rdfs:subClassOf :PropertyChange ,
-                                           [ rdf:type owl:Restriction ;
-                                             owl:onProperty :enactedBy ;
-                                             owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                             owl:onClass <http://www.w3.org/ns/sosa/Actuator>
-                                           ] ;
+                           rdfs:subClassOf :PropertyChange ;
                            owl:disjointWith :PropertyChangeByReconfiguration ;
                            rdfs:comment "Represents a specific PropertyChange as a result of actuating on the respective Property."@en ;
                            rdfs:label "PropertyChangeByActuation"@en .
@@ -424,11 +410,6 @@ xsd:duration rdf:type rdfs:Datatype .
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration
 :PropertyChangeByReconfiguration rdf:type owl:Class ;
                                  rdfs:subClassOf :PropertyChange ,
-                                                 [ rdf:type owl:Restriction ;
-                                                   owl:onProperty :enactedBy ;
-                                                   owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                   owl:onClass :ConfigurableParameter
-                                                 ] ,
                                                  [ rdf:type owl:Restriction ;
                                                    owl:onProperty :alteredBy ;
                                                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
@@ -475,11 +456,6 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.w3.org/ns/sosa/Platform
 <http://www.w3.org/ns/sosa/Platform> rdfs:subClassOf [ rdf:type owl:Restriction ;
-                                                       owl:onProperty :optimizesFor ;
-                                                       owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                       owl:onClass :PropertyChange
-                                                     ] ,
-                                                     [ rdf:type owl:Restriction ;
                                                        owl:onProperty :hasSimulationModel ;
                                                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                                        owl:onClass :FmuModel

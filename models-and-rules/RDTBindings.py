@@ -20,29 +20,12 @@ class FMU(Node):
         g.add((self.node, RDT["hasSimulationFidelitySeconds"], Literal(fidelity, datatype=XSD.integer)))
         g.add((self.node, RDT["hasURI"], Literal(fmuPath, datatype=XSD.anyURI)))
 
-class Restriction(Node):
-    pass
-
-class RestrictionL1D(Restriction): # probably not right.
-    def __init__(self, g):
-        self.node = BNode()
-        g.add((self.node, RDF["type"], OWL["Restriction"]))
-        g.add((self.node, OWL["onProperty"], RDT["hasValue"]))
-        g.add((self.node, OWL["qualifiedCardinality"], Literal(1, datatype=XSD.nonNegativeInteger)))
-        g.add((self.node, OWL["onDataRange"], XSD.double))
-
 class ObservableProperty(Node):
-    restriction: Restriction
-
     def __init__(self, g, name, restriction=None):
         elprice = name
         g.add((elprice, RDF["type"], SOSA["ObservableProperty"]))
         g.add((elprice, RDF["type"], OWL["NamedIndividual"]))
-        if restriction is None:
-            self.restriction = RestrictionL1D(g)            
-        else:
-            self.restriction = restriction
-        g.add((elprice, RDF["type"], self.restriction.node))
+        #g.add((elprice, RDF["type"], self.restriction.node))
         self.node = elprice
 
 class Change(Node):

@@ -21,26 +21,6 @@ xsd:duration rdf:type rdfs:Datatype .
 #    Object Properties
 #################################################################
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#forEnablingProperty
-:forEnablingProperty rdf:type owl:ObjectProperty ;
-                     rdfs:domain :OptimalCondition ;
-                     rdfs:range <http://www.w3.org/ns/ssn/Property> ;
-                     rdfs:comment "Represents the relation between an OptimalCondition and a Property that enables it."@en ;
-                     rdfs:label "forEnablingProperty"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#maximizes
-:maximizes rdf:type owl:ObjectProperty ;
-           rdfs:comment "Represents the relation between a Platform and a Property it wants to maximize."@en ;
-           rdfs:label "maximizes"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins#minimizes
-:minimizes rdf:type owl:ObjectProperty ;
-           rdfs:comment "Represents the relation between a Platform and a Property it wants to minimize."@en ;
-           rdfs:label "minimizes"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith
 :affectsPropertyWith rdf:type owl:ObjectProperty ;
                      rdfs:range :Effect ;
@@ -74,6 +54,14 @@ xsd:duration rdf:type rdfs:Datatype .
          rdfs:subPropertyOf :comparisonOperator ;
          rdfs:comment "Represents the '=' (equal to) comparison operator for Property-based values."@en ;
          rdfs:label "equalTo"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/forEnablingProperty
+:forEnablingProperty rdf:type owl:ObjectProperty ;
+                     rdfs:domain :OptimalCondition ;
+                     rdfs:range <http://www.w3.org/ns/ssn/Property> ;
+                     rdfs:comment "Represents the relation between an OptimalCondition and a Property that enables it."@en ;
+                     rdfs:label "forEnablingProperty"@en .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThan
@@ -146,6 +134,18 @@ xsd:duration rdf:type rdfs:Datatype .
                    rdfs:subPropertyOf :comparisonOperator ;
                    rdfs:comment "Represents the '<=' (less than or equal to) comparison operator for Property-based values."@en ;
                    rdfs:label "lessThanOrEqualTo"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/maximizes
+:maximizes rdf:type owl:ObjectProperty ;
+           rdfs:comment "Represents the relation between a Platform and a Property it wants to maximize."@en ;
+           rdfs:label "maximizes"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/minimizes
+:minimizes rdf:type owl:ObjectProperty ;
+           rdfs:comment "Represents the relation between a Platform and a Property it wants to minimize."@en ;
+           rdfs:label "minimizes"@en .
 
 
 #################################################################
@@ -293,10 +293,14 @@ xsd:duration rdf:type rdfs:Datatype .
                                          owl:onClass :PropertyChangeByReconfiguration
                                        ] ,
                                        [ rdf:type owl:Restriction ;
-                                         owl:onProperty :hasValue ;
+                                         owl:onProperty :hasPossibleValue ;
                                          owl:minCardinality "1"^^xsd:nonNegativeInteger
+                                       ] ,
+                                       [ rdf:type owl:Restriction ;
+                                         owl:onProperty :hasValue ;
+                                         owl:cardinality "1"^^xsd:nonNegativeInteger
                                        ] ;
-                       rdfs:comment "A parameter not directly observable or actuatable but rather used for configuring an an Input to a System or Procedure."@en ;
+                       rdfs:comment "A parameter not directly observable or actuatable but rather used for configuring an Input to a System or Procedure."@en ;
                        rdfs:label "ConfigurableParameter"@en .
 
 

@@ -58,43 +58,6 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 
 #################################################################
-#    Classes
-#################################################################
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TestOC
-:TestOC rdf:type owl:Class ;
-        rdfs:subClassOf <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> ,
-                        [ rdf:type owl:Class ;
-                          owl:complementOf [ rdf:type owl:Restriction ;
-                                             owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint> ;
-                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                             owl:onClass [ owl:intersectionOf ( [ rdf:type owl:Restriction ;
-                                                                                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThan> ;
-                                                                                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                                                  owl:onClass <http://www.w3.org/ns/ssn/Property>
-                                                                                ]
-                                                                                [ rdf:type owl:Restriction ;
-                                                                                  owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo> ;
-                                                                                  owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                                                  owl:onClass <http://www.w3.org/ns/ssn/Property>
-                                                                                ]
-                                                                              ) ;
-                                                           rdf:type owl:Class
-                                                         ]
-                                           ]
-                        ] ,
-                        [ rdf:type owl:Restriction ;
-                          owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint> ;
-                          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                          owl:onClass [ rdf:type owl:Restriction ;
-                                        owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/comparisonOperator> ;
-                                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                        owl:onClass <http://www.w3.org/ns/ssn/Property>
-                                      ]
-                        ] .
-
-
-#################################################################
 #    Individuals
 #################################################################
 
@@ -251,6 +214,38 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "19.246512725848774"^^xsd:double .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Motion
+:Motion rdf:type owl:NamedIndividual ,
+                 <http://www.w3.org/ns/sosa/ObservableProperty> ;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "false"^^xsd:boolean .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionActivated
+:MotionActivated rdf:type owl:NamedIndividual ,
+                          <http://www.w3.org/ns/ssn/Property> ;
+                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "true"^^xsd:boolean .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensor
+:MotionSensor rdf:type owl:NamedIndividual ,
+                       <http://www.w3.org/ns/sosa/Sensor> ;
+              <http://www.w3.org/ns/sosa/observes> :Motion ;
+              <http://www.w3.org/ns/ssn/implements> :MotionSensorProcedure .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensorMeasuredMotion
+:MotionSensorMeasuredMotion rdf:type owl:NamedIndividual ,
+                                     <http://www.w3.org/ns/ssn/Output> ,
+                                     <http://www.w3.org/ns/ssn/Property> ;
+                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "false"^^xsd:boolean .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensorProcedure
+:MotionSensorProcedure rdf:type owl:NamedIndividual ,
+                                <http://www.w3.org/ns/sosa/Procedure> ;
+                       <http://www.w3.org/ns/ssn/hasOutput> :MotionSensorMeasuredMotion .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OfficeHumidityLowerLimit
 :OfficeHumidityLowerLimit rdf:type owl:NamedIndividual ,
                                    <http://www.w3.org/ns/ssn/Property> ;
@@ -277,7 +272,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                          ] ;
                                 <http://www.w3.org/ns/ssn/forProperty> :RoomHumidity ;
                                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/isBreakable> "true"^^xsd:boolean ;
-                                <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/satisfiedBy> "0001-01-01T13:30:00Z"^^xsd:dateTimeStamp .
+                                <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/satisfiedBy> "0001-01-01T09:00:00Z"^^xsd:dateTimeStamp .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OfficeHumidityUpperLimit
@@ -309,9 +304,18 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                                                                ) ;
                                                             rdf:type owl:Class
                                                           ]
+                                            ] ,
+                                            [ rdf:type owl:Restriction ;
+                                              owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasEnablingConstraint> ;
+                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                              owl:onClass [ rdf:type owl:Restriction ;
+                                                            owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/equalTo> ;
+                                                            owl:hasValue :MotionActivated
+                                                          ]
                                             ] ;
+                                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/forEnablingProperty> :Motion ;
                                    <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
-                                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/isBreakable> "false"^^xsd:boolean .
+                                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/isBreakable> "true"^^xsd:boolean .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OfficeTemperatureUpperLimit
@@ -337,8 +341,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 :RoomM370 rdf:type owl:NamedIndividual ,
                    <http://www.w3.org/ns/sosa/Platform> ;
           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel> :RoomM370FMU ;
-          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/minimizes> :EnergyConsumption ,
-                                                                                              :RoomHumidity ;
+          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/minimizes> :EnergyConsumption ;
           <http://www.w3.org/ns/sosa/hosts> :Dehumidifier ,
                                             :EnergyConsumptionMeter ,
                                             :FloorHeating ,
@@ -421,35 +424,6 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 :TemperatureSensor2Procedure rdf:type owl:NamedIndividual ,
                                       <http://www.w3.org/ns/sosa/Procedure> ;
                              <http://www.w3.org/ns/ssn/hasOutput> :TemperatureSensor2MeasuredTemperature .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Test
-:Test rdf:type owl:NamedIndividual ,
-               :TestOC ,
-               [ rdf:type owl:Restriction ;
-                 owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint> ;
-                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                 owl:onClass [ owl:intersectionOf ( [ rdf:type owl:Restriction ;
-                                                      owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThan> ;
-                                                      owl:hasValue :RoomTemperatureLowerLimit1
-                                                    ]
-                                                    [ rdf:type owl:Restriction ;
-                                                      owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo> ;
-                                                      owl:hasValue :RoomTemperatureUpperLimit1
-                                                    ]
-                                                  ) ;
-                               rdf:type owl:Class
-                             ]
-               ] ,
-               [ rdf:type owl:Restriction ;
-                 owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint> ;
-                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                 owl:onClass [ rdf:type owl:Restriction ;
-                               owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/comparisonOperator> ;
-                               owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                               owl:onClass <http://www.w3.org/ns/ssn/Property>
-                             ]
-               ] .
 
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger

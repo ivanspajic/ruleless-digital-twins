@@ -28,14 +28,6 @@ xsd:duration rdf:type rdfs:Datatype .
                      rdfs:label "affectsPropertyWith"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/alteredBy
-:alteredBy rdf:type owl:ObjectProperty ;
-           rdfs:domain :PropertyChangeByReconfiguration ;
-           rdfs:range :Effect ;
-           rdfs:comment "Represents a relation between a ConfigurableProperty and an Effect on it that causes a related property to change."@en ;
-           rdfs:label "alteredBy"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/comparisonOperator
 :comparisonOperator rdf:type owl:ObjectProperty ;
                     rdfs:comment "Required to enable OptimalCondition constraints on variable Property values. Since it is not possible to use the standard comparison operators (>, <, >=, <=) on non-literals, this property allows us to do so."@en ;
@@ -288,11 +280,6 @@ xsd:duration rdf:type rdfs:Datatype .
                        rdfs:subClassOf <http://www.w3.org/ns/ssn/Input> ,
                                        <http://www.w3.org/ns/ssn/Property> ,
                                        [ rdf:type owl:Restriction ;
-                                         owl:onProperty :enacts ;
-                                         owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                         owl:onClass :PropertyChangeByReconfiguration
-                                       ] ,
-                                       [ rdf:type owl:Restriction ;
                                          owl:onProperty :hasPossibleValue ;
                                          owl:minCardinality "1"^^xsd:nonNegativeInteger
                                        ] ,
@@ -403,26 +390,6 @@ xsd:duration rdf:type rdfs:Datatype .
                 rdfs:label "PropertyChange"@en .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation
-:PropertyChangeByActuation rdf:type owl:Class ;
-                           rdfs:subClassOf :PropertyChange ;
-                           owl:disjointWith :PropertyChangeByReconfiguration ;
-                           rdfs:comment "Represents a specific PropertyChange as a result of actuating on the respective Property."@en ;
-                           rdfs:label "PropertyChangeByActuation"@en .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByReconfiguration
-:PropertyChangeByReconfiguration rdf:type owl:Class ;
-                                 rdfs:subClassOf :PropertyChange ,
-                                                 [ rdf:type owl:Restriction ;
-                                                   owl:onProperty :alteredBy ;
-                                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                   owl:onClass :Effect
-                                                 ] ;
-                                 rdfs:comment "Represents a specific PropertyChange as a result of reconfiguring a related ConfigurableProperty."@en ;
-                                 rdfs:label "PropertyChangeByReconfiguration"@en .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ReconfigurationAction
 :ReconfigurationAction rdf:type owl:Class ;
                        rdfs:subClassOf :Action ,
@@ -441,11 +408,6 @@ xsd:duration rdf:type rdfs:Datatype .
 
 ###  http://www.w3.org/ns/sosa/Actuator
 <http://www.w3.org/ns/sosa/Actuator> rdfs:subClassOf [ rdf:type owl:Restriction ;
-                                                       owl:onProperty :enacts ;
-                                                       owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                                       owl:onClass :PropertyChangeByActuation
-                                                     ] ,
-                                                     [ rdf:type owl:Restriction ;
                                                        owl:onProperty :hasActuatorState ;
                                                        owl:minCardinality "1"^^xsd:nonNegativeInteger
                                                      ] .

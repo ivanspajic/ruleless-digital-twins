@@ -69,7 +69,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionIncrease
 :EnergyConsumptionIncrease rdf:type owl:NamedIndividual ,
-                                    <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> ;
+                                    <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> ;
                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease> ;
                            <http://www.w3.org/ns/ssn/forProperty> :EnergyConsumption .
 
@@ -159,8 +159,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                             rdf:type owl:Class
                                           ]
                             ] ;
-                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
-                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> "3600"^^xsd:int .
+                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OptimalCondition2
@@ -181,8 +180,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                                             rdf:type owl:Class
                                           ]
                             ] ;
-                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
-                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/reachedInMaximumSeconds> "3600"^^xsd:int .
+                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomHumidity
@@ -193,7 +191,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomHumidityDecrease
 :RoomHumidityDecrease rdf:type owl:NamedIndividual ,
-                               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> ;
+                               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> ;
                       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease> ;
                       <http://www.w3.org/ns/ssn/forProperty> :RoomHumidity .
 
@@ -202,8 +200,8 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 :RoomM370 rdf:type owl:NamedIndividual ,
                    <http://www.w3.org/ns/sosa/Platform> ;
           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel> :RoomM370FMU ;
-          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/optimizesFor> :EnergyConsumptionDecrease ,
-                                                                                                 :RoomHumidityDecrease ;
+          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/minimizes> :EnergyConsumption ,
+                                                                                              :RoomHumidity ;
           <http://www.w3.org/ns/sosa/hosts> :Dehumidifier ,
                                             :EnergyConsumptionMeter ,
                                             :Fan ,
@@ -231,14 +229,14 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperatureDecrease
 :RoomTemperatureDecrease rdf:type owl:NamedIndividual ,
-                                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> ;
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> ;
                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease> ;
                          <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
 
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperatureIncrease
 :RoomTemperatureIncrease rdf:type owl:NamedIndividual ,
-                                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation> ;
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> ;
                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease> ;
                          <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
 
@@ -307,8 +305,26 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
                              <http://www.w3.org/ns/ssn/hasOutput> :TemperatureSensor2MeasuredTemperature .
 
 
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+[ xsd:minInclusive "27.5"^^xsd:double
 ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ xsd:maxInclusive "28.5"^^xsd:double
+ ] .
+
+[ xsd:maxExclusive "30.2"^^xsd:double
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
 
 [ xsd:minExclusive "10.1"^^xsd:double
  ] .
@@ -316,7 +332,7 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
-[ xsd:minInclusive "1"^^xsd:int
+[ xsd:maxExclusive "30.2"^^xsd:double
  ] .
 
 [ xsd:maxInclusive "3"^^xsd:int
@@ -328,33 +344,6 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
-[ xsd:maxInclusive "28.5"^^xsd:double
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
-[ xsd:minExclusive "10.1"^^xsd:double
- ] .
-
-[ xsd:minInclusive "27.5"^^xsd:double
- ] .
-
-[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
- ] .
-
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
@@ -367,13 +356,22 @@ owl:qualifiedCardinality rdf:type owl:AnnotationProperty .
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
  ] .
 
-[ xsd:maxExclusive "30.2"^^xsd:double
- ] .
-
 [ xsd:maxInclusive "28.5"^^xsd:double
  ] .
 
-[ xsd:maxExclusive "30.2"^^xsd:double
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ xsd:minInclusive "1"^^xsd:int
+ ] .
+
+[ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+ ] .
+
+[ xsd:minExclusive "10.1"^^xsd:double
  ] .
 
 [ owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger

@@ -375,11 +375,11 @@
 // cartesian product of a variable number of sets (Actions grouped by Actuators or ConfigurableParameters) with a variable number of
 // elements (possible Actuator states or ConfigurableParameter values).
 //
-// The rules work by initially creating an ActionCombination for each Action found in the model (rules 4a and 4b). Every ActionCombination
-// contains an rdf:List of Actions, which it then expands as it encounters new ones (rules 4c and 4d). To be added to the list, these Actions
+// The rules work by initially creating an ActionCombination for each Action found in the model (rules 8a and 8b). Every ActionCombination
+// contains an rdf:List of Actions, which it then expands as it encounters new ones (rules 8c and 8d). To be added to the list, these Actions
 // must not already be contained in it and their Actuators/ConfigurableParameters must not be the same as those of other Actions already
-// in it. Because this method generates permutations (lists of the same Actions in different orders), additional rules (rules 4e and 4f)
-// are necessary to eliminate duplicates and reduce the combinatorial explosion.
+// in it. Because this method generates permutations (lists of the same Actions in different orders), an additional rule (rule 8e) is
+// necessary to eliminate duplicates and reduce the combinatorial explosion.
 //
 // In the end, all ActionCombinations that are NOT marked with "duplicate" (same combination already exists) or "not final" (the combination
 // contains fewer Actions than it should) are final.

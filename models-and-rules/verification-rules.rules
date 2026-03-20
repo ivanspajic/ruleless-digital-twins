@@ -250,10 +250,10 @@
 
 // Prints errors if Properties in OptimalConditions have unsupported value types.
 [ruleVer2c: (?aNode :withPropertyCheck ?property)
-            (?optimalCondition rdf:type ?aNode)
             (?property meta:hasValue ?value)
             notDType(?value, xsd:double)
             notDType(?value, xsd:int)
+            notDType(?value, xsd:boolean)
             ->  print("Error!")
                 print("Unsupported Property value type", ?value, "used in OptimalCondition", ?optimalCondition)
 ]

@@ -22,11 +22,17 @@ class FMU(Node):
 
 class ObservableProperty(Node):
     def __init__(self, g, name, restriction=None):
-        elprice = name
-        g.add((elprice, RDF["type"], SOSA["ObservableProperty"]))
-        g.add((elprice, RDF["type"], OWL["NamedIndividual"]))
-        #g.add((elprice, RDF["type"], self.restriction.node))
-        self.node = elprice
+        self.node = name
+        g.add((self.node, RDF["type"], SOSA["ObservableProperty"]))
+        g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
+        g.add((self.node, RDT["hasValue"], Literal("0.0", datatype=XSD.double)))
+
+class Property(Node):
+    def __init__(self, g, name, value = 0.0):
+        self.node = name
+        g.add((self.node, RDF["type"], SOSA["Property"]))
+        g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
+        g.add((self.node, RDT["hasValue"], Literal(value, datatype=XSD.double)))
 
 class Change(Node):
     def __init__(self, g, name: IdentifiedNode, affects: ObservableProperty):
@@ -47,36 +53,57 @@ class OptimalCondition(Node):
     pass
 
 class OptimalConditionDouble(OptimalCondition):
-    def __init__(self, g, name: IdentifiedNode, onProperty: ObservableProperty, reachedInMaximumSeconds: int, minT: tuple[float,bool], maxT: tuple[float,bool]):
+    def __init__(self, g, name: IdentifiedNode, onProperty: ObservableProperty, minT: Property, maxT: Property):
         self.node = name
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
         g.add((self.node, RDF["type"], RDT["OptimalCondition"]))
         g.add((self.node, SSN["forProperty"], onProperty.node))
-        g.add((self.node, RDT["reachedInMaximumSeconds"], Literal(reachedInMaximumSeconds, datatype=XSD.nonNegativeInteger)))
+        min = BNode()
+        g.add((min, RDF["type"], OWL["Restriction"]))
+        g.add((min, OWL["onProperty"], RDT["greaterThan"])) #TODO: fix this when making this class accept all 5 supported types of OptimalConditions.
+        g.add((min, OWL["hasValue"], minT.node))
+        max = BNode()
+        g.add((max, RDF["type"], OWL["Restriction"]))
+        g.add((max, OWL["onProperty"], RDT["lessThan"]))
+        g.add((max, OWL["hasValue"], maxT.node))
+        intersectionContainer = BNode()
+        g.add((intersectionContainer, RDF["type"], OWL["Class"]))
+        intersectionList1 = BNode()
+        g.add((intersectionList2, RDF.first, max))
+        g.add((intersectionList2, RDF.rest, RDF.nil))
+        intersectionList2 = BNode()
+        g.add((intersectionList1, RDF.first, min))
+        g.add((intersectionList1, RDF.rest, intersectionList2))
+        g.add((intersectionContainer, OWL["intersectionOf"], intersectionList1))
         res = BNode()
         g.add((res, RDF["type"], OWL["Restriction"]))
         g.add((res, OWL["onProperty"], RDT["hasConstraint"]))
         g.add((res, OWL["qualifiedCardinality"], Literal(1, datatype=XSD.nonNegativeInteger)))
-        minmax = BNode()
-        g.add((minmax, RDF["type"], RDFS["Datatype"]))
-        g.add((minmax, OWL["onDatatype"], XSD.double))
-        reslist = BNode()
-        fNode = BNode()
-        rNode = BNode()
-        f2Node = BNode()
-        r2Node = BNode()
-        (min, minIncl) = minT
-        (max, maxIncl) = maxT
-        g.add((fNode, XSD["minInclusive" if minIncl else "minExclusive"], Literal(min, datatype=XSD.double)))
-        g.add((f2Node, XSD["maxInclusive" if maxIncl else "maxExclusive"], Literal(max, datatype=XSD.double)))        
-        g.add((reslist, RDF["first"], fNode))
-        g.add((reslist, RDF["rest"], rNode))
-        g.add((rNode, RDF["first"], f2Node))
-        g.add((rNode, RDF["rest"], r2Node))
-        g.add((minmax, OWL.withRestrictions, reslist))
-        g.add((res, OWL["onDataRange"], minmax))
-
+        g.add((res, OWL["onClass"], intersectionContainer))
         g.add((self.node, RDF["type"], res))
+
+
+
+
+
+
+        #minmax = BNode()
+        #g.add((minmax, RDF["type"], RDFS["Datatype"]))
+        #g.add((minmax, OWL["onDatatype"], XSD.double))
+        #reslist = BNode()
+        #fNode = BNode()
+        #rNode = BNode()
+        #f2Node = BNode()
+        #r2Node = BNode()
+        #(min, minIncl) = minT
+        #(max, maxIncl) = maxT
+        #g.add((fNode, XSD["minInclusive" if minIncl else "minExclusive"], Literal(min, datatype=XSD.double)))
+        #g.add((f2Node, XSD["maxInclusive" if maxIncl else "maxExclusive"], Literal(max, datatype=XSD.double)))        
+        #g.add((reslist, RDF["first"], fNode))
+        #g.add((reslist, RDF["rest"], rNode))
+        #g.add((rNode, RDF["first"], f2Node))
+        #g.add((rNode, RDF["rest"], r2Node))
+        #g.add((minmax, OWL.withRestrictions, reslist))
 
 
 class Platform(Node):
@@ -105,11 +132,7 @@ class Measure(Node):
         # g.add((self.node, RDF["type"], SSN["Input"]))
         g.add((self.node, RDF["type"], SSN["Output"]))
         g.add((self.node, RDF["type"], SSN["Property"]))
-        node = BNode()
-        g.add((node, RDF["type"], OWL["Restriction"]))
-        g.add((node, OWL["onProperty"], RDT["hasValue"]))
-        g.add((node, OWL["hasValue"], Literal("0.0", datatype=XSD.double)))
-        g.add((self.node, RDF["type"], node))
+        g.add((self.node, RDT["hasValue"], Literal("0.0", datatype=XSD.double)))
 
 class Sensor(Node):
     def __init__(self, g, name, observes: ObservableProperty | list[ObservableProperty]):        

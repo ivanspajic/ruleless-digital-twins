@@ -8,17 +8,12 @@
 // These rules are used as a verification mechanism against malformed or impossible OptimalConditions. In cases of errors, these rules will
 // explicitly print error messages such that the coordinator catches them and throws exceptions.
 
-// Verifies that system optimizations are not conflicting.
+// Verifies that Property maximizations and minimizations are not conflicting.
 [ruleVer1a: (?platform rdf:type sosa:Platform)
-            (?platform meta:optimizesFor ?propertyChange1)
-            (?propertyChange1 ssn:forProperty ?property)
-            (?platform meta:optimizesFor ?propertyChange2)
-            (?propertyChange2 ssn:forProperty ?property)
-            (?propertyChange1 meta:affectsPropertyWith meta:ValueIncrease)
-            (?propertyChange2 meta:affectsPropertyWith meta:ValueDecrease)
+            (?platform meta:maximizes ?property)
+            (?platform meta:minimizes ?property)
             ->  print("Error!")
-                print(?platform, "optimizes for", ?property, "with ValueIncrease through", ?propertyChange1)
-                print(?platform, "optimizes for", ?property, "with ValueDecrease through", ?propertyChange2)
+                print(?platform, "maximizes and minimizes", ?property, "at the same time.")
 ]
 
 // Marks single-constraint OptimalConditions, such as >15, for further checks.

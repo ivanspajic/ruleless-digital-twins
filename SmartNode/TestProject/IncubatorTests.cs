@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks.ServiceMocks;
 using Implementations.SimulatedTwinningTargets;
+using System.Globalization;
 
 namespace TestProject {
     public class IncubatorTests : IDisposable {
@@ -45,7 +46,7 @@ namespace TestProject {
             var fmu = Femyou.Model.Load(Path.Combine(filepathArguments.FmuDirectory, "au_incubator.fmu")); // TODO: grab from model
             var (SvType, SvValue) = fmu.Variables["G_box"]!.StartValue;
             Assert.Equal("Real", SvType);
-            double gbox = double.Parse(SvValue);
+            double gbox = double.Parse(SvValue, CultureInfo.InvariantCulture);
             fmu.Dispose(); // Don't forget this or you'll get segfaults when loading the FMU "again" later.
             // END Prototype
 

@@ -24,13 +24,10 @@ g.add((rtempActuator.node, RDT["hasActuatorName"], Literal("in_room_temperature"
 g.add((rtempActuator.node, RDT["hasActuatorState"], Literal("21.0", datatype=XSD.double)))
 g.add((rtempActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.boolean)))
 
+minTemp = Property(g, MINE["TemperatureLowerLimit"], 30)
+maxTemp = Property(g, MINE["TemperatureUpperLimit"], 35)
 temp = ObservableProperty(g, MINE["T"], None)
-oc_rtemp = OptimalConditionDouble(g, MINE["oc_temp"], temp, 3600, (30, False), (35, False))
-node = BNode()
-g.add((node, RDF["type"], OWL["Restriction"]))
-g.add((node, OWL["onProperty"], RDT["hasValue"]))
-g.add((node, OWL["hasValue"], Literal("20.0", datatype=XSD.double)))
-g.add((temp.node, RDF["type"], node))
+oc_rtemp = OptimalConditionDouble(g, MINE["oc_temp"], temp, minTemp, maxTemp)
 
 tempSensor = Sensor(g, MINE["TempSensor"], [temp])
 tempMeasure = Measure(g, MINE["TempMeasure"])

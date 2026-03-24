@@ -4,7 +4,7 @@ model au_incubator
   input Real in_heater_voltage(start = 12.15579391);
   input Real in_heater_current(start = 1.53551347);
   input Real G_box(start = 0.5763498);
-  input Real C_air(start = 267.55929458);
+  parameter Real C_air(start = 267.55929458);
   
   parameter Real in_room_temperature(start = 20);
   parameter Real in_box_temperature(start = 20);

@@ -53,11 +53,12 @@ class OptimalCondition(Node):
     pass
 
 class OptimalConditionDouble(OptimalCondition):
-    def __init__(self, g, name: IdentifiedNode, onProperty: ObservableProperty, minT: Property, maxT: Property):
+    def __init__(self, g, name: IdentifiedNode, onProperty: ObservableProperty, minT: Property, maxT: Property, breakable:bool = True):
         self.node = name
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
         g.add((self.node, RDF["type"], RDT["OptimalCondition"]))
         g.add((self.node, SSN["forProperty"], onProperty.node))
+        g.add((self.node, RDT["isBreakable"], Literal(breakable, datatype=XSD.boolean)))
         min = BNode()
         g.add((min, RDF["type"], OWL["Restriction"]))
         g.add((min, OWL["onProperty"], RDT["greaterThan"])) #TODO: fix this when making this class accept all 5 supported types of OptimalConditions.
@@ -81,11 +82,6 @@ class OptimalConditionDouble(OptimalCondition):
         g.add((res, OWL["qualifiedCardinality"], Literal(1, datatype=XSD.nonNegativeInteger)))
         g.add((res, OWL["onClass"], intersectionContainer))
         g.add((self.node, RDF["type"], res))
-
-
-
-
-
 
         #minmax = BNode()
         #g.add((minmax, RDF["type"], RDFS["Datatype"]))

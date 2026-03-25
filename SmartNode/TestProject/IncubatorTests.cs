@@ -35,9 +35,9 @@ namespace TestProject {
         [Theory]
         [InlineData(21.0, true, "Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
         // Higher temps may fail since I currently don't handle the upper bound correctly:
-        //[InlineData(37.0, false, "Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
+        [InlineData(37.0, false, "Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
         // This one used to glitch with an INF-crash in the FMU, but now passes?!
-        //[InlineData(53.2359909270973, false, "Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
+        [InlineData(53.2359909270973, false, "Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
         public void SimulateFMUOnly(double initial_T_value, bool all_actuators, string fromPython, string model, string inferred, int lookAheadCycles) {
             SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
 
@@ -77,6 +77,22 @@ namespace TestProject {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#G_box",
                             OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = gbox
+                        }
+                    },
+                   {
+                        "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TemperatureLowerLimit",
+                        new Property {
+                            Name = "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TemperatureLowerLimit",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                            Value = 30
+                        }
+                    },
+                   {
+                        "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TemperatureUpperLimit",
+                        new Property {
+                            Name = "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TemperatureUpperLimit",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
+                            Value = 35
                         }
                     }
                 }

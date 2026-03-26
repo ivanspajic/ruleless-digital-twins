@@ -221,6 +221,8 @@
 
 
 
+// These rules perform various checks against wrong data types, operators, and Property usage.
+
 // Prints errors if constraints use disallowed object properties as operators.
 [ruleVer2a: (?aNode :withOperatorCheck ?operator)
             (?optimalCondition rdf:type ?aNode)
@@ -252,6 +254,18 @@
             ->  print("Error!")
                 print("Unsupported Property value type", ?value, "used in OptimalCondition", ?optimalCondition)
 ]
+
+// OptimalCondition Properties should not also be constraint bounds since that will, depending on the operator, always
+// either be true (a tautology) or impossible (e.g., roomTemperature < roomTemperature).
+[ruleVer2n: (?aNode :withOptimalCondition ?optimalCondition)
+            (?optimalCondition ssn:forProperty ?optimalConditionProperty)
+            (?aNode owl:hasValue ?optimalConditionProperty)
+            ->  print("Error!")
+                print("OptimalCondition", ?optimalCondition, "uses", ?optimalConditionProperty)
+                print("as both the OptimalCondition Property and constraint bound.")
+]
+
+
 
 // These rules leave marks for subsequent rules to check that the right kinds of PropertyChanges exist for their OptimalCondition constraints.
 
@@ -378,16 +392,6 @@
 
 
 // These rules print errors in cases of OptimalConditions that are always true (tautologies).
-
-// OptimalCondition Properties should not also be constraint bounds since that will, depending on the operator, always
-// either be true (a tautology) or impossible (e.g., roomTemperature < roomTemperature).
-[ruleVer2n: (?aNode :withOptimalCondition ?optimalCondition)
-            (?optimalCondition ssn:forProperty ?optimalConditionProperty)
-            (?aNode owl:hasValue ?optimalConditionProperty)
-            ->  print("Error!")
-                print("OptimalCondition", ?optimalCondition, "uses", ?optimalConditionProperty)
-                print("as both the OptimalCondition Property and constraint bound.")
-]
 
 // > or <= the same property is always true.
 [ruleVer2o: (?aNode1 :withCheck "disjunction")

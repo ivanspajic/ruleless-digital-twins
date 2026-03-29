@@ -192,7 +192,7 @@
 
 // These rules mark OptimalConditions as enabled provided their respective enabling constraints evaluate to true.
 
-// If the enabling constraint is a single constraint (e.g., >15) and it`s true, enable the OptimalCondition.
+// If the enabling constraint is a single (e.g., >15) or conjunctive constraint (e.g., >15 and <22), and it`s true, enable the OptimalCondition.
 [rule4a:    (?optimalCondition rdf:type meta:OptimalCondition)
             (?optimalCondition rdf:type ?aNode1)
             (?aNode1 rdf:type owl:Restriction)
@@ -202,18 +202,8 @@
             ->  (?optimalCondition :isEnabled "true"^^xsd:boolean)
 ]
 
-// If the enabling constraint is a conjunctive constraint (e.g., >15 and <22) and it`s true, enable the OptimalCondition.
-[rule4b:    (?optimalCondition rdf:type meta:OptimalCondition)
-            (?optimalCondition rdf:type ?aNode1)
-            (?aNode1 rdf:type owl:Restriction)
-            (?aNode1 owl:onProperty meta:hasEnablingConstraint)
-            (?aNode1 owl:onClass ?aNode2)
-            (?aNode2 :withEvaluationResult "true"^^xsd:boolean)
-            ->  (?optimalCondition :isEnabled "true"^^xsd:boolean)
-]
-
 // If the enabling constraint is a disjunctive constraint (e.g., <15 or >22) and it`s true, enable the OptimalCondition.
-[rule4c:    (?aNode rdf:type owl:Restriction)
+[rule4b:    (?aNode rdf:type owl:Restriction)
             (?aNode :withOptimalCondition ?optimalCondition)
             (?aNode :withConstraintType meta:hasEnablingConstraint)
             (?aNode :withCheck "disjunction")
@@ -223,7 +213,7 @@
 ]
 
 // In case the OptimalCondition has no enabling constraints, it is enabled by default.
-[rule4d:    (?optimalCondition rdf:type meta:OptimalCondition)
+[rule4c:    (?optimalCondition rdf:type meta:OptimalCondition)
             (?optimalCondition rdf:type ?aNode)
             (?aNode rdf:type owl:Restriction)
             noValue(?aNode owl:onProperty meta:hasEnablingConstraint)

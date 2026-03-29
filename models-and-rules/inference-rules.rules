@@ -135,13 +135,11 @@
             ->  (?aNode :withEvaluationResult "false"^^xsd:boolean)
 ]
 
-
-
 // The following rules add an evaluation result to a conjunctive constraint node based on the evaluations of its atomic constraints. This step
 // simplifies further checks for whether an OptimalCondition is satisfied.
 
 // If both conjunctive children evaluate to true, mark their shared ancestor node as true as well.
-[rule3a:    (?aNode1 owl:intersectionOf ?aList)
+[rule2l:    (?aNode1 owl:intersectionOf ?aList)
             (?aList rdf:first ?aNode2)
             (?aNode2 rdf:type owl:Restriction)
             (?aNode2 :withCheck "conjunction")
@@ -157,7 +155,7 @@
 ]
 
 // If the first conjunctive child evaluates to false, mark the shared ancestor node as false.
-[rule3b:    (?aNode1 owl:intersectionOf ?aList)
+[rule2m:    (?aNode1 owl:intersectionOf ?aList)
             (?aList rdf:first ?aNode2)
             (?aNode2 rdf:type owl:Restriction)
             (?aNode2 :withCheck "conjunction")
@@ -173,7 +171,7 @@
 ]
 
 // If the second conjunctive child evaluates to false, mark the shared ancestor node as false.
-[rule3c:    (?aNode1 owl:intersectionOf ?aList)
+[rule2n:    (?aNode1 owl:intersectionOf ?aList)
             (?aList rdf:first ?aNode2)
             (?aNode2 rdf:type owl:Restriction)
             (?aNode2 :withCheck "conjunction")
@@ -193,7 +191,7 @@
 // These rules mark OptimalConditions as enabled provided their respective enabling constraints evaluate to true.
 
 // If the enabling constraint is a single (e.g., >15) or conjunctive constraint (e.g., >15 and <22), and it`s true, enable the OptimalCondition.
-[rule4a:    (?optimalCondition rdf:type meta:OptimalCondition)
+[rule3a:    (?optimalCondition rdf:type meta:OptimalCondition)
             (?optimalCondition rdf:type ?aNode1)
             (?aNode1 rdf:type owl:Restriction)
             (?aNode1 owl:onProperty meta:hasEnablingConstraint)
@@ -203,7 +201,7 @@
 ]
 
 // If the enabling constraint is a non-conjunctive, disjunctive constraint (e.g., <15 or >22) and it`s true, enable the OptimalCondition.
-[rule4b:    (?aNode rdf:type owl:Restriction)
+[rule3b:    (?aNode rdf:type owl:Restriction)
             (?aNode :withOptimalCondition ?optimalCondition)
             (?aNode :withConstraintType meta:hasEnablingConstraint)
             (?aNode :withCheck "disjunction")
@@ -213,7 +211,7 @@
 ]
 
 // In case the OptimalCondition has no enabling constraints, it is enabled by default.
-[rule4c:    (?optimalCondition rdf:type meta:OptimalCondition)
+[rule3c:    (?optimalCondition rdf:type meta:OptimalCondition)
             (?optimalCondition rdf:type ?aNode)
             (?aNode rdf:type owl:Restriction)
             noValue(?aNode owl:onProperty meta:hasEnablingConstraint)
@@ -225,7 +223,7 @@
 // The following rules mark specific types of unsatisfied operators based on their evaluation result.
 
 // All non-disjunctive constraints evaluating to false should generate mitigation Actions. Thus, their operators are marked as unsatisfied.
-[rule5a:    (?aNode rdf:type owl:Restriction)
+[rule4a:    (?aNode rdf:type owl:Restriction)
             (?aNode :withOptimalCondition ?optimalCondition)
             (?optimalCondition :isEnabled "true"^^xsd:boolean)
             (?aNode :withOptimalConditionProperty ?optimalConditionProperty)
@@ -242,7 +240,7 @@
 // disjunctive OptimalConditions only become unsatisfied if their condition Property is between or outside both range constraints,
 // the OptimalCondition can be restored by both a ValueIncrease and a ValueDecrease on that Property. For simplicity, we therefore
 // say that an equalTo is the unsatisfied operator.
-[rule5b:    (?optimalCondition rdf:type meta:OptimalCondition)
+[rule4b:    (?optimalCondition rdf:type meta:OptimalCondition)
             (?optimalCondition :isEnabled "true"^^xsd:boolean)
             (?optimalCondition rdf:type ?aNode1)
             (?optimalCondition ssn:forProperty ?optimalConditionProperty)
@@ -264,42 +262,42 @@
 
 // The following rules match on unsatisfied operators and find PropertyChanges that will cause the respective Property value changes.
 
-[rule6a:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
+[rule5a:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
             (?evaluationContainer :withUnsatisfiedOperator meta:equalTo)
             (?propertyChange ssn:forProperty ?optimalConditionProperty)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             ->  (_: :withPropertyChange ?propertyChange)
 ]
 
-[rule6b:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
+[rule5b:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
             (?evaluationContainer :withUnsatisfiedOperator meta:equalTo)
             (?propertyChange ssn:forProperty ?optimalConditionProperty)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             ->  (_: :withPropertyChange ?propertyChange)
 ]
 
-[rule6c:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
+[rule5c:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
             (?evaluationContainer :withUnsatisfiedOperator meta:greaterThan)
             (?propertyChange ssn:forProperty ?optimalConditionProperty)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             ->  (_: :withPropertyChange ?propertyChange)
 ]
 
-[rule6d:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
+[rule5d:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
             (?evaluationContainer :withUnsatisfiedOperator meta:greaterThanOrEqualTo)
             (?propertyChange ssn:forProperty ?optimalConditionProperty)
             (?propertyChange meta:affectsPropertyWith meta:ValueIncrease)
             ->  (_: :withPropertyChange ?propertyChange)
 ]
 
-[rule6e:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
+[rule5e:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
             (?evaluationContainer :withUnsatisfiedOperator meta:lessThan)
             (?propertyChange ssn:forProperty ?optimalConditionProperty)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
             ->  (_: :withPropertyChange ?propertyChange)
 ]
 
-[rule6f:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
+[rule5f:    (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
             (?evaluationContainer :withUnsatisfiedOperator meta:lessThanOrEqualTo)
             (?propertyChange ssn:forProperty ?optimalConditionProperty)
             (?propertyChange meta:affectsPropertyWith meta:ValueDecrease)
@@ -312,7 +310,7 @@
 // concatinations are used for generating unique names for unique combinations of elements in an Action. This ensures that no duplicate Actions
 // are generated in cases of, e.g., multiple actuators causing multiple different PropertyChanges.
 
-[rule7a:   (?thing :withPropertyChange ?propertyChange)
+[rule6a:   (?thing :withPropertyChange ?propertyChange)
            (?actuator meta:enacts ?propertyChange)
            (?actuator rdf:type sosa:Actuator)
            (?actuator meta:hasActuatorState ?actuatorState)
@@ -323,7 +321,7 @@
                print("Generated ActuationAction", ?actionName)
 ]
 
-[rule7b:   (?thing :withPropertyChange ?propertyChange)
+[rule6b:   (?thing :withPropertyChange ?propertyChange)
            (?configurableParameter meta:enacts ?propertyChange)
            (?configurableParameter rdf:type meta:ConfigurableParameter)
            (?configurableParameter meta:hasPossibleValue ?configurableParameterValue)
@@ -337,7 +335,7 @@
 // The following rules generate Actions provided the switch for generating restrictive combinations (only based on unsatisfied OptimalConditions)
 // is disabled.
 
-[rule7c:    (?platform rdf:type sosa:Platform)
+[rule6c:    (?platform rdf:type sosa:Platform)
             (?platform meta:generateCombinationsOnlyFromOptimalConditions "false"^^xsd:boolean)
             (?actuator rdf:type sosa:Actuator)
             (?actuator meta:hasActuatorState ?actuatorState)
@@ -348,7 +346,7 @@
                 print("Generated ActuationAction", ?actionName)
 ]
 
-[rule7d:    (?platform rdf:type sosa:Platform)
+[rule6d:    (?platform rdf:type sosa:Platform)
             (?platform meta:generateCombinationsOnlyFromOptimalConditions "false"^^xsd:boolean)
             (?configurableParameter rdf:type meta:ConfigurableParameter)
             (?configurableParameter meta:hasPossibleValue ?configurableParameterValue)
@@ -365,16 +363,16 @@
 // cartesian product of a variable number of sets (Actions grouped by Actuators or ConfigurableParameters) with a variable number of
 // elements (possible Actuator states or ConfigurableParameter values).
 //
-// The rules work by initially creating an ActionCombination for each Action found in the model (rules 8a and 8b). Every ActionCombination
-// contains an rdf:List of Actions, which it then expands as it encounters new ones (rules 8c and 8d). To be added to the list, these Actions
+// The rules work by initially creating an ActionCombination for each Action found in the model (rules 7a and 7b). Every ActionCombination
+// contains an rdf:List of Actions, which it then expands as it encounters new ones (rules 7c and 7d). To be added to the list, these Actions
 // must not already be contained in it and their Actuators/ConfigurableParameters must not be the same as those of other Actions already
-// in it. Because this method generates permutations (lists of the same Actions in different orders), an additional rule (rule 8e) is
+// in it. Because this method generates permutations (lists of the same Actions in different orders), an additional rule (rule 7e) is
 // necessary to eliminate duplicates and reduce the combinatorial explosion.
 //
 // In the end, all ActionCombinations that are NOT marked with "duplicate" (same combination already exists) or "not final" (the combination
 // contains fewer Actions than it should) are final.
 
-[rule8a:    (?actuationAction rdf:type meta:ActuationAction)
+[rule7a:    (?actuationAction rdf:type meta:ActuationAction)
             (?actuationAction meta:hasActuator ?actuator)
             makeTemp(?actionCombination)
             makeTemp(?actionList)
@@ -390,7 +388,7 @@
                 (?actuatorList rdf:rest rdf:nil)
 ]
 
-[rule8b:    (?reconfigurationAction rdf:type meta:ReconfigurationAction)
+[rule7b:    (?reconfigurationAction rdf:type meta:ReconfigurationAction)
             (?reconfigurationAction ssn:forProperty ?configurableParameter)
             makeTemp(?actionCombination)
             makeTemp(?actionList)
@@ -406,7 +404,7 @@
                 (?configurableParameterList rdf:rest rdf:nil)
 ]
 
-[rule8c:    (?actionCombination rdf:type meta:ActionCombination)
+[rule7c:    (?actionCombination rdf:type meta:ActionCombination)
             (?actionCombination meta:hasActions ?actionList)
             (?actionCombination meta:hasActuators ?actuatorList)
             (?actuationAction rdf:type meta:ActuationAction)
@@ -428,7 +426,7 @@
                 (?actionCombination rdf:comment "not final")
 ]
 
-[rule8d:    (?actionCombination rdf:type meta:ActionCombination)
+[rule7d:    (?actionCombination rdf:type meta:ActionCombination)
             (?actionCombination meta:hasActions ?actionList)
             (?actionCombination meta:hasConfigurableParameters ?configurableParameterList)
             (?reconfigurationAction rdf:type meta:ReconfigurationAction)
@@ -450,7 +448,7 @@
                 (?actionCombination rdf:comment "not final")
 ]
 
-[rule8e:    (?actionCombination1 rdf:type meta:ActionCombination)
+[rule7e:    (?actionCombination1 rdf:type meta:ActionCombination)
             (?actionCombination1 meta:hasActions ?actionList1)
             (?actionCombination2 rdf:type meta:ActionCombination)
             (?actionCombination2 meta:hasActions ?actionList2)

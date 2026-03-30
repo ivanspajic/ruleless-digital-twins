@@ -10,7 +10,14 @@ namespace Implementations.ValueHandlers
     {
     
         public object GetObservablePropertyValueFromMeasuredPropertyValues(params object[] measuredPropertyValues){
-            throw new NotImplementedException();
+            // This is just an example implementation for this data type.
+            var result = true;
+
+            foreach (var measuredPropertyValue in measuredPropertyValues) {
+                result = result && (bool)measuredPropertyValue;
+            }
+
+            return result;
         }
 
         public IEnumerable<object> GetPossibleValuesForActuationAction(Actuator actuator) {

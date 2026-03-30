@@ -147,6 +147,12 @@ namespace SmartNode
                             "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceAlgorithm"),
                             new CustomPieceSoftSensor("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
                                 "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceAlgorithm")
+                        },
+                        {
+                            ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensor",
+                            "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensorProcedure"),
+                            new MotionSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensor",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensorProcedure")
                         }
                     }
                 }
@@ -180,7 +186,8 @@ namespace SmartNode
         private readonly Dictionary<string, IValueHandler> _valueHandlers = new() {
             { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() },
-            { "http://www.w3.org/2001/XMLSchema#base64Binary", new Base64BinaryValueHandler() }
+            { "http://www.w3.org/2001/XMLSchema#base64Binary", new Base64BinaryValueHandler() },
+            { "http://www.w3.org/2001/XMLSchema#boolean", new BooleanValueHandler() }
         };
         private readonly IncubatorAdapter? _incubatorAdapter;
         // Changing the environment variable's value requires restarting Visual Studio before it's visible.

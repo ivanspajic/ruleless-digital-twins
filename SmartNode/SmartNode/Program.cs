@@ -10,6 +10,9 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using System.CommandLine;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("TestProject")]
 
 namespace SmartNode
 {

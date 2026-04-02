@@ -1,10 +1,11 @@
-﻿using Logic.FactoryInterface;
+using Logic.FactoryInterface;
 using Logic.Mapek;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks.ServiceMocks;
+using Xunit.Internal;
 
 namespace TestProject {
     public class MapekTests {
@@ -61,6 +62,17 @@ namespace TestProject {
                         new Property { Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#price", Value = "0", OwlType = "http://www.w3.org/2001/XMLSchema#double" });
                 }
                 var simulationPathAndTree = await plan.Plan(cache);
+                var path = simulationPathAndTree.Item2.Simulations;
+
+                // Test property we want to accumulate:
+                Property prop = cache.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperature"];
+                Fitness<AccState> fitness = new(path.First()) {                    
+                    FOps = new[] { new FAccFloat(prop) }
+                };
+
+                var result = path.Skip(1).Aggregate(new AccState(fitness, prop), fitness.Process);
+                
+                Debug.WriteLine(string.Join(",",result.Fitness.Properties));
 
                 Assert.Equal(simulationPathAndTree.Item2.Simulations.Count(), coordinatorSettings.LookAheadMapekCycles);
             }
@@ -72,5 +84,78 @@ namespace TestProject {
             // Assert
             Assert.True(true);
         }
+    }
+
+    /* This is now a horrible mix of functional and imperative code:
+    - in principle Aggregate() would handle the state for us
+    - but we've now constructed the whole mess in such a way that the generic part is taken care off by destructively modifying the
+        PropertyCache with our elements derived from the structure of the FOp...
+    */
+    internal class AccState : FOp<AccState> {
+        int depth = 0;
+
+        public Fitness<AccState> Fitness { set; get; }
+
+        public AccState(Fitness<AccState> fitness, Property prop) {
+            this.Fitness = fitness;
+            fitness.Set(new Property(){ Name = prop.Name+"_ACC", OwlType = prop.OwlType, Value=null}, prop.Value);
+        }
+
+        public override void Eval(Fitness<AccState> fitness, Simulation sim) {
+            depth++;
+        }
+    }
+    
+    internal class FAccFloat(Property prop) : FAcc<AccState>(prop) {
+        public override object Operation(object v, object value) { return (double) v + (double) value; }
+    }
+
+    internal class Fitness<T> {
+        Simulation previous;
+        // We abuse the property-cache to keep state:
+        public IDictionary<string, object> Properties { get; init; } = new Dictionary<string, object>() {};
+        // We support multiple "root" expressions.
+        required public IEnumerable<FOp<T>> FOps { get; init;}
+
+        public Fitness(Simulation simulation) {
+            previous = simulation;
+        }
+
+        internal T Process(T state, Simulation simulation) {
+            FOps.ForEach(fop => fop.Eval(this, simulation));
+            previous = simulation;
+            return state; // XXX             
+        }
+
+        internal void Set(Property prop, object value) {
+            Properties[prop.Name] = value;
+        }
+
+        internal object Get(Property prop) {
+            object outP = null;
+            Properties.TryGetValue(prop.Name, out outP);
+            return outP;
+        }
+}
+
+    abstract class FOp<T> {
+        public abstract void Eval(Fitness<T> fitness, Simulation sim);
+    }
+    abstract class FAcc<T> : FOp<T> {
+        // We accumulate the values of a property by overriding `Operation`.
+        // Construct "fake" property to hold accumulator value
+        public FAcc(Property prop) {
+            this.Prop = prop;
+            this.Acc = new Property() { OwlType = prop.OwlType, Name = Prop.Name+"_ACC", Value=null}; // XXX Unsafe name construction
+        }
+
+        public override void Eval(Fitness<T> fitness, Simulation sim) {
+             fitness.Set(Acc, Operation(fitness.Get(Acc), sim.PropertyCache.Properties[Prop.Name].Value));
+        }
+
+        public abstract object Operation(object v, object value);
+
+        public Property Prop { get; }
+        public Property Acc { get; }
     }
 }

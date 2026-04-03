@@ -64,7 +64,7 @@ initial equation
   RoomTemperature = RoomTemperatureInitial;
   RoomHumidity = RoomHumidityInitial;
   EnergyConsumption = EnergyConsumptionInitial;
-equation  
+equation
   der(RoomTemperature) = (GetRoomTemperatureLimit(Heater, FloorHeating) - RoomTemperature) / slowdownValue;
   der(RoomHumidity) = (GetRoomHumidityLimit(Dehumidifier) - RoomHumidity) / slowdownValue;
   der(EnergyConsumption) = GetEnergyConsumptionRate(Heater, FloorHeating, Dehumidifier);

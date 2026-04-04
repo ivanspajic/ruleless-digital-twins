@@ -217,7 +217,7 @@ namespace TestProject {
                 LookAheadMapekCycles = 4,
                 MaximumMapekRounds = 4,
                 StartInReactiveMode = false,
-                SimulationDurationSeconds = 10,
+                CycleDurationSeconds = 10,
                 Environment = "incubator"
             });
             mapekKnowledge = new MapekKnowledge(mock);

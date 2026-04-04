@@ -10,7 +10,7 @@
 
         public bool UseCaseBasedFunctionality { get; set; }
 
-        public int SimulationDurationSeconds { get; set; }
+        public int CycleDurationSeconds { get; set; }
 
         public int LookAheadMapekCycles { get; set; }
 

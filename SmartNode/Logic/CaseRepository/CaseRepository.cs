@@ -22,11 +22,11 @@ namespace Logic.CaseRepository {
         public Case ReadCase(IEnumerable<Property> quantizedProperties,
             IEnumerable<OptimalCondition> quantizedOptimalConditions,
             int lookAheadCycles,
-            int simulationDurationSeconds,
+            int cycleDurationSeconds,
             int caseIndex) {
             var potentialMatches = _caseCollection.Find(element =>
                 element.LookAheadCycles == lookAheadCycles &&
-                element.SimulationDurationSeconds == simulationDurationSeconds &&
+                element.CycleDurationSeconds == cycleDurationSeconds &&
                 element.Index == caseIndex)
                 .ToEnumerable();
 

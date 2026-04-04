@@ -132,7 +132,7 @@ namespace TestProject {
                 ID = null,
                 Index = 0,
                 LookAheadCycles = 2,
-                SimulationDurationSeconds = 100,
+                CycleDurationSeconds = 100,
                 Simulation = simulationPath.Simulations.First(),
                 QuantizedOptimalConditions = new List<OptimalCondition> {
                     new OptimalCondition {
@@ -179,7 +179,7 @@ namespace TestProject {
                 ID = null,
                 Index = 0,
                 LookAheadCycles = 2,
-                SimulationDurationSeconds = 150,
+                CycleDurationSeconds = 150,
                 Simulation = simulationPath.Simulations.First(),
                 QuantizedOptimalConditions = new List<OptimalCondition> {
                     new OptimalCondition {
@@ -398,7 +398,7 @@ namespace TestProject {
                 LookAheadMapekCycles = 2,
                 MaximumMapekRounds = 2,
                 PropertyValueFuzziness = 0.25,
-                SimulationDurationSeconds = 100
+                CycleDurationSeconds = 100
             };
             var serviceProviderMock = new ServiceProviderMock();
             serviceProviderMock.Add(filepathArguments);
@@ -428,7 +428,7 @@ namespace TestProject {
                 ID = null,
                 Index = 0,
                 LookAheadCycles = 2,
-                SimulationDurationSeconds = 100,
+                CycleDurationSeconds = 100,
                 Simulation = simulationPath.Simulations.First(),
                 QuantizedOptimalConditions = new List<OptimalCondition> {
                     new OptimalCondition {

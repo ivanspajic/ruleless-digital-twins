@@ -13,7 +13,7 @@ namespace Logic.Models.DatabaseModels {
 
         public int LookAheadCycles { get; set; }
 
-        public int SimulationDurationSeconds { get; set; }
+        public int CycleDurationSeconds { get; set; }
 
         public int Index { get; set; }
 

@@ -31,7 +31,7 @@ namespace TestProject {
                 MaximumMapekRounds = 4,
                 PropertyValueFuzziness = 0.25,
                 SaveMapekCycleData = false,
-                SimulationDurationSeconds = 3600,
+                CycleDurationSeconds = 3600,
                 SleepyTimeMilliseconds = 0,
                 StartInReactiveMode = false,
                 UseCaseBasedFunctionality = false,

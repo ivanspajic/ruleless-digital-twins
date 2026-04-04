@@ -105,7 +105,7 @@ namespace TestProject
                 LookAheadMapekCycles = 4,
                 MaximumMapekRounds = 4,
                 StartInReactiveMode = false,
-                SimulationDurationSeconds = 10,
+                CycleDurationSeconds = 10,
                 Environment = ""
             });
             // TODO: not sure anymore if pulling it out was actually necessary in the end:

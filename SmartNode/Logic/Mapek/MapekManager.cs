@@ -263,7 +263,7 @@ namespace Logic.Mapek {
                 var savedCase = _caseRepository.ReadCase(quantizedProperties,
                     quantizedOptimalConditions,
                     _coordinatorSettings.LookAheadMapekCycles,
-                    _coordinatorSettings.SimulationDurationSeconds,
+                    _coordinatorSettings.CycleDurationSeconds,
                     i);
 
                 // If no case is found, return a null.
@@ -291,7 +291,7 @@ namespace Logic.Mapek {
                 ID = null,
                 Index = firstSimulation.Index,
                 LookAheadCycles = _coordinatorSettings.LookAheadMapekCycles,
-                SimulationDurationSeconds = _coordinatorSettings.SimulationDurationSeconds,
+                CycleDurationSeconds = _coordinatorSettings.CycleDurationSeconds,
                 QuantizedOptimalConditions = quantizedObservedOptimalConditions,
                 QuantizedProperties = quantizedObservedProperties,
                 Simulation = firstSimulation

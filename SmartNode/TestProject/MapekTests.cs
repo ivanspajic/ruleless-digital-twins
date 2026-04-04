@@ -95,7 +95,7 @@ namespace TestProject {
     - but we've now constructed the whole mess in such a way that the generic part is taken care off by destructively modifying the
         PropertyCache with our elements derived from the structure of the FOp...
     - the elements in the cache will be derived from the hash code of the operation which should make them unique.
-    - TODO: binary operators where `Eval()` descends, and an if-then-else-like projection
+    - TODO: an if-then-else-like projection, comparisons...
     */
     internal class AccState {
 

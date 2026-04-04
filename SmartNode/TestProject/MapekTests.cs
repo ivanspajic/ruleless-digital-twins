@@ -3,6 +3,7 @@ using Logic.Mapek;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using System.Diagnostics;
+using System.Numerics;
 using System.Reflection;
 using TestProject.Mocks.ServiceMocks;
 using Xunit.Internal;
@@ -66,11 +67,14 @@ namespace TestProject {
 
                 // Test property we want to accumulate:
                 Property prop = cache.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperature"];
-                Fitness<AccState> fitness = new(path.First()) {                    
-                    FOps = new[] { new FAccFloat(prop) }
+                var f1 = new FAcc<double>(prop);
+                var f2 = new FAvg<double>(prop);
+                var f3 = new FBinOpSum(f1,f2);
+                Fitness fitness = new(path.First()) {                    
+                    FOps = new FOp[] { f1, f2, f3 }
                 };
 
-                var result = path.Skip(1).Aggregate(new AccState(fitness, prop), fitness.Process);
+                var result = path.Skip(1).Aggregate(fitness.MkState(), fitness.Process);
                 
                 Debug.WriteLine(string.Join(",",result.Fitness.Properties));
 
@@ -90,72 +94,153 @@ namespace TestProject {
     - in principle Aggregate() would handle the state for us
     - but we've now constructed the whole mess in such a way that the generic part is taken care off by destructively modifying the
         PropertyCache with our elements derived from the structure of the FOp...
+    - the elements in the cache will be derived from the hash code of the operation which should make them unique.
+    - TODO: binary operators where `Eval()` descends, and an if-then-else-like projection
     */
-    internal class AccState : FOp<AccState> {
-        int depth = 0;
+    internal class AccState {
 
-        public Fitness<AccState> Fitness { set; get; }
-
-        public AccState(Fitness<AccState> fitness, Property prop) {
-            this.Fitness = fitness;
-            fitness.Set(new Property(){ Name = prop.Name+"_ACC", OwlType = prop.OwlType, Value=null}, prop.Value);
-        }
-
-        public override void Eval(Fitness<AccState> fitness, Simulation sim) {
-            depth++;
-        }
-    }
-    
-    internal class FAccFloat(Property prop) : FAcc<AccState>(prop) {
-        public override object Operation(object v, object value) { return (double) v + (double) value; }
-    }
-
-    internal class Fitness<T> {
-        Simulation previous;
         // We abuse the property-cache to keep state:
         public IDictionary<string, object> Properties { get; init; } = new Dictionary<string, object>() {};
-        // We support multiple "root" expressions.
-        required public IEnumerable<FOp<T>> FOps { get; init;}
-
-        public Fitness(Simulation simulation) {
-            previous = simulation;
-        }
-
-        internal T Process(T state, Simulation simulation) {
-            FOps.ForEach(fop => fop.Eval(this, simulation));
-            previous = simulation;
-            return state; // XXX             
-        }
 
         internal void Set(Property prop, object value) {
             Properties[prop.Name] = value;
         }
 
         internal object Get(Property prop) {
-            object outP = null;
+            object outP;
             Properties.TryGetValue(prop.Name, out outP);
             return outP;
         }
-}
 
-    abstract class FOp<T> {
-        public abstract void Eval(Fitness<T> fitness, Simulation sim);
+        public AccState(Fitness fitness) {
+            foreach (var o in fitness.FOps) {
+                // Could probably be nicer/Zip...
+                var ivs = o.MkInitialValues().GetEnumerator();
+                foreach (var p in o.MkProps()) {
+                    ivs.MoveNext();
+                    Set(p, ivs.Current);
+                }
+            }
+        }
     }
-    abstract class FAcc<T> : FOp<T> {
+    
+    // Computer the average of a property.
+    // TODO: Should probably inherit from Facc<>, but I didn't manage reuse of the superclass yet.
+    class FAvg<T> : FOp where T : INumber<T> {
+        int counter = 1;
+        public FAvg(Property prop) {
+            this.Orig = prop;
+            this.Acc = new Property() { OwlType = prop.OwlType, Name = GetHashCode().ToString()+"_ACC", Value=null};
+            // Output:
+            this.Prop = new Property() { OwlType = prop.OwlType, Name = GetHashCode().ToString()+"_AVG", Value=null};
+        }
+
+        internal override IEnumerable<object> MkInitialValues() {
+            return new[] {Orig.Value, Orig.Value};
+        }
+
+        internal override IEnumerable<Property> MkProps() {
+            return new[] {Prop, Acc};
+        }
+
+        public override void Eval(AccState in_state, Simulation sim, AccState out_state) {
+            counter++;
+            out_state.Set(Acc, (T)in_state.Get(Acc) + (T)sim.PropertyCache.Properties[Orig.Name].Value);
+            out_state.Set(Prop, (T)out_state.Get(Acc) / T.CreateChecked(counter));
+        }
+
+        Property Acc { get; }
+        Property Orig { get; }
+    }
+
+    internal class Fitness {
+        Simulation previous;        
+        // We support multiple "root" expressions.
+        required public IEnumerable<FOp> FOps { get; init;}
+
+        public Fitness(Simulation simulation) {
+            previous = simulation;
+        }
+
+        internal AccState Process(AccState state, Simulation simulation) {
+            // Update `state` in place:
+            FOps.ForEach(fop => fop.Eval(state, simulation, state));
+            previous = simulation;
+            return state;
+        }
+
+        internal AccState MkState() {
+            return new AccState(this);
+        }
+    }
+
+    abstract class FOp {
+        public abstract void Eval(AccState in_state, Simulation sim, AccState out_state);
+        internal abstract IEnumerable<object> MkInitialValues();
+        internal abstract IEnumerable<Property> MkProps();
+        // If we need a value, that's where it is:
+        public Property Prop { get; set; }
+    }
+
+    abstract class FBinOp : FOp {
+        public FBinOp(FOp left, FOp right) {
+            this.L = left;
+            this.R = right;
+            // XXX Other datatypes...
+            this.Prop = new Property() { OwlType = "http://www.w3.org/2001/XMLSchema#double", Name = GetHashCode().ToString()+"_BinOp", Value=null};
+        }
+
+        internal override IEnumerable<object> MkInitialValues() {
+            return new object[] { (int)0 };
+        }
+
+        internal override IEnumerable<Property> MkProps() {
+            return new[] { Prop };
+        }
+
+        public override void Eval(AccState in_state, Simulation sim, AccState out_state) {
+            // Evaluate both sides independently:
+            L.Eval(in_state, sim, out_state);
+            R.Eval(in_state, sim, out_state);
+            out_state.Set(Prop, Operation(out_state.Get(L.Prop), out_state.Get(R.Prop)));
+        }
+
+        // TODO: would be nice to have a type parameter here tied to the OwlType above:
+        protected abstract object Operation(object v1, object v2);
+
+        FOp L { get; }
+        FOp R { get; }
+    }
+
+    class FBinOpSum : FBinOp {
+        public FBinOpSum(FOp left, FOp right) : base(left, right) {}
+
+        protected override object Operation(object v1, object v2) {
+            return ((double) v1 + (double) v2);
+        }
+    }
+
+    class FAcc<T> : FOp where T : INumber<T> {
         // We accumulate the values of a property by overriding `Operation`.
-        // Construct "fake" property to hold accumulator value
+        // Construct "fake" property to hold accumulator value derived from the object id(!), not the name.
         public FAcc(Property prop) {
-            this.Prop = prop;
-            this.Acc = new Property() { OwlType = prop.OwlType, Name = Prop.Name+"_ACC", Value=null}; // XXX Unsafe name construction
+            this.Orig = prop;
+            this.Prop = new Property() { OwlType = prop.OwlType, Name = GetHashCode().ToString()+"_ACC", Value=null};
         }
 
-        public override void Eval(Fitness<T> fitness, Simulation sim) {
-             fitness.Set(Acc, Operation(fitness.Get(Acc), sim.PropertyCache.Properties[Prop.Name].Value));
+        internal override IEnumerable<object>  MkInitialValues() {
+            // Explicitly fetch initial value
+            return new[] {Orig.Value};
         }
 
-        public abstract object Operation(object v, object value);
+        internal override IEnumerable<Property> MkProps() {
+            return new[] {Prop};
+        }
 
-        public Property Prop { get; }
-        public Property Acc { get; }
+        public override void Eval(AccState in_state, Simulation sim, AccState out_state) {
+             out_state.Set(Prop, (T)in_state.Get(Prop) + (T)sim.PropertyCache.Properties[Orig.Name].Value);
+        }
+
+        Property Orig { get; }
     }
 }

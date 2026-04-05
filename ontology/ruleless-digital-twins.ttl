@@ -152,6 +152,14 @@ xsd:duration rdf:type rdfs:Datatype .
                                                rdfs:label "generateCombinationsOnlyFromOptimalConditions"@en .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActiveActuatorState
+:hasActiveActuatorState rdf:type owl:DatatypeProperty ;
+                        rdfs:domain <http://www.w3.org/ns/sosa/Actuator> ;
+                        rdfs:range rdfs:Literal ;
+                        rdfs:comment "Represents the relationship between an Actuator and a literal that is its currently active state."@en ;
+                        rdfs:label "hasActiveActuatorState"@en .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorName
 :hasActuatorName rdf:type owl:DatatypeProperty ;
                  rdfs:comment "Work in progress. Currently enables cohesion with some models and their respective FMUs." .
@@ -404,6 +412,10 @@ xsd:duration rdf:type rdfs:Datatype .
 <http://www.w3.org/ns/sosa/Actuator> rdfs:subClassOf [ rdf:type owl:Restriction ;
                                                        owl:onProperty :hasActuatorState ;
                                                        owl:minCardinality "1"^^xsd:nonNegativeInteger
+                                                     ] ,
+                                                     [ rdf:type owl:Restriction ;
+                                                       owl:onProperty :hasActiveActuatorState ;
+                                                       owl:cardinality "1"^^xsd:nonNegativeInteger
                                                      ] .
 
 

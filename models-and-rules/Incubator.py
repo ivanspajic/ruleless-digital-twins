@@ -16,12 +16,14 @@ heaterActuator = Actuator(g, MINE["HeaterActuator"], heaterChange)
 g.add((heaterActuator.node, RDT["hasActuatorName"], Literal("in_heater_state", datatype=XSD.string)))
 g.add((heaterActuator.node, RDT["hasActuatorState"], Literal("0", datatype=XSD.int)))
 g.add((heaterActuator.node, RDT["hasActuatorState"], Literal("1", datatype=XSD.int)))
+g.add((heaterActuator.node, RDT["hasActiveActuatorState"], Literal("0", datatype=XSD.int)))
 
 rtemp = ObservableProperty(g, MINE["in_room_temperature"])
 rtempActuator = Actuator(g, MINE["TempActuator"], Change(g, MINE["TempChange"], rtemp))
 g.add((rtempActuator.node, RDT["hasActuatorName"], Literal("in_room_temperature", datatype=XSD.string)))
 # TODO: Absence triggers a runtime error
 g.add((rtempActuator.node, RDT["hasActuatorState"], Literal("21.0", datatype=XSD.double)))
+g.add((rtempActuator.node, RDT["hasActiveActuatorState"], Literal("21.0", datatype=XSD.double)))
 g.add((rtempActuator.node, RDT["isParameter"], Literal("true", datatype=XSD.boolean)))
 
 minTemp = Property(g, MINE["TemperatureLowerLimit"], 30)

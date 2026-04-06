@@ -190,25 +190,37 @@ namespace Logic.Mapek {
             var quantizedProperties = new List<Property>();
 
             foreach (var configurableParameterKeyValuePair in configurableParameters) {
-                var valueHandler = _factory.GetValueHandlerImplementation(configurableParameterKeyValuePair.Value.OwlType);
-                var quantizedValue = valueHandler.GetQuantizedValue(configurableParameterKeyValuePair.Value.Value, _coordinatorSettings.PropertyValueFuzziness);
-                var quantizedConfigurableParameter = new ConfigurableParameter {
-                    Name = configurableParameterKeyValuePair.Value.Name,
-                    OwlType = configurableParameterKeyValuePair.Value.OwlType,
-                    Value = quantizedValue
-                };
-                quantizedProperties.Add(quantizedConfigurableParameter);
+                var configurableParameterType = configurableParameterKeyValuePair.Value.OwlType;
+                // We're only interested in quantizing for double values given the deviations we're willing to tolerate (e.g., 0.25).
+                if (configurableParameterType.Equals("http://www.w3.org/2001/XMLSchema#double")) {
+                    var valueHandler = _factory.GetValueHandlerImplementation(configurableParameterKeyValuePair.Value.OwlType);
+                    var quantizedValue = valueHandler.GetQuantizedValue(configurableParameterKeyValuePair.Value.Value, _coordinatorSettings.PropertyValueFuzziness);
+                    var quantizedConfigurableParameter = new ConfigurableParameter {
+                        Name = configurableParameterKeyValuePair.Value.Name,
+                        OwlType = configurableParameterKeyValuePair.Value.OwlType,
+                        Value = quantizedValue
+                    };
+                    quantizedProperties.Add(quantizedConfigurableParameter);
+                } else {
+                    quantizedProperties.Add(configurableParameterKeyValuePair.Value);
+                }
             }
 
             foreach (var propertyKeyValuePair in properties) {
-                var valueHandler = _factory.GetValueHandlerImplementation(propertyKeyValuePair.Value.OwlType);
-                var quantizedValue = valueHandler.GetQuantizedValue(propertyKeyValuePair.Value.Value, _coordinatorSettings.PropertyValueFuzziness);
-                var quantizedProperty = new Property {
-                    Name = propertyKeyValuePair.Value.Name,
-                    OwlType = propertyKeyValuePair.Value.OwlType,
-                    Value = quantizedValue
-                };
-                quantizedProperties.Add(quantizedProperty);
+                var propertyType = propertyKeyValuePair.Value.OwlType;
+                // We're only interested in quantizing for double values given the deviations we're willing to tolerate (e.g., 0.25).
+                if (propertyType.Equals("http://www.w3.org/2001/XMLSchema#double")) {
+                    var valueHandler = _factory.GetValueHandlerImplementation(propertyKeyValuePair.Value.OwlType);
+                    var quantizedValue = valueHandler.GetQuantizedValue(propertyKeyValuePair.Value.Value, _coordinatorSettings.PropertyValueFuzziness);
+                    var quantizedProperty = new Property {
+                        Name = propertyKeyValuePair.Value.Name,
+                        OwlType = propertyKeyValuePair.Value.OwlType,
+                        Value = quantizedValue
+                    };
+                    quantizedProperties.Add(quantizedProperty);
+                } else {
+                    quantizedProperties.Add(propertyKeyValuePair.Value);
+                }
             }
 
             return quantizedProperties;
@@ -218,15 +230,21 @@ namespace Logic.Mapek {
             var quantizedOptimalConditions = new List<OptimalCondition>();
 
             foreach (var optimalCondition in optimalConditions) {
-                var valueHandler = _factory.GetValueHandlerImplementation(optimalCondition.Property.OwlType);
-                var constraint = GetQuantizedOptimalConditionConstraint(optimalCondition.ConditionConstraint, valueHandler);
+                var optimalConditionType = optimalCondition.Property.OwlType;
+                // We're only interested in quantizing for double values given the deviations we're willing to tolerate (e.g., 0.25).
+                if (optimalConditionType.Equals("http://www.w3.org/2001/XMLSchema#double")) {
+                    var valueHandler = _factory.GetValueHandlerImplementation(optimalConditionType);
+                    var constraint = GetQuantizedOptimalConditionConstraint(optimalCondition.ConditionConstraint, valueHandler);
 
-                quantizedOptimalConditions.Add(new OptimalCondition {
-                    ConditionConstraint = constraint,
-                    Name = optimalCondition.Name,
-                    Property = optimalCondition.Property,
-                    ReachedInMaximumSeconds = optimalCondition.ReachedInMaximumSeconds
-                });
+                    quantizedOptimalConditions.Add(new OptimalCondition {
+                        ConditionConstraint = constraint,
+                        Name = optimalCondition.Name,
+                        Property = optimalCondition.Property,
+                        ReachedInMaximumSeconds = optimalCondition.ReachedInMaximumSeconds
+                    });
+                } else {
+                    quantizedOptimalConditions.Add(optimalCondition);
+                }
             }
 
             return quantizedOptimalConditions;

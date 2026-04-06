@@ -101,7 +101,7 @@ namespace TestProject {
             mapekKnowledge.Validate(propertyCacheMock);
 
             // TODO: Assert that there's at least one actuator that's not a parameter.
-            var (simulationTree, simulationPath) = mapekPlan.Plan(new Cache() { PropertyCache = propertyCacheMock, OptimalConditions = [], SoftSensorTreeNodes = [] }).Result;
+            var (simulationTree, simulationPath) = mapekPlan.Plan(new Cache() { PropertyCache = propertyCacheMock, OptimalConditions = [], SoftSensorTreeNodes = [], Actuators = new Dictionary<string, Actuator>() }).Result;
             crashed = false;
 
             // Only valid AFTER focing evaluation through simulation:
@@ -282,6 +282,8 @@ namespace TestProject {
             internal class AMQHeater() : IActuator
             {
                 public string ActuatorName => "Incubator Heater";
+
+                public object ActuatorState => "0";
 
                 public async Task Actuate(object state) {
                     var _actuatorState = int.Parse((string)state);

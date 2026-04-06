@@ -4,21 +4,32 @@ using System.Globalization;
 
 namespace Implementations.Actuators.RoomM370
 {
-    public class DummyHeater : IActuator
-    {
+    public class DummyHeater : IActuator {
+        private const string DefaultState = "0";
+        private object _currentState = null!;
+
         private int _actuatorState = 0;
         private readonly DummyRoomM370 _dummyRoomM370;
 
-        public DummyHeater(string actuatorName)
-        {
+        public DummyHeater(string actuatorName) {
             ActuatorName = actuatorName;
             _dummyRoomM370 = DummyRoomM370.Instance;
         }
 
         public string ActuatorName { get; }
 
-        public async Task Actuate(object state)
-        {
+        public object ActuatorState {
+            get {
+                return _currentState ?? DefaultState;
+            }
+            private set {
+                _currentState = value;
+            }
+        }
+
+        public async Task Actuate(object state) {
+            ActuatorState = state;
+
             if (state is not int) {
                 state = int.Parse(state.ToString()!, CultureInfo.InvariantCulture);
             }

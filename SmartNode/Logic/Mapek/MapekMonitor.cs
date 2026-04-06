@@ -27,7 +27,8 @@ namespace Logic.Mapek {
                     ConfigurableParameters = new Dictionary<string, ConfigurableParameter>()
                 },
                 SoftSensorTreeNodes = new List<SoftSensorTreeNode>(),
-                OptimalConditions = new List<OptimalCondition>()
+                OptimalConditions = new List<OptimalCondition>(),
+                Actuators = new Dictionary<string, Actuator>(),
             };
 
             // Get the values of all ConfigurableParameters and populate the cache.
@@ -74,6 +75,8 @@ namespace Logic.Mapek {
 
             // This is necessary for the current fitness function and case-based functionality.
             cache.OptimalConditions = _mapekKnowledge.GetAllOptimalConditions(cache.PropertyCache);
+
+            PopulateActuatorCache(cache.Actuators);
 
             return cache;
         }
@@ -294,6 +297,30 @@ namespace Logic.Mapek {
             }
 
             _mapekKnowledge.CommitInMemoryInstanceModelToKnowledgeBase();
+        }
+
+        private void PopulateActuatorCache(IDictionary<string, Actuator> actuators) {
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState WHERE {
+                ?actuator rdf:type sosa:Actuator .
+                ?actuator meta:hasActuatorState ?actuatorState . }");
+
+            var queryResult = _mapekKnowledge.ExecuteQuery(query);
+
+            foreach (var result in queryResult.Results) {
+                var actuatorName = result["actuator"].ToString();
+                var actuatorType = result["actuatorState"].ToString().Split("^^")[1];
+                var actuatorState = _factory.GetActuatorImplementation(actuatorName).ActuatorState;
+
+                // The query result contains unique combinations for every actuator and actuator state. Since we only care about the state because of the type,
+                // we only need the first result of an actuator and its type in the collection.
+                if (!actuators.ContainsKey(actuatorName)) {
+                    actuators.Add(actuatorName, new Actuator {
+                        Name = actuatorName,
+                        Type = actuatorType,
+                        State = actuatorState
+                    });
+                }
+            }
         }
     }
 }

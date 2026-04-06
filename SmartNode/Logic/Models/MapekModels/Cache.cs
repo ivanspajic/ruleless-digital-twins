@@ -7,5 +7,7 @@ namespace Logic.Models.MapekModels {
         public required IEnumerable<SoftSensorTreeNode> SoftSensorTreeNodes { get; set; }
 
         public required IEnumerable<OptimalCondition> OptimalConditions { get; set; }
+
+        public required IDictionary<string, Actuator> Actuators { get; set; }
     }
 }

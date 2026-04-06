@@ -20,8 +20,8 @@ namespace Logic.Mapek
         // act as mitigations against violated OptimalConditions. The proactive mode generates all possible Actions from all Actuators and/or ConfigurableParameters in the
         // instance model.
         private readonly bool _restrictToReactiveActionsOnly;
-        // Used for performance enhancements.
-        private bool _restrictToReactiveActionsOnlyOld;
+        private bool _restrictToReactiveActionsOnlyOld; // Used for performance enhancements.
+        private bool _javaInvocationAsyncError = false; // Used to track async errors from Java invocation.
 
         private bool _savedReactiveSetting = false;
 
@@ -30,7 +30,6 @@ namespace Logic.Mapek
         private readonly IFactory _factory;
         private readonly IMapekKnowledge _mapekKnowledge;
         private readonly FilepathArguments _filepathArguments;
-        private bool javaInvocationAsyncError = false; // Used to track async errors from Java invocation.
 
         public MapekPlan(IServiceProvider serviceProvider)
         {
@@ -45,6 +44,12 @@ namespace Logic.Mapek
 
         public async Task<(SimulationTreeNode, SimulationPath)> Plan(Cache cache) {
             _logger.LogInformation("Starting the Plan phase.");
+
+            if (_coordinatorSettings.UseDecisionLagMitigation) {
+                _logger.LogInformation("Decision lag mitigation active. Estimating real-world simulation duration.");
+
+                cache.PropertyCache = await GetDecisionLagMitigationPropertyCache(_coordinatorSettings.LookAheadMapekCycles, cache.Actuators, cache.PropertyCache, cache.SoftSensorTreeNodes);
+            }
 
             _logger.LogInformation("Generating simulations.");
 
@@ -66,6 +71,86 @@ namespace Logic.Mapek
             LogOptimalSimulationPath(optimalSimulationPath);
 
             return (simulationTree, optimalSimulationPath!);
+        }
+
+        // Estimates how long simulation will take in real-world time to more accurately predict how the observed conditions change between data observation and decision execution.
+        // It uses the full number of Actuators and their states to make a 'worst-case scenario' prediction (proactive mode). Reactive mode is difficult to accomplish without simulating.
+        // This currently only supports physical TT components (Actuators through ActuationActions).
+        private async Task<PropertyCache> GetDecisionLagMitigationPropertyCache(int lookAheadCycles,
+            IDictionary<string, Actuator> actuatorCache,
+            PropertyCache propertyCache,
+            IEnumerable<SoftSensorTreeNode> softSensorTreeNodes) {
+            var fakeSimulationsToRunForAverageDuration = 100;
+
+            // Get the total number of simulations (proactive mode).
+            var numberOfSimulations = GetNumberOfSimulations(lookAheadCycles);
+
+            // Construct fake ActuationActions for the fake simulations.
+            var fakeActuationActions = new List<ActuationAction>();
+            foreach (var actuatorKeyValue in actuatorCache) {
+                fakeActuationActions.Add(new ActuationAction {
+                    Actuator = actuatorKeyValue.Value,
+                    Name = actuatorKeyValue.Key + actuatorKeyValue.Value.State!.ToString(),
+                    NewStateValue = actuatorKeyValue.Value.State
+                });
+            }
+
+            // Set up the parameters.
+            var fmuModel = GetHostPlatformFmuModel(_filepathArguments.FmuDirectory);
+            var simulation = new Simulation(propertyCache) {
+                Index = 0,
+                Actions = fakeActuationActions
+            };
+
+            // Measure time.
+            Stopwatch stopwatch = new();
+            stopwatch.Start();
+            for (var i = 0; i < fakeSimulationsToRunForAverageDuration; i++) {
+                ExecuteFmu(fmuModel, simulation);
+                await ExecuteSoftSensorsAndUpdateSimulationCache(simulation, softSensorTreeNodes);
+            }
+            stopwatch.Stop();
+
+            // Calculate the estimated duration for the total number of simulations.
+            var estimatedRealWorldSimulationDurationSeconds = stopwatch.ElapsedMilliseconds / fakeSimulationsToRunForAverageDuration / 1000.0 * numberOfSimulations;
+
+            // Reset the simulation to use the original PropertyCache.
+            simulation = new Simulation(propertyCache) {
+                Index = 0,
+                Actions = fakeActuationActions
+            };
+
+            // Execute the decision lag mitigation simulation to get the predicted Property values at the time of decision execution.
+            ExecuteFmu(fmuModel, simulation, estimatedRealWorldSimulationDurationSeconds);
+
+            return simulation.PropertyCache;
+        }
+
+        private int GetNumberOfSimulations(int lookAheadCycles) {
+            // Get counts of Actuator states grouped by Actuator.
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator (COUNT(?actuatorState) as ?actuatorStateCount) WHERE {
+                ?actuator rdf:type sosa:Actuator .
+                ?actuator meta:hasActuatorState ?actuatorState. }
+                GROUP BY ?actuator");
+
+            var queryResult = _mapekKnowledge.ExecuteQuery(query);
+
+            // Calculate the total number of unique combinations.
+            var totalCombinations = 1.0;
+            foreach (var result in queryResult.Results) {
+                var actuatorStateCountString = result["actuatorStateCount"].ToString().Split("^")[0];
+                var actuatorStateCount = int.Parse(actuatorStateCountString);
+
+                totalCombinations *= actuatorStateCount;
+            }
+
+            // Calculate the total number of simulations.
+            var totalSimulations = 0.0;
+            for (var i = lookAheadCycles; i > 0; i--) {
+                totalSimulations += Math.Pow(totalCombinations, i);
+            }
+
+            return (int)totalSimulations;
         }
 
         // TODO: consider making this async in the future.
@@ -232,12 +317,12 @@ namespace Logic.Mapek
                 throw new Exception($"The inference engine encountered an error. Process {process.Id} exited with code {process.ExitCode}.");
             }
 
-            Debug.Assert(!javaInvocationAsyncError, "Inconsistencies detected.");
+            Debug.Assert(!_javaInvocationAsyncError, "Inconsistencies detected.");
             _logger.LogInformation("Process {processId} exited with code {processExitCode}.", process.Id, process.ExitCode);
         }
 
         private void SetError() {
-            javaInvocationAsyncError = true;
+            _javaInvocationAsyncError = true;
         }
 
         // This method currently only supports ActuationActions.
@@ -371,6 +456,9 @@ namespace Logic.Mapek
 
         internal async Task Simulate(IEnumerable<Simulation> simulations, IEnumerable<SoftSensorTreeNode> softSensorTreeNodes)
         {
+            // Retrieve the host platform FMU and its simulation fidelity for ActuationAction simulations.
+            var fmuModel = GetHostPlatformFmuModel(_filepathArguments.FmuDirectory);
+
             // Measure simulation time.
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -379,9 +467,6 @@ namespace Logic.Mapek
             // TODO: Parallelize simulations (#13).
             foreach (var simulation in simulations)
             {
-                // Retrieve the host platform FMU and its simulation fidelity for ActuationAction simulations.
-                var fmuModel = GetHostPlatformFmuModel(simulation, _filepathArguments.FmuDirectory);
-
                 _logger.LogInformation("Running simulation #{run}", i++);
 
                 // Perform the simulation via FMU execution and ensure all the Properties in the simulation's property cache are updated by running all soft sensors
@@ -471,7 +556,7 @@ namespace Logic.Mapek
             return observableProperties;
         }
 
-        private FmuModel GetHostPlatformFmuModel(Simulation simulation, string fmuDirectory) {
+        private FmuModel GetHostPlatformFmuModel(string fmuDirectory) {
             // Retrieve the Platform (TT) FMU to be used for Actuators and/or ConfigurableParameters.
             var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?fmuModel ?fmuFilePath ?simulationFidelitySeconds WHERE {
                 ?platform rdf:type sosa:Platform .
@@ -506,7 +591,11 @@ namespace Logic.Mapek
             return new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]);
         }
 
-        private void ExecuteFmu(FmuModel fmuModel, Simulation simulation) {
+        private void ExecuteFmu(FmuModel fmuModel, Simulation simulation, double simulationDurationSeconds = 0) {
+            if (simulationDurationSeconds == 0) {
+                simulationDurationSeconds = _coordinatorSettings.CycleDurationSeconds;
+            }
+
             // The LogDebug calls here are primarily to keep an eye on crashes in the FMU which are otherwise a tad harder to track down.
             _logger.LogInformation("Simulation {simulation}", simulation); // XXX Arg useless.
             if (!_fmuDict.TryGetValue(fmuModel.Filepath, out IModel? model)) {
@@ -526,8 +615,8 @@ namespace Logic.Mapek
                 fmuInstance.Reset();
             }
             Debug.Assert(fmuInstance != null, "Instance is null after creation.");
-            _logger.LogDebug("Setting time {t}", simulation.Index * _coordinatorSettings.CycleDurationSeconds);
-            fmuInstance.StartTime(simulation.Index * _coordinatorSettings.CycleDurationSeconds, (i) => Initialization(simulation, model, i));
+            _logger.LogDebug("Setting time {t}", simulation.Index * simulationDurationSeconds);
+            fmuInstance.StartTime(simulation.Index * simulationDurationSeconds, (i) => Initialization(simulation, model, i));
 
             // Run the simulation by executing ActuationActions.
             var fmuActuationInputs = new List<(string, string, object)>();
@@ -569,7 +658,7 @@ namespace Logic.Mapek
 
             _logger.LogDebug("Tick");
             // Advance the FMU time for the duration of the simulation tick in steps of simulation fidelity.
-            var maximumSteps = (double)_coordinatorSettings.CycleDurationSeconds / fmuModel.SimulationFidelitySeconds;
+            var maximumSteps = (double)simulationDurationSeconds / fmuModel.SimulationFidelitySeconds;
             var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
             var difference = maximumSteps - maximumStepsRoundedDown;
 

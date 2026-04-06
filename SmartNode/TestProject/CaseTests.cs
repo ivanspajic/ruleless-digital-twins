@@ -305,7 +305,8 @@ namespace TestProject {
                             }
                         }
                     }
-                }
+                },
+                Actuators = new Dictionary<string, Actuator>()
             };
             var simulationResultCache = new PropertyCache {
                 ConfigurableParameters = new Dictionary<string, ConfigurableParameter> { },

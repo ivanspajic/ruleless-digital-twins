@@ -1,6 +1,4 @@
-﻿using AngleSharp.Common;
-using Femyou;
-using Logic.FactoryInterface;
+﻿using Logic.FactoryInterface;
 using Logic.Mapek;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
@@ -9,11 +7,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Reflection;
 using TestProject.Mocks.ServiceMocks;
-using VDS.Common.Tries;
-using VDS.RDF;
-using VDS.RDF.Query.Expressions.Functions.XPath.Cast;
 using Xunit.Internal;
-using ZstdSharp.Unsafe;
 
 namespace TestProject {
     public class MapekTests {
@@ -37,7 +31,7 @@ namespace TestProject {
             var coordinatorSettings = new CoordinatorSettings {
                 Environment = "roomM370",
                 LookAheadMapekCycles = 2,
-                MaximumMapekRounds = 4,
+                MaximumMapekRounds = 1,
                 PropertyValueFuzziness = 0.25,
                 SaveMapekCycleData = false,
                 SimulationDurationSeconds = 3600,
@@ -67,17 +61,24 @@ namespace TestProject {
                 var path = simulationPathAndTree.Item2.Simulations;
 
                 // Test property we want to accumulate:
-                Property prop = cache.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperature"];
+                Property prop = cache.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature"];
                 var f1 = new FAcc<double>(prop);
                 var f2 = new FAvg<double>(prop);
-                var f3 = new FBinOpSum(f1,f2);
-                Fitness fitness = new(path.First()) {                    
-                    FOps = new FOp[] { f1, f2, f3 }
+                var f3 = new FBinOpArith(f1,f2, (x,y) => x+y, name:"binop_plus");
+                var f_energy = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption");
+                var f_temp = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature");
+                var f_prod = new FBinOpArith(f_energy, f_temp, (x, y) => x * y, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyTimesTemp");
+                var f_prod_acc = new FAcc<double>(f_prod, name: "AccumulatedEnergyTimesTemp");
+                
+                Fitness fitness = new(simulationPathAndTree.Item1.NodeItem) {                    
+                    FOps = new FOp[] { f1, f2, f3, f_prod, f_prod_acc }
                 };
 
-                var result = path.Skip(1).Aggregate(fitness.MkState(), fitness.Process);
-                
-                Debug.WriteLine(string.Join(",", fitness.FOps.Select(fop => fop.Prop)));
+                var result = path.Aggregate(fitness.MkState(), fitness.Process);
+
+                Debug.WriteLine(string.Join(",", fitness.FOps.Select(fop => fop.Prop.Name + "=" + result.Get(fop.Prop))));
+                // Sanity check:
+                Assert.Equal((double)result.Get(f1.Prop) + (double)result.Get(f2.Prop), result.Get(f3.Prop));
             }
             catch (Exception exception) {
                 Debug.WriteLine(exception.Message);
@@ -181,16 +182,13 @@ namespace TestProject {
         public Property Prop { get; set; }
     }
 
-    abstract class FBinOp : FOp {
-        public FBinOp(FOp left, FOp right) {
-            this.L = left;
-            this.R = right;
-            // XXX Other datatypes...
-            this.Prop = new Property() { OwlType = "http://www.w3.org/2001/XMLSchema#double", Name = GetHashCode().ToString()+"_BinOp", Value=null};
+    class FProp : FOp {
+        public FProp(String name) { // TODO: Use Property directly?
+            this.Prop = new Property() { OwlType = "http://www.w3.org/2001/XMLSchema#double", Name = name, Value=null };
         }
 
         internal override IEnumerable<object> MkInitialValues() {
-            return new object[] { (int)0 };
+            return new object[] { (double)0 }; // XXX should read the initial value from the cache.
         }
 
         internal override IEnumerable<Property> MkProps() {
@@ -198,6 +196,32 @@ namespace TestProject {
         }
 
         public override void Eval(AccState in_state, Simulation sim, AccState out_state) {
+            // Copy current value into output:
+            out_state.Set(Prop, sim.PropertyCache.Properties[Prop.Name].Value);
+        }
+    }
+    abstract class FBinOp : FOp
+    {
+        public FBinOp(FOp left, FOp right, String? name = null)
+        {
+            this.L = left;
+            this.R = right;
+            // XXX Other datatypes...
+            this.Prop = new Property() { OwlType = "http://www.w3.org/2001/XMLSchema#double", Name = name ?? GetHashCode().ToString() + "_BinOp", Value = null };
+        }
+
+        internal override IEnumerable<object> MkInitialValues()
+        {
+            return new object[] { (int)0 };
+        }
+
+        internal override IEnumerable<Property> MkProps()
+        {
+            return new[] { Prop };
+        }
+
+        public override void Eval(AccState in_state, Simulation sim, AccState out_state)
+        {
             // Evaluate both sides independently:
             L.Eval(in_state, sim, out_state);
             R.Eval(in_state, sim, out_state);
@@ -211,25 +235,37 @@ namespace TestProject {
         FOp R { get; }
     }
 
-    class FBinOpSum : FBinOp {
-        public FBinOpSum(FOp left, FOp right) : base(left, right) {}
+    class FBinOpArith : FBinOp {
+        public FBinOpArith(FOp left, FOp right, Func<double, double, double> func, String? name = null) : base(left, right, name) {
+                this.Func = func;
+        }
+
+        public Func<double, double, double> Func { get; }
 
         protected override object Operation(object v1, object v2) {
-            return ((double) v1 + (double) v2);
+            return Func ((double)v1, (double)v2);
         }
     }
 
     class FAcc<T> : FOp where T : INumber<T> {
         // We accumulate the values of a property by overriding `Operation`.
         // Construct "fake" property to hold accumulator value derived from the object id(!), not the name.
-        public FAcc(Property prop) {
+        // The "cool" hack is that you can also use an FOp(-result) as input.
+        public FAcc(Property prop, String? name = null) {
+            this.IsOp = false; // XXX Needs another safetynet, since the Propety must come from the simulation.
             this.Orig = prop;
-            this.Prop = new Property() { OwlType = prop.OwlType, Name = GetHashCode().ToString()+"_ACC", Value=null};
+            this.Prop = new Property() { OwlType = prop.OwlType, Name = name ?? GetHashCode().ToString()+"_ACC", Value=null};
         }
 
+        public FAcc(FOp op, String? name = null) {
+            this.IsOp = true;
+            this.Orig = op.Prop;
+            this.Prop = new Property() { OwlType = op.Prop.OwlType, Name = name ?? GetHashCode().ToString() + "_ACC", Value = null };
+        }
+        
         internal override IEnumerable<object>  MkInitialValues() {
             // Explicitly fetch initial value
-            return new[] {Orig.Value};
+            return new[] {IsOp ? 0.0 : Orig.Value};
         }
 
         internal override IEnumerable<Property> MkProps() {
@@ -237,9 +273,14 @@ namespace TestProject {
         }
 
         public override void Eval(AccState in_state, Simulation sim, AccState out_state) {
-             out_state.Set(Prop, (T)in_state.Get(Prop) + (T)sim.PropertyCache.Properties[Orig.Name].Value);
+            if (IsOp) {
+                out_state.Set(Prop, (T)in_state.Get(Prop) + (T)in_state.Get(Orig)); // XXX better be sure that's already calculated
+            } else {
+                out_state.Set(Prop, (T)in_state.Get(Prop) + (T)sim.PropertyCache.Properties[Orig.Name].Value);
+            }
         }
 
         Property Orig { get; }
+        bool IsOp { get; }
     }
 }

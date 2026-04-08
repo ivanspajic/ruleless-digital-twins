@@ -55,6 +55,8 @@ namespace TestProject {
             try {
                 var cache = await monitor.Monitor();
                 var simulationPathAndTree = await plan.Plan(cache);
+
+                Assert.Equal(simulationPathAndTree.Item2.Simulations.Count(), coordinatorSettings.LookAheadMapekCycles);
             }
             catch (Exception exception) {
                 Debug.WriteLine(exception.Message);

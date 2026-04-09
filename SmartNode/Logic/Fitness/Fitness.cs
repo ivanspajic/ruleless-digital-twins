@@ -56,7 +56,7 @@ namespace Fitness {
             return new[] { Prop, Acc };
         }
 
-        public override void Eval(AccState in_state, Simulation sim, AccState out_state) {
+        internal override void Eval(AccState in_state, Simulation sim, AccState out_state) {
             counter++;
             out_state.Set(Acc, (T)in_state.Get(Acc) + (T)sim.PropertyCache.Properties[Orig.Name].Value);
             out_state.Set(Prop, (T)out_state.Get(Acc) / T.CreateChecked(counter));
@@ -66,7 +66,7 @@ namespace Fitness {
         Property Orig { get; }
     }
 
-    internal class Fitness {
+    public class Fitness {
         public Simulation previous;
         // We support multiple "root" expressions.
         required public IEnumerable<FOp> FOps { get; init; }
@@ -90,9 +90,9 @@ namespace Fitness {
         }
     }
 
-    abstract class FOp
+    public abstract class FOp
     {
-        public abstract void Eval(AccState in_state, Simulation sim, AccState out_state);
+        internal abstract void Eval(AccState in_state, Simulation sim, AccState out_state);
         internal abstract IEnumerable<object> MkInitialValues(Simulation s);
         internal abstract IEnumerable<Property> MkProps();
         // If we need a value, that's where it is:
@@ -114,7 +114,7 @@ namespace Fitness {
             return new[] { Prop };
         }
 
-        public override void Eval(AccState in_state, Simulation sim, AccState out_state)
+        internal override void Eval(AccState in_state, Simulation sim, AccState out_state)
         {
             // Copy current value into output:
             out_state.Set(Prop, sim.PropertyCache.Properties[Prop.Name].Value);
@@ -140,7 +140,7 @@ namespace Fitness {
             return new[] { Prop };
         }
 
-        public override void Eval(AccState in_state, Simulation sim, AccState out_state)
+        internal override void Eval(AccState in_state, Simulation sim, AccState out_state)
         {
             // Evaluate both sides independently:
             L.Eval(in_state, sim, out_state);
@@ -200,7 +200,7 @@ namespace Fitness {
             return new[] { Prop };
         }
 
-        public override void Eval(AccState in_state, Simulation sim, AccState out_state)
+        internal override void Eval(AccState in_state, Simulation sim, AccState out_state)
         {
             if (IsOp)
             {

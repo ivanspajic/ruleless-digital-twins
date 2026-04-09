@@ -47,8 +47,9 @@ namespace Logic.Mapek
         /// </summary>
         /// <param name="cache">The knowledge base cache consisting of Properties, Actuators, OptimalConditions, and a tree of soft Sensors for a preserved order in their execution.</param>
         /// <returns>
-        /// A (task of a) tuple of a tree of simulations and an optimal decision represented as a path from level 1 (level after root) to leaf on that tree. The simulation tree will contain
-        /// all simulations run during this phase. The decision will contain a sequence of simulations containing the actions to take and their predicted results.
+        /// A (task of a) tuple of a tree of simulations and an optimal decision represented as a path from level 1 (level after root) to leaf on that tree. Every node in the simulation tree
+        /// represents a unique decision at a given cycle (tree level). The root node represents the current cycle and contains the originally observed Property values. The decision will contains
+        /// a sequence of simulations with each containing the actions to take and their predicted results.
         /// </returns>
         public async Task<(SimulationTreeNode, SimulationPath)> Plan(Cache cache) {
             _logger.LogInformation("Starting the Plan phase.");

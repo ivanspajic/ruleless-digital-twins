@@ -55,7 +55,7 @@ class Fakepool(Fmi2Slave):
         interval = int((current_time+step_size) // self.step)
         try:
             result = self.data[interval]
-            sys.stderr.write(f"step: {current_time} {step_size} {interval} {result}\n")
+            # sys.stderr.write(f"step: {current_time} {step_size} {interval} {result}\n")
             self.notFound = False
             self.price = result
         except IndexError:

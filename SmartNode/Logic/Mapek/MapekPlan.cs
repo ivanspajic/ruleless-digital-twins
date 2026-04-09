@@ -105,7 +105,7 @@ namespace Logic.Mapek
             }
 
             // Set up the parameters.
-            var fmuModel = GetHostPlatformFmuModel(_filepathArguments.FmuDirectory);
+            var fmuModels = GetHostPlatformFmuModel(_filepathArguments.FmuDirectory);
             var simulation = new Simulation(propertyCache) {
                 Index = 0,
                 Actions = fakeActuationActions
@@ -115,7 +115,8 @@ namespace Logic.Mapek
             Stopwatch stopwatch = new();
             stopwatch.Start();
             for (var i = 0; i < fakeSimulationsToRunForAverageDuration; i++) {
-                ExecuteFmu(fmuModel, simulation);
+                Debug.Assert(fmuModels.Count() == 1);
+                ExecuteFmu(fmuModels.First(), simulation, simulation.PropertyCache); // XXX
                 await ExecuteSoftSensorsAndUpdateSimulationCache(simulation, softSensorTreeNodes);
             }
             stopwatch.Stop();
@@ -130,7 +131,7 @@ namespace Logic.Mapek
             };
 
             // Execute the decision lag mitigation simulation to get the predicted Property values at the time of decision execution.
-            ExecuteFmu(fmuModel, simulation, estimatedRealWorldSimulationDurationSeconds);
+            ExecuteFmu(fmuModels.First() /* XXX */, simulation, null, estimatedRealWorldSimulationDurationSeconds);
 
             return simulation.PropertyCache;
         }
@@ -466,7 +467,7 @@ namespace Logic.Mapek
         internal async Task Simulate(IEnumerable<Simulation> simulations, IEnumerable<SoftSensorTreeNode> softSensorTreeNodes)
         {
             // Retrieve the host platform FMU and its simulation fidelity for ActuationAction simulations.
-            var fmuModel = GetHostPlatformFmuModel(_filepathArguments.FmuDirectory);
+            var fmuModels = GetHostPlatformFmuModel(_filepathArguments.FmuDirectory);
 
             // Measure simulation time.
             var stopwatch = new Stopwatch();
@@ -474,13 +475,23 @@ namespace Logic.Mapek
 
             int i = 0;
             // TODO: Parallelize simulations (#13).
-            foreach (var simulation in simulations)
-            {
+            foreach (var simulation in simulations) {
                 _logger.LogInformation("Running simulation #{run}", i++);
 
                 // Perform the simulation via FMU execution and ensure all the Properties in the simulation's property cache are updated by running all soft sensors
                 // in the correct order.
-                ExecuteFmu(fmuModel, simulation);
+                foreach (var fmuModel in fmuModels) {
+                    // Run each FMU with the initial state
+                    var s = new Simulation(GetPropertyCacheCopy(simulation.PropertyCache!)) {
+                        Actions = simulation.Actions,
+                        InitializationActions = simulation.InitializationActions,
+                        Index = simulation.Index
+                    };
+                    // ... and merge FMU outputs:
+                    // TODO: Assert non-overlapping outputs!
+                    ExecuteFmu(fmuModel, s, simulation.PropertyCache);
+                }
+                
                 await ExecuteSoftSensorsAndUpdateSimulationCache(simulation, softSensorTreeNodes);
             }
 
@@ -565,7 +576,7 @@ namespace Logic.Mapek
             return observableProperties;
         }
 
-        private FmuModel GetHostPlatformFmuModel(string fmuDirectory) {
+        private IEnumerable<FmuModel> GetHostPlatformFmuModel(string fmuDirectory) {
             // Retrieve the Platform (TT) FMU to be used for Actuators and/or ConfigurableParameters.
             var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?fmuModel ?fmuFilePath ?simulationFidelitySeconds WHERE {
                 ?platform rdf:type sosa:Platform .
@@ -576,15 +587,16 @@ namespace Logic.Mapek
 
             var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
-            // There can theoretically be multiple Platforms hosting the same Actuator, but we limit ourselves to expect a single Platform
-            // per instance model. There should therefore be only one result.
-            var fmuModel = queryResult.Results[0];
+            var result = new List<FmuModel>();
+            foreach (var fmuModel in queryResult.Results) {
 
-            return new FmuModel {
-                Name = fmuModel["fmuModel"].ToString(),
-                Filepath = Path.Combine(fmuDirectory, fmuModel["fmuFilePath"].ToString().Split('^')[0]),
-                SimulationFidelitySeconds = int.Parse(fmuModel["simulationFidelitySeconds"].ToString().Split('^')[0])
-            };
+                result.Add(new FmuModel {
+                    Name = fmuModel["fmuModel"].ToString(),
+                    Filepath = Path.Combine(fmuDirectory, fmuModel["fmuFilePath"].ToString().Split('^')[0]),
+                    SimulationFidelitySeconds = int.Parse(fmuModel["simulationFidelitySeconds"].ToString().Split('^')[0])
+                });
+            }
+            return result;
         }
 
         // Initialize the FMU between enter/exitInitialization (#42).
@@ -600,7 +612,7 @@ namespace Logic.Mapek
             return new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]);
         }
 
-        private void ExecuteFmu(FmuModel fmuModel, Simulation simulation, double simulationDurationSeconds = 0) {
+        private void ExecuteFmu(FmuModel fmuModel, Simulation simulation, PropertyCache outCache, double simulationDurationSeconds = 0) {
             if (simulationDurationSeconds == 0) {
                 simulationDurationSeconds = _coordinatorSettings.CycleDurationSeconds;
             }
@@ -665,7 +677,7 @@ namespace Logic.Mapek
             _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
             AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
 
-            _logger.LogDebug("Tick");
+            _logger.LogDebug("Tick ({fmuName})", fmuInstance.Name);
             // Advance the FMU time for the duration of the simulation tick in steps of simulation fidelity.
             var maximumSteps = (double)simulationDurationSeconds / fmuModel.SimulationFidelitySeconds;
             var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
@@ -679,7 +691,7 @@ namespace Logic.Mapek
             // Advance the remainder of time to stay true to the simulation duration.
             fmuInstance.AdvanceTime(difference);
 
-            AssignPropertyCacheCopyValues(fmuInstance, simulation.PropertyCache!, model.Variables);
+            AssignPropertyCacheCopyValues(fmuInstance, outCache, model.Variables);
         }
 
         private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs) {

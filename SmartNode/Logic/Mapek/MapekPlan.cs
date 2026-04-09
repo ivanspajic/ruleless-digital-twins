@@ -1,4 +1,5 @@
 ﻿using Femyou;
+using Fitness;
 using Logic.FactoryInterface;
 using Logic.Mapek.Comparers;
 using Logic.Models.MapekModels;
@@ -491,14 +492,25 @@ namespace Logic.Mapek
                     // TODO: Assert non-overlapping outputs!
                     ExecuteFmu(fmuModel, s, simulation.PropertyCache);
                 }
-                
+
                 await ExecuteSoftSensorsAndUpdateSimulationCache(simulation, softSensorTreeNodes);
+                if (GetFitnessOps() != null) {
+                    Fitness.Fitness fitness = new(simulations.First()) {
+                        FOps = GetFitnessOps().ToArray()
+                    };
+                    var result = simulations.Skip(1).Aggregate(fitness.MkState(), fitness.Process);
+                }
             }
 
             stopwatch.Stop();
             _logger.LogInformation("Total simulation time (seconds): {elapsedTime}", (double)stopwatch.ElapsedMilliseconds / 1000);
         }
-        
+
+        public virtual IEnumerable<FOp> GetFitnessOps()
+        {
+            return [];
+        }
+
         private async static Task ExecuteSoftSensorsAndUpdateSimulationCache(Simulation simulation, IEnumerable<SoftSensorTreeNode> softSensorTreeNodes) {
             // Execute the tree of soft sensors in the correct order to ensure all Properties in the simulation's property cache are updated.
             foreach (var softSensorTreeNode in softSensorTreeNodes) {

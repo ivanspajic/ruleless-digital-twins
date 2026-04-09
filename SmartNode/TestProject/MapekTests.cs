@@ -59,7 +59,13 @@ namespace TestProject
             IMapekMonitor monitor = new MapekMonitor(serviceProvider);
             serviceProvider.Add(monitor);
 
-            IMapekPlan plan = new MapekPlan(serviceProvider);
+            // Test property we want to accumulate:
+            var f_energy = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption");
+            var f_temp = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#price");
+            var f_prod = new FBinOpArith(f_energy, f_temp, (x, y) => x * y, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyTimesPrice");
+            var f_prod_acc = new FAcc<double>(f_prod, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice");
+
+            IMapekPlan plan = new MMK(serviceProvider, new FOp[] { f_prod, f_prod_acc });
             serviceProvider.Add(plan);
 
             // Act
@@ -72,12 +78,7 @@ namespace TestProject
                 }
                 var simulationPathAndTree = await plan.Plan(cache);
                 var path = simulationPathAndTree.Item2.Simulations;
-
-                // Test property we want to accumulate:
-                var f_energy = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption");
-                var f_temp = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#price");
-                var f_prod = new FBinOpArith(f_energy, f_temp, (x, y) => x * y, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyTimesPrice");
-                var f_prod_acc = new FAcc<double>(f_prod, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice");
+                Debug.WriteLine(path.Last().PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption"].Value);
 
                 Fitness.Fitness fitness = new(simulationPathAndTree.Item1.NodeItem)
                 {
@@ -96,6 +97,20 @@ namespace TestProject
 
             // Assert
             Assert.True(true);
+        }
+    }
+
+    internal class MMK : MapekPlan
+    {
+        private readonly IEnumerable<FOp> _fOps;
+
+        public MMK(IServiceProvider serviceProvider, IEnumerable<FOp> fOps) : base(serviceProvider)
+        {
+            _fOps = fOps;
+        }
+        public override IEnumerable<FOp> GetFitnessOps()
+        {
+            return _fOps;
         }
     }
 }

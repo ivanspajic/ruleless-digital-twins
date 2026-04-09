@@ -79,6 +79,8 @@ namespace Fitness {
             // Update `state` in place:
             foreach (FOp fop in FOps) {
                 fop.Eval(state, simulation, state);
+                 // XXX: review?
+                simulation.PropertyCache.Properties[fop.Prop.Name] = fop.Prop;
             }
             previous = simulation;
             return state;

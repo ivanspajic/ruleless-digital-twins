@@ -1,15 +1,17 @@
-﻿using Femyou;
-using Logic.FactoryInterface;
+﻿using Logic.FactoryInterface;
 using Logic.Mapek;
 using Logic.Models.MapekModels;
+using Logic.Models.OntologicalModels;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks.ServiceMocks;
 
 namespace TestProject {
     public class MapekTests {
-        [Fact]
-        public async Task TestMapeK() {
+        [Theory]
+        [InlineData("instance-model-1.ttl", "inferred-model-1.ttl")]
+        [InlineData("M370-instance.ttl","M370-inferred.ttl")]
+        public async Task TestMapeK(String instance, String inferred) {
             // Arrange
             var serviceProvider = new ServiceProviderMock();
 
@@ -19,8 +21,8 @@ namespace TestProject {
                 FmuDirectory = Path.GetFullPath(Path.Combine(rootDirectory, "SmartNode", "Implementations", "FMUs")),
                 InferenceEngineFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar")),
                 InferenceRulesFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "inference-rules.rules")),
-                InferredModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "inferred-model-1.ttl")),
-                InstanceModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "instance-model-1.ttl")),
+                InferredModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", inferred)),
+                InstanceModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", instance)),
                 OntologyFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "ontology", "ruleless-digital-twins.ttl"))
             };
             serviceProvider.Add(filepathArguments);
@@ -54,6 +56,10 @@ namespace TestProject {
             // Act
             try {
                 var cache = await monitor.Monitor();
+                if (instance == "M370-instance.ttl") { // Adjust cache for extended model :-}
+                    cache.PropertyCache.Properties.Add("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#price",
+                        new Property { Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#price", Value = "0", OwlType = "http://www.w3.org/2001/XMLSchema#double" });
+                }
                 var simulationPathAndTree = await plan.Plan(cache);
 
                 Assert.Equal(simulationPathAndTree.Item2.Simulations.Count(), coordinatorSettings.LookAheadMapekCycles);

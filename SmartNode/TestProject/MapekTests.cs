@@ -4,20 +4,18 @@ using Logic.Mapek;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using System.Diagnostics;
-using System.Numerics;
 using System.Reflection;
 using TestProject.Mocks.ServiceMocks;
-using Xunit.Internal;
 
 namespace TestProject
 {
     public class MapekTests
     {
         [Theory]
-        [InlineData("instance-model-1.ttl", "inferred-model-1.ttl",2,40)]
-        [InlineData("M370-instance.ttl", "M370-inferred.ttl",1,4)]
-        [InlineData("M370-instance.ttl", "M370-inferred.ttl",2,40)]
-        public async Task TestMapeK(String instance, String inferred, int rounds, int count)
+        [InlineData("instance-model-1.ttl", "inferred-model-1.ttl",2,40,0)]
+        [InlineData("M370-instance.ttl", "M370-inferred.ttl",1,4,115.05600000000001)]
+        [InlineData("M370-instance.ttl", "M370-inferred.ttl",2,40,106.488)]
+        public async Task TestMapeK(String instance, String inferred, int rounds, int count, double minCost)
         {
             // Arrange
             var serviceProvider = new ServiceProviderMock();
@@ -88,12 +86,13 @@ namespace TestProject
                 var f_prod_acc2 = new FAcc<double>(f_prod2, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPriceB");
 
                 // Sanity check root-node in case we messed it up in-place:
-                {                    
+                {
                     var found = simulationPathAndTree.Item1.NodeItem.PropertyCache.Properties.TryGetValue("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice", out var vOut);
                     Assert.True(!found || (string)vOut!.Value == "0");
                 }
 
-                Fitness.Fitness fitness = new(simulationPathAndTree.Item1.NodeItem) {
+                Fitness.Fitness fitness = new(simulationPathAndTree.Item1.NodeItem)
+                {
                     FOps = new FOp[] { f_prod_acc2 }
                 };
 
@@ -108,6 +107,7 @@ namespace TestProject
                 // Check that all best paths are as they should be:
                 var paths = plan.GetOptimalSimulationPath(cache, simulationPathAndTree.Item1.SimulationPaths);
                 Assert.Equal(count, paths.Count());
+                Assert.Equal(minCost, paths.Min(s => s.Simulations.Last().PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice"].Value));
             }
             catch (Exception exception)
             {

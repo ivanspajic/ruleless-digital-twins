@@ -76,11 +76,11 @@ namespace Logic.Mapek
             _logger.LogInformation("Generated a total of {total} simulation paths.", simulationTree.SimulationPaths.Count());
 
             // Find the optimal simulation path.
-            var optimalSimulationPath = GetOptimalSimulationPath(cache.PropertyCache, cache.OptimalConditions, simulationTree.SimulationPaths);
+            var optimalSimulationPath = GetOptimalSimulationPath(cache, simulationTree.SimulationPaths);
 
-            LogOptimalSimulationPath(optimalSimulationPath);
+            LogOptimalSimulationPath(optimalSimulationPath.First());
 
-            return (simulationTree, optimalSimulationPath!);
+            return (simulationTree, optimalSimulationPath!.First());
         }
 
         // Estimates how long simulation will take in real-world time to more accurately predict how the observed conditions change between data observation and decision execution.
@@ -769,8 +769,7 @@ namespace Logic.Mapek
             return numberOfSatisfiedOptimalConditions;
         }
 
-        protected virtual SimulationPath GetOptimalSimulationPath(PropertyCache propertyCache,
-            IEnumerable<OptimalCondition> optimalConditions,
+        public virtual IEnumerable<SimulationPath> GetOptimalSimulationPath(Cache cache,
             IEnumerable<SimulationPath> simulationPaths)
         {
             // This method is a filter for finding the optimal simulation path. It works in a few steps of descending precedance, each of which further reduces the set of
@@ -778,6 +777,9 @@ namespace Logic.Mapek
             // 1. Filter for simulation paths that satisfy the most OptimalConditions.
             // 2. Filter for simulation paths that have the highest number of the most optimized Properties.
             // 3. Pick the first one.
+
+            PropertyCache propertyCache = cache.PropertyCache;
+            IEnumerable<OptimalCondition> optimalConditions = cache.OptimalConditions;
 
             if (!simulationPaths.Any())
             {
@@ -790,7 +792,7 @@ namespace Logic.Mapek
 
             _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationPathsWithMostOptimalConditionsSatisfied.Count);
             if (simulationPathsWithMostOptimalConditionsSatisfied.Count == 1) {
-                return simulationPathsWithMostOptimalConditionsSatisfied.First();
+                return simulationPathsWithMostOptimalConditionsSatisfied;
             }
 
             // Filter for simulation configurations that optimize the most targeted Properties.
@@ -800,8 +802,7 @@ namespace Logic.Mapek
 
             _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationPathsWithMostOptimizedProperties.Count);
 
-            // At this point, arbitrarily return the first one regardless of the number of simulation configurations remaining.
-            return simulationPathsWithMostOptimizedProperties.First();
+            return simulationPathsWithMostOptimizedProperties;
         }
 
         private List<SimulationPath> GetSimulationPathsWithMostOptimalConditionsSatisfied(IEnumerable<SimulationPath> simulationPaths,

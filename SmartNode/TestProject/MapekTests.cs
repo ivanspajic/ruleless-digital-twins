@@ -14,10 +14,10 @@ namespace TestProject
     public class MapekTests
     {
         [Theory]
-        [InlineData("instance-model-1.ttl", "inferred-model-1.ttl",2)]
-        [InlineData("M370-instance.ttl", "M370-inferred.ttl",1)]
-        [InlineData("M370-instance.ttl", "M370-inferred.ttl",2)]
-        public async Task TestMapeK(String instance, String inferred, int rounds)
+        [InlineData("instance-model-1.ttl", "inferred-model-1.ttl",2,40)]
+        [InlineData("M370-instance.ttl", "M370-inferred.ttl",1,4)]
+        [InlineData("M370-instance.ttl", "M370-inferred.ttl",2,40)]
+        public async Task TestMapeK(String instance, String inferred, int rounds, int count)
         {
             // Arrange
             var serviceProvider = new ServiceProviderMock();
@@ -104,6 +104,10 @@ namespace TestProject
                 var r2 = path.Aggregate(0.0, (acc, s) => acc + ((double)s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#price"].Value) * (double)s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption"].Value);
                 Assert.Equal(result.Get(f_prod_acc2.Prop), r2);
                 Assert.Equal(result.Get(f_prod_acc2.Prop), last);
+
+                // Check that all best paths are as they should be:
+                var paths = plan.GetOptimalSimulationPath(cache, simulationPathAndTree.Item1.SimulationPaths);
+                Assert.Equal(count, paths.Count());
             }
             catch (Exception exception)
             {

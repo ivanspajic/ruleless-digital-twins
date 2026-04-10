@@ -11,10 +11,9 @@ namespace Logic.Mapek {
         public EuclidMapekPlan(IServiceProvider serviceProvider) : base(serviceProvider) {
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
-        protected override SimulationPath GetOptimalSimulationPath(PropertyCache propertyCache,
-                IEnumerable<OptimalCondition> optimalConditions,
+        public override IEnumerable<SimulationPath> GetOptimalSimulationPath(Cache cache,
                 IEnumerable<SimulationPath> simulationPaths) {
-            return GetOptimalSimulationPathsEuclidian(simulationPaths, optimalConditions).First().Item1;
+            return GetOptimalSimulationPathsEuclidian(simulationPaths, cache.OptimalConditions).Select((s,d) => s.Item1);
         }
 
         internal IEnumerable<(SimulationPath, double)>? GetOptimalSimulationPathsEuclidian(IEnumerable<SimulationPath> simulationPaths, IEnumerable<OptimalCondition> optimalConditions) {

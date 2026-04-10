@@ -571,11 +571,7 @@ namespace Logic.Mapek
         {
             var observableProperties = new List<Property>();
 
-            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty WHERE {
-                ?sensor rdf:type sosa:Sensor .
-                ?sensor sosa:observes ?observableProperty . }");
-
-            var queryResult = _mapekKnowledge.ExecuteQuery(query);
+            VDS.RDF.Query.SparqlResultSet queryResult = GetStaticObservables();
 
             foreach (var result in queryResult.Results)
             {
@@ -592,6 +588,19 @@ namespace Logic.Mapek
             }
 
             return observableProperties;
+        }
+
+        VDS.RDF.Query.SparqlResultSet staticObservables = null;
+        private VDS.RDF.Query.SparqlResultSet GetStaticObservables() {
+            if (staticObservables != null) {
+                return staticObservables;
+            }
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty WHERE {
+                ?sensor rdf:type sosa:Sensor .
+                ?sensor sosa:observes ?observableProperty . }");
+
+            staticObservables = _mapekKnowledge.ExecuteQuery(query);
+            return staticObservables;
         }
 
         private IEnumerable<FmuModel> GetHostPlatformFmuModel(string fmuDirectory) {
@@ -636,7 +645,7 @@ namespace Logic.Mapek
             }
 
             // The LogDebug calls here are primarily to keep an eye on crashes in the FMU which are otherwise a tad harder to track down.
-            _logger.LogInformation("Simulation {simulation}", simulation); // XXX Arg useless.
+            // _logger.LogInformation("Simulation {simulation}", simulation); // XXX Arg useless.
             if (!_fmuDict.TryGetValue(fmuModel.Filepath, out IModel? model)) {
                 _logger.LogDebug("Loading Model {filePath}", fmuModel.Filepath);
                 model = Model.Load(fmuModel.Filepath, GetUnsupportedFMUFunctions());
@@ -713,6 +722,7 @@ namespace Logic.Mapek
         }
 
         private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs) {
+            IEnumerable<String> ignoredVars = [];
             foreach (var input in fmuInputs) {
                 // We filter inputs by those accepted by the actual FMU.
                 // TODO: figure out if we should do this outside of this loop here.
@@ -720,9 +730,11 @@ namespace Logic.Mapek
                     var valueHandler = _factory.GetValueHandlerImplementation(input.Item2);
                     valueHandler.WriteValueToSimulationParameter(fmuInstance, fmuVariable, input.Item3);
                 } else {
-                    _logger.LogInformation("FMU variable {variable} not relevant.", input.Item1);
+                    // might want to remove this in the future:
+                    ignoredVars = ignoredVars.Append(input.Item1);
                 }
             }
+            _logger.LogDebug("FMU variables not relevant: {variables}", ignoredVars);
         }
 
         private void AssignPropertyCacheCopyValues(IInstance fmuInstance, PropertyCache propertyCacheCopy, IReadOnlyDictionary<string, IVariable> fmuOutputs)

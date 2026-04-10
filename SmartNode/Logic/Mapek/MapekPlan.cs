@@ -232,7 +232,7 @@ namespace Logic.Mapek
                         unrestrictedInferenceExecuted,
                         reloadInferredModel,
                         actionCombinations,
-                        propertyCache);
+                        simulation.PropertyCache);
 
                     foreach (var childSimulation in childSimulations) {
                         yield return childSimulation;
@@ -479,6 +479,11 @@ namespace Logic.Mapek
             foreach (var simulation in simulations) {
                 _logger.LogInformation("Running simulation #{run}", i++);
 
+                var orig = new Simulation(GetPropertyCacheCopy(simulation.PropertyCache!)) {
+                        Actions = simulation.Actions,
+                        InitializationActions = simulation.InitializationActions,
+                        Index = simulation.Index
+                    };
                 // Perform the simulation via FMU execution and ensure all the Properties in the simulation's property cache are updated by running all soft sensors
                 // in the correct order.
                 foreach (var fmuModel in fmuModels) {
@@ -495,10 +500,11 @@ namespace Logic.Mapek
 
                 await ExecuteSoftSensorsAndUpdateSimulationCache(simulation, softSensorTreeNodes);
                 if (GetFitnessOps() != null) {
-                    Fitness.Fitness fitness = new(simulations.First()) {
+                    Fitness.Fitness fitness = new(orig) {
                         FOps = GetFitnessOps().ToArray()
                     };
-                    var result = simulations.Skip(1).Aggregate(fitness.MkState(), fitness.Process);
+                    // Sideeffect:
+                    fitness.Process(fitness.MkState(), simulation);
                 }
             }
 

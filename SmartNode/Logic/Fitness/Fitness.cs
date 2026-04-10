@@ -80,7 +80,7 @@ namespace Fitness {
             foreach (FOp fop in FOps) {
                 fop.Eval(state, simulation, state);
                  // XXX: review?
-                simulation.PropertyCache.Properties[fop.Prop.Name] = fop.Prop;
+                simulation.PropertyCache.Properties[fop.Prop.Name] = new Property { Name = fop.Prop.Name, Value = state.Properties[fop.Prop.Name], OwlType = fop.Prop.OwlType };
             }
             previous = simulation;
             return state;
@@ -134,7 +134,9 @@ namespace Fitness {
 
         internal override IEnumerable<object> MkInitialValues(Simulation s)
         {
-            return new object[] { (int)0 };
+            var l = L.MkInitialValues(s);
+            var r = R.MkInitialValues(s);
+            return new object[] { (double)0 }; // XXX type!
         }
 
         internal override IEnumerable<Property> MkProps()
@@ -187,14 +189,13 @@ namespace Fitness {
         public FAcc(FOp op, String? name = null)
         {
             this.IsOp = true;
+            this.Op = op;
             this.Orig = op.Prop;
             this.Prop = new Property() { OwlType = op.Prop.OwlType, Name = name ?? GetHashCode().ToString() + "_ACC", Value = null };
         }
 
-        internal override IEnumerable<object> MkInitialValues(Simulation s)
-        {
-            // Explicitly fetch initial value
-            return new[] { IsOp ? 0.0 : Orig.Value };
+        internal override IEnumerable<object> MkInitialValues(Simulation s) {
+            return new[] { IsOp ? (s.PropertyCache.Properties.ContainsKey(Prop.Name) ? s.PropertyCache.Properties[Prop.Name].Value : 0.0) : s.PropertyCache.Properties[Orig.Name].Value };
         }
 
         internal override IEnumerable<Property> MkProps()
@@ -206,6 +207,7 @@ namespace Fitness {
         {
             if (IsOp)
             {
+                Op!.Eval(in_state, sim, out_state);
                 out_state.Set(Prop, (T)in_state.Get(Prop) + (T)in_state.Get(Orig)); // XXX better be sure that's already calculated
             }
             else
@@ -216,5 +218,7 @@ namespace Fitness {
 
         Property Orig { get; }
         bool IsOp { get; }
+
+        private readonly FOp? Op = null;
     }
 }

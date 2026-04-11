@@ -61,6 +61,11 @@ namespace SmartNode
                         {
                             "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier",
                             new DummyDehumidifier("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier")
+                        },
+                        {
+                            "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolStepActuator",
+                            new DummyDehumidifier("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolStepActuator")
+
                         }
                     },
                     SensorMap = new() {
@@ -185,6 +190,7 @@ namespace SmartNode
         // The keys represent the OWL (RDF/XSD) types supported by Protege, and the values are user implementations.
         private readonly Dictionary<string, IValueHandler> _valueHandlers = new() {
             { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
+            { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#base64Binary", new Base64BinaryValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#boolean", new BooleanValueHandler() }

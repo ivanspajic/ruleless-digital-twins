@@ -704,7 +704,7 @@ namespace Logic.Mapek
             _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
             AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
 
-            _logger.LogDebug("Tick ({fmuName})", fmuInstance.Name);
+            _logger.LogDebug("Tick ({fmuName}), {secs}s", fmuInstance.Name, simulationDurationSeconds);
             // Advance the FMU time for the duration of the simulation tick in steps of simulation fidelity.
             var maximumSteps = (double)simulationDurationSeconds / fmuModel.SimulationFidelitySeconds;
             var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);

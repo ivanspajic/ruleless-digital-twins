@@ -21,7 +21,7 @@ class Fakepool(Fmi2Slave):
         self.price = 0.0
         self.register_variable(String("zone", causality=Fmi2Causality.parameter, variability=Fmi2Variability.fixed))
         # How "long" should we use one row? Optional.
-        self.register_variable(Real("step", causality=Fmi2Causality.parameter, variability=Fmi2Variability.fixed))
+        self.register_variable(Integer("step", causality=Fmi2Causality.parameter, variability=Fmi2Variability.fixed))
         # Unused:
         self.register_variable(Integer("resolution", causality=Fmi2Causality.parameter, variability=Fmi2Variability.fixed))
         self.register_variable(Boolean("notFound", causality=Fmi2Causality.output))

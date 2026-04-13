@@ -1,18 +1,23 @@
 ﻿using Femyou;
-using Logic.Models.MapekModels;
-using Logic.Models.OntologicalModels;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using static Femyou.IModel;
 
 namespace Implementations.SimulatedTwinningTargets
 {
     public class DummyRoomM370 {
-        private readonly Random _randomGenerator = new(); // TODO: make this seeded!
+        private const int Seed = 10110111;
+        private const string FmuModelFilepath = "";
+        private const string FmuInstanceName = "DummyRoomM370";
+        private const int CycleDurationSeconds = 900;
+
+        private readonly Random _randomGenerator = new(Seed);
 
         private double _roomTemperature = 17.7;
         private double _roomHumidity = 10.2;
         private double _energyConsumption = 0.0;
+
+        private IModel fmuModel;
+        private IInstance fmuInstance;
 
         private static DummyRoomM370? _instance;
 
@@ -29,85 +34,37 @@ namespace Implementations.SimulatedTwinningTargets
         public double RoomTemperature {
             get => _roomTemperature;
             set {
-
+                _roomTemperature = value;
             }
         }
 
         public double RoomHumidity {
             get => _roomHumidity;
             set {
-
+                _roomHumidity = value;
             }
         }
 
         public double EnergyConsumption {
             get => _energyConsumption;
             set {
-
+                _energyConsumption = value;
             }
         }
 
-        private void ExecuteFmu(FmuModel fmuModel, Simulation simulation, double simulationDurationSeconds = 0) {
-            var model = Model.Load(fmuModel.Filepath, GetUnsupportedFMUFunctions());
-            Debug.Assert(model != null, "Model is null after loading.");
+        private void ExecuteFmu(double simulationDurationSeconds) {
+            // check if the model is already loaded
+            var model = Model.Load(FmuModelFilepath, new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]));
             // We're only using one instance per FMU, so we can just use the path as name.
-            var instanceName = fmuModel.Filepath;
-            var fmuInstance = model.CreateCoSimulationInstance(instanceName);
-            Debug.Assert(fmuInstance != null, "Instance is null after creation.");
-            fmuInstance.StartTime(simulation.Index * simulationDurationSeconds, (i) => Initialization(simulation, model, i));
 
-            // Run the simulation by executing ActuationActions.
-            var fmuActuationInputs = new List<(string, string, object)>();
+            // check if the instance is already loaded
+            var fmuInstance = model.CreateCoSimulationInstance(FmuInstanceName);
 
-            // Add all ActuatorStates to the inputs for the FMU.
-            foreach (var action in simulation.Actions) {
-                string name;
-                string type;
-                object value;
-                if (action is ActuationAction actuationAction) {
-                    name = actuationAction.Actuator.ParameterName ?? actuationAction.Actuator.Name;
-                    type = actuationAction.Actuator.Type!;
-                    value = actuationAction.NewStateValue;
-                } else {
-                    var reconfigurationAction = (ReconfigurationAction)action;
-                    // TODO: override here as well?
-                    name = reconfigurationAction.ConfigurableParameter.Name;
-                    type = reconfigurationAction.ConfigurableParameter.OwlType;
-                    value = reconfigurationAction.NewParameterValue;
-                }
+            // write the old parameters first (save them somewhere!!)
+            // write the old actuator states (save them somewhere!!)
+            fmuInstance.StartTime(0, (i) => i.WriteReal((parameter, (double)value));
 
-                // Shave off the long name URIs from the instance model.
-                var simpleName = MapekUtilities.GetSimpleName(name);
-                fmuActuationInputs.Add((simpleName, type, value));
-            }
-
-            // Add all ActuatorStates to the inputs for the FMU.
-            foreach (var action in simulation.Actions) {
-                string name;
-                string type;
-                object value;
-                if (action is ActuationAction actuationAction) {
-                    name = actuationAction.Actuator.ParameterName ?? actuationAction.Actuator.Name;
-                    type = actuationAction.Actuator.Type!;
-                    value = actuationAction.NewStateValue;
-                } else {
-                    var reconfigurationAction = (ReconfigurationAction)action;
-                    // TODO: override here as well?
-                    name = reconfigurationAction.ConfigurableParameter.Name;
-                    type = reconfigurationAction.ConfigurableParameter.OwlType;
-                    value = reconfigurationAction.NewParameterValue;
-                }
-
-                // Shave off the long name URIs from the instance model.
-                var simpleName = MapekUtilities.GetSimpleName(name);
-                fmuActuationInputs.Add((simpleName, type, value));
-            }
-
-            _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
-            AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
-
-            _logger.LogDebug("Tick");
-            // Advance the FMU time for the duration of the simulation tick in steps of simulation fidelity.
+            // Advance time for the duration of 
             var maximumSteps = (double)simulationDurationSeconds / fmuModel.SimulationFidelitySeconds;
             var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
             var difference = maximumSteps - maximumStepsRoundedDown;
@@ -119,16 +76,16 @@ namespace Implementations.SimulatedTwinningTargets
             // Advance the remainder of time to stay true to the simulation duration.
             fmuInstance.AdvanceTime(difference);
 
-            AssignPropertyCacheCopyValues(fmuInstance, simulation.PropertyCache!, model.Variables);
-        }
-        protected virtual bool Initialization(Simulation simulation, IModel model, IInstance fmuInstance) {
-            var actions = simulation.InitializationActions.Select(action => (action.Actuator.ParameterName ?? MapekUtilities.GetSimpleName(action.Name), action.Actuator.Type!, action.NewStateValue)).ToList();
-            AssignSimulationInputsToParameters(model, fmuInstance, actions);
-            return true;
-        }
+            // now write the new actuator states
+            // advance time for the remainder of the cycle after simulation duration
 
-        protected virtual Collection<UnsupportedFunctions> GetUnsupportedFMUFunctions() {
-            return new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]);
+            // Get values out here.
+            fmuInstance.ReadReal(parameter).ToArray()[0];
+
+            // Use randomization for temp and humid!! seed!! (en. cons. is almost the same)
+
+            // set the properties so sensors can get em in the next cycle
+
         }
     }
 }

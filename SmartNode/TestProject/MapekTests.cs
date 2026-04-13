@@ -98,9 +98,15 @@ namespace TestProject
                 sw.Stop();
                 Debug.WriteLine($"Planning took {sw.Elapsed.TotalSeconds} seconds total.");
 
-            using (StreamWriter f_out = File.AppendText("plan_times.csv")) { 
-                // Check that all best paths are as they should be:
-                IEnumerable<SimulationPath> paths = plan.GetOptimalSimulationPath(cache, simulationPathAndTree.Item1.SimulationPaths);
+            using (StreamWriter f_out = File.AppendText("plan_times.csv")) {
+                    // Check that all best paths are as they should be:
+                    IEnumerable<SimulationPath> paths = plan.GetOptimalSimulationPath(cache, simulationPathAndTree.Item1.SimulationPaths);
+                    // Print starting values:
+                    var sroot = simulationPathAndTree.Item1.NodeItem.PropertyCache; {
+                        var temp = sroot.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature"].Value;                        
+                        f_out.WriteLine($"{temp},0,0,0,0,\"\"");
+                    }
+
                 // Assume worst case if we're not minimizing
                 double minOrMax = dontMinimize  ? (double)paths.Max(s => s.Simulations.Last().PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice"].Value)
                                                 : (double)paths.Min(s => s.Simulations.Last().PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice"].Value);

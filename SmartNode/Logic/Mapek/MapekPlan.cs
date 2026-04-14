@@ -783,7 +783,7 @@ namespace Logic.Mapek
             // Filter for simulation configurations that optimize the most targeted Properties.
             var simulationPathsWithMostOptimizedProperties = GetSimulationPathsWithMostOptimizedProperties(simulationPathsWithMostOptimalConditionsSatisfied);
 
-            _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationPathsWithMostOptimizedProperties.Count);
+            _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationPathsWithMostOptimizedProperties.Count());
 
             return simulationPathsWithMostOptimizedProperties;
         }
@@ -834,7 +834,7 @@ namespace Logic.Mapek
             return numberOfSatisfiedOptimalConditions;
         }
 
-        private List<SimulationPath> GetSimulationPathsWithMostOptimizedProperties(IEnumerable<SimulationPath> simulationPaths) {
+        private IEnumerable<SimulationPath> GetSimulationPathsWithMostOptimizedProperties(IEnumerable<SimulationPath> simulationPaths) {
             // Use any property cache to find optimization annotations. This assumes we're working with numerical types and not booleans.
             // TODO: include ConfigurableParameters.
             var propertiesToMinimize = GetPropertiesToOptimize(simulationPaths.First().Simulations.First().PropertyCache, false);
@@ -885,11 +885,16 @@ namespace Logic.Mapek
                 }
             }
 
+            
             // Find how many properties a simulation path optimized best.
             var mostOptimizedSimulationPathsCounter = new Dictionary<SimulationPath, int>();
 
-            foreach (var keyValuePair in mostMinimizedSimulationPathsMap) {
-                foreach (var simulationPath in keyValuePair.Value) {
+            // XXX Hotfix, review:
+            if (mostMinimizedSimulationPathsMap.Count == 0) {
+                mostMinimizedSimulationPathsMap.Add("", simulationPaths.ToList());
+            }
+            foreach (var value in mostMinimizedSimulationPathsMap.Values) {
+                foreach (var simulationPath in value) {
                     // Increment the counter on a simulation path that minimized a property the most.
                     if (mostOptimizedSimulationPathsCounter.ContainsKey(simulationPath)) {
                         mostOptimizedSimulationPathsCounter[simulationPath]++;
@@ -924,7 +929,7 @@ namespace Logic.Mapek
                 }
             }
 
-            return mostOptimizedSimulationPaths;
+            return mostOptimizedSimulationPaths ;
         }
 
         private List<Property> GetPropertiesToOptimize(PropertyCache propertyCache, bool maximize) {

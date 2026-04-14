@@ -9,6 +9,11 @@ namespace TestProject.Mocks.ServiceMocks {
             _simulationTuple = simulationTuple;
         }
 
+        public IEnumerable<SimulationPath> GetOptimalSimulationPath(Cache cache, IEnumerable<SimulationPath> simulationPaths)
+        {
+            throw new NotImplementedException(); // XXX Unclear who needs this?
+        }
+
         public async Task<(SimulationTreeNode, SimulationPath)> Plan(Cache cache) {
             return _simulationTuple;
         }

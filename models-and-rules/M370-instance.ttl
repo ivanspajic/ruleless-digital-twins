@@ -6,6 +6,7 @@
 @prefix : <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix xml: <http://www.w3.org/XML/1998/namespace>.
+@prefix rdt: <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/>.
 
 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1> a owl:Ontology;
                                                                     owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins>.
@@ -131,10 +132,10 @@
                                    owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint> ; 
                                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
                                    owl:onClass [owl:intersectionOf ([a owl:Restriction ; 
-                                                                    owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo> ; 
+                                                                    owl:onProperty rdt:greaterThanOrEqualTo ; 
                                                                     owl:hasValue :OfficeHumidityLowerLimit]
                                                                     [a owl:Restriction ; 
-                                                                    owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo> ; 
+                                                                    owl:onProperty rdt:lessThanOrEqualTo ; 
                                                                     owl:hasValue :OfficeHumidityUpperLimit]) ; 
                                                 a owl:Class]];
                                 <http://www.w3.org/ns/ssn/forProperty> :RoomHumidity.
@@ -149,13 +150,13 @@
                                    a owl:NamedIndividual,
                                      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>,
                                      [a owl:Restriction ; 
-                                      owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint> ; 
+                                      owl:onProperty rdt:hasConstraint ; 
                                       owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
                                       owl:onClass [owl:intersectionOf ([a owl:Restriction ; 
-                                                                       owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThan> ; 
+                                                                       owl:onProperty rdt:greaterThan ; 
                                                                        owl:hasValue :OfficeTemperatureLowerLimit]
                                                                        [a owl:Restriction ; 
-                                                                       owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo> ; 
+                                                                       owl:onProperty rdt:lessThanOrEqualTo ; 
                                                                        owl:hasValue :OfficeTemperatureUpperLimit]) ; 
                                                    a owl:Class]],
                                      [a owl:Restriction ; 

@@ -123,14 +123,14 @@ namespace Logic.Mapek {
             Case potentialCase,
             SimulationTreeNode currentSimulationTree,
             SimulationPath currentOptimalSimulationPath) {
-            var quantizedObservedProperties = GetQuantizedProperties(cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
+            var observedProperties = new List<Property>(cache.PropertyCache.Properties.Values);
+            observedProperties.AddRange(cache.PropertyCache.ConfigurableParameters.Values);
 
             var simulationMatches = false;
             if (simulationToExecute is not null) {
-                //var quantizedSimulationProperties = GetQuantizedProperties(simulationToExecute.PropertyCache.ConfigurableParameters, simulationToExecute.PropertyCache.Properties);
-
-                var quantizedSimulationPropertiesSet = new HashSet<Property>(simulationToExecute.PropertyCache.Properties.Values, new FuzzyPropertyEqualityComparer(_coordinatorSettings.PropertyValueFuzziness));
-                simulationMatches = quantizedSimulationPropertiesSet.SetEquals(cache.PropertyCache.Properties.Values);
+                // Use a set for comparing without caring for order.
+                var simulationPropertiesSet = new HashSet<Property>(simulationToExecute.PropertyCache.Properties.Values, new FuzzyPropertyEqualityComparer(_coordinatorSettings.PropertyValueFuzziness));
+                simulationMatches = simulationPropertiesSet.SetEquals(cache.PropertyCache.Properties.Values);
             }
 
             // If the previously executed simulation's results don't match the current cycle's observations, the predictions for the rest of the simulation path are outside of
@@ -140,27 +140,25 @@ namespace Logic.Mapek {
             }
 
             if (_coordinatorSettings.UseCaseBasedFunctionality && potentialCase is not null) {
-                // If there is a potential case from the previous cycle to be saved and the values of the observed Properties from this cycle match with the predicted quantized
-                // values from the simulation of the last cycle, then case is valid and can be saved to the database. Otherwise, the case should be nullified.
+                // If there is a potential case from the previous cycle to be saved and the values of the observed Properties from this cycle match with the predicted values
+                // from the simulation of the last cycle, then case is valid and can be saved to the database. Otherwise, the case should be nullified.
                 if (simulationMatches) {
                     _caseRepository.CreateCase(potentialCase);
                 } else {
                     potentialCase = null!;
                 }
 
-                var quantizedObservedOptimalConditions = GetQuantizedOptimalConditions(cache.OptimalConditions);
-
                 // If there are still remaining simulations in the simulation path, get the next potential case from it. Otherwise, try to look for it in the database.
                 if (currentOptimalSimulationPath is not null && currentOptimalSimulationPath.Simulations.Any()) {
                     
-                    potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedOptimalConditions, currentOptimalSimulationPath);
+                    potentialCase = GetPotentialCaseFromSimulationPath(observedProperties, cache.OptimalConditions, currentOptimalSimulationPath);
 
                     // After getting the potential case from the simulation path, reduce the number of remaining simulations.
                     currentOptimalSimulationPath.RemoveFirstRemainingSimulationFromSimulationPath();
                 } else {
-                    currentOptimalSimulationPath = GetSimulationPathFromSavedCases(quantizedObservedProperties, quantizedObservedOptimalConditions);
+                    currentOptimalSimulationPath = GetSimulationPathFromSavedCases(observedProperties, cache.OptimalConditions);
                     if (currentOptimalSimulationPath is not null) {
-                        potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedOptimalConditions, currentOptimalSimulationPath);
+                        potentialCase = GetPotentialCaseFromSimulationPath(observedProperties, cache.OptimalConditions, currentOptimalSimulationPath);
 
                         // After getting the potential case from the simulation path, reduce the number of remaining simulations.
                         currentOptimalSimulationPath.RemoveFirstRemainingSimulationFromSimulationPath();
@@ -178,9 +176,7 @@ namespace Logic.Mapek {
 
                 // If case-based functionality is used, get the potential case from the new simulation path.
                 if (_coordinatorSettings.UseCaseBasedFunctionality) {
-                    var quantizedObservedOptimalConditions = GetQuantizedOptimalConditions(cache.OptimalConditions);
-
-                    potentialCase = GetPotentialCaseFromSimulationPath(quantizedObservedProperties, quantizedObservedOptimalConditions, currentOptimalSimulationPath);
+                    potentialCase = GetPotentialCaseFromSimulationPath(observedProperties, cache.OptimalConditions, currentOptimalSimulationPath);
                 }
 
                 if (currentOptimalSimulationPath != null) {
@@ -194,95 +190,6 @@ namespace Logic.Mapek {
             }
 
             return (simulationToExecute, potentialCase, currentSimulationTree, currentOptimalSimulationPath)!;
-        }
-
-        private List<Property> GetQuantizedProperties(IDictionary<string, ConfigurableParameter> configurableParameters,
-            IDictionary<string, Property> properties) {
-            var quantizedProperties = new List<Property>();
-
-            foreach (var configurableParameterKeyValuePair in configurableParameters) {
-                var configurableParameterType = configurableParameterKeyValuePair.Value.OwlType;
-                // We're only interested in quantizing for double values given the deviations we're willing to tolerate (e.g., 0.25).
-                if (configurableParameterType.Equals("http://www.w3.org/2001/XMLSchema#double")) {
-                    var valueHandler = _factory.GetValueHandlerImplementation(configurableParameterKeyValuePair.Value.OwlType);
-                    var quantizedValue = valueHandler.GetQuantizedValue(configurableParameterKeyValuePair.Value.Value, _coordinatorSettings.PropertyValueFuzziness);
-                    var quantizedConfigurableParameter = new ConfigurableParameter {
-                        Name = configurableParameterKeyValuePair.Value.Name,
-                        OwlType = configurableParameterKeyValuePair.Value.OwlType,
-                        Value = quantizedValue
-                    };
-                    quantizedProperties.Add(quantizedConfigurableParameter);
-                } else {
-                    quantizedProperties.Add(configurableParameterKeyValuePair.Value);
-                }
-            }
-
-            foreach (var propertyKeyValuePair in properties) {
-                var propertyType = propertyKeyValuePair.Value.OwlType;
-                // We're only interested in quantizing for double values given the deviations we're willing to tolerate (e.g., 0.25).
-                if (propertyType.Equals("http://www.w3.org/2001/XMLSchema#double")) {
-                    var valueHandler = _factory.GetValueHandlerImplementation(propertyKeyValuePair.Value.OwlType);
-                    var quantizedValue = valueHandler.GetQuantizedValue(propertyKeyValuePair.Value.Value, _coordinatorSettings.PropertyValueFuzziness);
-                    var quantizedProperty = new Property {
-                        Name = propertyKeyValuePair.Value.Name,
-                        OwlType = propertyKeyValuePair.Value.OwlType,
-                        Value = quantizedValue
-                    };
-                    quantizedProperties.Add(quantizedProperty);
-                } else {
-                    quantizedProperties.Add(propertyKeyValuePair.Value);
-                }
-            }
-
-            return quantizedProperties;
-        }
-
-        private List<OptimalCondition> GetQuantizedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions) {
-            var quantizedOptimalConditions = new List<OptimalCondition>();
-
-            foreach (var optimalCondition in optimalConditions) {
-                var optimalConditionType = optimalCondition.Property.OwlType;
-                // We're only interested in quantizing for double values given the deviations we're willing to tolerate (e.g., 0.25).
-                if (optimalConditionType.Equals("http://www.w3.org/2001/XMLSchema#double")) {
-                    var valueHandler = _factory.GetValueHandlerImplementation(optimalConditionType);
-                    var constraint = GetQuantizedOptimalConditionConstraint(optimalCondition.ConditionConstraint, valueHandler);
-
-                    quantizedOptimalConditions.Add(new OptimalCondition {
-                        ConditionConstraint = constraint,
-                        Name = optimalCondition.Name,
-                        Property = optimalCondition.Property,
-                        ReachedInMaximumSeconds = optimalCondition.ReachedInMaximumSeconds
-                    });
-                } else {
-                    quantizedOptimalConditions.Add(optimalCondition);
-                }
-            }
-
-            return quantizedOptimalConditions;
-        }
-
-        private ConstraintExpression GetQuantizedOptimalConditionConstraint(ConstraintExpression constraintExpression, IValueHandler valueHandler) {
-            // Go through the whole tree of OptimalCondition constraints and get quantized values for each one.
-            if (constraintExpression is AtomicConstraintExpression atomicConstraintExpression) {
-                var quantizedProperty = new Property {
-                    Name = atomicConstraintExpression.Property.Name,
-                    OwlType = atomicConstraintExpression.Property.OwlType,
-                    Value = valueHandler.GetQuantizedValue(atomicConstraintExpression.Property.Value, _coordinatorSettings.PropertyValueFuzziness)
-                };
-
-                return new AtomicConstraintExpression {
-                    ConstraintType = atomicConstraintExpression.ConstraintType,
-                    Property = quantizedProperty
-                };
-            } else {
-                var nestedConstraintExpression = constraintExpression as NestedConstraintExpression;
-
-                return new NestedConstraintExpression {
-                    ConstraintType = nestedConstraintExpression!.ConstraintType,
-                    Left = GetQuantizedOptimalConditionConstraint(nestedConstraintExpression.Left, valueHandler),
-                    Right = GetQuantizedOptimalConditionConstraint(nestedConstraintExpression.Right, valueHandler)
-                };
-            }
         }
 
         private SimulationPath GetSimulationPathFromSavedCases(IEnumerable<Property> quantizedProperties, IEnumerable<OptimalCondition> quantizedOptimalConditions) {

@@ -46,9 +46,5 @@ namespace Implementations.ValueHandlers
         public string GetValueAsCultureInvariantString(object value) {
             throw new NotImplementedException();
         }
-
-        public object GetQuantizedValue(object value, double fuzziness) {
-            throw new NotImplementedException();
-        }
     }
 }

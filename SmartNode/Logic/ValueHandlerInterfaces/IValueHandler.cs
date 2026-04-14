@@ -20,7 +20,5 @@ namespace Logic.ValueHandlerInterfaces
         public void WriteValueToSimulationParameter(IInstance fmuInstance, IVariable parameter, object value);
 
         public string GetValueAsCultureInvariantString(object value);
-
-        public object GetQuantizedValue(object value, double fuzziness);
     }
 }

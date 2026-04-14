@@ -182,22 +182,6 @@ namespace Implementations.ValueHandlers
             return ((double)value).ToString(CultureInfo.InvariantCulture);
         }
 
-        public object GetQuantizedValue(object value, double fuzziness) {
-            if (value is not double) {
-                value = double.Parse(value.ToString()!, CultureInfo.InvariantCulture);
-            }
-
-            var factor = (double)value / fuzziness;
-            var remainder = (double)value % fuzziness;
-            var halfFuzziness = fuzziness / 2;
-
-            if (remainder > halfFuzziness) {
-                return Math.Ceiling(factor) * fuzziness;
-            } else {
-                return Math.Floor(factor) * fuzziness;
-            }
-        }
-
         private static bool EvaluateEqualTo(double sensorValue, double optimalConditionValue) {
             return sensorValue <= optimalConditionValue + FloatingEpsilon &&
                 sensorValue >= optimalConditionValue - FloatingEpsilon;

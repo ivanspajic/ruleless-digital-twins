@@ -50,9 +50,5 @@ namespace Implementations.ValueHandlers
         public int IncreaseComp(object comparingValue, object targetValue) {
             throw new NotImplementedException();
         }
-
-        public object GetQuantizedValue(object value, double fuzziness) {
-            throw new NotImplementedException();
-        }
     }
 }

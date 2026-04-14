@@ -66,21 +66,5 @@ namespace Implementations.ValueHandlers
                 return 0;
             }
         }
-
-        public object GetQuantizedValue(object value, double fuzziness) {
-            if (value is not int) {
-                value = int.Parse(value.ToString()!, CultureInfo.InvariantCulture);
-            }
-
-            var factor = (int)value / fuzziness;
-            var remainder = (int)value % fuzziness;
-            var halfFuzziness = fuzziness / 2;
-
-            if (remainder > halfFuzziness) {
-                return Math.Ceiling(factor) * fuzziness;
-            } else {
-                return Math.Floor(factor) * fuzziness;
-            }
-        }
     }
 }

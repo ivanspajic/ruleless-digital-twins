@@ -755,12 +755,65 @@ namespace Logic.Mapek
             _logger.LogInformation("New values:\n{vals}", logMsg);   
         }
 
-        private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache)
+        public virtual IEnumerable<SimulationPath> GetOptimalSimulationPath(Cache cache,
+            IEnumerable<SimulationPath> simulationPaths)
         {
+            // This method is a filter for finding the optimal simulation path. It works in a few steps of descending precedance, each of which further reduces the set of
+            // simulation paths:
+            // 1. Filter for simulation paths that satisfy the most OptimalConditions.
+            // 2. Filter for simulation paths that have the highest number of the most optimized (lowest/highest) Properties.
+            // 3. Pick the first one.
+
+            PropertyCache propertyCache = cache.PropertyCache;
+            IEnumerable<OptimalCondition> optimalConditions = cache.OptimalConditions;
+
+            if (!simulationPaths.Any()) {
+                return null!;
+            }
+
+            // Filter for simulation configurations that satisfy the most OptimalConditions.
+            var simulationPathsWithMostOptimalConditionsSatisfied = GetSimulationPathsWithMostOptimalConditionsSatisfied(simulationPaths,
+                optimalConditions);
+
+            _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationPathsWithMostOptimalConditionsSatisfied.Count);
+            if (simulationPathsWithMostOptimalConditionsSatisfied.Count == 1) {
+                return simulationPathsWithMostOptimalConditionsSatisfied;
+            }
+
+            // Filter for simulation configurations that optimize the most targeted Properties.
+            var simulationPathsWithMostOptimizedProperties = GetSimulationPathsWithMostOptimizedProperties(simulationPathsWithMostOptimalConditionsSatisfied);
+
+            _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationPathsWithMostOptimizedProperties.Count);
+
+            return simulationPathsWithMostOptimizedProperties;
+        }
+
+        private List<SimulationPath> GetSimulationPathsWithMostOptimalConditionsSatisfied(IEnumerable<SimulationPath> simulationPaths,
+            IEnumerable<OptimalCondition> optimalConditions) {
+            var passingSimulationPaths = new List<SimulationPath>();
+            var highestNumberOfSatisfiedOptimalConditions = 0;
+
+            foreach (var simulationPath in simulationPaths) {
+                var simulationSatisfiedOptimalConditions = 0;
+                foreach (var simulation in simulationPath.Simulations) {
+                    simulationSatisfiedOptimalConditions += GetNumberOfSatisfiedOptimalConditions(optimalConditions, simulation.PropertyCache);
+                }
+
+                if (simulationSatisfiedOptimalConditions > highestNumberOfSatisfiedOptimalConditions) {
+                    highestNumberOfSatisfiedOptimalConditions = simulationSatisfiedOptimalConditions;
+                    passingSimulationPaths = [simulationPath];
+                } else if (simulationSatisfiedOptimalConditions == highestNumberOfSatisfiedOptimalConditions) {
+                    passingSimulationPaths.Add(simulationPath);
+                }
+            }
+
+            return passingSimulationPaths;
+        }
+
+        private int GetNumberOfSatisfiedOptimalConditions(IEnumerable<OptimalCondition> optimalConditions, PropertyCache propertyCache) {
             var numberOfSatisfiedOptimalConditions = 0;
 
-            foreach (var optimalCondition in optimalConditions)
-            {
+            foreach (var optimalCondition in optimalConditions) {
 
                 Property p;
                 if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property.Name, out ConfigurableParameter? configurableParameter)) {
@@ -781,128 +834,124 @@ namespace Logic.Mapek
             return numberOfSatisfiedOptimalConditions;
         }
 
-        public virtual IEnumerable<SimulationPath> GetOptimalSimulationPath(Cache cache,
-            IEnumerable<SimulationPath> simulationPaths)
-        {
-            // This method is a filter for finding the optimal simulation path. It works in a few steps of descending precedance, each of which further reduces the set of
-            // simulation paths:
-            // 1. Filter for simulation paths that satisfy the most OptimalConditions.
-            // 2. Filter for simulation paths that have the highest number of the most optimized Properties.
-            // 3. Pick the first one.
+        private List<SimulationPath> GetSimulationPathsWithMostOptimizedProperties(IEnumerable<SimulationPath> simulationPaths) {
+            // Use any property cache to find optimization annotations. This assumes we're working with numerical types and not booleans.
+            // TODO: include ConfigurableParameters.
+            var propertiesToMinimize = GetPropertiesToOptimize(simulationPaths.First().Simulations.First().PropertyCache, false);
+            var propertiesToMaximize = GetPropertiesToOptimize(simulationPaths.First().Simulations.First().PropertyCache, true);
 
-            PropertyCache propertyCache = cache.PropertyCache;
-            IEnumerable<OptimalCondition> optimalConditions = cache.OptimalConditions;
+            var mostMinimizedSimulationPathsMap = new Dictionary<string, List<SimulationPath>>();
+            var mostMaximizedSimulationPathsMap = new Dictionary<string, List<SimulationPath>>();
 
-            if (!simulationPaths.Any())
-            {
-                return null!;
-            }
+            // Find simulation paths with the most minimized properties. Save the path if it's the best one for at least one property.
+            foreach (var minimizedProperty in propertiesToMinimize) {
+                var lowestTotalPropertyValue = double.MaxValue;
 
-            // Filter for simulation configurations that satisfy the most OptimalConditions.
-            var simulationPathsWithMostOptimalConditionsSatisfied = GetSimulationPathsWithMostOptimalConditionsSatisfied(simulationPaths,
-                optimalConditions);
+                foreach (var simulationPath in simulationPaths) {
+                    var totalMinimizedPropertyValue = 0.0;
 
-            _logger.LogInformation("{count} simulation configurations remaining after the first filter.", simulationPathsWithMostOptimalConditionsSatisfied.Count);
-            if (simulationPathsWithMostOptimalConditionsSatisfied.Count == 1) {
-                return simulationPathsWithMostOptimalConditionsSatisfied;
-            }
+                    foreach (var simulation in simulationPath.Simulations) {
+                        totalMinimizedPropertyValue += (double)simulation.PropertyCache.Properties[minimizedProperty.Name].Value;
+                    }
 
-            // Filter for simulation configurations that optimize the most targeted Properties.
-            var simulationPathsWithMostOptimizedProperties =
-                GetSimulationPathsWithMostOptimizedProperties(simulationPathsWithMostOptimalConditionsSatisfied,
-                    propertyCache);
+                    if (totalMinimizedPropertyValue < lowestTotalPropertyValue) {
+                        lowestTotalPropertyValue = totalMinimizedPropertyValue;
 
-            _logger.LogInformation("{count} simulation configurations remaining after the second filter.", simulationPathsWithMostOptimizedProperties.Count);
-
-            return simulationPathsWithMostOptimizedProperties;
-        }
-
-        private List<SimulationPath> GetSimulationPathsWithMostOptimalConditionsSatisfied(IEnumerable<SimulationPath> simulationPaths,
-            IEnumerable<OptimalCondition> optimalConditions)
-        {
-            var passingSimulationPaths = new List<SimulationPath>();
-            var highestNumberOfSatisfiedOptimalConditions = 0;
-
-            foreach (var simulationPath in simulationPaths)
-            {
-                var numberOfSatisfiedOptimalConditions = GetNumberOfSatisfiedOptimalConditions(optimalConditions, simulationPath.Simulations.Last().PropertyCache!);
-
-                if (numberOfSatisfiedOptimalConditions > highestNumberOfSatisfiedOptimalConditions)
-                {
-                    highestNumberOfSatisfiedOptimalConditions = numberOfSatisfiedOptimalConditions;
-                    passingSimulationPaths = [simulationPath];
-                }
-                else if (numberOfSatisfiedOptimalConditions == highestNumberOfSatisfiedOptimalConditions)
-                {
-                    passingSimulationPaths.Add(simulationPath);
+                        mostMinimizedSimulationPathsMap[minimizedProperty.Name] = [simulationPath];
+                    } else if (totalMinimizedPropertyValue == lowestTotalPropertyValue) {
+                        mostMinimizedSimulationPathsMap[minimizedProperty.Name].Add(simulationPath);
+                    }
                 }
             }
 
-            return passingSimulationPaths;
+            // Find simulation paths with the most maximized properties. Save the path if it's the best one for at least one property.
+            foreach (var maximizedProperty in propertiesToMaximize) {
+                var highestTotalPropertyValue = double.MinValue;
+
+                foreach (var simulationPath in simulationPaths) {
+                    var totalMaximizedPropertyValue = 0.0;
+
+                    foreach (var simulation in simulationPath.Simulations) {
+                        totalMaximizedPropertyValue += (double)simulation.PropertyCache.Properties[maximizedProperty.Name].Value;
+                    }
+
+                    if (totalMaximizedPropertyValue > highestTotalPropertyValue) {
+                        highestTotalPropertyValue = totalMaximizedPropertyValue;
+
+                        mostMaximizedSimulationPathsMap[maximizedProperty.Name] = [simulationPath];
+                    } else if (totalMaximizedPropertyValue == highestTotalPropertyValue) {
+                        mostMaximizedSimulationPathsMap[maximizedProperty.Name].Add(simulationPath);
+                    }
+                }
+            }
+
+            // Find how many properties a simulation path optimized best.
+            var mostOptimizedSimulationPathsCounter = new Dictionary<SimulationPath, int>();
+
+            foreach (var keyValuePair in mostMinimizedSimulationPathsMap) {
+                foreach (var simulationPath in keyValuePair.Value) {
+                    // Increment the counter on a simulation path that minimized a property the most.
+                    if (mostOptimizedSimulationPathsCounter.ContainsKey(simulationPath)) {
+                        mostOptimizedSimulationPathsCounter[simulationPath]++;
+                    } else {
+                        mostOptimizedSimulationPathsCounter.Add(simulationPath, 1);
+                    }
+                }
+            }
+
+            foreach (var keyValuePair in mostMaximizedSimulationPathsMap) {
+                foreach (var simulationPath in keyValuePair.Value) {
+                    // Increment the counter on a simulation path that maximized a property the most.
+                    if (mostOptimizedSimulationPathsCounter.ContainsKey(simulationPath)) {
+                        mostOptimizedSimulationPathsCounter[simulationPath]++;
+                    } else {
+                        mostOptimizedSimulationPathsCounter.Add(simulationPath, 1);
+                    }
+                }
+            }
+
+            // Return the one(s) that optimized the most properties.
+            var mostOptimizedSimulationPaths = new List<SimulationPath>();
+            var mostPropertiesOptimized = 0;
+
+            foreach (var keyValuePair in mostOptimizedSimulationPathsCounter) {
+                if (keyValuePair.Value > mostPropertiesOptimized) {
+                    mostPropertiesOptimized = keyValuePair.Value;
+
+                    mostOptimizedSimulationPaths = [keyValuePair.Key];
+                } else if (keyValuePair.Value == mostPropertiesOptimized) {
+                    mostOptimizedSimulationPaths.Add(keyValuePair.Key);
+                }
+            }
+
+            return mostOptimizedSimulationPaths;
         }
 
-        private List<SimulationPath> GetSimulationPathsWithMostOptimizedProperties(IEnumerable<SimulationPath> simulationPaths,
-            PropertyCache propertyCache)
-        {
-            var propertyChangesToOptimizeFor = GetPropertyChangesToOptimizeFor(propertyCache);
-            var valueHandlers = propertyChangesToOptimizeFor.Select(p => _factory.GetValueHandlerImplementation(p.Property.OwlType));
+        private List<Property> GetPropertiesToOptimize(PropertyCache propertyCache, bool maximize) {
+            var propertyList = new List<Property>();
 
-            _logger.LogInformation("Ordering and filtering simulation results...");
-            
-            var simulationPathComparer = new SimulationPathComparer(propertyChangesToOptimizeFor.Zip(valueHandlers));
+            // Simple injection. We can achieve this similarly with dotNetRdf's own methods with full URIs.
+            var filter = maximize ? "meta:maximizes" : "meta:minimizes";
 
-            // Return the simulation configurations with the maximum score.
-            return simulationPaths.OrderByDescending(s => s, simulationPathComparer)
-                .Where(s => simulationPathComparer.Compare(s, simulationPaths.First()) > -1)
-                .ToList();
-        }
-
-        private List<PropertyChange> GetPropertyChangesToOptimizeFor(PropertyCache propertyCache)
-        {
-            var propertyChangesToOptimizeFor = new List<PropertyChange>();
-
-            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?propertyChange ?property ?effect WHERE {
+            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?propertyName WHERE {
                 ?platform rdf:type sosa:Platform .
-                ?platform meta:optimizesFor ?propertyChange .
-                ?propertyChange ssn:forProperty ?property .
-                ?propertyChange meta:affectsPropertyWith ?effect . }");
+                ?platform " + filter + " ?propertyName . }");
 
             var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
-            foreach (var result in queryResult.Results)
-            {
-                var propertyChangeName = result["propertyChange"].ToString();
-                var propertyName = result["property"].ToString();
-                var effectName = result["effect"].ToString().Split("/")[^1];
-
-                Property property = null!;
-
-                var propertyFound = propertyCache.Properties.TryGetValue(propertyName, out property!);
-
-                // Check where in the property cache the Property is. Shouldn't really fail.
-                if (!propertyFound)
-                {
-                    property = propertyCache.ConfigurableParameters[propertyName];
+            foreach (var result in queryResult.Results) {
+                var propertyName = result["propertyName"].ToString();
+                if (propertyCache.Properties.TryGetValue(propertyName, out var property)) {
+                    // Of the 3 supported types, we don't want to handle non-numericals for this.
+                    if (property.OwlType != "http://www.w3.org/2001/XMLSchema#boolean") {
+                        propertyList.Add(property);
+                    }
+                } else {
+                    throw new Exception($"Property {propertyName} not found in cache.");
                 }
-
-                if (!Enum.TryParse(effectName, out Effect effect))
-                {
-                    throw new Exception($"Enum value {effectName} is not supported.");
-                }
-
-                // TODO: Review, fishy constructing PropertyChange with `null`, should probably be non-nullable?
-                Debug.Assert(property != null, $"Didn't find {propertyName}.");
-                var propertyChange = new PropertyChange
-                {
-                    Name = propertyChangeName,
-                    Property = property,
-                    OptimizeFor = effect
-                };
-
-                propertyChangesToOptimizeFor.Add(propertyChange);
             }
 
-            return propertyChangesToOptimizeFor;
+            return propertyList;
         }
 
         internal void LogOptimalSimulationPath(SimulationPath optimalSimulationPath)

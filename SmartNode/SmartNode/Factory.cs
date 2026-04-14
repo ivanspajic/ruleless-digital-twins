@@ -27,153 +27,154 @@ namespace SmartNode
         {
             return new Dictionary<string, SensorActuatorMapWrapper>(){
                 {
-                "incubator",
-                new SensorActuatorMapWrapper {
-                    ActuatorMap = new() {
-                        {
-                            "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#HeaterActuator",
-                            new AmqHeater(_incubatorAdapter)
+                    "incubator",
+                    new SensorActuatorMapWrapper {
+                        ActuatorMap = new() {
+                            {
+                                "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#HeaterActuator",
+                                new AmqHeater(_incubatorAdapter)
+                            }
+                        },
+                        SensorMap = new() {
+                            {
+                                ("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor",
+                                "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure"),
+                                new AmqSensor(_incubatorAdapter, "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor",
+                                    "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure",
+                                    d => d.average_temperature)
+                            }
                         }
-                    },
-                    SensorMap = new() {
-                        {
-                            ("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor",
-                            "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure"),
-                            new AmqSensor(_incubatorAdapter, "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor",
-                                "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure",
-                                d => d.average_temperature)
+                    }
+                },
+                {
+                    "roomM370",
+                    new SensorActuatorMapWrapper {
+                        ActuatorMap = new() {
+                            {
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater",
+                                new DummyHeater("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater")
+                            },
+                            {
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating",
+                                new DummyHeater("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating")
+                            },
+                            {
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier",
+                                new DummyDehumidifier("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier")
+                            }
+                        },
+                        SensorMap = new() {
+                            {
+                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm"),
+                                new DummyTemperatureSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm",
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1")
+                            },
+                            {
+                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure"),
+                                new DummyTemperatureSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure",
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2")
+                            },
+                            {
+                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure"),
+                                new DummyTemperatureSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure",
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1")
+                            },
+                            {
+                                ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
+                                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm"),
+                                new DummySensor("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm",
+                                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor")
+                            },
+                            {
+                                ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
+                                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPiece"),
+                                new DummySensor("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPiece",
+                                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor")
+                            },
+                            {
+                                ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1",
+                                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1Procedure"),
+                                new DummyTemperatureSensor("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1Procedure",
+                                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1")
+                            },
+                            {
+                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeter",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterProcedure"),
+                                new DummyEnergyConsumptionSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterProcedure",
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeter")
+                            },
+                            {
+                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure"),
+                                new DummyHumiditySensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure",
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor")
+                            },
+                            { // [VS] Abuse:
+                                ("http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummySensor",
+                                "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProcedure"),
+                                new ConstantSensor("http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProcedure",
+                                    "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummySensor", -1)
+                            },
+                            {
+                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensor",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensorProcedure"),
+                                new IncreaseTemperatureSoftSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensor",
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensorProcedure")
+                            },
+                            {
+                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensor",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensorProcedure"),
+                                new DecreaseTemperatureSoftSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensor",
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensorProcedure")
+                            },
+                            {
+                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensor",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensorProcedure"),
+                                new AverageTemperatureSoftSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensor",
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensorProcedure")
+                            },
+                            {
+                                ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioSoftSensor",
+                                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm"),
+                                new CompressionRatioSoftSensor("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioSoftSensor",
+                                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm")
+                            },
+                            {
+                                ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
+                                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceAlgorithm"),
+                                new CustomPieceSoftSensor("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
+                                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceAlgorithm")
+                            },
+                            {
+                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensor",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensorProcedure"),
+                                new MotionSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensor",
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensorProcedure")
+                            },
+                            {
+                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure"),
+                                new PriceSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure")
+                            }
+                        }
+                    }
+                },
+                {
+                    string.Empty,
+                    new SensorActuatorMapWrapper {
+                        ActuatorMap = new() {
+
+                        },
+                        SensorMap = new() {
+
                         }
                     }
                 }
-            },
-            {
-                "roomM370",
-                new SensorActuatorMapWrapper {
-                    ActuatorMap = new() {
-                        {
-                            "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater",
-                            new DummyHeater("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater")
-                        },
-                        {
-                            "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating",
-                            new DummyHeater("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating")
-                        },
-                        {
-                            "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier",
-                            new DummyDehumidifier("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier")
-                        },
-                        {
-                            "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolStepActuator",
-                            new DummyDehumidifier("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolStepActuator")
-
-                        }
-                    },
-                    SensorMap = new() {
-                        {
-                            ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1",
-                            "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm"),
-                            new DummyTemperatureSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm",
-                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1")
-                        },
-                        {
-                            ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2",
-                            "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure"),
-                            new DummyTemperatureSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure",
-                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2")
-                        },
-                        {
-                            ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1",
-                            "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure"),
-                            new DummyTemperatureSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure",
-                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1")
-                        },
-                        {
-                            ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
-                            "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm"),
-                            new DummySensor("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm",
-                                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor")
-                        },
-                        {
-                            ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
-                            "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPiece"),
-                            new DummySensor("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPiece",
-                                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor")
-                        },
-                        {
-                            ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1",
-                            "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1Procedure"),
-                            new DummyTemperatureSensor("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1Procedure",
-                                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1")
-                        },
-                        {
-                            ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeter",
-                            "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterProcedure"),
-                            new DummyEnergyConsumptionSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterProcedure",
-                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeter")
-                        },
-                        {
-                            ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor",
-                            "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure"),
-                            new DummyHumiditySensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure",
-                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor")
-                        },
-                        { // [VS] Abuse:
-                            ("http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummySensor",
-                            "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProcedure"),
-                            new ConstantSensor("http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProcedure",
-                                "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummySensor", -1)
-                        },
-                        {
-                            ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensor",
-                            "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensorProcedure"),
-                            new IncreaseTemperatureSoftSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensor",
-                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensorProcedure")
-                        },
-                        {
-                            ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensor",
-                            "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensorProcedure"),
-                            new DecreaseTemperatureSoftSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensor",
-                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensorProcedure")
-                        },
-                        {
-                            ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensor",
-                            "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensorProcedure"),
-                            new AverageTemperatureSoftSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensor",
-                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensorProcedure")
-                        },
-                        {
-                            ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioSoftSensor",
-                            "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm"),
-                            new CompressionRatioSoftSensor("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioSoftSensor",
-                                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm")
-                        },
-                        {
-                            ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
-                            "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceAlgorithm"),
-                            new CustomPieceSoftSensor("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
-                                "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceAlgorithm")
-                        },
-                        {
-                            ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensor",
-                            "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensorProcedure"),
-                            new MotionSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensor",
-                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensorProcedure")
-                        }
-                    }
-                }
-            },
-            {
-                string.Empty,
-                new SensorActuatorMapWrapper {
-                    ActuatorMap = new() {
-
-                    },
-                    SensorMap = new() {
-
-                    }
-                }
-            }
-        };
+            };
         }
 
         private readonly Dictionary<string, IConfigurableParameter> _configurableParameters = new() {

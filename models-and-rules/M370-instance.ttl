@@ -14,6 +14,12 @@
                     a <http://www.w3.org/ns/ssn/Property>,
                       <http://www.w3.org/ns/ssn/Output>,
                       owl:NamedIndividual.
+:AccumulatedEnergyTimesPrice a owl:NamedIndividual,
+                               <http://www.w3.org/ns/sosa/ObservableProperty>,
+                               [a owl:Restriction ; 
+                                owl:onProperty rdt:hasValue ; 
+                                owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
+                                owl:onDataRange xsd:double].
 :AverageTemperatureSoftSensor a <http://www.w3.org/ns/sosa/Sensor>,
                                 owl:NamedIndividual;
                               <http://www.w3.org/ns/ssn/implements> :AverageTemperatureSoftSensorProcedure.
@@ -67,6 +73,19 @@
              rdt:hasURI "Fakepool.fmu"^^xsd:anyURI;
              a rdt:FmuModel,
                owl:NamedIndividual.
+:FakepoolStepActuator rdt:hasActuatorName "step";
+                      rdt:hasActuatorState "900"^^xsd:int;
+                      rdt:isParameter true;
+                      a owl:NamedIndividual,
+                        <http://www.w3.org/ns/sosa/Actuator>;
+                      <http://www.w3.org/ns/sosa/enacts> :StepChange.
+:FakepoolStepChange rdt:affectsPropertyWith rdt:ValueIncrease;
+                    a rdt:PropertyChangeByActuation,
+                      owl:NamedIndividual;
+                    <http://www.w3.org/ns/ssn/forProperty> :FakepoolStepProperty.
+:FakepoolStepProperty rdt:hasValue 0e+00;
+                      a owl:NamedIndividual,
+                        <http://www.w3.org/ns/sosa/ObservableProperty>.
 :FloorHeating rdt:enacts :RoomTemperatureIncrease,
                          :EnergyConsumptionIncrease;
               rdt:hasActuatorState "1"^^xsd:int,

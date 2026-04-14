@@ -16,11 +16,12 @@ namespace TestProject
     {
         [Theory]
         // [InlineData("M370-instance.ttl", "M370-inferred.ttl",1,4,115.05600000000001, false, false, false)]
-        [InlineData(2, 40, 106.488, true, false, false)]
-        [InlineData(4, 5536, 114.696, false, true, false)]
-        [InlineData(4, 5536, 114.696, false, true, true)]
+        [InlineData(2, 3600, 40, 106.488, true, false, false)]
+        [InlineData(4, 3600, 5536, 114.696, false, true, false)]
+        [InlineData(4, 3600, 5536, 114.696, false, true, true)]
+        [InlineData(5, 2700, 5536, 114.696, false, true, false)]
         //[InlineData(4, 5536, 114.696, true, true, false)]
-        public async Task TestMapeK(int rounds, int count, double minCost, bool useCase, bool nullLogger, bool dontMinimize)
+        public async Task TestMapeK(int rounds, int duration, int count, double minCost, bool useCase, bool nullLogger, bool dontMinimize)
         {
             // Arrange
             IRDTServiceProvider serviceProvider = nullLogger ? new NullServiceProviderMock() : new ServiceProviderMock();
@@ -45,7 +46,7 @@ namespace TestProject
                 MaximumMapekRounds = 1,
                 PropertyValueFuzziness = 0.25,
                 SaveMapekCycleData = false,
-                CycleDurationSeconds = 3600,
+                CycleDurationSeconds = duration,
                 SleepyTimeMilliseconds = 0,
                 StartInReactiveMode = false,
                 UseCaseBasedFunctionality = useCase,
@@ -88,10 +89,6 @@ namespace TestProject
                     ((MapekKnowledge)knowledge).UpdateModel(deleteQ);
                 }
                 var cache = await monitor.Monitor();
-                { // Tweak cache:
-                    cache.PropertyCache.Properties.Add("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#price",
-                        new Property { Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#price", Value = 0.0, OwlType = "http://www.w3.org/2001/XMLSchema#double" });
-                }
 
                 Stopwatch sw = Stopwatch.StartNew();
                 var simulationPathAndTree = await plan.Plan(cache);
@@ -104,7 +101,7 @@ namespace TestProject
                     // Print starting values:
                     var sroot = simulationPathAndTree.Item1.NodeItem.PropertyCache; {
                         var temp = sroot.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature"].Value;                        
-                        f_out.WriteLine($"{temp},0,0,0,0,\"\"");
+                        f_out.WriteLine($"0,{temp},0,0,0,0,\"\"");
                     }
 
                 // Assume worst case if we're not minimizing
@@ -118,7 +115,7 @@ namespace TestProject
                   var actions = string.Join(",", s.Actions.OrderBy(a => a.Name).Select(a => a.Name.Split("#")[1].Split("_")[1]));
                   var temp = s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature"].Value;
                   var accPrice = s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice"].Value;
-                  f_out.Write($"{temp},{accPrice},{actions},");
+                  f_out.Write($"{s.Index * duration},{temp},{accPrice},{actions},");
                   f_out.WriteLine($"\"{ThisAssembly.Git.Commit}{(ThisAssembly.Git.IsDirty ? "-DIRTY" : "")}: {rounds},{count},{minCost},case:{useCase},dMin:{dontMinimize},{sw.Elapsed.TotalSeconds}s\"");
                 }
             }

@@ -606,7 +606,7 @@ namespace Logic.Mapek
             return staticObservables;
         }
 
-        private IEnumerable<FmuModel> GetHostPlatformFmuModel(string fmuDirectory) {
+        public IEnumerable<FmuModel> GetHostPlatformFmuModel(string fmuDirectory) {
             // Retrieve the Platform (TT) FMU to be used for Actuators and/or ConfigurableParameters.
             var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?fmuModel ?fmuFilePath ?simulationFidelitySeconds WHERE {
                 ?platform rdf:type sosa:Platform .

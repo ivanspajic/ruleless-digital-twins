@@ -10,16 +10,16 @@
 
 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1> a owl:Ontology;
                                                                     owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins>.
-:AverageTemperature rdt:hasValue "16.746512725848774"^^xsd:double;
-                    a <http://www.w3.org/ns/ssn/Property>,
-                      <http://www.w3.org/ns/ssn/Output>,
-                      owl:NamedIndividual.
 :AccumulatedEnergyTimesPrice a owl:NamedIndividual,
                                <http://www.w3.org/ns/sosa/ObservableProperty>,
                                [a owl:Restriction ; 
                                 owl:onProperty rdt:hasValue ; 
                                 owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
                                 owl:onDataRange xsd:double].
+:AverageTemperature rdt:hasValue "16.746512725848774"^^xsd:double;
+                    a <http://www.w3.org/ns/ssn/Property>,
+                      <http://www.w3.org/ns/ssn/Output>,
+                      owl:NamedIndividual.
 :AverageTemperatureSoftSensor a <http://www.w3.org/ns/sosa/Sensor>,
                                 owl:NamedIndividual;
                               <http://www.w3.org/ns/ssn/implements> :AverageTemperatureSoftSensorProcedure.
@@ -211,7 +211,8 @@
                         owl:NamedIndividual;
                       <http://www.w3.org/ns/ssn/forProperty> :RoomHumidity.
 :RoomM370 rdt:generateCombinationsOnlyFromOptimalConditions false;
-          rdt:hasSimulationModel :RoomM370FMU;
+          rdt:hasSimulationModel :RoomM370FMU,
+                                 :FakepoolFMU;
           rdt:minimizes :Price,
                         :EnergyConsumption;
           a <http://www.w3.org/ns/sosa/Platform>,

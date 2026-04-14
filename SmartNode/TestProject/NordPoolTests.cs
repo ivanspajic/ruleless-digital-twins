@@ -16,9 +16,6 @@ namespace TestProject
     internal class Factory : IFactory {
         private readonly Dictionary<string, IValueHandler> _valueHandlers = new() {
             { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
-            { "double", new DoubleValueHandler() }, // FIXME
-            { "boolean", new BooleanValueHandler() },
-            { "string", new StringValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
         };

@@ -8,6 +8,9 @@ namespace Implementations.SimulatedTwinningTargets
         private const int Seed = 10110111;
         private const string FmuModelFilepath = "";
         private const string FmuInstanceName = "DummyRoomM370";
+        private const string HeaterParameterName = "HeaterState";
+        private const string FloorHeatingParameterName = "FloorHeatingState";
+        private const string DehumidifierParameterName = "DehumidifierState";
         private const int CycleDurationSeconds = 900;
 
         private readonly Random _randomGenerator = new(Seed);
@@ -16,8 +19,12 @@ namespace Implementations.SimulatedTwinningTargets
         private double _roomHumidity = 10.2;
         private double _energyConsumption = 0.0;
 
-        private IModel fmuModel;
-        private IInstance fmuInstance;
+        private int _heaterState = 0;
+        private int _floorHeatingState = 0;
+        private int _dehumidifierState = 0;
+
+        private IModel? _fmuModel;
+        private IInstance? _fmuInstance;
 
         private static DummyRoomM370? _instance;
 
@@ -52,17 +59,43 @@ namespace Implementations.SimulatedTwinningTargets
             }
         }
 
-        private void ExecuteFmu(double simulationDurationSeconds) {
-            // check if the model is already loaded
-            var model = Model.Load(FmuModelFilepath, new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]));
-            // We're only using one instance per FMU, so we can just use the path as name.
+        public int HeaterState {
+            get => _heaterState;
+            set {
+                _heaterState = value;
+            }
+        }
 
-            // check if the instance is already loaded
-            var fmuInstance = model.CreateCoSimulationInstance(FmuInstanceName);
+        public int FloorHeatingState {
+            get => _floorHeatingState;
+            set {
+                _floorHeatingState = value;
+            }
+        }
 
-            // write the old parameters first (save them somewhere!!)
+        public int DehumidifierState {
+            get => _dehumidifierState;
+            set {
+                _dehumidifierState = value;
+            }
+        }
+
+        private void ExecuteFmu(double mapekExecutionDuration) {
+            // Check if we already loaded the model.
+            _fmuModel ??= Model.Load(FmuModelFilepath, new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]));
+
+            // Check if we already loaded the instance.
+            _fmuInstance ??= _fmuModel.CreateCoSimulationInstance(FmuInstanceName);
+            _fmuInstance.Reset();
+
+            var heaterParameter = 
+
             // write the old actuator states (save them somewhere!!)
-            fmuInstance.StartTime(0, (i) => i.WriteReal((parameter, (double)value));
+            _fmuInstance.StartTime(0, (i) => {
+                i.WriteInteger((HeaterParameterName, HeaterState));
+
+                return true;
+            });
 
             // Advance time for the duration of 
             var maximumSteps = (double)simulationDurationSeconds / fmuModel.SimulationFidelitySeconds;

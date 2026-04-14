@@ -4,7 +4,6 @@ using Logic.FactoryInterface;
 using Logic.Mapek;
 using Logic.Models.DatabaseModels;
 using Logic.Models.MapekModels;
-using Logic.Models.OntologicalModels;
 using MongoDB.Driver;
 using System.Diagnostics;
 using System.Reflection;
@@ -16,11 +15,11 @@ namespace TestProject
     {
         [Theory]
         // [InlineData("M370-instance.ttl", "M370-inferred.ttl",1,4,115.05600000000001, false, false, false)]
-        [InlineData(2, 900, 40, 106.488, true, false, false)]
+        [InlineData(2, 1800, 40, 106.488, true, false, false)]
         [InlineData(4, 900, 5536, 114.696, false, false, false)]
         [InlineData(4, 900, 5536, 114.696, false, true, false)]
         [InlineData(4, 900, 5536, 114.696, false, true, true)]
-        [InlineData(5, 675, 5536, 114.696, false, false, false)]
+        [InlineData(5, 720, 5536, 114.696, false, true, false)]
         //[InlineData(4, 5536, 114.696, true, true, false)]
         public async Task TestMapeK(int rounds, int duration, int count, double minCost, bool useCase, bool nullLogger, bool dontMinimize)
         {

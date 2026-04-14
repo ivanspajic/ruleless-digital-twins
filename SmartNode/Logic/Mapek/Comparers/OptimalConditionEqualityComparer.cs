@@ -4,8 +4,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Logic.Mapek.Comparers {
     internal class OptimalConditionEqualityComparer : IEqualityComparer<OptimalCondition> {
-        private readonly IEqualityComparer<Property> _propertyEqualityComparer = new PropertyEqualityComparer();
+        private readonly IEqualityComparer<Property> _propertyEqualityComparer;
         private readonly IEqualityComparer<ConstraintExpression> _constraintExpressionEqualityComparer = new ConstraintExpressionEqualityComparer();
+
+        public OptimalConditionEqualityComparer(double fuzzinessFactor) {
+            _propertyEqualityComparer = new FuzzyPropertyEqualityComparer(fuzzinessFactor);
+        }
 
         public bool Equals(OptimalCondition? x, OptimalCondition? y) {
             return x!.Name.Equals(y!.Name) &&

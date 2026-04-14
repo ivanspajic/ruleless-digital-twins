@@ -17,7 +17,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public async Task Execute(Simulation simulation)
+        public async Task Execute(Simulation simulation, double mapekExecutionDurationSeconds = 0)
         {
             _logger.LogInformation("Starting the Execute phase.");
 
@@ -35,10 +35,14 @@ namespace Logic.Mapek
             }
 
             LogExpectedPropertyValues(simulation);
+
+            // Workaround for a virtual dummy environment execution. Supports only ActuationActions.
+            if (mapekExecutionDurationSeconds > 0) {
+                ActuateDummyEnvironment(((ActuationAction)simulation.Actions.Last()).Actuator.Name, mapekExecutionDurationSeconds);
+            }
         }
 
-        private void ExecuteActuationAction(ActuationAction actuationAction)
-        {
+        private void ExecuteActuationAction(ActuationAction actuationAction) {
             _logger.LogInformation("Actuating actuator {actuator} with state {actuatorState}.",
                 actuationAction.Actuator.Name,
                 actuationAction.NewStateValue.ToString());
@@ -49,8 +53,7 @@ namespace Logic.Mapek
             actuator.Actuate(actuationAction.NewStateValue);
         }
 
-        private void ExecuteReconfigurationAction(ReconfigurationAction reconfigurationAction)
-        {
+        private void ExecuteReconfigurationAction(ReconfigurationAction reconfigurationAction) {
             _logger.LogInformation("Reconfiguring property {configurableProperty} with {effect}.",  
                 reconfigurationAction.ConfigurableParameter.Name,
                 reconfigurationAction.NewParameterValue);
@@ -59,8 +62,7 @@ namespace Logic.Mapek
             configurableParameterImplementation.UpdateConfigurableParameter(reconfigurationAction.ConfigurableParameter.Name, reconfigurationAction.NewParameterValue);
         }
 
-        private void LogExpectedPropertyValues(Simulation simulation)
-        {
+        private void LogExpectedPropertyValues(Simulation simulation) {
             var msg = "Expected Property values:";
 
             foreach (var propertyKeyValue in simulation.PropertyCache!.Properties) {
@@ -71,6 +73,12 @@ namespace Logic.Mapek
                 msg += $"\n{configurableParameterKeyValue.Key}: {configurableParameterKeyValue.Value.Value.ToString()}";
             }
             _logger.LogInformation(msg);
+        }
+
+        private void ActuateDummyEnvironment(string actuatorName, double mapekExecutionDurationSeconds) {
+            // Get any actuator to actuate the dummy environment.
+            var actuator = _factory.GetActuatorImplementation(actuatorName);
+            actuator.RunDummyEnvironment(mapekExecutionDurationSeconds);
         }
     }
 }

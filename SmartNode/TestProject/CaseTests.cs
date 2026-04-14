@@ -15,6 +15,7 @@ namespace TestProject {
         public void Case_repository_logic_finds_right_case() {
             // Arrange
             // Set up all the DTOs.
+            var fuzzinessFactor = 5;
             var databaseSettings = new DatabaseSettings {
                 CollectionName = "Cases",
                 ConnectionString = "mongodb://localhost:27017",
@@ -236,7 +237,7 @@ namespace TestProject {
             // Act
             caseRepository.CreateCase(expectedCase);
             caseRepository.CreateCase(otherCase);
-            var actualCase = caseRepository.ReadCase(quantizedProperties, quantizedOptimalConditions, lookAheadCycles, simulationDurationSeconds, caseIndex);
+            var actualCase = caseRepository.ReadCase(quantizedProperties, quantizedOptimalConditions, lookAheadCycles, simulationDurationSeconds, caseIndex, fuzzinessFactor);
 
             // Assert
             Assert.Equal(expectedCase, actualCase);
@@ -491,8 +492,8 @@ namespace TestProject {
             Assert.Equal(expectedCase.LookAheadCycles, actualCase.LookAheadCycles);
             Assert.Equal(expectedCase.Simulation.Index, actualCase.Simulation!.Index);
             Assert.Equal(expectedCase.Simulation.Actions, actualCase.Simulation.Actions, new ActionEqualityComparer());
-            Assert.Equal(expectedCase.QuantizedProperties, actualCase.QuantizedProperties, new PropertyEqualityComparer());
-            Assert.Equal(expectedCase.QuantizedOptimalConditions, actualCase.QuantizedOptimalConditions, new OptimalConditionEqualityComparer());
+            Assert.Equal(expectedCase.QuantizedProperties, actualCase.QuantizedProperties, new FuzzyPropertyEqualityComparer(coordinatorSettings.PropertyValueFuzziness));
+            Assert.Equal(expectedCase.QuantizedOptimalConditions, actualCase.QuantizedOptimalConditions, new OptimalConditionEqualityComparer(coordinatorSettings.PropertyValueFuzziness));
         }
     }
 }

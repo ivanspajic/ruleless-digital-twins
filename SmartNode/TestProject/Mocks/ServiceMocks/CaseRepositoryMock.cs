@@ -18,7 +18,8 @@ namespace TestProject.Mocks.ServiceMocks {
             IEnumerable<OptimalCondition> quantizedOptimalConditions,
             int lookAheadCycles,
             int cycleDurationSeconds,
-            int index) {
+            int index,
+            double fuzzinessFactor) {
             return Cases.Where(element =>
                 element.QuantizedProperties!.SequenceEqual(quantizedProperties) &&
                 element.QuantizedOptimalConditions!.SequenceEqual(quantizedOptimalConditions) &&

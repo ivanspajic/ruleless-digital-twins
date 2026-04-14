@@ -296,6 +296,10 @@ namespace TestProject {
                         Debug.Fail($"Unexpected value {_actuatorState}!");
                     }
                 }
+
+                public void RunDummyEnvironment(double mapekExecutionDurationSeconds) {
+                    throw new NotImplementedException();
+                }
             }
 
             public class AMQSensor(string sensorName, string procedureName, Func<IncubatorFields, double> f) : ISensor

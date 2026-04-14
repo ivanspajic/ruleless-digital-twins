@@ -4,6 +4,6 @@ namespace Logic.Mapek
 {
     public interface IMapekExecute
     {
-        public Task Execute(Simulation simulation);
+        public Task Execute(Simulation simulation, double mapekExecutionDurationSeconds = 0);
     }
 }

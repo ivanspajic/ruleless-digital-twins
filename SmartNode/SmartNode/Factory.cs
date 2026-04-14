@@ -56,7 +56,7 @@ namespace SmartNode
                             },
                             {
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating",
-                                new DummyHeater("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating")
+                                new DummyFloorHeating("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating")
                             },
                             {
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier",

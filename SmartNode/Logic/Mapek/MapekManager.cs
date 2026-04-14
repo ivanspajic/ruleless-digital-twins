@@ -9,6 +9,7 @@ using Logic.ValueHandlerInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("TestProject")]
@@ -59,7 +60,12 @@ namespace Logic.Mapek {
             SimulationTreeNode currentSimulationTree = null!;
             SimulationPath currentOptimalSimulationPath = null!;
 
+            var stopwatch = new Stopwatch();
+
             while (_isLoopActive) {
+                // Gather duration information for the dummy environment.
+                stopwatch.Start();
+
                 if (_coordinatorSettings.MaximumMapekRounds > -1) {
                     _logger.LogInformation("MAPE-K rounds left: {maxRound})", _coordinatorSettings.MaximumMapekRounds);
                 }
@@ -81,8 +87,12 @@ namespace Logic.Mapek {
                     currentSimulationTree,
                     currentOptimalSimulationPath);
 
+                stopwatch.Stop();
+
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
-                await _mapekExecute.Execute(simulationToExecute);
+                await _mapekExecute.Execute(simulationToExecute, stopwatch.ElapsedMilliseconds / 1000.0);
+                
+                stopwatch.Reset();
 
                 // If configured, write MAPE-K state to CSV.
                 if (_coordinatorSettings.SaveMapekCycleData && simulationToExecute is not null && currentSimulationTree is not null) {
@@ -117,9 +127,10 @@ namespace Logic.Mapek {
 
             var simulationMatches = false;
             if (simulationToExecute is not null) {
-                var quantizedSimulationProperties = GetQuantizedProperties(simulationToExecute.PropertyCache.ConfigurableParameters, simulationToExecute.PropertyCache.Properties);
+                //var quantizedSimulationProperties = GetQuantizedProperties(simulationToExecute.PropertyCache.ConfigurableParameters, simulationToExecute.PropertyCache.Properties);
 
-                simulationMatches = quantizedSimulationProperties.SequenceEqual(quantizedObservedProperties, new PropertyEqualityComparer());
+                var quantizedSimulationPropertiesSet = new HashSet<Property>(simulationToExecute.PropertyCache.Properties.Values, new FuzzyPropertyEqualityComparer(_coordinatorSettings.PropertyValueFuzziness));
+                simulationMatches = quantizedSimulationPropertiesSet.SetEquals(cache.PropertyCache.Properties.Values);
             }
 
             // If the previously executed simulation's results don't match the current cycle's observations, the predictions for the rest of the simulation path are outside of
@@ -282,7 +293,8 @@ namespace Logic.Mapek {
                     quantizedOptimalConditions,
                     _coordinatorSettings.LookAheadMapekCycles,
                     _coordinatorSettings.CycleDurationSeconds,
-                    i);
+                    i,
+                    _coordinatorSettings.PropertyValueFuzziness);
 
                 // If no case is found, return a null.
                 if (savedCase is null) {

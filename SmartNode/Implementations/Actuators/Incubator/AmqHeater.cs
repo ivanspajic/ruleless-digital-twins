@@ -33,5 +33,9 @@ namespace Implementations.Actuators.Incubator {
                 Debug.Fail($"Unexpected value {_actuatorState}!");
             }
         }
+
+        public void RunDummyEnvironment(double mapekExecutionDurationSeconds) {
+            // Not used here.
+        }
     }
 }

@@ -486,6 +486,9 @@ namespace Logic.Mapek
 
             stopwatch.Stop();
             _logger.LogInformation("Total simulation time (seconds): {elapsedTime}", (double)stopwatch.ElapsedMilliseconds / 1000);
+
+            // Ensure the FMU is loadable after the simulations.
+            DeallocateFmuModelAndInstance();
         }
         
         private async static Task ExecuteSoftSensorsAndUpdateSimulationCache(Simulation simulation, IEnumerable<SoftSensorTreeNode> softSensorTreeNodes) {
@@ -701,13 +704,13 @@ namespace Logic.Mapek
             var logMsg = "";
             foreach (var fmuOutput in fmuOutputs)
             {
-                foreach (var propertyName in propertyCacheCopy.Properties.Keys.Where(propertyName => propertyName.EndsWith($"#{fmuOutput.Key}")))
+                foreach (var propertyName in propertyCacheCopy.Properties.Keys.Where(propertyName => propertyName.EndsWith($"{fmuOutput.Key}")))
                 {
-                        var valueHandler = _factory.GetValueHandlerImplementation(propertyCacheCopy.Properties[propertyName].OwlType);
-                        var value = valueHandler.GetValueFromSimulationParameter(fmuInstance, fmuOutput.Value);
+                    var valueHandler = _factory.GetValueHandlerImplementation(propertyCacheCopy.Properties[propertyName].OwlType);
+                    var value = valueHandler.GetValueFromSimulationParameter(fmuInstance, fmuOutput.Value);
 
-                        logMsg += $"{propertyName}: {value}\n";
-                        propertyCacheCopy.Properties[propertyName].Value = value;
+                    logMsg += $"{propertyName}: {value}\n";
+                    propertyCacheCopy.Properties[propertyName].Value = value;
                 }
             }
             _logger.LogInformation("New values:\n{vals}", logMsg);   
@@ -948,6 +951,20 @@ namespace Logic.Mapek
                 _logger.LogDebug("Disposing {fmu}.", d.Key);
                 d.Value.Dispose();
             }
+        }
+
+        private void DeallocateFmuModelAndInstance() {
+            foreach (var keyValuePair in _iDict) {
+                keyValuePair.Value.Dispose();
+                _iDict[keyValuePair.Key] = null!;
+            }
+            _iDict.Clear();
+
+            foreach (var keyValuePair in _fmuDict) {
+                keyValuePair.Value.Dispose();
+                _fmuDict[keyValuePair.Key] = null!;
+            }
+            _fmuDict.Clear();
         }
     }
 }

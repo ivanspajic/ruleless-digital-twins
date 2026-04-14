@@ -61,6 +61,11 @@ namespace SmartNode
                             {
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier",
                                 new DummyDehumidifier("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier")
+                            },
+                            { // [VS] Abuse -- input for FMU which does not have a TT
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolStepActuator",
+                                new DummyDehumidifier("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolStepActuator")
+
                             }
                         },
                         SensorMap = new() {

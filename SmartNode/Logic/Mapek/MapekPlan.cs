@@ -779,8 +779,7 @@ namespace Logic.Mapek
             _logger.LogInformation("New values:\n{vals}", logMsg);   
         }
 
-        public virtual IEnumerable<SimulationPath> GetOptimalSimulationPath(Cache cache,
-            IEnumerable<SimulationPath> simulationPaths)
+        public virtual IEnumerable<SimulationPath> GetOptimalSimulationPath(Cache cache, IEnumerable<SimulationPath> simulationPaths)
         {
             // This method is a filter for finding the optimal simulation path. It works in a few steps of descending precedance, each of which further reduces the set of
             // simulation paths:

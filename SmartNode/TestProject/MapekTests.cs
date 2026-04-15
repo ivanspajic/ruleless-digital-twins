@@ -81,6 +81,8 @@ namespace TestProject
             IMapekPlan plan = new MMK(serviceProvider, new FOp[] { f_prod_acc });
             serviceProvider.Add(plan);
 
+            Assert.Equal(2, ((MapekPlan)plan).GetHostPlatformFmuModel(filepathArguments.FmuDirectory).Count());
+
             // Act
             try
             {

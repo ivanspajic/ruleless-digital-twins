@@ -3,7 +3,7 @@ import typing
 from typing import Optional
 from rdflib import BNode, Literal, Graph, URIRef
 from rdflib.namespace import Namespace, RDF, RDFS, OWL, XSD
-from rdflib.term import IdentifiedNode
+from rdflib.term import IdentifiedNode, URIRef
 
 RDT = Namespace("http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/")
 SOSA = Namespace("http://www.w3.org/ns/sosa/")
@@ -34,22 +34,30 @@ class Property(Node):
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
         g.add((self.node, RDT["hasValue"], Literal(value, datatype=XSD.double)))
 
+
 class Change(Node):
-    def __init__(self, g, name: IdentifiedNode, affects: ObservableProperty):
+    def __init__(self, g, name: IdentifiedNode, affects: ObservableProperty, increase: Optional[bool] = None):
         self.node = name
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
         g.add((self.node, RDF["type"], RDT["PropertyChangeByActuation"]))
         g.add((self.node, SSN["forProperty"], affects.node))
-        g.add((self.node, RDT["affectsPropertyWith"], RDT["ValueIncrease"])) # TODO
+        if increase is not None:
+            g.add((self.node, RDT["affectsPropertyWith"], RDT["ValueIncrease"] if increase else RDT["ValueDecrease"])) # TODO: maybe enum better?
 
 class Actuator(Node):
-    def __init__(self, g, name: IdentifiedNode, enacts: Change, actuatorName: Optional[str] = None):
+    def __init__(self, g, name: IdentifiedNode, enacts: Change, actuatorName: Optional[str] = None
+                     , actuatorStates: Optional[list[str]] = [], actuatorType: Optional[URIRef] = None
+                     , isParameter: Optional[bool] = False):
         self.node = name
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
         g.add((self.node, RDF["type"], SOSA["Actuator"]))
         g.add((self.node, SOSA["enacts"], enacts.node))
         if actuatorName is not None:
             g.add((self.node, RDT["hasActuatorName"], Literal(actuatorName, datatype=XSD.string)))
+        for s in actuatorStates:
+            g.add((self.node, RDT["hasActuatorState"], Literal(s, datatype=actuatorType)))
+        if isParameter:
+            g.add((self.node, RDT["isParameter"], Literal(True, datatype=XSD.boolean)))
 
 class OptimalCondition(Node):
     pass

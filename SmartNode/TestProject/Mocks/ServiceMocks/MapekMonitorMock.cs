@@ -9,7 +9,7 @@ namespace TestProject.Mocks.ServiceMocks {
             _cache = cache;
         }
 
-        public async Task<Cache> Monitor() {
+        public async Task<Cache> Monitor(int currentMapekCycle) {
             return _cache;
         }
     }

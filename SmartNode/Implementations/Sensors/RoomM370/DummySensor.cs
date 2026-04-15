@@ -16,4 +16,8 @@ namespace Implementations.Sensors.RoomM370
         public double Value { get; private set; } = value;
         public override async Task<object> ObservePropertyValue(params object[] inputProperties) => Value;
     }
+
+    public class GeneralConstantSensor(string sensorName, string procedureName, object value) : DummySensor(sensorName, procedureName) {
+        public override async Task<object> ObservePropertyValue(params object[] inputProperties) => value;
+    }
 }

@@ -14,7 +14,7 @@ namespace TestProject.Mocks.ServiceMocks {
             throw new NotImplementedException(); // XXX Unclear who needs this?
         }
 
-        public async Task<(SimulationTreeNode, SimulationPath)> Plan(Cache cache) {
+        public async Task<(SimulationTreeNode, SimulationPath)> Plan(Cache cache, int currentMapekCycle) {
             return _simulationTuple;
         }
     }

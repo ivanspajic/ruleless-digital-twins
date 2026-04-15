@@ -25,6 +25,7 @@ namespace Logic.Mapek
         private bool _javaInvocationAsyncError = false; // Used to track async errors from Java invocation.
 
         private bool _savedReactiveSetting = false;
+        private int _currentMapekCycle = 0;
 
         private readonly CoordinatorSettings _coordinatorSettings;
         private readonly ILogger<IMapekPlan> _logger;
@@ -52,8 +53,11 @@ namespace Logic.Mapek
         /// represents a unique decision at a given cycle (tree level). The root node represents the current cycle and contains the originally observed Property values. The decision will contains
         /// a sequence of simulations with each containing the actions to take and their predicted results.
         /// </returns>
-        public async Task<(SimulationTreeNode, SimulationPath)> Plan(Cache cache) {
+        public async Task<(SimulationTreeNode, SimulationPath)> Plan(Cache cache, int currentMapekCycle) {
             _logger.LogInformation("Starting the Plan phase.");
+
+            // Set meta information for later injection.
+            _currentMapekCycle = currentMapekCycle;
 
             if (_coordinatorSettings.UseDecisionLagMitigation) {
                 _logger.LogInformation("Decision lag mitigation active. Estimating real-world simulation duration.");
@@ -498,6 +502,9 @@ namespace Logic.Mapek
                     ExecuteFmu(fmuModel, s, simulation.PropertyCache);
                 }
 
+                // Update meta information before soft sensors are executed.
+                UpdateMetaInformation(simulation);
+
                 await ExecuteSoftSensorsAndUpdateSimulationCache(simulation, softSensorTreeNodes);
                 if (GetFitnessOps() != null) {
                     Fitness.Fitness fitness = new(orig) {
@@ -518,6 +525,20 @@ namespace Logic.Mapek
         public virtual IEnumerable<FOp> GetFitnessOps()
         {
             return [];
+        }
+
+        private void UpdateMetaInformation(Simulation simulation) {
+            // Update MAPE-K cycle information.
+            UpdateMapekCycleNumberForSimulation(simulation);
+            
+            // ...
+        }
+
+        private void UpdateMapekCycleNumberForSimulation(Simulation simulation) {
+            var simulatedMapekCycle = _currentMapekCycle + simulation.Index;
+            var mapekCycleProperty = simulation.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MapekCycle"];
+            mapekCycleProperty.Value = simulatedMapekCycle;
+            MapekUtilities.PopulateCacheValuesWithMetaInformation(simulation.PropertyCache, mapekCycleProperty);
         }
 
         private async static Task ExecuteSoftSensorsAndUpdateSimulationCache(Simulation simulation, IEnumerable<SoftSensorTreeNode> softSensorTreeNodes) {

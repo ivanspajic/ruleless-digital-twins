@@ -18,7 +18,7 @@ namespace Logic.Mapek {
             _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
         }
 
-        public async Task<Cache> Monitor() {
+        public async Task<Cache> Monitor(int currentMapekCycle) {
             _logger.LogInformation("Starting the Monitor phase.");
 
             var cache = new Cache {
@@ -33,6 +33,15 @@ namespace Logic.Mapek {
 
             // Get the values of all ConfigurableParameters and populate the cache.
             PopulateConfigurableParametersCache(cache.PropertyCache);
+
+            // Inject system meta information which is otherwise not observed by sensors or soft sensors. This information may be useful to some soft sensor computations.
+            // It is important to do this before running soft sensor executions to ensure they return accurate values.
+            var mapekCycleProperty = new Property {
+                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MapekCycle",
+                OwlType = "http://www.w3.org/2001/XMLSchema#int",
+                Value = currentMapekCycle
+            };
+            MapekUtilities.PopulateCacheValuesWithMetaInformation(cache.PropertyCache, mapekCycleProperty);
 
             // Get all measured Properties (Sensor Outputs) that aren't Inputs to other soft Sensors. Since soft Sensors may use
             // other Sensors' Outputs as their own Inputs, this query effectively gets the roots of the Sensor trees in the system.
@@ -124,7 +133,7 @@ namespace Logic.Mapek {
                 }
 
                 // Shouldn't happen, but in case it does... :)
-                throw new Exception($"No sensor registered for Output Property {propertyName}.");
+                //throw new Exception($"No sensor registered for Output Property {propertyName}.");
             }
 
             var softSensorNodeChildren = new List<SoftSensorTreeNode>();
@@ -153,7 +162,7 @@ namespace Logic.Mapek {
                     @procedure ssn:hasInput ?inputProperty .
                     ?inputProperty meta:hasValue ?initialValue .
                     @sensor ssn:implements @procedure .
-                    FILTER NOT EXISTS { ?inputProperty rdf:type meta:ConfigurableParameter . } }");
+                    FILTER NOT EXISTS { ?inputProperty rdf:type meta:ConfigurableParameter . } }"); // Review the filter for ConfigurableParameters.
 
             // Get all measured Properties this Sensor uses as its Inputs.
             query.SetParameter("procedure", procedureNode);
@@ -184,6 +193,14 @@ namespace Logic.Mapek {
                 softSensorNodeChildren.Add(softSensorTreeChildNode);
             }
 
+            // Build the soft sensor node with any potential children.
+            softSensorTreeNode.NodeItem = sensor;
+            softSensorTreeNode.Children = softSensorNodeChildren;
+            softSensorTreeNode.OutputProperty = propertyName;
+
+            // Cache it for easier (and faster) finding.
+            softSensorDictionary.Add(propertyName, softSensorTreeNode);
+
             var propertyValue = await sensor.ObservePropertyValue(inputProperties);
             var property = new Property {
                 Name = propertyName,
@@ -191,17 +208,11 @@ namespace Logic.Mapek {
                 Value = propertyValue
             };
 
-            propertyCache.Properties.Add(property.Name, property);
+            if (!propertyCache.Properties.ContainsKey(propertyName)) {
+                propertyCache.Properties.Add(property.Name, property);
 
-            // Build the soft sensor node with any potential children.
-            softSensorTreeNode.NodeItem = sensor;
-            softSensorTreeNode.Children = softSensorNodeChildren;
-            softSensorTreeNode.OutputProperty = property.Name;
-
-            // Cache it for easier (and faster) finding.
-            softSensorDictionary.Add(property.Name, softSensorTreeNode);
-
-            _logger.LogInformation("Added computable Property (Input/Output) {property} to the cache.", propertyName);
+                _logger.LogInformation("Added computable Property (Input/Output) {property} to the cache.", propertyName);
+            }
         }
 
         private void PopulateObservablePropertiesCache(PropertyCache propertyCache) {
@@ -267,6 +278,9 @@ namespace Logic.Mapek {
                 }
                 FILTER NOT EXISTS {
                     ?sensorProcedure ssn:hasOutput ?constantProperty
+                }
+                FILTER NOT EXISTS {
+                    ?sensorProcedure ssn:hasInput ?constantProperty
                 } }");
 
             var queryResult = _mapekKnowledge.ExecuteQuery(query);

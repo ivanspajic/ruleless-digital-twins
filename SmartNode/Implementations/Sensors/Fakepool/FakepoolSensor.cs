@@ -27,9 +27,9 @@ namespace Implementations.Sensors.Fakepool {
                 NewLine = Environment.NewLine,
                 Delimiter = "\t",
             };
-            using (var reader = new StreamReader("fakepool.tsv"))
+            using (var reader = new StreamReader(Path.Combine("Sensors", "Fakepool", "fakepool.tsv")))
             using (var csv = new CsvReader(reader, config))
-            {   
+            {
                 csv.Read();
                 csv.ReadHeader();
                 _records = csv.GetRecords<Row>().ToArray();
@@ -37,7 +37,15 @@ namespace Implementations.Sensors.Fakepool {
         }
         public async Task<object> ObservePropertyValue(params object[] inputProperties)
         {
-            return 1; // XXX Adjust
+            // TODO: find a better way to differentiate between input parameters. Consider using Properties instead.
+            var dataIndex = 0;
+            foreach (var inputProperty in inputProperties) {
+                if (inputProperty is int intInputProperty) {
+                    dataIndex = intInputProperty;
+                }
+            }
+
+            return _records[dataIndex].State;
         }
     }
 }

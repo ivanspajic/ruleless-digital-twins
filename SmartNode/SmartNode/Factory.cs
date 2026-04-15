@@ -9,6 +9,7 @@ using Implementations.Actuators.RoomM370;
 using Implementations.Sensors.Incubator;
 using Implementations.Actuators.Incubator;
 using Implementations.SimulatedTwinningTargets;
+using Implementations.Sensors.Fakepool;
 
 namespace SmartNode
 {
@@ -162,8 +163,33 @@ namespace SmartNode
                             {
                                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure"),
-                                new PriceSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
+                                new FakepoolSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
                                     "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure")
+                            },
+
+
+
+                            // The following are workarounds due to a bug in how we query Inputs/Outputs and build soft sensor trees!
+                            {
+                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolNotFoundSensor",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolNotFoundProcedure"),
+                                new GeneralConstantSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolNotFoundSensor",
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolNotFoundProcedure",
+                                    false)
+                            },
+                            {
+                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolStepSensor",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolStepProcedure"),
+                                new GeneralConstantSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolStepSensor",
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolStepProcedure",
+                                    0.0)
+                            },
+                            {
+                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MapekCycleSensor",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MapekCycleProcedure"),
+                                new GeneralConstantSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MapekCycleSensor",
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MapekCycleProcedure",
+                                    0)
                             }
                         }
                     }

@@ -25,6 +25,18 @@ namespace Logic.Mapek {
             }
             
             throw new Exception($"Property {propertyName} not found in the property cache.");
-        }        
+        }
+
+        public static void PopulateCacheValuesWithMetaInformation(PropertyCache propertyCache, params Property[] systemProperties) {
+            foreach (var systemProperty in systemProperties) {
+                if (propertyCache.Properties.TryGetValue(systemProperty.Name, out Property? property)) {
+                    property.Value = systemProperty.Value;
+                } else if (propertyCache.ConfigurableParameters.TryGetValue(systemProperty.Name, out ConfigurableParameter? configurableParameter)) {
+                    configurableParameter.Value = systemProperty.Value;
+                } else {
+                    propertyCache.Properties.Add(systemProperty.Name, systemProperty);
+                }
+            }
+        }
     }
 }

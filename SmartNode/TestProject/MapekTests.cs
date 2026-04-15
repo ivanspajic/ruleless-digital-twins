@@ -88,10 +88,10 @@ namespace TestProject
                     var deleteQ = ((MapekKnowledge)knowledge).GetParameterizedStringQuery("DELETE DATA { <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomM370> meta:minimizes <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice> }");
                     ((MapekKnowledge)knowledge).UpdateModel(deleteQ);
                 }
-                var cache = await monitor.Monitor();
+                var cache = await monitor.Monitor(0);
 
                 Stopwatch sw = Stopwatch.StartNew();
-                var simulationPathAndTree = await plan.Plan(cache);
+                var simulationPathAndTree = await plan.Plan(cache, 0);
                 sw.Stop();
                 Debug.WriteLine($"Planning took {sw.Elapsed.TotalSeconds} seconds total.");
 

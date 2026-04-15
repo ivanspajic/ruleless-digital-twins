@@ -101,7 +101,7 @@ namespace TestProject {
             mapekKnowledge.Validate(propertyCacheMock);
 
             // TODO: Assert that there's at least one actuator that's not a parameter.
-            var (simulationTree, simulationPath) = mapekPlan.Plan(new Cache() { PropertyCache = propertyCacheMock, OptimalConditions = [], SoftSensorTreeNodes = [], Actuators = new Dictionary<string, Actuator>() }).Result;
+            var (simulationTree, simulationPath) = mapekPlan.Plan(new Cache() { PropertyCache = propertyCacheMock, OptimalConditions = [], SoftSensorTreeNodes = [], Actuators = new Dictionary<string, Actuator>() }, 0).Result;
             crashed = false;
 
             // Only valid AFTER focing evaluation through simulation:
@@ -150,9 +150,9 @@ namespace TestProject {
 
             var monitor = new MapekMonitor(mock);
             Assert.True(AMQTempSensor._onceOnly);
-            var cache = monitor.Monitor().Result;
+            var cache = monitor.Monitor(0).Result;
 
-            var (simulationTree, optimalSimulationPath) = mapekPlan.Plan(cache).Result;
+            var (simulationTree, optimalSimulationPath) = mapekPlan.Plan(cache, 0).Result;
             crashed = false;
             Assert.False(AMQTempSensor._onceOnly); // Must've been used.
 

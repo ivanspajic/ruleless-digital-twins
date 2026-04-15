@@ -54,7 +54,7 @@ namespace Logic.Mapek {
         private async Task RunMapekLoop() {
             _logger.LogInformation("Starting the MAPE-K loop. (maxRounds= {maxRound})", _coordinatorSettings.MaximumMapekRounds);
 
-            var currentRound = 0;
+            var currentMapekCycle = 0;
             Simulation simulationToExecute = null!;
             Case potentialCase = null!;
             SimulationTreeNode currentSimulationTree = null!;
@@ -74,7 +74,7 @@ namespace Logic.Mapek {
                 _mapekKnowledge.LoadModelsFromKnowledgeBase(); // This makes sense in theory but won't work without the Factory updating as well.
 
                 // Monitor - Observe all hard and soft Sensor values, construct soft Sensor trees, and collect OptimalConditions.
-                var cache = await _mapekMonitor.Monitor();
+                var cache = await _mapekMonitor.Monitor(currentMapekCycle);
 
                 // Check for previously constructed simulation paths to pick the next simulation configuration to execute. If case-based functionality is enabled, check for preexisting
                 // cases and save new ones when applicable. For simplicity, the look-ahead approach and the case-based functionality effectively keep state based on the configuration at
@@ -85,7 +85,8 @@ namespace Logic.Mapek {
                     simulationToExecute,
                     potentialCase,
                     currentSimulationTree,
-                    currentOptimalSimulationPath);
+                    currentOptimalSimulationPath,
+                    currentMapekCycle);
 
                 stopwatch.Stop();
 
@@ -96,8 +97,8 @@ namespace Logic.Mapek {
 
                 // If configured, write MAPE-K state to CSV.
                 if (_coordinatorSettings.SaveMapekCycleData && simulationToExecute is not null && currentSimulationTree is not null) {
-                    CsvUtils.WritePropertyStatesToCsv(_filepathArguments.DataDirectory, currentRound, cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
-                    CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentRound, simulationToExecute);
+                    CsvUtils.WritePropertyStatesToCsv(_filepathArguments.DataDirectory, currentMapekCycle, cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
+                    CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentMapekCycle, simulationToExecute);
 
                     var serializedSimulationTree = JsonConvert.SerializeObject(currentSimulationTree.SerializableSimulationTreeNode);
                     File.WriteAllText(Path.Combine(_filepathArguments.DataDirectory, SimulationTreeFilename), serializedSimulationTree);
@@ -111,7 +112,7 @@ namespace Logic.Mapek {
                     break; // We can sleep when we're dead.
                 }
 
-                currentRound++;
+                currentMapekCycle++;
 
                 _logger.LogInformation("Sleeping {sleepTime} ms until next MAPE-K cycle.", _coordinatorSettings.SleepyTimeMilliseconds);
                 Thread.Sleep(_coordinatorSettings.SleepyTimeMilliseconds);
@@ -122,7 +123,8 @@ namespace Logic.Mapek {
             Simulation simulationToExecute,
             Case potentialCase,
             SimulationTreeNode currentSimulationTree,
-            SimulationPath currentOptimalSimulationPath) {
+            SimulationPath currentOptimalSimulationPath,
+            int currentMapekCycle) {
             var observedProperties = new List<Property>(cache.PropertyCache.Properties.Values);
             observedProperties.AddRange(cache.PropertyCache.ConfigurableParameters.Values);
 
@@ -171,7 +173,7 @@ namespace Logic.Mapek {
                 if (currentOptimalSimulationPath is null || !currentOptimalSimulationPath.Simulations.Any()) {
                     // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
                     // TODO: use the simulation tree for visualization.
-                    (currentSimulationTree, currentOptimalSimulationPath) = await _mapekPlan.Plan(cache);
+                    (currentSimulationTree, currentOptimalSimulationPath) = await _mapekPlan.Plan(cache, currentMapekCycle);
                 }
 
                 // If case-based functionality is used, get the potential case from the new simulation path.

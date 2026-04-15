@@ -5,7 +5,6 @@ using Logic.Models.DatabaseModels;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Logic.Utilities;
-using Logic.ValueHandlerInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -26,7 +25,7 @@ namespace Logic.Mapek {
         private readonly IMapekExecute _mapekExecute;
         private readonly IMapekKnowledge _mapekKnowledge;
         private readonly ICaseRepository _caseRepository;
-        private readonly IFactory _factory;
+        private readonly IBangBangPlanner _bangBangPlanner;
 
         private bool _isLoopActive = false;
 
@@ -39,7 +38,7 @@ namespace Logic.Mapek {
             _mapekExecute = serviceProvider.GetRequiredService<IMapekExecute>();
             _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
             _caseRepository = serviceProvider.GetRequiredService<ICaseRepository>();
-            _factory = serviceProvider.GetRequiredService<IFactory>();
+            _bangBangPlanner = serviceProvider.GetRequiredService<IBangBangPlanner>();
         }
 
         public async Task StartLoop() {
@@ -76,17 +75,26 @@ namespace Logic.Mapek {
                 // Monitor - Observe all hard and soft Sensor values, construct soft Sensor trees, and collect OptimalConditions.
                 var cache = await _mapekMonitor.Monitor(currentMapekCycle);
 
-                // Check for previously constructed simulation paths to pick the next simulation configuration to execute. If case-based functionality is enabled, check for preexisting
-                // cases and save new ones when applicable. For simplicity, the look-ahead approach and the case-based functionality effectively keep state based on the configuration at
-                // the time of making a sequence of simulations/cases to execute. This means if settings values are changed midway through a full simulation path execution (e.g., 2/4),
-                // the system will continue executing as if it followed the old ones for the remainder of the simulation path. Dynamic settings changes thus take effect after the execution
-                // of a full simulation path or in case it is deliberately rejected early by the system due to deviation from its previously predicted Property values.
-                (simulationToExecute, potentialCase, currentSimulationTree, currentOptimalSimulationPath) = await ManageSimulationsAndCasesAndPotentiallyPlan(cache,
-                    simulationToExecute,
-                    potentialCase,
-                    currentSimulationTree,
-                    currentOptimalSimulationPath,
-                    currentMapekCycle);
+                // Use the right planning method (and functionality) based on configuration.
+                // TODO: Consider using the strategy pattern here. How do we make the Manager agnostic to the type of planner it should use? We should probably not have multi-cycle
+                // simulation logic be outside the planner. This would allow us to simply return the simulation as required. The planner should probably decide on its own whether it
+                // has something buffered based on the conditions observed.
+                if (_coordinatorSettings.UseRulelessMethod) {
+                    // Check for previously constructed simulation paths to pick the next simulation configuration to execute. If case-based functionality is enabled, check for preexisting
+                    // cases and save new ones when applicable. For simplicity, the look-ahead approach and the case-based functionality effectively keep state based on the configuration at
+                    // the time of making a sequence of simulations/cases to execute. This means if settings values are changed midway through a full simulation path execution (e.g., 2/4),
+                    // the system will continue executing as if it followed the old ones for the remainder of the simulation path. Dynamic settings changes thus take effect after the execution
+                    // of a full simulation path or in case it is deliberately rejected early by the system due to deviation from its previously predicted Property values.
+                    (simulationToExecute, potentialCase, currentSimulationTree, currentOptimalSimulationPath) = await ManageSimulationsAndCasesAndPotentiallyPlan(cache,
+                        simulationToExecute,
+                        potentialCase,
+                        currentSimulationTree,
+                        currentOptimalSimulationPath,
+                        currentMapekCycle);
+                } else {
+                    // Keeping it simple with a classic bang-bang controller.
+                    simulationToExecute = _bangBangPlanner.Plan(cache);
+                }
 
                 stopwatch.Stop();
 

@@ -21,5 +21,7 @@
         public int SleepyTimeMilliseconds { get; set; }
 
         public bool UseDecisionLagMitigation { get; set; }
+
+        public bool UseRulelessMethod { get; set; }
     }
 }

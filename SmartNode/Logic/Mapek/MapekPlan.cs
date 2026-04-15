@@ -837,7 +837,6 @@ namespace Logic.Mapek
             var numberOfSatisfiedOptimalConditions = 0;
 
             foreach (var optimalCondition in optimalConditions) {
-
                 Property p;
                 if (propertyCache.ConfigurableParameters.TryGetValue(optimalCondition.Property.Name, out ConfigurableParameter? configurableParameter)) {
                     p = configurableParameter;

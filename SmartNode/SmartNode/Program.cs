@@ -66,6 +66,7 @@ namespace SmartNode
             builder.Services.AddSingleton<IMapekPlan, MapekPlan>(serviceProvider => {
                 return coordinatorSettings!.UseEuclid ? new EuclidMapekPlan(serviceProvider) : new MapekPlan(serviceProvider);
             });
+            builder.Services.AddSingleton<IBangBangPlanner, BangBangPlanner>(serviceProvider => new BangBangPlanner(serviceProvider));
             builder.Services.AddSingleton<IMapekExecute, MapekExecute>(serviceProvider => new MapekExecute(serviceProvider));
             builder.Services.AddSingleton<IMapekKnowledge, MapekKnowledge>(serviceProvider => new MapekKnowledge(serviceProvider));
             builder.Services.AddSingleton<IMapekManager, MapekManager>(serviceprovider => new MapekManager(serviceprovider));

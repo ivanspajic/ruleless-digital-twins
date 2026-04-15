@@ -43,11 +43,13 @@ class Change(Node):
         g.add((self.node, RDT["affectsPropertyWith"], RDT["ValueIncrease"])) # TODO
 
 class Actuator(Node):
-    def __init__(self, g, name: IdentifiedNode, enacts: Change):
+    def __init__(self, g, name: IdentifiedNode, enacts: Change, actuatorName: Optional[str] = None):
         self.node = name
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
         g.add((self.node, RDF["type"], SOSA["Actuator"]))
         g.add((self.node, SOSA["enacts"], enacts.node))
+        if actuatorName is not None:
+            g.add((self.node, RDT["hasActuatorName"], Literal(actuatorName, datatype=XSD.string)))
 
 class OptimalCondition(Node):
     pass

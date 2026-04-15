@@ -28,49 +28,6 @@ rdt:PropertyChangeByActuation rdf:type owl:Class .
                              rdt:hasValue "0.0"^^xsd:double .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperature
-:AverageTemperature rdf:type owl:NamedIndividual ,
-                             <http://www.w3.org/ns/ssn/Output> ,
-                             <http://www.w3.org/ns/ssn/Property> ;
-                    rdt:hasValue "16.746512725848774"^^xsd:double .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensor
-:AverageTemperatureSoftSensor rdf:type owl:NamedIndividual ,
-                                       <http://www.w3.org/ns/sosa/Sensor> ;
-                              <http://www.w3.org/ns/ssn/implements> :AverageTemperatureSoftSensorProcedure .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensorProcedure
-:AverageTemperatureSoftSensorProcedure rdf:type owl:NamedIndividual ,
-                                                <http://www.w3.org/ns/sosa/Procedure> ;
-                                       <http://www.w3.org/ns/ssn/hasInput> :DecreasedTemperature ,
-                                                                           :IncreasedTemperature ;
-                                       <http://www.w3.org/ns/ssn/hasOutput> :AverageTemperature .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensor
-:DecreaseTemperatureSoftSensor rdf:type owl:NamedIndividual ,
-                                        <http://www.w3.org/ns/sosa/Sensor> ;
-                               <http://www.w3.org/ns/ssn/implements> :DecreaseTemperatureSoftSensorProcedure .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensorProcedure
-:DecreaseTemperatureSoftSensorProcedure rdf:type owl:NamedIndividual ,
-                                                 <http://www.w3.org/ns/sosa/Procedure> ;
-                                        <http://www.w3.org/ns/ssn/hasInput> :TemperatureSensor1MeasuredRoomTemperature ,
-                                                                            :TemperatureSensor2MeasuredRoomTemperature ;
-                                        <http://www.w3.org/ns/ssn/hasOutput> :DecreasedTemperature .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreasedTemperature
-:DecreasedTemperature rdf:type owl:NamedIndividual ,
-                               <http://www.w3.org/ns/ssn/Input> ,
-                               <http://www.w3.org/ns/ssn/Output> ,
-                               <http://www.w3.org/ns/ssn/Property> ;
-                      rdt:hasValue "14.246512725848774"^^xsd:double .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier
 :Dehumidifier rdf:type owl:NamedIndividual ,
                        <http://www.w3.org/ns/sosa/Actuator> ;
@@ -232,28 +189,6 @@ rdt:PropertyChangeByActuation rdf:type owl:Class .
                          <http://www.w3.org/ns/ssn/hasOutput> :HumiditySensorMeasuredRoomHumidity .
 
 
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensor
-:IncreaseTemperatureSoftSensor rdf:type owl:NamedIndividual ,
-                                        <http://www.w3.org/ns/sosa/Sensor> ;
-                               <http://www.w3.org/ns/ssn/implements> :IncreaseTemperatureSoftSensorProcedure .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensorProcedure
-:IncreaseTemperatureSoftSensorProcedure rdf:type owl:NamedIndividual ,
-                                                 <http://www.w3.org/ns/sosa/Procedure> ;
-                                        <http://www.w3.org/ns/ssn/hasInput> :TemperatureSensor1MeasuredRoomTemperature ,
-                                                                            :TemperatureSensor2MeasuredRoomTemperature ;
-                                        <http://www.w3.org/ns/ssn/hasOutput> :IncreasedTemperature .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreasedTemperature
-:IncreasedTemperature rdf:type owl:NamedIndividual ,
-                               <http://www.w3.org/ns/ssn/Input> ,
-                               <http://www.w3.org/ns/ssn/Output> ,
-                               <http://www.w3.org/ns/ssn/Property> ;
-                      rdt:hasValue "19.246512725848774"^^xsd:double .
-
-
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MapekCycle
 :MapekCycle rdf:type owl:NamedIndividual ,
                      <http://www.w3.org/ns/ssn/Input> ,
@@ -386,6 +321,27 @@ rdt:PropertyChangeByActuation rdf:type owl:Class .
                              rdt:hasValue "22.0"^^xsd:double .
 
 
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergy
+:PricePerEnergy rdf:type owl:NamedIndividual ,
+                         <http://www.w3.org/ns/ssn/Output> ,
+                         <http://www.w3.org/ns/ssn/Property> ;
+                rdt:hasValue "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyProcedure
+:PricePerEnergyProcedure rdf:type owl:NamedIndividual ,
+                                  <http://www.w3.org/ns/sosa/Procedure> ;
+                         <http://www.w3.org/ns/ssn/hasInput> :EnergyConsumptionMeterMeasuredEnergyConsumption ,
+                                                             :PriceSensorMeasuredPrice ;
+                         <http://www.w3.org/ns/ssn/hasOutput> :PricePerEnergy .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergySoftSensor
+:PricePerEnergySoftSensor rdf:type owl:NamedIndividual ,
+                                   <http://www.w3.org/ns/sosa/Sensor> ;
+                          <http://www.w3.org/ns/ssn/implements> :PricePerEnergyProcedure .
+
+
 ###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure
 :PriceProcedure rdf:type owl:NamedIndividual ,
                          <http://www.w3.org/ns/sosa/Procedure> ;
@@ -427,8 +383,7 @@ rdt:PropertyChangeByActuation rdf:type owl:Class .
                    <http://www.w3.org/ns/sosa/Platform> ;
           rdt:hasSimulationModel :FakepoolFMU ,
                                  :RoomM370FMU ;
-          rdt:minimizes :EnergyConsumption ,
-                        :PriceSensorMeasuredPrice ;
+          rdt:minimizes :PricePerEnergy ;
           <http://www.w3.org/ns/sosa/hosts> :Dehumidifier ,
                                             :EnergyConsumptionMeter ,
                                             :FloorHeating ,

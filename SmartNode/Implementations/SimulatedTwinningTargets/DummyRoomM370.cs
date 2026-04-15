@@ -32,6 +32,7 @@ namespace Implementations.SimulatedTwinningTargets
         private int _oldHeaterState = 0;
         private int _oldFloorHeatingState = 0;
         private int _oldDehumidifierState = 0;
+        private int _currentMapekCycle = 0;
 
         private IModel? _fmuModel;
         private IInstance? _fmuInstance;
@@ -139,6 +140,11 @@ namespace Implementations.SimulatedTwinningTargets
             _roomHumidity = roomHumidityOutput + roomHumidityDeviation;
             // Accumulate this since it's accumulated in the simulations.
             _energyConsumption = energyConsumptionOutput + _energyConsumption;
+
+            // TODO: add the accumulated energy price here.
+
+            // Increment the cycle for next time.
+            _currentMapekCycle++;
 
             _fmuInstance.Dispose();
             _fmuInstance = null;

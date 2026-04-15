@@ -125,24 +125,6 @@ namespace SmartNode
                                     "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummySensor", -1)
                             },
                             {
-                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensor",
-                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensorProcedure"),
-                                new IncreaseTemperatureSoftSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensor",
-                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#IncreaseTemperatureSoftSensorProcedure")
-                            },
-                            {
-                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensor",
-                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensorProcedure"),
-                                new DecreaseTemperatureSoftSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensor",
-                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#DecreaseTemperatureSoftSensorProcedure")
-                            },
-                            {
-                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensor",
-                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensorProcedure"),
-                                new AverageTemperatureSoftSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensor",
-                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AverageTemperatureSoftSensorProcedure")
-                            },
-                            {
                                 ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioSoftSensor",
                                 "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioAlgorithm"),
                                 new CompressionRatioSoftSensor("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CompressionRatioSoftSensor",
@@ -165,6 +147,12 @@ namespace SmartNode
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure"),
                                 new FakepoolSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
                                     "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure")
+                            },
+                            {
+                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergySoftSensor",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyProcedure"),
+                                new PricePerEnergySoftSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergySoftSensor",
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyProcedure")
                             },
 
 

@@ -28,6 +28,8 @@ namespace Logic.Mapek {
         private readonly IBangBangPlanner _bangBangPlanner;
 
         private bool _isLoopActive = false;
+        private bool _bufferedDecisionUsed = false;
+        private bool _caseHit = false;
 
         public MapekManager(IServiceProvider serviceProvider) {
             _filepathArguments = serviceProvider.GetRequiredService<FilepathArguments>();
@@ -107,6 +109,8 @@ namespace Logic.Mapek {
                 if (_coordinatorSettings.SaveMapekCycleData && simulationToExecute is not null && currentSimulationTree is not null) {
                     CsvUtils.WritePropertyStatesToCsv(_filepathArguments.DataDirectory, currentMapekCycle, cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
                     CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentMapekCycle, simulationToExecute);
+                    CsvUtils.WritePropertyState(Path.Combine(_filepathArguments.DataDirectory, "bufferedDecisionsUsed.csv"), currentMapekCycle, "Buffered_Decision_Used", _bufferedDecisionUsed);
+                    CsvUtils.WritePropertyState(Path.Combine(_filepathArguments.DataDirectory, "caseHits.csv"), currentMapekCycle, "Matching_Case_Found", _caseHit);
 
                     var serializedSimulationTree = JsonConvert.SerializeObject(currentSimulationTree.SerializableSimulationTreeNode);
                     File.WriteAllText(Path.Combine(_filepathArguments.DataDirectory, SimulationTreeFilename), serializedSimulationTree);
@@ -133,6 +137,10 @@ namespace Logic.Mapek {
             SimulationTreeNode currentSimulationTree,
             SimulationPath currentOptimalSimulationPath,
             int currentMapekCycle) {
+            // Reset for tracking.
+            _bufferedDecisionUsed = false;
+            _caseHit = false;
+
             var observedProperties = new List<Property>(cache.PropertyCache.Properties.Values);
             observedProperties.AddRange(cache.PropertyCache.ConfigurableParameters.Values);
 
@@ -172,16 +180,24 @@ namespace Logic.Mapek {
 
                         // After getting the potential case from the simulation path, reduce the number of remaining simulations.
                         currentOptimalSimulationPath.RemoveFirstRemainingSimulationFromSimulationPath();
+
+                        // For tracking case hits.
+                        _caseHit = true;
                     }
                 }
             }
-            
+
+            // For tracking buffered decision use.
+            var planned = false;
+
             if (potentialCase is null) {
                 // If there are no remaining simulations to be executed from a previously created simulation path, run the planning phase again.
                 if (currentOptimalSimulationPath is null || !currentOptimalSimulationPath.Simulations.Any()) {
                     // Plan - Simulate all Actions and check that they mitigate OptimalConditions and optimize the system to get the most optimal configuration.
                     // TODO: use the simulation tree for visualization.
                     (currentSimulationTree, currentOptimalSimulationPath) = await _mapekPlan.Plan(cache, currentMapekCycle);
+
+                    planned = true;
                 }
 
                 // If case-based functionality is used, get the potential case from the new simulation path.
@@ -194,6 +210,9 @@ namespace Logic.Mapek {
 
                     // After getting the simulation from the simulation path, reduce the number of remaining simulations.
                     currentOptimalSimulationPath.RemoveFirstRemainingSimulationFromSimulationPath();
+
+                    // For tracking buffered decision use.
+                    _bufferedDecisionUsed = !planned;
                 } else {
                     simulationToExecute = null!;
                 }

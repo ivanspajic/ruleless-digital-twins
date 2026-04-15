@@ -22,6 +22,12 @@ namespace Logic.Mapek
             _logger.LogInformation("Starting the Execute phase.");
 
             if (simulation is null || !simulation.Actions.Any()) {
+                // Workaround for a virtual dummy environment execution. Supports only ActuationActions.
+                // Actuate anyway to simulate the TT staying in its current state.
+                if (mapekExecutionDurationSeconds > 0) {
+                    ActuateDummyEnvironment(mapekExecutionDurationSeconds);
+                }
+
                 return;
             }
 
@@ -38,7 +44,7 @@ namespace Logic.Mapek
 
             // Workaround for a virtual dummy environment execution. Supports only ActuationActions.
             if (mapekExecutionDurationSeconds > 0) {
-                ActuateDummyEnvironment(((ActuationAction)simulation.Actions.Last()).Actuator.Name, mapekExecutionDurationSeconds);
+                ActuateDummyEnvironment(mapekExecutionDurationSeconds);
             }
         }
 
@@ -75,9 +81,9 @@ namespace Logic.Mapek
             _logger.LogInformation(msg);
         }
 
-        private void ActuateDummyEnvironment(string actuatorName, double mapekExecutionDurationSeconds) {
-            // Get any actuator to actuate the dummy environment.
-            var actuator = _factory.GetActuatorImplementation(actuatorName);
+        private void ActuateDummyEnvironment(double mapekExecutionDurationSeconds) {
+            // Use any actuator to actuate the dummy environment.
+            var actuator = _factory.GetActuatorImplementation("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater");
             actuator.RunDummyEnvironment(mapekExecutionDurationSeconds);
         }
     }

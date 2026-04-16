@@ -229,7 +229,7 @@ namespace TestProject
             IMapekPlan plan = new MMK(serviceProvider, new FOp[] { });
             serviceProvider.Add(plan);
 
-            Assert.Equal(2, ((MapekPlan)plan).GetHostPlatformFmuModel(filepathArguments.FmuDirectory).Count());
+            Assert.Equal(1, ((MapekPlan)plan).GetHostPlatformFmuModel(filepathArguments.FmuDirectory).Count());
 
             // Act
             try

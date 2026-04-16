@@ -13,7 +13,7 @@ using Implementations.Sensors.Fakepool;
 
 namespace SmartNode
 {
-    internal class Factory : IFactory
+    public class Factory : IFactory
     {
         private readonly string _environment;
 
@@ -23,7 +23,7 @@ namespace SmartNode
         // be registered in one map.
         // 
         // New implementations can simply be added to the factory collections.
-        private readonly Dictionary<string, SensorActuatorMapWrapper> _sensorActuatorMaps;
+        public readonly Dictionary<string, SensorActuatorMapWrapper> _sensorActuatorMaps;
         private Dictionary<string, SensorActuatorMapWrapper> MakeSensorMap()
         {
             return new Dictionary<string, SensorActuatorMapWrapper>(){
@@ -283,7 +283,7 @@ namespace SmartNode
             throw new Exception($"No implementation was found for Sensor value handler for OWL type {owlType}.");
         }
 
-        private class SensorActuatorMapWrapper {
+        public class SensorActuatorMapWrapper {
             public required Dictionary<(string, string), ISensor> SensorMap { get; set; }
 
             public required Dictionary<string, IActuator> ActuatorMap { get; set; }

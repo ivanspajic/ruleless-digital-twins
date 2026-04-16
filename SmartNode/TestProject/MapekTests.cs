@@ -1,4 +1,5 @@
 ﻿using Fitness;
+using Implementations.Sensors.Fakepool;
 using Logic.CaseRepository;
 using Logic.FactoryInterface;
 using Logic.Mapek;
@@ -79,9 +80,13 @@ namespace TestProject
             var f_prod_acc = new FAcc<double>(f_prod, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice");
 
             MapekPlan plan = new MMK(serviceProvider, new FOp[] { f_prod_acc });
-            // Adjust for hard-coded accumulation:
+            // Adjust for hard-coded accumulation (TOD):
             plan._minMaxOverrides = false;
             serviceProvider.Add(plan);
+            // Adjust duration in Fakepool-softsensor (TOD):
+            FakepoolSensor fps = (FakepoolSensor)((SmartNode.Factory)factory)._sensorActuatorMaps["roomM370"].SensorMap[("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure")];
+            fps._duration = duration;
 
             Assert.Equal(2, plan.GetHostPlatformFmuModel(filepathArguments.FmuDirectory).Count());
 
@@ -224,7 +229,7 @@ namespace TestProject
             IMapekPlan plan = new MMK(serviceProvider, new FOp[] { });
             serviceProvider.Add(plan);
 
-            Assert.Equal(2, ((MapekPlan)plan).GetHostPlatformFmuModel(filepathArguments.FmuDirectory).Count());
+            Assert.Equal(1, ((MapekPlan)plan).GetHostPlatformFmuModel(filepathArguments.FmuDirectory).Count());
 
             // Act
             try

@@ -138,7 +138,7 @@ namespace Logic.Mapek
             };
 
             // Execute the decision lag mitigation simulation to get the predicted Property values at the time of decision execution.
-            ExecuteFmu(fmuModels.First() /* XXX */, simulation, null, estimatedRealWorldSimulationDurationSeconds);
+            ExecuteFmu(fmuModels.First() /* XXX */, simulation, simulation.PropertyCache, estimatedRealWorldSimulationDurationSeconds);
 
             return simulation.PropertyCache;
         }

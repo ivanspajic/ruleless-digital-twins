@@ -53,9 +53,8 @@
                       rdt:isParameter true;
                       a owl:NamedIndividual,
                         <http://www.w3.org/ns/sosa/Actuator>;
-                      <http://www.w3.org/ns/sosa/enacts> :StepChange.
-:FakepoolStepChange rdt:affectsPropertyWith rdt:ValueIncrease;
-                    a rdt:PropertyChangeByActuation,
+                      <http://www.w3.org/ns/sosa/enacts> :FakepoolStepChange.
+:FakepoolStepChange a rdt:PropertyChangeByActuation,
                       owl:NamedIndividual;
                     <http://www.w3.org/ns/ssn/forProperty> :FakepoolStepProperty.
 :FakepoolStepProperty rdt:hasValue 0e+00;
@@ -154,21 +153,13 @@
 :OfficeTemperatureUpperLimit rdt:hasValue "22.0"^^xsd:double;
                              a <http://www.w3.org/ns/ssn/Property>,
                                owl:NamedIndividual.
-:Price rdt:hasValue "0.0"^^xsd:double;
-       a <http://www.w3.org/ns/sosa/ObservableProperty>,
-         owl:NamedIndividual.
-:PriceProcedure a <http://www.w3.org/ns/sosa/Procedure>,
-                  owl:NamedIndividual;
-                <http://www.w3.org/ns/ssn/hasOutput> :PriceSensorMeasuredPrice;
-                <http://www.w3.org/ns/ssn/implementedBy> :PriceSensor.
-:PriceSensor a <http://www.w3.org/ns/sosa/Sensor>,
-               owl:NamedIndividual;
-             <http://www.w3.org/ns/sosa/observes> :Price;
-             <http://www.w3.org/ns/ssn/implements> :PriceProcedure.
-:PriceSensorMeasuredPrice rdt:hasValue "0.0"^^xsd:double;
-                          a <http://www.w3.org/ns/ssn/Property>,
-                            <http://www.w3.org/ns/ssn/Output>,
-                            owl:NamedIndividual.
+:PriceDummyProcedure a <http://www.w3.org/ns/sosa/Procedure>,
+                       owl:NamedIndividual;
+                     <http://www.w3.org/ns/ssn/hasOutput> :price;
+                     <http://www.w3.org/ns/ssn/implementedBy> :PriceDummySensor.
+:PriceDummySensor a <http://www.w3.org/ns/sosa/Sensor>,
+                    owl:NamedIndividual;
+                  <http://www.w3.org/ns/ssn/implements> :PriceDummyProcedure.
 :RoomHumidity rdt:hasValue "8.065931477520403"^^xsd:double;
               a <http://www.w3.org/ns/sosa/ObservableProperty>,
                 owl:NamedIndividual.
@@ -183,7 +174,7 @@
             owl:NamedIndividual;
           <http://www.w3.org/ns/sosa/hosts> :TemperatureSensor2,
                                             :TemperatureSensor1,
-                                            :PriceSensor,
+                                            :PriceDummySensor,
                                             :HumiditySensor,
                                             :Heater,
                                             :FloorHeating,
@@ -236,3 +227,6 @@
 :TemperatureSensor2Procedure a <http://www.w3.org/ns/sosa/Procedure>,
                                owl:NamedIndividual;
                              <http://www.w3.org/ns/ssn/hasOutput> :TemperatureSensor2MeasuredRoomTemperature.
+:price rdt:hasValue "0.0"^^xsd:double;
+       a <http://www.w3.org/ns/sosa/ObservableProperty>,
+         owl:NamedIndividual.

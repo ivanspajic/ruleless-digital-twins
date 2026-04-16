@@ -149,6 +149,13 @@ namespace SmartNode
                                     "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure")
                             },
                             {
+                                ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceDummySensor",
+                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceDummyProcedure"),
+                                new ConstantSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceDummySensor",
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceDummyProcedure", 1.58) // XXX In the absence of an FP-not-so-softsensor
+
+                            },
+                            {
                                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergySoftSensor",
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyProcedure"),
                                 new PricePerEnergySoftSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergySoftSensor",

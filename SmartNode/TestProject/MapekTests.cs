@@ -74,14 +74,16 @@ namespace TestProject
 
             // Test property we want to accumulate:
             var f_energy = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption");
-            var f_temp = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Price");
+            var f_temp = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#price");
             var f_prod = new FBinOpArith(f_energy, f_temp, (x, y) => x * y, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyTimesPrice");
             var f_prod_acc = new FAcc<double>(f_prod, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice");
 
-            IMapekPlan plan = new MMK(serviceProvider, new FOp[] { f_prod_acc });
+            MapekPlan plan = new MMK(serviceProvider, new FOp[] { f_prod_acc });
+            // Adjust for hard-coded accumulation:
+            plan._minMaxOverrides = false;
             serviceProvider.Add(plan);
 
-            Assert.Equal(2, ((MapekPlan)plan).GetHostPlatformFmuModel(filepathArguments.FmuDirectory).Count());
+            Assert.Equal(2, plan.GetHostPlatformFmuModel(filepathArguments.FmuDirectory).Count());
 
             // Act
             try
@@ -148,7 +150,7 @@ namespace TestProject
                 var result = path.Aggregate(fitness.MkState(), fitness.Process);
                 Debug.WriteLine(string.Join(",", fitness.FOps.Select(fop => fop.Prop.Name + "=" + result.Get(fop.Prop))));
 
-                var r2 = path.Aggregate(0.0, (acc, s) => acc + ((double)s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Price"].Value) * (double)s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption"].Value);
+                var r2 = path.Aggregate(0.0, (acc, s) => acc + ((double)s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#price"].Value) * (double)s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption"].Value);
                 Assert.Equal(result.Get(f_prod_acc2.Prop), r2);
                 Assert.Equal(result.Get(f_prod_acc2.Prop), last);
                 
@@ -163,7 +165,7 @@ namespace TestProject
             }
         }
 
-                [Theory]
+        [Theory]
         [InlineData(2, 1800, 106.488, true, false, false)]
         [InlineData(4, 900, 114.696, false, false, false)]
         [InlineData(4, 900, 114.696, false, true, false)]

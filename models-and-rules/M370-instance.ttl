@@ -11,139 +11,141 @@
 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1> a owl:Ontology;
                                                                     owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins>.
 :AccumulatedEnergyTimesPrice rdt:hasValue "0.0"^^xsd:double;
-                             a <http://www.w3.org/ns/sosa/ObservableProperty>,
-                               owl:NamedIndividual.
-:Dehumidifier rdt:enacts :RoomHumidityDecrease,
-                         :EnergyConsumptionIncrease;
-              rdt:hasActuatorState "1"^^xsd:int,
-                                   "0"^^xsd:int;
-              a <http://www.w3.org/ns/sosa/Actuator>,
-                owl:NamedIndividual.
-:EnergyConsumption rdt:hasValue "0"^^xsd:double;
-                   a <http://www.w3.org/ns/sosa/ObservableProperty>,
-                     owl:NamedIndividual.
+                             a owl:NamedIndividual,
+                               <http://www.w3.org/ns/sosa/ObservableProperty>.
+:Dehumidifier rdt:enacts :EnergyConsumptionIncrease,
+                         :RoomHumidityDecrease;
+              rdt:hasActuatorState "0"^^xsd:int,
+                                   "1"^^xsd:int;
+              a owl:NamedIndividual,
+                <http://www.w3.org/ns/sosa/Actuator>.
+:EnergyConsumption rdt:hasValue "116.60480919999998"^^xsd:double;
+                   a owl:NamedIndividual,
+                     <http://www.w3.org/ns/sosa/ObservableProperty>.
 :EnergyConsumptionDecrease rdt:affectsPropertyWith rdt:ValueDecrease;
-                           a rdt:PropertyChange,
-                             owl:NamedIndividual;
+                           a owl:NamedIndividual,
+                             rdt:PropertyChange;
                            <http://www.w3.org/ns/ssn/forProperty> :EnergyConsumption.
 :EnergyConsumptionIncrease rdt:affectsPropertyWith rdt:ValueIncrease;
-                           a rdt:PropertyChange,
-                             owl:NamedIndividual;
+                           a owl:NamedIndividual,
+                             rdt:PropertyChange;
                            <http://www.w3.org/ns/ssn/forProperty> :EnergyConsumption.
-:EnergyConsumptionMeter a <http://www.w3.org/ns/sosa/Sensor>,
-                          owl:NamedIndividual;
+:EnergyConsumptionMeter a owl:NamedIndividual,
+                          <http://www.w3.org/ns/sosa/Sensor>;
                         <http://www.w3.org/ns/sosa/observes> :EnergyConsumption;
                         <http://www.w3.org/ns/ssn/implements> :EnergyConsumptionMeterProcedure.
-:EnergyConsumptionMeterMeasuredEnergyConsumption rdt:hasValue "0"^^xsd:double;
-                                                 a <http://www.w3.org/ns/ssn/Property>,
+:EnergyConsumptionMeterMeasuredEnergyConsumption rdt:hasValue "116.60480919999998"^^xsd:double;
+                                                 a owl:NamedIndividual,
                                                    <http://www.w3.org/ns/ssn/Output>,
-                                                   owl:NamedIndividual.
-:EnergyConsumptionMeterProcedure a <http://www.w3.org/ns/sosa/Procedure>,
-                                   owl:NamedIndividual;
+                                                   <http://www.w3.org/ns/ssn/Property>.
+:EnergyConsumptionMeterProcedure a owl:NamedIndividual,
+                                   <http://www.w3.org/ns/sosa/Procedure>;
                                  <http://www.w3.org/ns/ssn/hasOutput> :EnergyConsumptionMeterMeasuredEnergyConsumption.
 :FakepoolFMU rdt:hasSimulationFidelitySeconds "900"^^xsd:int;
              rdt:hasURI "Fakepool.fmu"^^xsd:anyURI;
-             a rdt:FmuModel,
-               owl:NamedIndividual.
+             a owl:NamedIndividual,
+               rdt:FmuModel.
 :FakepoolNotFound rdt:hasValue "False"^^xsd:boolean;
-                  a <http://www.w3.org/ns/ssn/Property>,
-                    <http://www.w3.org/ns/ssn/Output>,
+                  a owl:NamedIndividual,
                     <http://www.w3.org/ns/ssn/Input>,
-                    owl:NamedIndividual.
-:FakepoolNotFoundProcedure a <http://www.w3.org/ns/sosa/Procedure>,
-                             owl:NamedIndividual;
+                    <http://www.w3.org/ns/ssn/Output>,
+                    <http://www.w3.org/ns/ssn/Property>.
+:FakepoolNotFoundProcedure a owl:NamedIndividual,
+                             <http://www.w3.org/ns/sosa/Procedure>;
                            rdfs:comment "Workaround.";
                            <http://www.w3.org/ns/ssn/hasOutput> :FakepoolNotFound.
-:FakepoolNotFoundSensor a <http://www.w3.org/ns/sosa/Sensor>,
-                          owl:NamedIndividual;
+:FakepoolNotFoundSensor a owl:NamedIndividual,
+                          <http://www.w3.org/ns/sosa/Sensor>;
                         rdfs:comment "Workaround.";
                         <http://www.w3.org/ns/ssn/implements> :FakepoolNotFoundProcedure.
 :FakepoolStep rdt:hasValue "0"^^xsd:double;
-              a <http://www.w3.org/ns/ssn/Property>,
-                <http://www.w3.org/ns/ssn/Output>,
+              a owl:NamedIndividual,
                 <http://www.w3.org/ns/ssn/Input>,
-                owl:NamedIndividual.
+                <http://www.w3.org/ns/ssn/Output>,
+                <http://www.w3.org/ns/ssn/Property>.
 :FakepoolStepActuator rdt:enacts :FakepoolStepChange;
                       rdt:hasActuatorName "step";
                       rdt:hasActuatorState "900"^^xsd:int;
                       rdt:isParameter true;
-                      a <http://www.w3.org/ns/sosa/Actuator>,
-                        owl:NamedIndividual.
+                      a owl:NamedIndividual,
+                        <http://www.w3.org/ns/sosa/Actuator>.
 :FakepoolStepChange rdt:affectsPropertyWith rdt:ValueIncrease;
-                    a rdt:PropertyChangeByActuation,
-                      owl:NamedIndividual;
+                    a owl:NamedIndividual,
+                      rdt:PropertyChangeByActuation;
                     <http://www.w3.org/ns/ssn/forProperty> :FakepoolStepProperty.
-:FakepoolStepProcedure a <http://www.w3.org/ns/sosa/Procedure>,
-                         owl:NamedIndividual;
+:FakepoolStepProcedure a owl:NamedIndividual,
+                         <http://www.w3.org/ns/sosa/Procedure>;
                        rdfs:comment "Workaround.";
                        <http://www.w3.org/ns/ssn/hasOutput> :FakepoolStep.
 :FakepoolStepProperty rdt:hasValue "0.0"^^xsd:double;
-                      a <http://www.w3.org/ns/sosa/ObservableProperty>,
-                        owl:NamedIndividual.
-:FakepoolStepSensor a <http://www.w3.org/ns/sosa/Sensor>,
-                      owl:NamedIndividual;
+                      a owl:NamedIndividual,
+                        <http://www.w3.org/ns/sosa/ObservableProperty>.
+:FakepoolStepSensor a owl:NamedIndividual,
+                      <http://www.w3.org/ns/sosa/Sensor>;
                     rdfs:comment "Workaround.";
                     <http://www.w3.org/ns/ssn/implements> :FakepoolStepProcedure.
-:FloorHeating rdt:enacts :RoomTemperatureIncrease,
-                         :EnergyConsumptionIncrease;
-              rdt:hasActuatorState "1"^^xsd:int,
-                                   "0"^^xsd:int;
-              a <http://www.w3.org/ns/sosa/Actuator>,
-                owl:NamedIndividual.
-:Heater rdt:enacts :RoomTemperatureIncrease,
-                   :EnergyConsumptionIncrease;
-        rdt:hasActuatorState "2"^^xsd:int,
+:FloorHeating rdt:enacts :EnergyConsumptionIncrease,
+                         :RoomTemperatureIncrease;
+              rdt:hasActuatorState "0"^^xsd:int,
+                                   "1"^^xsd:int;
+              a owl:NamedIndividual,
+                <http://www.w3.org/ns/sosa/Actuator>.
+:Heater rdt:enacts :EnergyConsumptionIncrease,
+                   :RoomTemperatureIncrease;
+        rdt:hasActuatorState "0"^^xsd:int,
                              "1"^^xsd:int,
-                             "0"^^xsd:int;
-        a <http://www.w3.org/ns/sosa/Actuator>,
-          owl:NamedIndividual.
-:HumiditySensor a <http://www.w3.org/ns/sosa/Sensor>,
-                  owl:NamedIndividual;
+                             "2"^^xsd:int;
+        a owl:NamedIndividual,
+          <http://www.w3.org/ns/sosa/Actuator>.
+:HumiditySensor a owl:NamedIndividual,
+                  <http://www.w3.org/ns/sosa/Sensor>;
                 <http://www.w3.org/ns/sosa/observes> :RoomHumidity;
                 <http://www.w3.org/ns/ssn/implements> :HumiditySensorProcedure.
-:HumiditySensorMeasuredRoomHumidity rdt:hasValue "10.2"^^xsd:double;
-                                    a <http://www.w3.org/ns/ssn/Property>,
+:HumiditySensorMeasuredRoomHumidity rdt:hasValue "14.41092614477976"^^xsd:double;
+                                    a owl:NamedIndividual,
                                       <http://www.w3.org/ns/ssn/Output>,
-                                      owl:NamedIndividual.
-:HumiditySensorProcedure a <http://www.w3.org/ns/sosa/Procedure>,
-                           owl:NamedIndividual;
+                                      <http://www.w3.org/ns/ssn/Property>.
+:HumiditySensorProcedure a owl:NamedIndividual,
+                           <http://www.w3.org/ns/sosa/Procedure>;
                          <http://www.w3.org/ns/ssn/hasOutput> :HumiditySensorMeasuredRoomHumidity.
-:MapekCycle rdt:hasValue "0"^^xsd:int;
-            a <http://www.w3.org/ns/ssn/Property>,
-              <http://www.w3.org/ns/ssn/Output>,
+:MapekCycle rdt:hasValue "8"^^xsd:int;
+            a owl:NamedIndividual,
               <http://www.w3.org/ns/ssn/Input>,
-              owl:NamedIndividual.
-:MapekCycleProcedure a <http://www.w3.org/ns/sosa/Procedure>,
-                       owl:NamedIndividual;
+              <http://www.w3.org/ns/ssn/Output>,
+              <http://www.w3.org/ns/ssn/Property>.
+:MapekCycleProcedure a owl:NamedIndividual,
+                       <http://www.w3.org/ns/sosa/Procedure>;
                      rdfs:comment "Workaround.";
                      <http://www.w3.org/ns/ssn/hasOutput> :MapekCycle.
-:MapekCycleSensor a <http://www.w3.org/ns/sosa/Sensor>,
-                    owl:NamedIndividual;
+:MapekCycleSensor a owl:NamedIndividual,
+                    <http://www.w3.org/ns/sosa/Sensor>;
                   rdfs:comment "Workaround.";
                   <http://www.w3.org/ns/ssn/implements> :MapekCycleProcedure.
 :Motion rdt:hasValue "True"^^xsd:boolean;
-        a <http://www.w3.org/ns/sosa/ObservableProperty>,
-          owl:NamedIndividual.
+        a owl:NamedIndividual,
+          <http://www.w3.org/ns/sosa/ObservableProperty>.
 :MotionActivated rdt:hasValue true;
-                 a <http://www.w3.org/ns/ssn/Property>,
-                   owl:NamedIndividual.
-:MotionSensor a <http://www.w3.org/ns/sosa/Sensor>,
-                owl:NamedIndividual;
+                 a owl:NamedIndividual,
+                   <http://www.w3.org/ns/ssn/Property>.
+:MotionSensor a owl:NamedIndividual,
+                <http://www.w3.org/ns/sosa/Sensor>;
               <http://www.w3.org/ns/sosa/observes> :Motion;
               <http://www.w3.org/ns/ssn/implements> :MotionSensorProcedure.
 :MotionSensorMeasuredMotion rdt:hasValue "True"^^xsd:boolean;
-                            a <http://www.w3.org/ns/ssn/Property>,
+                            a owl:NamedIndividual,
                               <http://www.w3.org/ns/ssn/Output>,
-                              owl:NamedIndividual.
-:MotionSensorProcedure a <http://www.w3.org/ns/sosa/Procedure>,
-                         owl:NamedIndividual;
+                              <http://www.w3.org/ns/ssn/Property>.
+:MotionSensorProcedure a owl:NamedIndividual,
+                         <http://www.w3.org/ns/sosa/Procedure>;
                        <http://www.w3.org/ns/ssn/hasOutput> :MotionSensorMeasuredMotion.
 :OfficeHumidityLowerLimit rdt:hasValue "30.0"^^xsd:double;
-                          a <http://www.w3.org/ns/ssn/Property>,
-                            owl:NamedIndividual.
+                          a owl:NamedIndividual,
+                            <http://www.w3.org/ns/ssn/Property>.
 :OfficeHumidityOptimalCondition rdt:isBreakable true;
                                 rdt:satisfiedBy "0001-01-01T09:00:00Z"^^xsd:dateTimeStamp;
-                                a [a owl:Restriction ; 
+                                a owl:NamedIndividual,
+                                  rdt:OptimalCondition,
+                                  [a owl:Restriction ; 
                                    owl:onProperty rdt:hasConstraint ; 
                                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
                                    owl:onClass [owl:intersectionOf ([a owl:Restriction ; 
@@ -152,24 +154,18 @@
                                                                     [a owl:Restriction ; 
                                                                     owl:onProperty rdt:lessThanOrEqualTo ; 
                                                                     owl:hasValue :OfficeHumidityUpperLimit]) ; 
-                                                a owl:Class]],
-                                  rdt:OptimalCondition,
-                                  owl:NamedIndividual;
+                                                a owl:Class]];
                                 <http://www.w3.org/ns/ssn/forProperty> :RoomHumidity.
 :OfficeHumidityUpperLimit rdt:hasValue "50.0"^^xsd:double;
-                          a <http://www.w3.org/ns/ssn/Property>,
-                            owl:NamedIndividual.
+                          a owl:NamedIndividual,
+                            <http://www.w3.org/ns/ssn/Property>.
 :OfficeTemperatureLowerLimit rdt:hasValue "18.0"^^xsd:double;
-                             a <http://www.w3.org/ns/ssn/Property>,
-                               owl:NamedIndividual.
+                             a owl:NamedIndividual,
+                               <http://www.w3.org/ns/ssn/Property>.
 :OfficeTemperatureOptimalCondition rdt:forEnablingProperty :Motion;
                                    rdt:isBreakable true;
-                                   a [a owl:Restriction ; 
-                                      owl:onProperty rdt:hasEnablingConstraint ; 
-                                      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
-                                      owl:onClass [a owl:Restriction ; 
-                                                   owl:onProperty rdt:equalTo ; 
-                                                   owl:hasValue :MotionActivated]],
+                                   a owl:NamedIndividual,
+                                     rdt:OptimalCondition,
                                      [a owl:Restriction ; 
                                       owl:onProperty rdt:hasConstraint ; 
                                       owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
@@ -180,103 +176,107 @@
                                                                        owl:onProperty rdt:lessThanOrEqualTo ; 
                                                                        owl:hasValue :OfficeTemperatureUpperLimit]) ; 
                                                    a owl:Class]],
-                                     rdt:OptimalCondition,
-                                     owl:NamedIndividual;
+                                     [a owl:Restriction ; 
+                                      owl:onProperty rdt:hasEnablingConstraint ; 
+                                      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
+                                      owl:onClass [a owl:Restriction ; 
+                                                   owl:onProperty rdt:equalTo ; 
+                                                   owl:hasValue :MotionActivated]];
                                    <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature.
 :OfficeTemperatureUpperLimit rdt:hasValue "22.0"^^xsd:double;
-                             a <http://www.w3.org/ns/ssn/Property>,
-                               owl:NamedIndividual.
-:PricePerEnergy rdt:hasValue "0"^^xsd:double;
-                a <http://www.w3.org/ns/ssn/Property>,
+                             a owl:NamedIndividual,
+                               <http://www.w3.org/ns/ssn/Property>.
+:PricePerEnergy rdt:hasValue "172.45851280679997"^^xsd:double;
+                a owl:NamedIndividual,
                   <http://www.w3.org/ns/ssn/Output>,
-                  owl:NamedIndividual.
-:PricePerEnergyProcedure a <http://www.w3.org/ns/sosa/Procedure>,
-                           owl:NamedIndividual;
-                         <http://www.w3.org/ns/ssn/hasInput> :PriceSensorMeasuredPrice,
-                                                             :EnergyConsumptionMeterMeasuredEnergyConsumption;
+                  <http://www.w3.org/ns/ssn/Property>.
+:PricePerEnergyProcedure a owl:NamedIndividual,
+                           <http://www.w3.org/ns/sosa/Procedure>;
+                         <http://www.w3.org/ns/ssn/hasInput> :EnergyConsumptionMeterMeasuredEnergyConsumption,
+                                                             :PriceSensorMeasuredPrice;
                          <http://www.w3.org/ns/ssn/hasOutput> :PricePerEnergy.
-:PricePerEnergySoftSensor a <http://www.w3.org/ns/sosa/Sensor>,
-                            owl:NamedIndividual;
+:PricePerEnergySoftSensor a owl:NamedIndividual,
+                            <http://www.w3.org/ns/sosa/Sensor>;
                           <http://www.w3.org/ns/ssn/implements> :PricePerEnergyProcedure.
-:PriceProcedure a <http://www.w3.org/ns/sosa/Procedure>,
-                  owl:NamedIndividual;
-                <http://www.w3.org/ns/ssn/hasInput> :MapekCycle,
+:PriceProcedure a owl:NamedIndividual,
+                  <http://www.w3.org/ns/sosa/Procedure>;
+                <http://www.w3.org/ns/ssn/hasInput> :FakepoolNotFound,
                                                     :FakepoolStep,
-                                                    :FakepoolNotFound;
+                                                    :MapekCycle;
                 <http://www.w3.org/ns/ssn/hasOutput> :PriceSensorMeasuredPrice;
                 <http://www.w3.org/ns/ssn/implementedBy> :PriceSensor.
-:PriceSensor a <http://www.w3.org/ns/sosa/Sensor>,
-               owl:NamedIndividual;
+:PriceSensor a owl:NamedIndividual,
+               <http://www.w3.org/ns/sosa/Sensor>;
              <http://www.w3.org/ns/ssn/implements> :PriceProcedure.
-:PriceSensorMeasuredPrice rdt:hasValue "2.323"^^xsd:double;
-                          a <http://www.w3.org/ns/ssn/Property>,
+:PriceSensorMeasuredPrice rdt:hasValue "1.479"^^xsd:double;
+                          a owl:NamedIndividual,
                             <http://www.w3.org/ns/ssn/Output>,
-                            owl:NamedIndividual.
-:RoomHumidity rdt:hasValue "10.2"^^xsd:double;
-              a <http://www.w3.org/ns/sosa/ObservableProperty>,
-                owl:NamedIndividual.
+                            <http://www.w3.org/ns/ssn/Property>.
+:RoomHumidity rdt:hasValue "14.41092614477976"^^xsd:double;
+              a owl:NamedIndividual,
+                <http://www.w3.org/ns/sosa/ObservableProperty>.
 :RoomHumidityDecrease rdt:affectsPropertyWith rdt:ValueDecrease;
-                      a rdt:PropertyChange,
-                        owl:NamedIndividual;
+                      a owl:NamedIndividual,
+                        rdt:PropertyChange;
                       <http://www.w3.org/ns/ssn/forProperty> :RoomHumidity.
 :RoomM370 rdt:generateCombinationsOnlyFromOptimalConditions false;
           rdt:hasSimulationModel :RoomM370FMU;
           rdt:minimizes :PricePerEnergy;
-          a <http://www.w3.org/ns/sosa/Platform>,
-            owl:NamedIndividual;
-          <http://www.w3.org/ns/sosa/hosts> :TemperatureSensor2,
-                                            :TemperatureSensor1,
-                                            :PriceSensor,
-                                            :HumiditySensor,
-                                            :Heater,
-                                            :FloorHeating,
+          a owl:NamedIndividual,
+            <http://www.w3.org/ns/sosa/Platform>;
+          <http://www.w3.org/ns/sosa/hosts> :Dehumidifier,
                                             :EnergyConsumptionMeter,
-                                            :Dehumidifier.
+                                            :FloorHeating,
+                                            :Heater,
+                                            :HumiditySensor,
+                                            :PriceSensor,
+                                            :TemperatureSensor1,
+                                            :TemperatureSensor2.
 :RoomM370FMU rdt:hasSimulationFidelitySeconds "100"^^xsd:int;
              rdt:hasURI "roomM370.fmu"^^xsd:anyURI;
-             a rdt:FmuModel,
-               owl:NamedIndividual.
-:RoomTemperature rdt:hasValue "17.7"^^xsd:double;
-                 a <http://www.w3.org/ns/sosa/ObservableProperty>,
-                   owl:NamedIndividual.
+             a owl:NamedIndividual,
+               rdt:FmuModel.
+:RoomTemperature rdt:hasValue "19.170570785462594"^^xsd:double;
+                 a owl:NamedIndividual,
+                   <http://www.w3.org/ns/sosa/ObservableProperty>.
 :RoomTemperatureIncrease rdt:affectsPropertyWith rdt:ValueIncrease;
-                         a rdt:PropertyChange,
-                           owl:NamedIndividual;
+                         a owl:NamedIndividual,
+                           rdt:PropertyChange;
                          <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature.
 :RoomTemperatureLowerLimit1 rdt:hasValue "27.5"^^xsd:double;
-                            a <http://www.w3.org/ns/ssn/Property>,
-                              owl:NamedIndividual.
+                            a owl:NamedIndividual,
+                              <http://www.w3.org/ns/ssn/Property>.
 :RoomTemperatureLowerLimit2 rdt:hasValue "10.0"^^xsd:double;
-                            a <http://www.w3.org/ns/ssn/Property>,
-                              owl:NamedIndividual.
+                            a owl:NamedIndividual,
+                              <http://www.w3.org/ns/ssn/Property>.
 :RoomTemperatureUpperLimit1 rdt:hasValue "30.2"^^xsd:double;
-                            a <http://www.w3.org/ns/ssn/Property>,
-                              owl:NamedIndividual.
+                            a owl:NamedIndividual,
+                              <http://www.w3.org/ns/ssn/Property>.
 :RoomTemperatureUpperLimit2 rdt:hasValue "10.0"^^xsd:double;
-                            a <http://www.w3.org/ns/ssn/Property>,
-                              owl:NamedIndividual.
-:TemperatureSensor1 a <http://www.w3.org/ns/sosa/Sensor>,
-                      owl:NamedIndividual;
+                            a owl:NamedIndividual,
+                              <http://www.w3.org/ns/ssn/Property>.
+:TemperatureSensor1 a owl:NamedIndividual,
+                      <http://www.w3.org/ns/sosa/Sensor>;
                     <http://www.w3.org/ns/sosa/observes> :RoomTemperature;
                     <http://www.w3.org/ns/ssn/implements> :TemperatureSensor1Procedure.
-:TemperatureSensor1MeasuredRoomTemperature rdt:hasValue "17.7"^^xsd:double;
-                                           a <http://www.w3.org/ns/ssn/Property>,
-                                             <http://www.w3.org/ns/ssn/Output>,
+:TemperatureSensor1MeasuredRoomTemperature rdt:hasValue "19.170570785462594"^^xsd:double;
+                                           a owl:NamedIndividual,
                                              <http://www.w3.org/ns/ssn/Input>,
-                                             owl:NamedIndividual.
-:TemperatureSensor1Procedure a <http://www.w3.org/ns/sosa/Procedure>,
-                               owl:NamedIndividual;
+                                             <http://www.w3.org/ns/ssn/Output>,
+                                             <http://www.w3.org/ns/ssn/Property>.
+:TemperatureSensor1Procedure a owl:NamedIndividual,
+                               <http://www.w3.org/ns/sosa/Procedure>;
                              <http://www.w3.org/ns/ssn/hasOutput> :TemperatureSensor1MeasuredRoomTemperature.
-:TemperatureSensor2 a <http://www.w3.org/ns/sosa/Sensor>,
-                      owl:NamedIndividual;
+:TemperatureSensor2 a owl:NamedIndividual,
+                      <http://www.w3.org/ns/sosa/Sensor>;
                     <http://www.w3.org/ns/sosa/observes> :RoomTemperature;
                     <http://www.w3.org/ns/ssn/implements> :TemperatureSensor2Procedure.
-:TemperatureSensor2MeasuredRoomTemperature rdt:hasValue "17.7"^^xsd:double;
-                                           a <http://www.w3.org/ns/ssn/Property>,
-                                             <http://www.w3.org/ns/ssn/Output>,
+:TemperatureSensor2MeasuredRoomTemperature rdt:hasValue "19.170570785462594"^^xsd:double;
+                                           a owl:NamedIndividual,
                                              <http://www.w3.org/ns/ssn/Input>,
-                                             owl:NamedIndividual.
-:TemperatureSensor2Procedure a <http://www.w3.org/ns/sosa/Procedure>,
-                               owl:NamedIndividual;
+                                             <http://www.w3.org/ns/ssn/Output>,
+                                             <http://www.w3.org/ns/ssn/Property>.
+:TemperatureSensor2Procedure a owl:NamedIndividual,
+                               <http://www.w3.org/ns/sosa/Procedure>;
                              <http://www.w3.org/ns/ssn/hasOutput> :TemperatureSensor2MeasuredRoomTemperature.
 rdt:PropertyChangeByActuation a owl:Class.

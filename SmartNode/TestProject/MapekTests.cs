@@ -103,7 +103,7 @@ namespace TestProject
                     // Print starting values:
                     var sroot = simulationPathAndTree.Item1.NodeItem.PropertyCache; {
                         var temp = sroot.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature"].Value;                        
-                        f_out.WriteLine($"0,{temp},0,0,0,0,\"\"");
+                        f_out.WriteLine($"0,{temp},0,0,0,0,0,0,\"\"");
                     }
 
                 // Assume worst case if we're not minimizing
@@ -116,8 +116,10 @@ namespace TestProject
                 foreach (Simulation s in sims.First().Simulations) {
                   var actions = string.Join(",", s.Actions.OrderBy(a => a.Name).Select(a => a.Name.Split("#")[1].Split("_")[1]));
                   var temp = s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature"].Value;
+                  var consumption = s.PropertyCache.Properties[f_energy.Prop.Name].Value;
+                  var price = s.PropertyCache.Properties[f_temp.Prop.Name].Value;
                   var accPrice = s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice"].Value;
-                  f_out.Write($"{(s.Index+1) * duration},{temp},{accPrice},{actions},");
+                  f_out.Write($"{(s.Index+1) * duration},{temp},{accPrice},{consumption},{price},{actions},");
                   f_out.WriteLine($"\"{ThisAssembly.Git.Commit}{(ThisAssembly.Git.IsDirty ? "-DIRTY" : "")}: {rounds},{count},{minCost},case:{useCase},dMin:{dontMinimize},{sw.Elapsed.TotalSeconds}s\"");
                 }
             }

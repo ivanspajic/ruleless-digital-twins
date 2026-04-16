@@ -536,6 +536,7 @@ namespace Logic.Mapek
 
         private void UpdateMapekCycleNumberForSimulation(Simulation simulation) {
             var simulatedMapekCycle = _currentMapekCycle + simulation.Index;
+            // XXX: respect model-authority
             var mapekCycleProperty = simulation.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MapekCycle"];
             mapekCycleProperty.Value = simulatedMapekCycle;
             MapekUtilities.PopulateCacheValuesWithMetaInformation(simulation.PropertyCache, mapekCycleProperty);

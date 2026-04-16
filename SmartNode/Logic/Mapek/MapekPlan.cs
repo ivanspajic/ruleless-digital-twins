@@ -33,6 +33,8 @@ namespace Logic.Mapek
         private readonly IMapekKnowledge _mapekKnowledge;
         private readonly FilepathArguments _filepathArguments;
 
+        public bool _minMaxOverrides = true; // XXX Hotfix to restore original behaviour. Eventually this should be only `false` again.
+
         public MapekPlan(IServiceProvider serviceProvider)
         {
             _coordinatorSettings = serviceProvider.GetRequiredService<CoordinatorSettings>();
@@ -874,7 +876,8 @@ namespace Logic.Mapek
                     var totalMinimizedPropertyValue = 0.0;
 
                     foreach (var simulation in simulationPath.Simulations) {
-                        totalMinimizedPropertyValue += (double)simulation.PropertyCache.Properties[minimizedProperty.Name].Value;
+                        totalMinimizedPropertyValue = _minMaxOverrides ? totalMinimizedPropertyValue + (double)simulation.PropertyCache.Properties[minimizedProperty.Name].Value
+                                                                        : (double)simulation.PropertyCache.Properties[minimizedProperty.Name].Value;
                     }
 
                     if (totalMinimizedPropertyValue < lowestTotalPropertyValue) {
@@ -895,7 +898,8 @@ namespace Logic.Mapek
                     var totalMaximizedPropertyValue = 0.0;
 
                     foreach (var simulation in simulationPath.Simulations) {
-                        totalMaximizedPropertyValue += (double)simulation.PropertyCache.Properties[maximizedProperty.Name].Value;
+                        totalMaximizedPropertyValue = _minMaxOverrides ? totalMaximizedPropertyValue + (double)simulation.PropertyCache.Properties[maximizedProperty.Name].Value
+                                                                        : (double)simulation.PropertyCache.Properties[maximizedProperty.Name].Value;
                     }
 
                     if (totalMaximizedPropertyValue > highestTotalPropertyValue) {

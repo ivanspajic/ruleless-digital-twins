@@ -37,7 +37,7 @@ namespace Logic.Mapek {
             // Inject system meta information which is otherwise not observed by sensors or soft sensors. This information may be useful to some soft sensor computations.
             // It is important to do this before running soft sensor executions to ensure they return accurate values.
             var mapekCycleProperty = new Property {
-                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MapekCycle",
+                Name = "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MapekCycle", // XXX name
                 OwlType = "http://www.w3.org/2001/XMLSchema#int",
                 Value = currentMapekCycle
             };

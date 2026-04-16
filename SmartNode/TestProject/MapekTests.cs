@@ -33,8 +33,8 @@ namespace TestProject
                 FmuDirectory = Path.GetFullPath(Path.Combine(rootDirectory, "SmartNode", "Implementations", "FMUs")),
                 InferenceEngineFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar")),
                 InferenceRulesFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "inference-rules.rules")),
-                InferredModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370-inferred.ttl")),
-                InstanceModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370-instance.ttl")),
+                InferredModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370-simulation-inferred.ttl")),
+                InstanceModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370.ttl")),
                 OntologyFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "ontology", "ruleless-digital-twins.ttl"))
             };
             serviceProvider.Add(filepathArguments);

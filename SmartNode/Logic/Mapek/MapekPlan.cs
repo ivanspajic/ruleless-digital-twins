@@ -656,7 +656,7 @@ namespace Logic.Mapek
         // Initialize the FMU between enter/exitInitialization (#42).
         protected virtual bool Initialization(Simulation simulation, IModel model, IInstance fmuInstance) {
             var actions = simulation.InitializationActions.Select(action => (action.Actuator.ParameterName ?? MapekUtilities.GetSimpleName(action.Name), action.Actuator.Type!, action.NewStateValue)).ToList();
-            AssignSimulationInputsToParameters(model, fmuInstance, actions);
+            AssignSimulationInputsToParameters("parameters", model, fmuInstance, actions);
             return true;
         }
 
@@ -729,7 +729,7 @@ namespace Logic.Mapek
             }
 
             _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
-            AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
+            AssignSimulationInputsToParameters("inputs", model, fmuInstance, fmuActuationInputs);
 
             _logger.LogDebug("Tick ({fmuName}), {secs}s", fmuInstance.Name, simulationDurationSeconds);
             // Advance the FMU time for the duration of the simulation tick in steps of simulation fidelity.
@@ -748,7 +748,7 @@ namespace Logic.Mapek
             AssignPropertyCacheCopyValues(fmuInstance, outCache, model.Variables);
         }
 
-        private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs) {
+        private void AssignSimulationInputsToParameters(String flavour, IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs) {
             IEnumerable<String> ignoredVars = [];
             foreach (var input in fmuInputs) {
                 // We filter inputs by those accepted by the actual FMU.
@@ -761,7 +761,7 @@ namespace Logic.Mapek
                     ignoredVars = ignoredVars.Append(input.Item1);
                 }
             }
-            _logger.LogDebug("FMU variables not relevant: {variables}", ignoredVars);
+            _logger.LogDebug("FMU {f} not relevant: {variables}", flavour, ignoredVars);
         }
 
         private void AssignPropertyCacheCopyValues(IInstance fmuInstance, PropertyCache propertyCacheCopy, IReadOnlyDictionary<string, IVariable> fmuOutputs)

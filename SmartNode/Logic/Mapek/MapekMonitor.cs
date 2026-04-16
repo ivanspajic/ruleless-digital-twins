@@ -152,6 +152,9 @@ namespace Logic.Mapek {
 
             // Although there may be multiple results here, the instance models should be configured such that a single soft Sensor
             // (Procedure) outputs a unique Property. This avoids potential cases of multiple values for the same Property.
+            if (procedureQueryResult.Results.Count > 1) {
+                _logger.LogDebug("Ooops, more results than expected!");
+            }
             var procedureNode = procedureQueryResult.Results[0]["procedure"];
             var sensorNode = procedureQueryResult.Results[0]["sensor"];
 

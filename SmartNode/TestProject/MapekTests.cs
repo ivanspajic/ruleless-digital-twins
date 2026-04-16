@@ -74,14 +74,16 @@ namespace TestProject
 
             // Test property we want to accumulate:
             var f_energy = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption");
-            var f_temp = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Price");
+            var f_temp = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#price");
             var f_prod = new FBinOpArith(f_energy, f_temp, (x, y) => x * y, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyTimesPrice");
             var f_prod_acc = new FAcc<double>(f_prod, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice");
 
-            IMapekPlan plan = new MMK(serviceProvider, new FOp[] { f_prod_acc });
+            MapekPlan plan = new MMK(serviceProvider, new FOp[] { f_prod_acc });
+            // Adjust for hard-coded accumulation:
+            plan._minMaxOverrides = false;
             serviceProvider.Add(plan);
 
-            Assert.Equal(2, ((MapekPlan)plan).GetHostPlatformFmuModel(filepathArguments.FmuDirectory).Count());
+            Assert.Equal(2, plan.GetHostPlatformFmuModel(filepathArguments.FmuDirectory).Count());
 
             // Act
             try
@@ -103,7 +105,7 @@ namespace TestProject
                     // Print starting values:
                     var sroot = simulationPathAndTree.Item1.NodeItem.PropertyCache; {
                         var temp = sroot.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature"].Value;                        
-                        f_out.WriteLine($"0,{temp},0,0,0,0,\"\"");
+                        f_out.WriteLine($"0,{temp},0,0,0,0,0,0,\"\"");
                     }
 
                 // Assume worst case if we're not minimizing
@@ -111,13 +113,13 @@ namespace TestProject
                                                 : (double)paths.Min(s => s.Simulations.Last().PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice"].Value);
                 var sims = paths.Where(s => (double)s.Simulations.Last().PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice"].Value == minOrMax);
 
-                // Remember to print initial values at some point...
-                Debug.WriteLine(simulationPathAndTree.Item1.NodeItem.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature"].Value);
                 foreach (Simulation s in sims.First().Simulations) {
                   var actions = string.Join(",", s.Actions.OrderBy(a => a.Name).Select(a => a.Name.Split("#")[1].Split("_")[1]));
                   var temp = s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature"].Value;
+                  var consumption = s.PropertyCache.Properties[f_energy.Prop.Name].Value;
+                  var price = s.PropertyCache.Properties[f_temp.Prop.Name].Value;
                   var accPrice = s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice"].Value;
-                  f_out.Write($"{(s.Index+1) * duration},{temp},{accPrice},{actions},");
+                  f_out.Write($"{(s.Index+1) * duration},{temp},{accPrice},{consumption},{price},{actions},");
                   f_out.WriteLine($"\"{ThisAssembly.Git.Commit}{(ThisAssembly.Git.IsDirty ? "-DIRTY" : "")}: {rounds},{count},{minCost},case:{useCase},dMin:{dontMinimize},{sw.Elapsed.TotalSeconds}s\"");
                 }
             }
@@ -146,7 +148,7 @@ namespace TestProject
                 var result = path.Aggregate(fitness.MkState(), fitness.Process);
                 Debug.WriteLine(string.Join(",", fitness.FOps.Select(fop => fop.Prop.Name + "=" + result.Get(fop.Prop))));
 
-                var r2 = path.Aggregate(0.0, (acc, s) => acc + ((double)s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Price"].Value) * (double)s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption"].Value);
+                var r2 = path.Aggregate(0.0, (acc, s) => acc + ((double)s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#price"].Value) * (double)s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption"].Value);
                 Assert.Equal(result.Get(f_prod_acc2.Prop), r2);
                 Assert.Equal(result.Get(f_prod_acc2.Prop), last);
                 
@@ -161,7 +163,7 @@ namespace TestProject
             }
         }
 
-                [Theory]
+        [Theory]
         [InlineData(2, 1800, 106.488, true, false, false)]
         [InlineData(4, 900, 114.696, false, false, false)]
         [InlineData(4, 900, 114.696, false, true, false)]

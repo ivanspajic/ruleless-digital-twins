@@ -39,6 +39,7 @@ namespace Implementations.Sensors.Fakepool {
         {
             // TODO: find a better way to differentiate between input parameters. Consider using Properties instead.
             var dataIndex = 0;
+            // 0: FNF, 1: Step, 2: Cycle
             foreach (var inputProperty in inputProperties) {
                 if (inputProperty is int intInputProperty) {
                     dataIndex = intInputProperty;

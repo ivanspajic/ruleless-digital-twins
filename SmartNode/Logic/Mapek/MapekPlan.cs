@@ -33,6 +33,8 @@ namespace Logic.Mapek
         private readonly IMapekKnowledge _mapekKnowledge;
         private readonly FilepathArguments _filepathArguments;
 
+        public bool _minMaxOverrides = true; // XXX Hotfix to restore original behaviour. Eventually this should be only `false` again.
+
         public MapekPlan(IServiceProvider serviceProvider)
         {
             _coordinatorSettings = serviceProvider.GetRequiredService<CoordinatorSettings>();
@@ -536,6 +538,7 @@ namespace Logic.Mapek
 
         private void UpdateMapekCycleNumberForSimulation(Simulation simulation) {
             var simulatedMapekCycle = _currentMapekCycle + simulation.Index;
+            // XXX: respect model-authority
             var mapekCycleProperty = simulation.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MapekCycle"];
             mapekCycleProperty.Value = simulatedMapekCycle;
             MapekUtilities.PopulateCacheValuesWithMetaInformation(simulation.PropertyCache, mapekCycleProperty);
@@ -653,7 +656,7 @@ namespace Logic.Mapek
         // Initialize the FMU between enter/exitInitialization (#42).
         protected virtual bool Initialization(Simulation simulation, IModel model, IInstance fmuInstance) {
             var actions = simulation.InitializationActions.Select(action => (action.Actuator.ParameterName ?? MapekUtilities.GetSimpleName(action.Name), action.Actuator.Type!, action.NewStateValue)).ToList();
-            AssignSimulationInputsToParameters(model, fmuInstance, actions);
+            AssignSimulationInputsToParameters("parameters", model, fmuInstance, actions);
             return true;
         }
 
@@ -726,7 +729,7 @@ namespace Logic.Mapek
             }
 
             _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
-            AssignSimulationInputsToParameters(model, fmuInstance, fmuActuationInputs);
+            AssignSimulationInputsToParameters("inputs", model, fmuInstance, fmuActuationInputs);
 
             _logger.LogDebug("Tick ({fmuName}), {secs}s", fmuInstance.Name, simulationDurationSeconds);
             // Advance the FMU time for the duration of the simulation tick in steps of simulation fidelity.
@@ -745,7 +748,7 @@ namespace Logic.Mapek
             AssignPropertyCacheCopyValues(fmuInstance, outCache, model.Variables);
         }
 
-        private void AssignSimulationInputsToParameters(IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs) {
+        private void AssignSimulationInputsToParameters(String flavour, IModel model, IInstance fmuInstance, IEnumerable<(string, string, object)> fmuInputs) {
             IEnumerable<String> ignoredVars = [];
             foreach (var input in fmuInputs) {
                 // We filter inputs by those accepted by the actual FMU.
@@ -758,7 +761,7 @@ namespace Logic.Mapek
                     ignoredVars = ignoredVars.Append(input.Item1);
                 }
             }
-            _logger.LogDebug("FMU variables not relevant: {variables}", ignoredVars);
+            _logger.LogDebug("FMU {f} not relevant: {variables}", flavour, ignoredVars);
         }
 
         private void AssignPropertyCacheCopyValues(IInstance fmuInstance, PropertyCache propertyCacheCopy, IReadOnlyDictionary<string, IVariable> fmuOutputs)
@@ -873,7 +876,8 @@ namespace Logic.Mapek
                     var totalMinimizedPropertyValue = 0.0;
 
                     foreach (var simulation in simulationPath.Simulations) {
-                        totalMinimizedPropertyValue += (double)simulation.PropertyCache.Properties[minimizedProperty.Name].Value;
+                        totalMinimizedPropertyValue = _minMaxOverrides ? totalMinimizedPropertyValue + (double)simulation.PropertyCache.Properties[minimizedProperty.Name].Value
+                                                                        : (double)simulation.PropertyCache.Properties[minimizedProperty.Name].Value;
                     }
 
                     if (totalMinimizedPropertyValue < lowestTotalPropertyValue) {
@@ -894,7 +898,8 @@ namespace Logic.Mapek
                     var totalMaximizedPropertyValue = 0.0;
 
                     foreach (var simulation in simulationPath.Simulations) {
-                        totalMaximizedPropertyValue += (double)simulation.PropertyCache.Properties[maximizedProperty.Name].Value;
+                        totalMaximizedPropertyValue = _minMaxOverrides ? totalMaximizedPropertyValue + (double)simulation.PropertyCache.Properties[maximizedProperty.Name].Value
+                                                                        : (double)simulation.PropertyCache.Properties[maximizedProperty.Name].Value;
                     }
 
                     if (totalMaximizedPropertyValue > highestTotalPropertyValue) {

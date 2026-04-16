@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -20,6 +21,9 @@ namespace Implementations.Sensors.Fakepool {
 
         public string ProcedureName { get; private set; }
 
+        public int _duration = 900; // TODO: Duration of a tick in the model (15 mins), should eventually come from model.
+        private int _step = 900; // "Width" of one row in the CSV.
+
         public FakepoolSensor(string sensorName, string procedureName) {
             SensorName = sensorName;
             ProcedureName = procedureName;
@@ -38,14 +42,11 @@ namespace Implementations.Sensors.Fakepool {
         public async Task<object> ObservePropertyValue(params object[] inputProperties)
         {
             // TODO: find a better way to differentiate between input parameters. Consider using Properties instead.
-            var dataIndex = 0;
-            // 0: FNF, 1: Step, 2: Cycle
-            foreach (var inputProperty in inputProperties) {
-                if (inputProperty is int intInputProperty) {
-                    dataIndex = intInputProperty;
-                }
-            }
-
+            // 0: FNF, 1: Step, 2: Cycle for Ivan, 0: Cycle for Volker.
+            Debug.Assert(inputProperties.Count() == 1 || inputProperties.Count() == 3);
+            Debug.Assert(inputProperties.Count() != 3 || (double)inputProperties[1] == 0);
+            int cycleIndex = inputProperties.Count() == 3 ? 2 : 0;
+            int dataIndex = (((int)inputProperties[cycleIndex]+1) * _duration) / _step ;
             return _records[dataIndex].State;
         }
     }

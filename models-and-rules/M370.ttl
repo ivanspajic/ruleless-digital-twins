@@ -84,6 +84,15 @@
 :HumiditySensorProcedure a <http://www.w3.org/ns/sosa/Procedure>,
                            owl:NamedIndividual;
                          <http://www.w3.org/ns/ssn/hasOutput> :HumiditySensorMeasuredRoomHumidity.
+:MapekCycle rdt:hasValue "0"^^xsd:int;
+            a owl:NamedIndividual,
+              <http://www.w3.org/ns/ssn/Input>,
+              <http://www.w3.org/ns/ssn/Output>,
+              <http://www.w3.org/ns/ssn/Property>.
+:MapekCycleProcedure a owl:NamedIndividual,
+                       <http://www.w3.org/ns/sosa/Procedure>;
+                     rdfs:comment "Workaround.";
+                     <http://www.w3.org/ns/ssn/hasOutput> :MapekCycle.
 :MapekCycleSensor a owl:NamedIndividual,
                     <http://www.w3.org/ns/sosa/Sensor>;
                   rdfs:comment "Workaround.";
@@ -153,13 +162,14 @@
 :OfficeTemperatureUpperLimit rdt:hasValue "22.0"^^xsd:double;
                              a <http://www.w3.org/ns/ssn/Property>,
                                owl:NamedIndividual.
-:PriceDummyProcedure a <http://www.w3.org/ns/sosa/Procedure>,
-                       owl:NamedIndividual;
-                     <http://www.w3.org/ns/ssn/hasOutput> :price;
-                     <http://www.w3.org/ns/ssn/implementedBy> :PriceDummySensor.
-:PriceDummySensor a <http://www.w3.org/ns/sosa/Sensor>,
-                    owl:NamedIndividual;
-                  <http://www.w3.org/ns/ssn/implements> :PriceDummyProcedure.
+:PriceProcedure a <http://www.w3.org/ns/sosa/Procedure>,
+                  owl:NamedIndividual;
+                <http://www.w3.org/ns/ssn/hasInput> :MapekCycle;
+                <http://www.w3.org/ns/ssn/hasOutput> :price;
+                <http://www.w3.org/ns/ssn/implementedBy> :PriceSensor.
+:PriceSensor a <http://www.w3.org/ns/sosa/Sensor>,
+               owl:NamedIndividual;
+             <http://www.w3.org/ns/ssn/implements> :PriceProcedure.
 :RoomHumidity rdt:hasValue "8.065931477520403"^^xsd:double;
               a <http://www.w3.org/ns/sosa/ObservableProperty>,
                 owl:NamedIndividual.
@@ -174,7 +184,7 @@
             owl:NamedIndividual;
           <http://www.w3.org/ns/sosa/hosts> :TemperatureSensor2,
                                             :TemperatureSensor1,
-                                            :PriceDummySensor,
+                                            :PriceSensor,
                                             :HumiditySensor,
                                             :Heater,
                                             :FloorHeating,

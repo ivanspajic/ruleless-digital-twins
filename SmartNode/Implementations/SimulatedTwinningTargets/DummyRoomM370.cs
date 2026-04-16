@@ -1,5 +1,4 @@
 ﻿using Femyou;
-using Logic.Models.MapekModels;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using static Femyou.IModel;
@@ -24,7 +23,7 @@ namespace Implementations.SimulatedTwinningTargets
 
         private double _roomTemperature = 17.7;
         private double _roomHumidity = 10.2;
-        private double _energyConsumption = 22.0;
+        private double _energyConsumption = 0.0;
 
         private int _heaterState = 0;
         private int _floorHeatingState = 0;

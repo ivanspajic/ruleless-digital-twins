@@ -112,15 +112,14 @@ namespace Logic.Mapek {
 
             // Update ObservableProperties first.
             var query = GetParameterizedStringQuery(@"DELETE {
-                    ?bNode owl:hasValue ?oldValue .
+                    @property meta:hasValue ?oldValue .
                 }
                 INSERT {
-                    ?bNode owl:hasValue @newValue^^@type .
+                    @property meta:hasValue @newValue^^@type .
                 }
                 WHERE {
                     @property rdf:type sosa:ObservableProperty .
-                    @property rdf:type ?bNode .
-                    ?bNode owl:hasValue ?oldValue .
+                    @property meta:hasValue ?oldValue .
                 }");
 
             query.SetLiteral("newValue", propertyValue, false);
@@ -131,16 +130,15 @@ namespace Logic.Mapek {
 
             // In case there was no match on an ObservableProperty, try to update a matching Output.
             query = GetParameterizedStringQuery(@"DELETE {
-                    ?bNode owl:hasValue ?oldValue .
+                    @property meta:hasValue ?oldValue .
                 }
                 INSERT {
-                    ?bNode owl:hasValue @newValue^^@type .
+                    @property meta:hasValue @newValue^^@type .
                 }
                 WHERE {
                     @property rdf:type ssn:Property .
                     @property rdf:type ssn:Output .
-                    @property rdf:type ?bNode .
-                    ?bNode owl:hasValue ?oldValue .
+                    @property meta:hasValue ?oldValue .
                 }");
 
             query.SetLiteral("newValue", propertyValue, false);
@@ -152,15 +150,14 @@ namespace Logic.Mapek {
 
         public void UpdateConfigurableParameterValue(ConfigurableParameter configurableParameter) {
             var query = GetParameterizedStringQuery(@"DELETE {
-                    ?bNode owl:hasValue ?oldValue .
+                    @property meta:hasValue ?oldValue .
                 }
                 INSERT {
-                    ?bNode owl:hasValue @newValue^^@type .
+                    @property meta:hasValue @newValue^^@type .
                 }
                 WHERE {
-                    @configurableParameter rdf:type meta:ConfigurableParameter .
-                    @configurableParameter rdf:type ?bNode .
-                    ?bNode owl:hasValue ?oldValue .
+                    @property rdf:type meta:ConfigurableParameter .
+                    @property meta:hasValue ?oldValue .
                 }");
 
             query.SetLiteral("newValue", configurableParameter.Value.ToString(), false);

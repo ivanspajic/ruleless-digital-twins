@@ -33,9 +33,9 @@ function GetRoomHumidityLimit
   output Integer RoomHumidityLimit;
 algorithm
   if Dehumidifier == 1 then
-    RoomHumidityLimit := 2;
+    RoomHumidityLimit := 20;
   else
-    RoomHumidityLimit := 10;
+    RoomHumidityLimit := 70;
   end if;
 end GetRoomHumidityLimit;
 

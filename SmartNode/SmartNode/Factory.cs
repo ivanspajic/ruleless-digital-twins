@@ -152,7 +152,7 @@ namespace SmartNode
                                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergySoftSensor",
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyProcedure"),
                                 new PricePerEnergySoftSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergySoftSensor",
-                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyProcedure")
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyProcedure", (x,y) => x*y)
                             },
 
 

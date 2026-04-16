@@ -21,7 +21,7 @@ namespace TestProject
         [InlineData(4, 900, 5536, 114.696, false, true, true)]
         [InlineData(5, 720, 5536, 114.696, false, true, false)]
         //[InlineData(4, 5536, 114.696, true, true, false)]
-        public async Task TestMapeK(int rounds, int duration, int count, double minCost, bool useCase, bool nullLogger, bool dontMinimize)
+        public async Task TestM370(int rounds, int duration, int count, double minCost, bool useCase, bool nullLogger, bool dontMinimize)
         {
             // Arrange
             IRDTServiceProvider serviceProvider = nullLogger ? new NullServiceProviderMock() : new ServiceProviderMock();
@@ -153,6 +153,124 @@ namespace TestProject
                 //Assert.Equal(count, paths.Count());
                 // XXX We're not doing this atm. Assert.Equal(minCost, least);
                 //Assert.Single(leasts); // Doesn't have to be true, but is.
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception.Message);
+                throw;
+            }
+        }
+
+                [Theory]
+        [InlineData(2, 1800, 106.488, true, false, false)]
+        [InlineData(4, 900, 114.696, false, false, false)]
+        [InlineData(4, 900, 114.696, false, true, false)]
+        [InlineData(4, 900, 114.696, false, true, true)]
+        [InlineData(5, 720, 114.696, false, true, false)]
+        //[InlineData(4, 5536, 114.696, true, true, false)]
+        public async Task TestM370Ivan(int rounds, int duration, double minCost, bool useCase, bool nullLogger, bool dontMinimize)
+        {
+            // Arrange
+            IRDTServiceProvider serviceProvider = nullLogger ? new NullServiceProviderMock() : new ServiceProviderMock();
+
+            var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
+            var filepathArguments = new FilepathArguments
+            {
+                DataDirectory = "",
+                FmuDirectory = Path.GetFullPath(Path.Combine(rootDirectory, "SmartNode", "Implementations", "FMUs")),
+                InferenceEngineFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar")),
+                InferenceRulesFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "inference-rules.rules")),
+                InferredModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370-inferred.ttl")),
+                InstanceModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370-instance.ttl")),
+                OntologyFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "ontology", "ruleless-digital-twins.ttl"))
+            };
+            serviceProvider.Add(filepathArguments);
+
+            var coordinatorSettings = new CoordinatorSettings
+            {
+                Environment = "roomM370",
+                LookAheadMapekCycles = rounds,
+                MaximumMapekRounds = 1,
+                PropertyValueFuzziness = 0.25,
+                SaveMapekCycleData = false,
+                CycleDurationSeconds = duration,
+                SleepyTimeMilliseconds = 0,
+                StartInReactiveMode = false,
+                UseCaseBasedFunctionality = useCase,
+                UseDecisionLagMitigation = false, // XXX not supported for multiple FMUs yet.
+                UseEuclid = false
+            };
+            serviceProvider.Add(coordinatorSettings);
+
+            IFactory factory = new SmartNode.Factory(coordinatorSettings.Environment);
+            serviceProvider.Add(factory);
+
+            IMapekKnowledge knowledge = new MapekKnowledge(serviceProvider);
+            serviceProvider.Add(knowledge);
+
+            IMapekMonitor monitor = new MapekMonitor(serviceProvider);
+            serviceProvider.Add(monitor);
+
+            if (useCase) {
+                var db = new DatabaseSettings() {ConnectionString = "mongodb://172.22.0.2:27017", DatabaseName = "testdb", CollectionName = "cases"};
+                serviceProvider.Add(db);
+                IMongoClient imc = new MongoClient(db.ConnectionString);
+                serviceProvider.Add(imc);
+                serviceProvider.Add(new CaseRepository(serviceProvider));
+            }
+
+            IMapekPlan plan = new MMK(serviceProvider, new FOp[] { });
+            serviceProvider.Add(plan);
+
+            Assert.Equal(2, ((MapekPlan)plan).GetHostPlatformFmuModel(filepathArguments.FmuDirectory).Count());
+
+            // Act
+            try
+            {
+                if (dontMinimize) {
+                    var deleteQ = ((MapekKnowledge)knowledge).GetParameterizedStringQuery("DELETE DATA { <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomM370> meta:minimizes <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergy> }");
+                    ((MapekKnowledge)knowledge).UpdateModel(deleteQ);
+                }
+                var cache = await monitor.Monitor(0);
+
+                Stopwatch sw = Stopwatch.StartNew();
+                var simulationPathAndTree = await plan.Plan(cache, 0);
+                sw.Stop();
+                Debug.WriteLine($"Planning took {sw.Elapsed.TotalSeconds} seconds total.");
+
+                IEnumerable<SimulationPath> paths = plan.GetOptimalSimulationPath(cache, simulationPathAndTree.Item1.SimulationPaths);
+            using (StreamWriter f_out = File.AppendText("plan_times_ivan.csv")) {
+                    // Check that all best paths are as they should be:
+                    // Print starting values:
+                    var sroot = simulationPathAndTree.Item1.NodeItem.PropertyCache; {
+                        var temp = sroot.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature"].Value;                        
+                        f_out.WriteLine($"0,{temp},0,0,0,0,\"\"");
+                    }
+
+                // Assume worst case if we're not minimizing
+                double minOrMax = dontMinimize  ? (double)paths.Max(s => s.Simulations.Last().PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergy"].Value)
+                                                : (double)paths.Min(s => s.Simulations.Last().PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergy"].Value);
+                var sims = paths.Where(s => (double)s.Simulations.Last().PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergy"].Value == minOrMax);
+
+                // Write initial values:
+                foreach (Simulation s in sims.First().Simulations) {
+                  var actions = string.Join(",", s.Actions.OrderBy(a => a.Name).Select(a => a.Name.Split("#")[1].Split("_")[1]));
+                  var temp = s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature"].Value;
+                  var accPrice = s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergy"].Value;
+                  f_out.Write($"{(s.Index+1) * duration},{temp},{-0.0},{actions},");
+                  f_out.WriteLine($"\"{ThisAssembly.Git.Commit}{(ThisAssembly.Git.IsDirty ? "-DIRTY" : "")}: {rounds},{minCost},case:{useCase},dMin:{dontMinimize},{sw.Elapsed.TotalSeconds}s\"");
+                }
+            }
+
+            // Important stuff stops here.
+            // Safety net below.
+            {
+                var path = simulationPathAndTree.Item2.Simulations;
+                var last = path.Last().PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergy"].Value;
+                
+                Assert.Single(paths);
+                // Assert some more.
+            };
             }
             catch (Exception exception)
             {

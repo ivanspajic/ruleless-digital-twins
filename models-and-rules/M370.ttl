@@ -169,6 +169,7 @@
                 <http://www.w3.org/ns/ssn/implementedBy> :PriceSensor.
 :PriceSensor a <http://www.w3.org/ns/sosa/Sensor>,
                owl:NamedIndividual;
+             <http://www.w3.org/ns/sosa/observes> :price;
              <http://www.w3.org/ns/ssn/implements> :PriceProcedure.
 :RoomHumidity rdt:hasValue "8.065931477520403"^^xsd:double;
               a <http://www.w3.org/ns/sosa/ObservableProperty>,
@@ -180,6 +181,7 @@
 :RoomM370 rdt:generateCombinationsOnlyFromOptimalConditions false;
           rdt:hasSimulationModel :RoomM370FMU,
                                  :FakepoolFMU;
+          rdt:minimizes :AccumulatedEnergyTimesPrice;
           a <http://www.w3.org/ns/sosa/Platform>,
             owl:NamedIndividual;
           <http://www.w3.org/ns/sosa/hosts> :TemperatureSensor2,

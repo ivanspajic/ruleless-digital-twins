@@ -101,7 +101,7 @@ namespace Fitness {
         public Property Prop { get; set; }
     }
 
-    class FProp : FOp {
+    public class FProp : FOp {
         public FProp(String name)
         { // TODO: Use Property directly?
             this.Prop = new Property() { OwlType = "http://www.w3.org/2001/XMLSchema#double", Name = name, Value = null };
@@ -122,7 +122,7 @@ namespace Fitness {
             out_state.Set(Prop, sim.PropertyCache.Properties[Prop.Name].Value);
         }
     }
-    abstract class FBinOp : FOp
+    public abstract class FBinOp : FOp
     {
         public FBinOp(FOp left, FOp right, String? name = null)
         {
@@ -159,7 +159,7 @@ namespace Fitness {
         FOp R { get; }
     }
 
-    class FBinOpArith : FBinOp
+    public class FBinOpArith : FBinOp
     {
         public FBinOpArith(FOp left, FOp right, Func<double, double, double> func, String? name = null) : base(left, right, name)
         {
@@ -174,7 +174,7 @@ namespace Fitness {
         }
     }
 
-    class FAcc<T> : FOp where T : INumber<T>
+    public class FAcc<T> : FOp where T : INumber<T>
     {
         // We accumulate the values of a property by overriding `Operation`.
         // Construct "fake" property to hold accumulator value derived from the object id(!), not the name.

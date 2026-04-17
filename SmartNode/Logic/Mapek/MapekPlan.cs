@@ -526,7 +526,7 @@ namespace Logic.Mapek
 
         public virtual IEnumerable<FOp> GetFitnessOps()
         {
-            return [];
+            return FitnessOps;
         }
 
         private void UpdateMetaInformation(Simulation simulation) {
@@ -618,6 +618,8 @@ namespace Logic.Mapek
         }
 
         VDS.RDF.Query.SparqlResultSet staticObservables = null;
+        public IEnumerable<FOp> FitnessOps = [];
+
         private VDS.RDF.Query.SparqlResultSet GetStaticObservables() {
             if (staticObservables != null) {
                 return staticObservables;

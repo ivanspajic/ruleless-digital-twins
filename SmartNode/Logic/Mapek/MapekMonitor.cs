@@ -266,7 +266,10 @@ namespace Logic.Mapek {
                     Value = observablePropertyValue
                 };
 
-                propertyCache.Properties.Add(observablePropertyName, observableProperty);
+                // TODO: review under which conditions the observable cannot be in the cache already.
+                if (!propertyCache.Properties.TryAdd(observablePropertyName, observableProperty)) {
+                    propertyCache.Properties[observablePropertyName] = observableProperty;
+                }
 
                 _logger.LogInformation("Added ObservableProperty {observableProperty} to the cache.", observablePropertyName);
             }

@@ -16,11 +16,11 @@ namespace TestProject
     {
         [Theory]
         // [InlineData("M370-instance.ttl", "M370-inferred.ttl",1,4,115.05600000000001, false, false, false)]
-        [InlineData(2, 1800, 40, 106.488, true, false, false)]
-        [InlineData(4, 900, 5536, 114.696, false, false, false)]
-        [InlineData(4, 900, 5536, 114.696, false, true, false)]
-        [InlineData(4, 900, 5536, 114.696, false, true, true)]
-        [InlineData(5, 720, 5536, 114.696, false, true, false)]
+        [InlineData(2, 1800, 1, 106.488, true, false, false)]
+        [InlineData(4, 900, 1, 114.696, false, false, false)]
+        [InlineData(4, 900, 1, 114.696, false, true, false)]
+        [InlineData(4, 900, 72, 114.696, false, true, true)]
+        [InlineData(5, 720, 1, 114.696, false, true, false)]
         //[InlineData(4, 5536, 114.696, true, true, false)]
         public async Task TestM370(int rounds, int duration, int count, double minCost, bool useCase, bool nullLogger, bool dontMinimize)
         {
@@ -35,10 +35,13 @@ namespace TestProject
                 InferenceEngineFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar")),
                 InferenceRulesFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "inference-rules.rules")),
                 InferredModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370-simulation-inferred.ttl")),
-                InstanceModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370.ttl")),
+                InstanceModelFilepath = Path.GetFullPath("/tmp/M370.ttl"),
                 OntologyFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "ontology", "ruleless-digital-twins.ttl"))
             };
             serviceProvider.Add(filepathArguments);
+            // Refresh model (#70):
+            var model = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370.ttl"));
+            File.Copy(model.ToString(), filepathArguments.InstanceModelFilepath.ToString(), true);
 
             var coordinatorSettings = new CoordinatorSettings
             {
@@ -79,7 +82,8 @@ namespace TestProject
             var f_prod = new FBinOpArith(f_energy, f_temp, (x, y) => x * y, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyTimesPrice");
             var f_prod_acc = new FAcc<double>(f_prod, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice");
 
-            MapekPlan plan = new MMK(serviceProvider, new FOp[] { f_prod_acc });
+            MapekPlan plan = new MapekPlan(serviceProvider);
+            plan.FitnessOps = [ f_prod_acc ];
             // Adjust for hard-coded accumulation (TOD):
             plan._minMaxOverrides = false;
             serviceProvider.Add(plan);
@@ -93,6 +97,7 @@ namespace TestProject
             // Act
             try
             {
+                // TODO: assert that `minize` is still in the model when we want it to be since we occassionally mangle the file.
                 if (dontMinimize) {
                     var deleteQ = ((MapekKnowledge)knowledge).GetParameterizedStringQuery("DELETE DATA { <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomM370> meta:minimizes <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice> }");
                     ((MapekKnowledge)knowledge).UpdateModel(deleteQ);
@@ -104,13 +109,14 @@ namespace TestProject
                 sw.Stop();
                 Debug.WriteLine($"Planning took {sw.Elapsed.TotalSeconds} seconds total.");
 
+                // Check that all best paths are as they should be:
+                IEnumerable<SimulationPath> paths = plan.GetOptimalSimulationPath(cache, simulationPathAndTree.Item1.SimulationPaths);
             using (StreamWriter f_out = File.AppendText("plan_times.csv")) {
-                    // Check that all best paths are as they should be:
-                    IEnumerable<SimulationPath> paths = plan.GetOptimalSimulationPath(cache, simulationPathAndTree.Item1.SimulationPaths);
                     // Print starting values:
                     var sroot = simulationPathAndTree.Item1.NodeItem.PropertyCache; {
-                        var temp = sroot.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature"].Value;                        
-                        f_out.WriteLine($"0,{temp},0,0,0,0,0,0,\"\"");
+                        var temp = sroot.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature"].Value;
+                        var price = sroot.Properties[f_temp.Prop.Name].Value;
+                        f_out.WriteLine($"0,{temp},0,0,2.323,0,0,0,\"\""); // TODO: adjust meaning of cycle.
                     }
 
                 // Assume worst case if we're not minimizing
@@ -157,7 +163,7 @@ namespace TestProject
                 Assert.Equal(result.Get(f_prod_acc2.Prop), r2);
                 Assert.Equal(result.Get(f_prod_acc2.Prop), last);
                 
-                //Assert.Equal(count, paths.Count());
+                Assert.Equal(count, paths.Count());
                 // XXX We're not doing this atm. Assert.Equal(minCost, least);
                 //Assert.Single(leasts); // Doesn't have to be true, but is.
             }
@@ -226,7 +232,7 @@ namespace TestProject
                 serviceProvider.Add(new CaseRepository(serviceProvider));
             }
 
-            IMapekPlan plan = new MMK(serviceProvider, new FOp[] { });
+            IMapekPlan plan = new MapekPlan(serviceProvider);
             serviceProvider.Add(plan);
 
             Assert.Equal(1, ((MapekPlan)plan).GetHostPlatformFmuModel(filepathArguments.FmuDirectory).Count());
@@ -254,47 +260,22 @@ namespace TestProject
                         f_out.WriteLine($"0,{temp},0,0,0,0,\"\"");
                     }
 
-                // Assume worst case if we're not minimizing
-                double minOrMax = dontMinimize  ? (double)paths.Max(s => s.Simulations.Last().PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergy"].Value)
-                                                : (double)paths.Min(s => s.Simulations.Last().PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergy"].Value);
-                var sims = paths.Where(s => (double)s.Simulations.Last().PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergy"].Value == minOrMax);
+                Assert.Single(paths);
 
                 // Write initial values:
-                foreach (Simulation s in sims.First().Simulations) {
+                foreach (Simulation s in paths.First().Simulations) {
                   var actions = string.Join(",", s.Actions.OrderBy(a => a.Name).Select(a => a.Name.Split("#")[1].Split("_")[1]));
                   var temp = s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature"].Value;
-                  var accPrice = s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergy"].Value;
+                  // var accPrice = s.PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergy"].Value;
                   f_out.Write($"{(s.Index+1) * duration},{temp},{-0.0},{actions},");
                   f_out.WriteLine($"\"{ThisAssembly.Git.Commit}{(ThisAssembly.Git.IsDirty ? "-DIRTY" : "")}: {rounds},{minCost},case:{useCase},dMin:{dontMinimize},{sw.Elapsed.TotalSeconds}s\"");
                 }
             }
 
-            // Important stuff stops here.
-            // Safety net below.
-            {
-                var path = simulationPathAndTree.Item2.Simulations;
-                var last = path.Last().PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergy"].Value;
-                
-                Assert.Single(paths);
-                // Assert some more.
-            };
-            }
-            catch (Exception exception)
-            {
+            } catch (Exception exception) {
                 Debug.WriteLine(exception.Message);
                 throw;
             }
-        }
-    }
-
-    internal class MMK : MapekPlan {
-        private readonly IEnumerable<FOp> _fOps;
-
-        public MMK(IServiceProvider serviceProvider, IEnumerable<FOp> fOps) : base(serviceProvider) {
-            _fOps = fOps;
-        }
-        public override IEnumerable<FOp> GetFitnessOps() {
-            return _fOps;
         }
     }
 }

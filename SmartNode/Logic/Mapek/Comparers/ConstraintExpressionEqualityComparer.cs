@@ -26,15 +26,13 @@ namespace Logic.Mapek.Comparers {
 
         public int GetHashCode([DisallowNull] ConstraintExpression obj) {
             if (obj is NestedConstraintExpression nestedObj) {
-                return nestedObj.GetHashCode() *
-                    nestedObj.ConstraintType.GetHashCode() *
+                return nestedObj.ConstraintType.GetHashCode() *
                     nestedObj.Left.GetHashCode() *
                     nestedObj.Right.GetHashCode();
             } else {
                 var atomicObj = (AtomicConstraintExpression)obj;
 
-                return atomicObj.GetHashCode() *
-                    atomicObj.ConstraintType.GetHashCode() *
+                return atomicObj.ConstraintType.GetHashCode() *
                     atomicObj.Property.GetHashCode();
             }
         }

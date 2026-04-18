@@ -1,5 +1,4 @@
 ﻿using Logic.CaseRepository;
-using Logic.FactoryInterface;
 using Logic.Mapek.Comparers;
 using Logic.Models.DatabaseModels;
 using Logic.Models.MapekModels;
@@ -162,9 +161,10 @@ namespace Logic.Mapek {
                 // from the simulation of the last cycle, then case is valid and can be saved to the database. Otherwise, the case should be nullified.
                 if (simulationMatches) {
                     _caseRepository.CreateCase(potentialCase);
-                } else {
-                    potentialCase = null!;
                 }
+
+                // Reset in case of leftover potential cases.
+                potentialCase = null!;
 
                 // If there are still remaining simulations in the simulation path, get the next potential case from it. Otherwise, try to look for it in the database.
                 if (currentOptimalSimulationPath is not null && currentOptimalSimulationPath.Simulations.Any()) {

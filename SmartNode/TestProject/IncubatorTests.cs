@@ -147,6 +147,7 @@ namespace TestProject {
 #pragma warning disable xUnit1051 // Probably okay for now since we gave the Adapter the token already.
             i.Connect().Wait();
             var consumerTag = i.Setup().Result;
+            Thread.Sleep(3000); // Wait for initial sensor values to trickle in.
 
             var monitor = new MapekMonitor(mock);
             Assert.True(AMQTempSensor._onceOnly);
@@ -265,6 +266,7 @@ namespace TestProject {
             private readonly Dictionary<string, IValueHandler> _valueHandlers = new() {
                 { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
                 { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
+                { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }, // TODO: Find out who is still using this.
                 { "http://www.w3.org/2001/XMLSchema#integer", new IntValueHandler() }
             };
             public IActuator GetActuatorImplementation(string actuatorName) {

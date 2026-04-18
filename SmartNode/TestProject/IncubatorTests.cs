@@ -230,7 +230,7 @@ namespace TestProject {
             var modelDirPath = Path.Combine(executingAssemblyPath, "models-and-rules");
             Assert.True(File.Exists(Path.Combine(modelDirPath, fromPython)));
             Assert.True(File.Exists(Path.Combine(modelDirPath, "RDTBindings.py")));
-            if (runInference || !File.Exists(outPath) || File.GetLastWriteTime(Path.Combine(modelDirPath, fromPython)) > File.GetLastWriteTime(outPath) || File.GetLastWriteTime(Path.Combine(modelDirPath, "RDTBindings.py")) > File.GetLastWriteTime(outPath)) {
+            if (true /* TODO: Always regenerate until we solve #70 */ || runInference || !File.Exists(outPath) || File.GetLastWriteTime(Path.Combine(modelDirPath, fromPython)) > File.GetLastWriteTime(outPath) || File.GetLastWriteTime(Path.Combine(modelDirPath, "RDTBindings.py")) > File.GetLastWriteTime(outPath)) {
                 runInference = true;
                 Trace.WriteLine("Regenerating model...");
                 var processInfo = new ProcessStartInfo {
@@ -265,7 +265,7 @@ namespace TestProject {
             private readonly Dictionary<string, IValueHandler> _valueHandlers = new() {
                 { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
                 { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
-                { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
+                { "http://www.w3.org/2001/XMLSchema#integer", new IntValueHandler() }
             };
             public IActuator GetActuatorImplementation(string actuatorName) {
                 if ("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#HeaterActuator".Equals(actuatorName)) {

@@ -219,6 +219,7 @@ namespace SmartNode
             { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() },
+            { "http://www.w3.org/2001/XMLSchema#integer", new IntValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#base64Binary", new Base64BinaryValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#boolean", new BooleanValueHandler() }
         };

@@ -7,8 +7,9 @@ MINE = Namespace("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#")
 
 g.add((URIRef(str(MINE)), OWL.imports, URIRef(str(RDT))))
 
-heaterProperty = ObservableProperty(g, MINE["HeaterProperty"])
-heaterChange = Change(g, MINE["HeaterChange"], heaterProperty, increase=True)
+temperature = ObservableProperty(g, MINE["T"], None)
+
+heaterChange = Change(g, MINE["HeaterChange"], temperature, increase=True)
 # Potential for RDT:Effect ->HERE<-.
 heaterActuator = Actuator(g, MINE["HeaterActuator"], heaterChange, actuatorName="in_heater_state",
                               actuatorType=XSD.integer, actuatorStates=[0,1])
@@ -19,10 +20,9 @@ rtemp = ObservableProperty(g, MINE["in_room_temperature"], 21.0)
 
 minTemp = Property(g, MINE["TemperatureLowerLimit"], 30)
 maxTemp = Property(g, MINE["TemperatureUpperLimit"], 35)
-temp = ObservableProperty(g, MINE["T"], None)
-oc_rtemp = OptimalConditionDouble(g, MINE["oc_temp"], temp, minTemp, maxTemp)
+oc_rtemp = OptimalConditionDouble(g, MINE["oc_temp"], temperature, minTemp, maxTemp)
 
-tempSensor = Sensor(g, MINE["TempSensor"], [temp])
+tempSensor = Sensor(g, MINE["TempSensor"], [temperature])
 tempMeasure = Measure(g, MINE["TempMeasure"])
 
 tempProcedure = Procedure(g, MINE["TempProcedure"], tempMeasure, tempSensor)

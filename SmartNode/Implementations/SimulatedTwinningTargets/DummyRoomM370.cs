@@ -31,7 +31,6 @@ namespace Implementations.SimulatedTwinningTargets
         private int _oldHeaterState = 0;
         private int _oldFloorHeatingState = 0;
         private int _oldDehumidifierState = 0;
-        private int _currentMapekCycle = 0;
 
         private IModel? _fmuModel;
         private IInstance? _fmuInstance;
@@ -99,13 +98,13 @@ namespace Implementations.SimulatedTwinningTargets
             var dehumidifierParameter = _fmuModel.Variables[DehumidifierParameterName];
 
             // Set the old actuator states to account for TT changes during MAPE-K cycle execution before the DT enacted its decision.
-            _fmuInstance.StartTime(0, (i) => {
-                i.WriteInteger((heaterParameter, _oldHeaterState));
-                i.WriteInteger((floorHeatingParameter, _oldFloorHeatingState));
-                i.WriteInteger((dehumidifierParameter, _oldDehumidifierState));
+            _fmuInstance.StartTime(0, (i) => true);
 
-                return true;
-            });
+            _fmuInstance.WriteInteger((heaterParameter, _oldHeaterState));
+            _fmuInstance.WriteInteger((floorHeatingParameter, _oldFloorHeatingState));
+            _fmuInstance.WriteInteger((dehumidifierParameter, _oldDehumidifierState));
+            _fmuInstance.WriteReal((roomTemperature, _roomTemperature));
+            _fmuInstance.WriteReal((roomHumidity, _roomHumidity));
 
             // Advance time for the duration of the MAPE-K execution to simulate TT changes in the meantime.
             AdvanceFmuTimeInSteps(_fmuInstance, mapekExecutionDuration);
@@ -139,12 +138,8 @@ namespace Implementations.SimulatedTwinningTargets
             _roomHumidity = roomHumidityOutput + roomHumidityDeviation;
             // Accumulate this since it's accumulated in the simulations.
             _energyConsumption = energyConsumptionOutput + _energyConsumption;
-
-            // TODO: add the accumulated energy price here.
-
-            // Increment the cycle for next time.
-            _currentMapekCycle++;
-
+            
+            // PURRRRRRRRRRRGEEEEEE!!!
             _fmuInstance.Dispose();
             _fmuInstance = null;
             _fmuModel.Dispose();

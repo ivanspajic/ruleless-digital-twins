@@ -357,6 +357,19 @@
                 print("Generated ReconfigurationAction", ?actionName)
 ]
 
+// The following rule generates ActuationActions such that their Actuators always have states "0". Since reactive mode only generates reactive
+// Actions, these are necessary to include to reset the unused Actuators to their default/off states.
+[rule6e:    (?platform rdf:type sosa:Platform)
+            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?actuator rdf:type sosa:Actuator)
+            (?actuator meta:hasActuatorState "0"^^xsd:int)
+            uriConcat(?actuator, "_0", ?actionName)
+            ->  (?actionName rdf:type meta:ActuationAction)
+                (?actionName meta:hasActuator ?actuator)
+                (?actionName meta:hasActuatorState "0"^^xsd:int)
+                print("Generated ActuationAction", ?actionName)
+]
+
 
 
 // The following rules infer possible combinations of Actions to take as part of the DT`s final decision. They effectively produce a

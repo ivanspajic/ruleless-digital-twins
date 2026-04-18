@@ -30,7 +30,7 @@ class ObservableProperty(Node):
 class Property(Node):
     def __init__(self, g, name, value = 0.0):
         self.node = name
-        g.add((self.node, RDF["type"], SOSA["Property"]))
+        g.add((self.node, RDF["type"], SSN["Property"]))
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
         g.add((self.node, RDT["hasValue"], Literal(value, datatype=XSD.double)))
 

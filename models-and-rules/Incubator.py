@@ -4,6 +4,8 @@ from RDTBindings import *
 
 g = Graph()
 MINE = Namespace("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#")
+g.bind("", MINE)
+g.bind("rdt", RDT)
 
 g.add((URIRef(str(MINE)), OWL.imports, URIRef(str(RDT))))
 

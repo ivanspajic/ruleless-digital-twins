@@ -7,8 +7,6 @@ using Logic.Models.OntologicalModels;
 using Logic.ValueHandlerInterfaces;
 using System.Diagnostics;
 using System.Reflection;
-using TestProject.Mocks;
-using Logic.Models.DatabaseModels;
 using TestProject.Mocks.ServiceMocks;
 
 namespace TestProject
@@ -17,6 +15,7 @@ namespace TestProject
         private readonly Dictionary<string, IValueHandler> _valueHandlers = new() {
             { "http://www.w3.org/2001/XMLSchema#double", new DoubleValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#string", new StringValueHandler() },
+            { "http://www.w3.org/2001/XMLSchema#boolean", new BooleanValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#int", new IntValueHandler() }
         };
         public IActuator GetActuatorImplementation(string actuatorName)
@@ -118,7 +117,7 @@ namespace TestProject
                         "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProperty",
                         new Property {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummyProperty",
-                            OwlType = "double",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = -1.02
                         }
                     },
@@ -126,7 +125,7 @@ namespace TestProject
                         "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#price",
                         new Property {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#price",
-                            OwlType = "double",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#double",
                             Value = -1.02
                         }
                     },
@@ -134,7 +133,7 @@ namespace TestProject
                         "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#notFound",
                         new Property {
                             Name = "http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#notFound",
-                            OwlType = "boolean",
+                            OwlType = "http://www.w3.org/2001/XMLSchema#boolean",
                             Value = true
                         }
                     }

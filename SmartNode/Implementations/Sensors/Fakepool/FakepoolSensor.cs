@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
@@ -31,7 +32,9 @@ namespace Implementations.Sensors.Fakepool {
                 NewLine = Environment.NewLine,
                 Delimiter = "\t",
             };
-            using (var reader = new StreamReader(Path.Combine("Sensors", "Fakepool", "fakepool.tsv")))
+            var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.FullName;
+            var path = Path.Combine(rootDirectory, "Sensors", "Fakepool", "fakepool.tsv");
+            using (var reader = new StreamReader(path))
             using (var csv = new CsvReader(reader, config))
             {
                 csv.Read();

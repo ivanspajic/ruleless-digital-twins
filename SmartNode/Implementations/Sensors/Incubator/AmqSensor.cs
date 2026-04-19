@@ -7,7 +7,7 @@ namespace Implementations.Sensors.Incubator {
         private readonly IncubatorAdapter _incubatorAdapter = incubatorAdapter;
 
         public bool _onceOnly = true;
-        private const int IncubatorAdapterMessageDelayMilliseconds = 2_500;
+        private const int IncubatorAdapterMessageDelayMilliseconds = 3_500;
 
         public string SensorName { get; private init; } = sensorName;
 
@@ -15,7 +15,9 @@ namespace Implementations.Sensors.Incubator {
 
         public async Task<object> ObservePropertyValue(params object[] inputProperties) {
             // Wait a little bit before messages are sent to the queue.
-            await Task.Delay(IncubatorAdapterMessageDelayMilliseconds);
+            if (_onceOnly) {
+                await Task.Delay(IncubatorAdapterMessageDelayMilliseconds);
+            }
 
             IncubatorFields? myData = null;
             Monitor.Enter(_incubatorAdapter);

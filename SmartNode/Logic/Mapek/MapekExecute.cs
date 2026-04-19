@@ -83,8 +83,13 @@ namespace Logic.Mapek
 
         private void ActuateDummyEnvironment(double mapekExecutionDurationSeconds) {
             // Use any actuator to actuate the dummy environment.
-            var actuator = _factory.GetActuatorImplementation("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater");
-            actuator.RunDummyEnvironment(mapekExecutionDurationSeconds);
+            try {
+                var actuator = _factory.GetActuatorImplementation("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater");
+                actuator.RunDummyEnvironment(mapekExecutionDurationSeconds);
+            } catch (Exception e) {
+                // TODO: Review, will go away.
+                // No action required.
+            }
         }
     }
 }

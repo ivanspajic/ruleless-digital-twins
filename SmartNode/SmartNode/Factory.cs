@@ -34,6 +34,10 @@ namespace SmartNode
                             {
                                 "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#HeaterActuator",
                                 new AmqHeater(_incubatorAdapter)
+                            },
+                            {
+                                "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#FanActuator",
+                                new AmqFan(_incubatorAdapter)
                             }
                         },
                         SensorMap = new() {

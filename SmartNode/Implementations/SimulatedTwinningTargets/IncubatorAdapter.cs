@@ -92,5 +92,16 @@ namespace Implementations.SimulatedTwinningTargets {
             var props = new BasicProperties();
             await Channel.BasicPublishAsync(ExchangeName, "incubator.hardware.gpio.heater.on", false, props, messageBodyBytes);
         }
+
+        record class Fan(Boolean fan);
+        public async Task SetFan(Boolean on) {
+            if (Channel == null) {
+                throw new Exception();
+            }
+            var new_fan = new Fan(on);
+            byte[] messageBodyBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize<Fan>(new_fan));
+            var props = new BasicProperties();
+            await Channel.BasicPublishAsync(ExchangeName, "incubator.hardware.gpio.fan.on", false, props, messageBodyBytes);
+        }
     }
 }

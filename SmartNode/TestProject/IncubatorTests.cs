@@ -10,6 +10,7 @@ using System.Reflection;
 using TestProject.Mocks.ServiceMocks;
 using Implementations.SimulatedTwinningTargets;
 using System.Globalization;
+using Implementations.Actuators.Incubator;
 
 namespace TestProject {
     public class IncubatorTests : IDisposable {
@@ -131,7 +132,7 @@ namespace TestProject {
             // Cold room, assert that the optimal path is heading in the right direction:
             Assert.Equal(4, path.Simulations.Count());
             foreach (var s in path.Simulations) {
-                Assert.True(s.Actions.All(a => (all_actuators ? "1" : "0") == ((ActuationAction)a).NewStateValue.ToString()));
+                Assert.True(s.Actions.Where(a => a.Name.Contains("HeaterActuator")).All(a => (all_actuators ? "1" : "0") == ((ActuationAction)a).NewStateValue.ToString()));
             }
             crashed = false;
         }

@@ -16,6 +16,9 @@ heaterChange = Change(g, MINE["HeaterChange"], temperature, increase=True)
 heaterActuator = Actuator(g, MINE["HeaterActuator"], heaterChange, actuatorName="in_heater_state",
                               actuatorType=XSD.integer, actuatorStates=[0,1])
 
+fan = Actuator(g, MINE["FanActuator"], None, # Pin fan to "on"
+                    actuatorType=XSD.integer, actuatorStates=[1])
+
 rtemp = ObservableProperty(g, MINE["in_room_temperature"], 21.0)
 #rtempActuator = Actuator(g, MINE["TempActuator"], Change(g, MINE["TempChange"], rtemp), isParameter=True,
 #                             actuatorName="in_room_temperature", actuatorType=XSD.double, actuatorStates=[21.0])
@@ -29,7 +32,7 @@ tempMeasure = Measure(g, MINE["TempMeasure"])
 
 tempProcedure = Procedure(g, MINE["TempProcedure"], tempMeasure, tempSensor)
 
-room = Platform(g, MINE["IncubatorTest"], False, [heaterActuator, tempSensor], implements=[oc_rtemp])
+room = Platform(g, MINE["IncubatorTest"], False, [heaterActuator, tempSensor, fan], implements=[oc_rtemp])
 fmu = FMU(g, MINE["Incubator_FMU"], "Source/au_incubator.fmu", 3) # 3s
 room.addFMU(g, fmu)
 

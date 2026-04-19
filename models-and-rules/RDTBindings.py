@@ -45,13 +45,14 @@ class Change(Node):
             g.add((self.node, RDT["affectsPropertyWith"], RDT["ValueIncrease"] if increase else RDT["ValueDecrease"])) # TODO: maybe enum better?
 
 class Actuator(Node):
-    def __init__(self, g, name: IdentifiedNode, enacts: Change, actuatorName: Optional[str] = None
+    def __init__(self, g, name: IdentifiedNode, enacts: Optional[Change] = None, actuatorName: Optional[str] = None
                      , actuatorStates: Optional[list[str]] = [], actuatorType: Optional[URIRef] = None
                      , isParameter: Optional[bool] = False):
         self.node = name
         g.add((self.node, RDF["type"], OWL["NamedIndividual"]))
         g.add((self.node, RDF["type"], SOSA["Actuator"]))
-        g.add((self.node, RDT["enacts"], enacts.node))
+        if enacts is not None:
+            g.add((self.node, RDT["enacts"], enacts.node))
         if actuatorName is not None:
             g.add((self.node, RDT["hasActuatorName"], Literal(actuatorName, datatype=XSD.string)))
         for s in actuatorStates:

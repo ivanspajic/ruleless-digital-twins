@@ -21,7 +21,7 @@ namespace Logic.Mapek {
                 // We only look into the final state of the simulation:
                 var lastPC = sp.Simulations.Last().PropertyCache;
                 var distances = optimalConditions.Select(oc => {
-                    Debug.Assert(lastPC.Properties.TryGetValue(oc.Property.Name, out var p));
+                    var found = lastPC.Properties.TryGetValue(oc.Property.Name, out var p);                    
                     Debug.Assert(p != null);
                     if (!"http://www.w3.org/2001/XMLSchema#double".Equals(oc.Property.OwlType) || oc.ConditionConstraint.ConstraintType == ConstraintType.Or) {
                         // Coward.

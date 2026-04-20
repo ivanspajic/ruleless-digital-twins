@@ -1,5 +1,5 @@
 ## Introduction
-This is the accompanying artifact to the Spajić and Stolz 2025 DataMod paper ([preprint as PDF](http://foldr.org/selabhvl/2025/2025-datamod-prepreprint.pdf)). It consists of an ontology, instance models, an inference engine JAR and source code, inference (and verification) rules, control loop (logic) codebase, and a simulation model (FMU) and its source code.
+This is the accompanying artifact to the Spajić and Stolz 2025 DataMod paper ([preprint as PDF](http://foldr.org/selabhvl/2025/2025-datamod-preprint.pdf)). It consists of an ontology, instance models, an inference engine JAR and source code, inference (and verification) rules, control loop (logic) codebase, and a simulation model (FMU) and its source code.
 
 ## Overview of the System
 Coming soon!
@@ -24,16 +24,6 @@ info: Logic.Mapek.MapekManager[0]
 ...
 ```
 
-### Run the pre-built Dockerimage from Docker Hub via emulation:
-
-```
-% docker pull volkers/smartnode
-Using default tag: latest
-latest: Pulling from volkers/smartnode
-...
-% docker run --rm --platform linux/amd64 -v `pwd`/models-and-rules:/app/models volkers/smartnode /app/models/inferred-model-1.ttl
-```
-
 ### MongoDB in Docker
 Since MongoDB is required to use the case-based functionality, there are some setup steps required to make it run (and persist) in Docker:
 1. Create a network in Docker:
@@ -46,7 +36,7 @@ docker network connect <your_network_name> <container_name>
 ```
 
 ## Running the Control Loop Coordinator (SmartNode)
-The codebase is a .NET 8 solution consisting of multiple projects: `Logic` (MAPE-K and models), `Implementations` (for user-provided sensor/actuator implementations), `SmartNode` (startup and configuration project), and `TestProject` (unit and integration tests). We also include our own fork of [Femyou](https://github.com/Oaz/Femyou) for the logic that loads and executes our FMUs. Users may choose between running the solution natively or containerized.
+The codebase is a .NET 8 solution consisting of multiple projects: `Logic` (MAPE-K and models), `Implementations` (for user-provided sensor/actuator implementations), `SmartNode` (startup and configuration project), and `TestProject` (unit and integration tests). We also include our own fork of [Femyou](https://codeberg.org/SELab_HVL/vsto-Femyou) for the logic that loads and executes our FMUs. Users may choose between running the solution natively or containerized.
 
 The codebase uses a `appsettings.json` in the `SmartNode/Properties` directory as a configuration file. This file already comes preconfigured, but users are free to change their own settings. It contains the following parameters:
 1. Filepath arguments:

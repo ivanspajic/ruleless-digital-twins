@@ -18,7 +18,7 @@ namespace SmartNode
 {
     internal class Program
     {
-        static async Task Main(string[] args)
+        static async Task<int> Main(string[] args)
         {
             RootCommand rootCommand = new();
             Option<string> fileNameArg = new("--appsettings")
@@ -26,8 +26,15 @@ namespace SmartNode
                 Description = "Which appsettings file to use."
             };
             rootCommand.Add(fileNameArg);
+            Option<string> baseDirName = new("--basedir")
+            {
+                Description = "The base directory for models etc. Used as prefix for all relative paths in `appsettings`."
+            };
+            rootCommand.Add(baseDirName);
+
             ParseResult parseResult = rootCommand.Parse(args);
             string? settingsFile = parseResult.GetValue(fileNameArg);
+            string? baseDir = parseResult.GetValue(baseDirName);
 
             var appSettings = settingsFile is not null ? Path.Combine("Properties", settingsFile) : Path.Combine("Properties", $"appsettings.json");
 
@@ -38,7 +45,14 @@ namespace SmartNode
             var coordinatorSettings = builder.Configuration.GetSection("CoordinatorSettings").Get<CoordinatorSettings>();
             var databaseSettings = builder.Configuration.GetSection("DatabaseSettings").Get<DatabaseSettings>();
 
-            var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
+            string? rootDirectory;
+            try {
+                var location = Directory.GetParent(Assembly.GetExecutingAssembly().Location);
+                // Dispatch between binary release (e.g. in Docker) and in-IDE/workspace.
+                rootDirectory = baseDir ?? location!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
+            } catch (NullReferenceException) {
+                rootDirectory = ""; // Not the most elegant solution, but it'll do.
+            }
 
             // TODO: we can use reflection for this.
             // Fix full paths.
@@ -93,6 +107,7 @@ namespace SmartNode
             // XXX review
             // host.Run();
             logger.LogInformation("MAPE-K ended.");
+            return 0;
         }
     }
 }

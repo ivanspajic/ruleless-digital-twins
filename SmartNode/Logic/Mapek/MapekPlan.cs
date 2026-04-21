@@ -22,7 +22,6 @@ namespace Logic.Mapek
         // instance model.
         private readonly bool _restrictToReactiveActionsOnly;
         private bool _restrictToReactiveActionsOnlyOld; // Used for performance enhancements.
-        private bool _javaInvocationAsyncError = false; // Used to track async errors from Java invocation.
 
         private bool _savedReactiveSetting = false;
         private int _currentMapekCycle = 0;
@@ -314,6 +313,8 @@ namespace Logic.Mapek
             using var process = Process.Start(processInfo);
             Debug.Assert(process != null, "Process failed to start.");
 
+            var javaInvocationAsyncError = false;
+            void SetError() => javaInvocationAsyncError = true;
             process!.OutputDataReceived += (sender, e) => {
                 _logger.LogInformation(e.Data);
                 if (e.Data != null && e.Data.Contains("Error!")) {
@@ -334,12 +335,8 @@ namespace Logic.Mapek
                 throw new Exception($"The inference engine encountered an error. Process {process.Id} exited with code {process.ExitCode}.");
             }
 
-            Debug.Assert(!_javaInvocationAsyncError, "Inconsistencies detected.");
+            Debug.Assert(!javaInvocationAsyncError, "Inconsistencies detected.");
             _logger.LogInformation("Process {processId} exited with code {processExitCode}.", process.Id, process.ExitCode);
-        }
-
-        private void SetError() {
-            _javaInvocationAsyncError = true;
         }
 
         // This method currently only supports ActuationActions.

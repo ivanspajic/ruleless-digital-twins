@@ -77,6 +77,10 @@ namespace SmartNode
             builder.Services.AddSingleton<ICaseRepository, CaseRepository>(serviceProvider => new CaseRepository(serviceProvider));
             builder.Services.AddSingleton<IFactory, Factory>(serviceProvider => new Factory(coordinatorSettings!.Environment));
             builder.Services.AddSingleton<IMapekMonitor, MapekMonitor>(serviceProvider => new MapekMonitor(serviceProvider));
+
+            // @DAT191 Streaming-server goes >HERE<
+            builder.Services.AddSingleton<IStreamingSimulationProvider, NullStreamingSimulationProvider>(serviceProvider => new NullStreamingSimulationProvider());
+            
             builder.Services.AddSingleton<IMapekPlan, MapekPlan>(serviceProvider => {
                 return coordinatorSettings!.UseEuclid ? new EuclidMapekPlan(serviceProvider) : new MapekPlan(serviceProvider);
             });

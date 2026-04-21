@@ -32,6 +32,7 @@ namespace Logic.Mapek
         private readonly IFactory _factory;
         private readonly IMapekKnowledge _mapekKnowledge;
         private readonly FilepathArguments _filepathArguments;
+        private readonly IStreamingSimulationProvider _streamingProvider;
 
         public bool _minMaxOverrides = true; // XXX Hotfix to restore original behaviour. Eventually this should be only `false` again.
 
@@ -44,6 +45,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
             _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
             _filepathArguments = serviceProvider.GetRequiredService<FilepathArguments>();
+            _streamingProvider = serviceProvider.GetService<IStreamingSimulationProvider>() ?? new NullStreamingSimulationProvider();
         }
 
         /// <summary>
@@ -208,6 +210,7 @@ namespace Logic.Mapek
             // For every ActionCombination, create a new Simulation, yield return it, and continue the process recursively for all children
             // as long as there are additional MAPE-K cycles to simulate for.
             var simulationTreeNodeChildren = new List<SimulationTreeNode>();
+            _streamingProvider.Reset(simulationTreeNode.NodeItem); // Signal the start of a new cycle to the streaming provider.
 
             foreach (var actionCombination in actionCombinations) {
                 // TODO: partition more efficiently:
@@ -219,6 +222,7 @@ namespace Logic.Mapek
                 };
 
                 // Already stream back the newly-created simulation.
+                _streamingProvider.Queue(simulationTreeNode.NodeItem, simulation);
                 yield return simulation;
 
                 // Choose whether to keep the current simulation after its property cache values are populated. This allows for dynamic tree
@@ -241,6 +245,7 @@ namespace Logic.Mapek
                         simulation.PropertyCache);
 
                     foreach (var childSimulation in childSimulations) {
+                        _streamingProvider.Queue(simulation, childSimulation);
                         yield return childSimulation;
                     }
                 }
@@ -484,6 +489,7 @@ namespace Logic.Mapek
             // TODO: Parallelize simulations (#13).
             foreach (var simulation in simulations) {
                 _logger.LogInformation("Running simulation #{run}", i++);
+                _streamingProvider.Starting(simulation);
 
                 var orig = new Simulation(GetPropertyCacheCopy(simulation.PropertyCache!)) {
                         Actions = simulation.Actions,
@@ -515,6 +521,7 @@ namespace Logic.Mapek
                     // Sideeffect:
                     fitness.Process(fitness.MkState(), simulation);
                 }
+                _streamingProvider.Stopped(simulation);
             }
 
             stopwatch.Stop();

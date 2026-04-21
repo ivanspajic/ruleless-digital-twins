@@ -26,6 +26,8 @@ namespace TestProject
         {
             // Arrange
             IRDTServiceProvider serviceProvider = nullLogger ? new NullServiceProviderMock() : new ServiceProviderMock();
+            // @DAT191 Override this for testing eg. serialisation.
+            serviceProvider.Add(typeof(IStreamingSimulationProvider), new NullStreamingSimulationProvider());
 
             var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
             var filepathArguments = new FilepathArguments

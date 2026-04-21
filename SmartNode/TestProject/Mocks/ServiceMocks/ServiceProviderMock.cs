@@ -1,4 +1,5 @@
-﻿using Logic.CaseRepository;
+﻿using System.Diagnostics;
+using Logic.CaseRepository;
 using Logic.Mapek;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -7,6 +8,7 @@ namespace TestProject.Mocks.ServiceMocks
 {
     interface IRDTServiceProvider : IServiceProvider {
         void Add<T>(T t);
+        void Add<I>(Type type, I implementation);
     }
     internal class ServiceProviderMock : IRDTServiceProvider
     {
@@ -38,6 +40,11 @@ namespace TestProject.Mocks.ServiceMocks
         {
             _serviceImplementationMocks.Add(typeof(T), t);
         }
+
+        public void Add<I>(Type type, I implementation)
+        {
+            _serviceImplementationMocks.Add(type, implementation);
+        }
     }
     
         internal class NullServiceProviderMock : IRDTServiceProvider {
@@ -64,6 +71,12 @@ namespace TestProject.Mocks.ServiceMocks
 
         public void Add<T>(T t) {
             _serviceImplementationMocks.Add(typeof(T), t);
+        }
+
+        public void Add<I>(Type type, I implementation)
+        {
+            Debug.Assert(type.IsInstanceOfType(implementation));
+            _serviceImplementationMocks.Add(type, implementation);
         }
     }
 }

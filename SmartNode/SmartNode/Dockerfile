@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
 # [VS] We keep `omc` in the final product. If we only want the compiled FMU, and never expect the user to invoke `omc`
 #       in the container themselves, we could move this bit up a layer or two.
 USER root
-RUN apt-get update ; apt-get install -y ca-certificates curl gnupg default-jre-headless; curl -fsSL http://build.openmodelica.org/apt/openmodelica.asc | \
+RUN apt-get update ; apt-get install -y ca-certificates curl gnupg default-jre-headless; curl -fsSL http://build.openmodelica.org/apt/openmodelica-2026.asc | \
      gpg --dearmor -o /usr/share/keyrings/openmodelica-keyring.gpg ; \
      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/openmodelica-keyring.gpg] \
   https://build.openmodelica.org/apt \
@@ -34,8 +34,9 @@ RUN dotnet publish "./SmartNode.csproj" -c $BUILD_CONFIGURATION -o /app/publish 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+# Don't ship Windows FMUs:
+COPY --from=publish --exclude=**/*.fmu /app/publish .
 COPY --from=build --chown=$APP_UID /src /src
 USER $APP_UID
-RUN cd /src/Implementations/FMUs/Source && omc doit.mos && cp roomM370.fmu /app && mkdir /app/models
+RUN cd /src/Implementations/FMUs/Source && make all && cp roomM370.fmu au_incubator.fmu /app && mkdir /app/models
 ENTRYPOINT ["dotnet", "SmartNode.dll"]

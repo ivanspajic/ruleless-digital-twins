@@ -15,28 +15,39 @@ RUN apt-get update ; apt-get install -y ca-certificates curl gnupg default-jre-h
 USER $APP_UID
 WORKDIR /app
 
+FROM base AS fmus
+COPY Implementations/ .
+RUN cd FMUs/Source && make all
+RUN pwd && ls -l FMUs/Source
 
 # This stage is used to build the service project
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-deps
+WORKDIR /src
+COPY SmartNode-release.sln */*.csproj ./
+RUN for i in Logic SmartNode Implementations; do mkdir -p /src/$i && mv $i.csproj /src/$i/; done
+# Subpath :-/
+RUN mkdir -p /src/Femyou/src
+COPY Femyou/src/Femyou.csproj /src/Femyou/src/
+# There's something fishy about the NuGet Git
+RUN dotnet restore "./SmartNode-release.sln"
+
+FROM build-deps AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["SmartNode/SmartNode.csproj", "SmartNode/"]
-RUN dotnet restore "./SmartNode/SmartNode.csproj"
 COPY . .
-WORKDIR "/src/SmartNode"
-RUN dotnet build "./SmartNode.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./SmartNode-release.sln" --no-restore -c $BUILD_CONFIGURATION /p:UseAppHost=false
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./SmartNode.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+# PublishDir will spew all dll into a single folder (not per-project), overwriting dependencies where necessary #-}
+RUN dotnet publish "./SmartNode-release.sln" --no-build -o /publish/ -c $BUILD_CONFIGURATION /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
-# Don't ship Windows FMUs:
-COPY --from=publish --exclude=**/*.fmu /app/publish .
-COPY --from=build --chown=$APP_UID /src /src
-USER $APP_UID
-RUN cd /src/Implementations/FMUs/Source && make all && cp roomM370.fmu au_incubator.fmu /app && mkdir /app/models
+# Don't ship Windows FMUs -- not to save space but to avoid confusion:
+COPY --from=publish --chown=$APP_UID --exclude=**/*.fmu /publish .
+COPY --from=fmus --chown=$APP_UID /app/FMUs/Source/roomM370.fmu /app/FMUs/Source/au_incubator.fmu /app/
+RUN mkdir /app/models
 ENTRYPOINT ["dotnet", "SmartNode.dll"]

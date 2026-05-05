@@ -28,9 +28,5 @@ namespace Implementations.Actuators.RoomM370 {
 
             _dummyRoomM370.FloorHeatingState = _actuatorState;
         }
-
-        public void RunDummyEnvironment(double mapekExecutionDurationSeconds) {
-            _dummyRoomM370.ExecuteFmu(mapekExecutionDurationSeconds);
-        }
     }
 }

@@ -29,9 +29,5 @@ namespace Implementations.Actuators.RoomM370
 
             _dummyRoomM370.DehumidifierState = _actuatorState;
         }
-
-        public void RunDummyEnvironment(double mapekExecutionDurationSeconds) {
-            _dummyRoomM370.ExecuteFmu(mapekExecutionDurationSeconds);
-        }
     }
 }

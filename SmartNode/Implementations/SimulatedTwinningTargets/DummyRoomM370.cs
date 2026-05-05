@@ -1,5 +1,6 @@
 ﻿using Femyou;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reflection;
 using static Femyou.IModel;
 
@@ -19,6 +20,7 @@ namespace Implementations.SimulatedTwinningTargets
         private const int SimulationFidelitySeconds = 100;
 
         private readonly Random _randomGenerator = new(Seed);
+        private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
         private readonly string _fmuModelFullFilepath;
 
         private double _roomTemperature = 17.7;
@@ -31,6 +33,10 @@ namespace Implementations.SimulatedTwinningTargets
         private int _oldHeaterState = 0;
         private int _oldFloorHeatingState = 0;
         private int _oldDehumidifierState = 0;
+
+        private bool _heaterStateUpdated = false;
+        private bool _floorHeatingStateUpdated = false;
+        private bool _dehumidifierStateUpdated = false;
 
         private IModel? _fmuModel;
         private IInstance? _fmuInstance;
@@ -67,22 +73,48 @@ namespace Implementations.SimulatedTwinningTargets
         public int HeaterState {
             set {
                 _heaterState = value;
+                _heaterStateUpdated = true;
+
+                CheckAllActuatorsUpdated();
             }
         }
 
         public int FloorHeatingState {
             set {
                 _floorHeatingState = value;
+                _floorHeatingStateUpdated = true;
+
+                CheckAllActuatorsUpdated();
             }
         }
 
         public int DehumidifierState {
             set {
                 _dehumidifierState = value;
+                _dehumidifierStateUpdated = true;
+
+                CheckAllActuatorsUpdated();
             }
         }
 
-        public void ExecuteFmu(double mapekExecutionDuration) {
+        private void CheckAllActuatorsUpdated() {
+            // Once all actuator states are updated, simulate the dummy environment.
+            if (_heaterStateUpdated && _floorHeatingStateUpdated && _dehumidifierStateUpdated) {
+                // Stop measuring the elapsed MAPE-K cycle time and pass it into the simulating method.
+                _stopwatch.Stop();
+                ExecuteFmu(_stopwatch.ElapsedMilliseconds / 1000.0);
+
+                // Reset flags.
+                _heaterStateUpdated = false;
+                _floorHeatingStateUpdated = false;
+                _dehumidifierStateUpdated = false;
+
+                // Start measuring again.
+                _stopwatch.Start();
+            }
+        }
+
+        private void ExecuteFmu(double mapekExecutionDuration) {
             // Check if we already loaded the model.
             _fmuModel ??= Model.Load(_fmuModelFullFilepath, new Collection<UnsupportedFunctions>([UnsupportedFunctions.SetTime2]));
 

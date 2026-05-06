@@ -10,7 +10,6 @@ namespace Implementations.SimulatedTwinningTargets
 {
     public class DummyRoomM370 {
         private const int Seed = 10110111;
-        private const string FmuModelDirectory = "SmartNode/Implementations/FMUs";
         private const string FmuModelName = "roomM370.fmu";
         private const string FmuInstanceName = "DummyRoomM370";
         private const string RoomTemperatureParameterName = "RoomTemperature";
@@ -45,17 +44,7 @@ namespace Implementations.SimulatedTwinningTargets
         private IInstance? _fmuInstance;
 
         public DummyRoomM370(IServiceProvider serviceProvider){
-            var fmuDirectory = string.Empty;
-
-            if (serviceProvider != null) {
-                fmuDirectory = Path.GetFullPath(serviceProvider.GetRequiredService<FilepathArguments>().FmuDirectory);
-            } else {
-                // Not a nice solution, but we need a default for a case that shouldn't happen.
-                var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
-                fmuDirectory = Path.GetFullPath(Path.Combine(rootDirectory, FmuModelDirectory));
-            }
-
-            _fmuModelFullFilepath = Path.GetFullPath(Path.Combine(fmuDirectory, FmuModelName));
+            _fmuModelFullFilepath = Path.GetFullPath(Path.Combine(serviceProvider.GetRequiredService<FilepathArguments>().FmuDirectory, FmuModelName));
         }
 
         // Used for Sensor access.

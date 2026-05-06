@@ -1,4 +1,6 @@
 ﻿using Femyou;
+using Logic.Models.MapekModels;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -8,7 +10,8 @@ namespace Implementations.SimulatedTwinningTargets
 {
     public class DummyRoomM370 {
         private const int Seed = 10110111;
-        private const string FmuModelPath = "SmartNode/Implementations/FMUs/roomM370.fmu";
+        private const string FmuModelDirectory = "SmartNode/Implementations/FMUs";
+        private const string FmuModelName = "roomM370.fmu";
         private const string FmuInstanceName = "DummyRoomM370";
         private const string RoomTemperatureParameterName = "RoomTemperature";
         private const string RoomHumidityParameterName = "RoomHumidity";
@@ -41,19 +44,18 @@ namespace Implementations.SimulatedTwinningTargets
         private IModel? _fmuModel;
         private IInstance? _fmuInstance;
 
-        private static DummyRoomM370? _instance;
+        public DummyRoomM370(IServiceProvider serviceProvider){
+            var fmuDirectory = string.Empty;
 
-        private DummyRoomM370(){
-            var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
-            _fmuModelFullFilepath = Path.GetFullPath(Path.Combine(rootDirectory, FmuModelPath));
-        }
-
-        public static DummyRoomM370 Instance {
-            get {
-                _instance ??= new DummyRoomM370();
-
-                return _instance;
+            if (serviceProvider != null) {
+                fmuDirectory = Path.GetFullPath(serviceProvider.GetRequiredService<FilepathArguments>().FmuDirectory);
+            } else {
+                // Not a nice solution, but we need a default for a case that shouldn't happen.
+                var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
+                fmuDirectory = Path.GetFullPath(Path.Combine(rootDirectory, FmuModelDirectory));
             }
+
+            _fmuModelFullFilepath = Path.GetFullPath(Path.Combine(fmuDirectory, FmuModelName));
         }
 
         // Used for Sensor access.

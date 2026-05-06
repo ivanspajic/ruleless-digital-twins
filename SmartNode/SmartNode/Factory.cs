@@ -57,19 +57,19 @@ namespace SmartNode
                         ActuatorMap = new() {
                             {
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater",
-                                new DummyHeater("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater")
+                                new DummyHeater("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater", _dummyRoomM370)
                             },
                             {
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating",
-                                new DummyFloorHeating("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating")
+                                new DummyFloorHeating("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating", _dummyRoomM370)
                             },
                             {
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier",
-                                new DummyDehumidifier("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier")
+                                new DummyDehumidifier("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier", _dummyRoomM370)
                             },
                             { // [VS] Abuse -- input for FMU which does not have a TT
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolStepActuator",
-                                new DummyDehumidifier("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolStepActuator")
+                                new DummyDehumidifier("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolStepActuator", _dummyRoomM370)
 
                             }
                         },
@@ -78,19 +78,22 @@ namespace SmartNode
                                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1",
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm"),
                                 new DummyTemperatureSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1Algorithm",
-                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1")
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#SoftSensor1",
+                                    _dummyRoomM370)
                             },
                             {
                                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2",
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure"),
                                 new DummyTemperatureSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure",
-                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2")
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2",
+                                    _dummyRoomM370)
                             },
                             {
                                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1",
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure"),
                                 new DummyTemperatureSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure",
-                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1")
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1",
+                                    _dummyRoomM370)
                             },
                             {
                                 ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/CustomPieceSoftSensor",
@@ -108,19 +111,22 @@ namespace SmartNode
                                 ("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1",
                                 "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1Procedure"),
                                 new DummyTemperatureSensor("http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1Procedure",
-                                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1")
+                                    "http://www.semanticweb.org/ispa/ontologies/2025/instance-model-2/TemperatureSensor1",
+                                    _dummyRoomM370)
                             },
                             {
                                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeter",
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterProcedure"),
                                 new DummyEnergyConsumptionSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterProcedure",
-                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeter")
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeter",
+                                    _dummyRoomM370)
                             },
                             {
                                 ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor",
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure"),
                                 new DummyHumiditySensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure",
-                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor")
+                                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor",
+                                    _dummyRoomM370)
                             },
                             { // [VS] Abuse:
                                 ("http://www.semanticweb.org/vs/ontologies/2025/11/untitled-ontology-97#DummySensor",
@@ -227,12 +233,16 @@ namespace SmartNode
             { "http://www.w3.org/2001/XMLSchema#base64Binary", new Base64BinaryValueHandler() },
             { "http://www.w3.org/2001/XMLSchema#boolean", new BooleanValueHandler() }
         };
+
+        private readonly DummyRoomM370 _dummyRoomM370;
         private readonly IncubatorAdapter? _incubatorAdapter;
         // Changing the environment variable's value requires restarting Visual Studio before it's visible.
         private const string HostNameEnvironmentVariableName = "AU_INCUBATOR_RABBITMQ_HOST_NAME";
 
-        public Factory(string dummyEnvironment) {
+        public Factory(IServiceProvider serviceProvider, string dummyEnvironment) {
             _environment = dummyEnvironment;
+            _dummyRoomM370 = new DummyRoomM370(serviceProvider);
+
             // XXX: We should really split the factory eventually.
             if ("incubator".Equals(_environment)) {
                 // TODO: Might as well directly come from its own section in the ConfigurationSettings.

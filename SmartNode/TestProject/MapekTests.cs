@@ -59,7 +59,7 @@ namespace TestProject
             };
             serviceProvider.Add(coordinatorSettings);
 
-            IFactory factory = new SmartNode.Factory(coordinatorSettings.Environment);
+            IFactory factory = new SmartNode.Factory(serviceProvider, coordinatorSettings.Environment);
             serviceProvider.Add(factory);
 
             IMapekKnowledge knowledge = new MapekKnowledge(serviceProvider);
@@ -215,7 +215,7 @@ namespace TestProject
             };
             serviceProvider.Add(coordinatorSettings);
 
-            IFactory factory = new SmartNode.Factory(coordinatorSettings.Environment);
+            IFactory factory = new SmartNode.Factory(serviceProvider, coordinatorSettings.Environment);
             serviceProvider.Add(factory);
 
             IMapekKnowledge knowledge = new MapekKnowledge(serviceProvider);

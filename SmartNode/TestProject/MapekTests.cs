@@ -59,7 +59,7 @@ namespace TestProject
             };
             serviceProvider.Add(coordinatorSettings);
 
-            IFactory factory = new SmartNode.Factory(serviceProvider, coordinatorSettings.Environment);
+            IFactory factory = new SmartNode.Factories.Factory(serviceProvider, coordinatorSettings.Environment);
             serviceProvider.Add(factory);
 
             IMapekKnowledge knowledge = new MapekKnowledge(serviceProvider);
@@ -88,7 +88,7 @@ namespace TestProject
             plan._minMaxOverrides = false;
             serviceProvider.Add(plan);
             // Adjust duration in Fakepool-softsensor (TOD):
-            FakepoolSensor fps = (FakepoolSensor)((SmartNode.Factory)factory)._sensorActuatorMaps["roomM370"].SensorMap[("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
+            FakepoolSensor fps = (FakepoolSensor)((SmartNode.Factories.Factory)factory)._sensorActuatorMaps["roomM370"].SensorMap[("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
                                 "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure")];
             fps._duration = duration;
 
@@ -215,7 +215,7 @@ namespace TestProject
             };
             serviceProvider.Add(coordinatorSettings);
 
-            IFactory factory = new SmartNode.Factory(serviceProvider, coordinatorSettings.Environment);
+            IFactory factory = new SmartNode.Factories.Factory(serviceProvider, coordinatorSettings.Environment);
             serviceProvider.Add(factory);
 
             IMapekKnowledge knowledge = new MapekKnowledge(serviceProvider);

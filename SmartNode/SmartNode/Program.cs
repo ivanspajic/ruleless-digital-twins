@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using SmartNode.Factories;
 using System.CommandLine;
 using System.Reflection;
 using System.Runtime.CompilerServices;

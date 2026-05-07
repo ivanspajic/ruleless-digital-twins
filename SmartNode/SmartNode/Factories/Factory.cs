@@ -11,7 +11,7 @@ using Implementations.Actuators.Incubator;
 using Implementations.SimulatedTwinningTargets;
 using Implementations.Sensors.Fakepool;
 
-namespace SmartNode
+namespace SmartNode.Factories
 {
     public class Factory : IFactory
     {

@@ -247,7 +247,6 @@ namespace TestProject {
         public void Successful_case_saved() {
             // Arrange
             // Set up all the DTOs.
-
             var observedCacheMock = new Cache {
                 OptimalConditions = new List<OptimalCondition> {
                     new OptimalCondition {
@@ -396,6 +395,10 @@ namespace TestProject {
                 Environment = "roomM370",
                 SaveMapekCycleData = false,
                 StartInReactiveMode = false,
+                SleepyTimeMilliseconds = 0,
+                UseDecisionLagMitigation = false,
+                UseEuclid = false,
+                UseRulelessMethod = true,
                 UseCaseBasedFunctionality = true,
                 LookAheadMapekCycles = 2,
                 MaximumMapekRounds = 2,
@@ -417,11 +420,13 @@ namespace TestProject {
             var mapekKnowledgeMock = new MapekKnowledgeMock();
             var mapekMonitorMock = new MapekMonitorMock(observedCacheMock);
             var mapekPlanMock = new MapekPlanMock((simulationTreeNode, simulationPath));
+            var mapekBangBangPlanner = new BangBangPlanner(serviceProviderMock);
             var mapekExecuteMock = new MapekExecuteMock();
             serviceProviderMock.Add<ICaseRepository>(caseRepositoryMock);
             serviceProviderMock.Add<IMapekKnowledge>(mapekKnowledgeMock);
             serviceProviderMock.Add<IMapekMonitor>(mapekMonitorMock);
             serviceProviderMock.Add<IMapekPlan>(mapekPlanMock);
+            serviceProviderMock.Add<IBangBangPlanner>(mapekBangBangPlanner);
             serviceProviderMock.Add<IMapekExecute>(mapekExecuteMock);
             var mapekManager = new MapekManager(serviceProviderMock);
 

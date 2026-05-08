@@ -16,6 +16,7 @@ namespace TestProject.Mocks.ServiceMocks
         {
             _serviceImplementationMocks = new() {
                 { typeof(ILogger<IMapekPlan>), new LoggerMock<IMapekPlan>() },
+                { typeof(ILogger<IBangBangPlanner>), new LoggerMock<IBangBangPlanner>() },
                 { typeof(ILogger<IMapekKnowledge>), new LoggerMock<IMapekKnowledge>() },
                 { typeof(ILogger<IMapekMonitor>), new LoggerMock<IMapekMonitor>() },
                 { typeof(ILogger<IMapekManager>), new LoggerMock<IMapekManager>() },

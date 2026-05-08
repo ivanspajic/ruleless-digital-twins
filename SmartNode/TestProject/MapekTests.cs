@@ -6,6 +6,7 @@ using Logic.Mapek;
 using Logic.Models.DatabaseModels;
 using Logic.Models.MapekModels;
 using MongoDB.Driver;
+using SmartNode.Factories;
 using System.Diagnostics;
 using System.Reflection;
 using TestProject.Mocks.ServiceMocks;
@@ -59,7 +60,7 @@ namespace TestProject
             };
             serviceProvider.Add(coordinatorSettings);
 
-            IFactory factory = new SmartNode.Factories.Factory(serviceProvider, coordinatorSettings.Environment);
+            IFactory factory = new RoomM370Factory(serviceProvider);
             serviceProvider.Add(factory);
 
             IMapekKnowledge knowledge = new MapekKnowledge(serviceProvider);
@@ -88,8 +89,8 @@ namespace TestProject
             plan._minMaxOverrides = false;
             serviceProvider.Add(plan);
             // Adjust duration in Fakepool-softsensor (TOD):
-            FakepoolSensor fps = (FakepoolSensor)((SmartNode.Factories.Factory)factory)._sensorActuatorMaps["roomM370"].SensorMap[("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
-                                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure")];
+            FakepoolSensor fps = (FakepoolSensor)factory.GetSensorImplementation("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure");
             fps._duration = duration;
 
             Assert.Equal(2, plan.GetHostPlatformFmuModel(filepathArguments.FmuDirectory).Count());
@@ -215,7 +216,7 @@ namespace TestProject
             };
             serviceProvider.Add(coordinatorSettings);
 
-            IFactory factory = new SmartNode.Factories.Factory(serviceProvider, coordinatorSettings.Environment);
+            IFactory factory = new RoomM370Factory(serviceProvider);
             serviceProvider.Add(factory);
 
             IMapekKnowledge knowledge = new MapekKnowledge(serviceProvider);

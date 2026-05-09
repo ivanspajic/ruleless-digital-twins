@@ -15,10 +15,10 @@ The Dockerfile builds and runs the example inside the container. Note that `arm6
 We use OpenModelica inside the container to compile the example FMU(s) into matching binaries.
 
 ```
-% docker build -t smartnode -f SmartNode/SmartNode/Dockerfile SmartNode
+% docker build -t smartnode -f SmartNode/Dockerfile SmartNode
 ...
 => => unpacking to docker.io/library/smartnode:latest
-% docker run --rm -v `pwd`/models-and-rules:/app/models smartnode /app/models/inferred-model-1.ttl
+% docker run -v `pwd`/models-and-rules:/app/models-and-rules -v `pwd`/ontology:/app/ontology --rm -it smartnode
 info: Logic.Mapek.MapekManager[0]
       Starting the MAPE-K loop.
 ...

@@ -48,6 +48,6 @@ FROM base AS final
 WORKDIR /app
 # Don't ship Windows FMUs -- not to save space but to avoid confusion:
 COPY --from=publish --chown=$APP_UID --exclude=**/*.fmu /publish .
-COPY --from=fmus --chown=$APP_UID /app/FMUs/Source/roomM370.fmu /app/FMUs/Source/au_incubator.fmu /app/
+COPY --from=fmus --chown=$APP_UID /app/FMUs/Source/roomM370.fmu /app/FMUs/Source/au_incubator.fmu /app/SmartNode/Implementations/FMUs/
 RUN mkdir /app/models
 ENTRYPOINT ["dotnet", "SmartNode.dll"]

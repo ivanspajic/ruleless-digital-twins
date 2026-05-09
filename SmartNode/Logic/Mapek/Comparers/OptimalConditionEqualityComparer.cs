@@ -27,7 +27,6 @@ namespace Logic.Mapek.Comparers {
             }
 
             return hashCode *
-                obj.GetHashCode() *
                 obj.Property.GetHashCode() *
                 obj.ReachedInMaximumSeconds.GetHashCode() *
                 obj.ConditionConstraint.GetHashCode() *

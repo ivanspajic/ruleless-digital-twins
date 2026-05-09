@@ -135,7 +135,7 @@ namespace TestProject {
                 LookAheadCycles = 2,
                 CycleDurationSeconds = 100,
                 Simulation = simulationPath.Simulations.First(),
-                QuantizedOptimalConditions = new List<OptimalCondition> {
+                OptimalConditions = new List<OptimalCondition> {
                     new OptimalCondition {
                         Name = "FakeOptimalCondition1",
                         ReachedInMaximumSeconds = 0,
@@ -163,7 +163,7 @@ namespace TestProject {
                         }
                     }
                 },
-                QuantizedProperties = new List<Property> {
+                Properties = new List<Property> {
                     new Property {
                         Name = "FakeProperty1",
                         OwlType = "http://www.w3.org/2001/XMLSchema#double",
@@ -182,7 +182,7 @@ namespace TestProject {
                 LookAheadCycles = 2,
                 CycleDurationSeconds = 150,
                 Simulation = simulationPath.Simulations.First(),
-                QuantizedOptimalConditions = new List<OptimalCondition> {
+                OptimalConditions = new List<OptimalCondition> {
                     new OptimalCondition {
                         Name = "FakeOptimalCondition1",
                         ReachedInMaximumSeconds = 0,
@@ -210,7 +210,7 @@ namespace TestProject {
                         }
                     }
                 },
-                QuantizedProperties = new List<Property> {
+                Properties = new List<Property> {
                     new Property {
                         Name = "FakeProperty3",
                         OwlType = "http://www.w3.org/2001/XMLSchema#double",
@@ -432,7 +432,7 @@ namespace TestProject {
                 LookAheadCycles = 2,
                 CycleDurationSeconds = 100,
                 Simulation = simulationPath.Simulations.First(),
-                QuantizedOptimalConditions = new List<OptimalCondition> {
+                OptimalConditions = new List<OptimalCondition> {
                     new OptimalCondition {
                         Name = "FakeOptimalCondition1",
                         ReachedInMaximumSeconds = 0,
@@ -468,7 +468,7 @@ namespace TestProject {
                         }
                     }
                 },
-                QuantizedProperties = new List<Property> {
+                Properties = new List<Property> {
                     new Property {
                         Name = "FakeProperty1",
                         OwlType = "http://www.w3.org/2001/XMLSchema#double",
@@ -492,8 +492,8 @@ namespace TestProject {
             Assert.Equal(expectedCase.LookAheadCycles, actualCase.LookAheadCycles);
             Assert.Equal(expectedCase.Simulation.Index, actualCase.Simulation!.Index);
             Assert.Equal(expectedCase.Simulation.Actions, actualCase.Simulation.Actions, new ActionEqualityComparer());
-            Assert.Equal(expectedCase.QuantizedProperties, actualCase.QuantizedProperties, new FuzzyPropertyEqualityComparer(coordinatorSettings.PropertyValueFuzziness));
-            Assert.Equal(expectedCase.QuantizedOptimalConditions, actualCase.QuantizedOptimalConditions, new OptimalConditionEqualityComparer(coordinatorSettings.PropertyValueFuzziness));
+            Assert.Equal(expectedCase.Properties, actualCase.Properties, new FuzzyPropertyEqualityComparer(coordinatorSettings.PropertyValueFuzziness));
+            Assert.Equal(expectedCase.OptimalConditions, actualCase.OptimalConditions, new OptimalConditionEqualityComparer(coordinatorSettings.PropertyValueFuzziness));
         }
     }
 }

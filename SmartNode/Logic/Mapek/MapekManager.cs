@@ -60,12 +60,7 @@ namespace Logic.Mapek {
             SimulationTreeNode currentSimulationTree = null!;
             SimulationPath currentOptimalSimulationPath = null!;
 
-            var stopwatch = new Stopwatch();
-
             while (_isLoopActive) {
-                // Gather duration information for the dummy environment.
-                stopwatch.Start();
-
                 if (_coordinatorSettings.MaximumMapekRounds > -1) {
                     _logger.LogInformation("MAPE-K rounds left: {maxRound})", _coordinatorSettings.MaximumMapekRounds);
                 }
@@ -97,12 +92,8 @@ namespace Logic.Mapek {
                     simulationToExecute = _bangBangPlanner.Plan(cache);
                 }
 
-                stopwatch.Stop();
-
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
-                await _mapekExecute.Execute(simulationToExecute, stopwatch.ElapsedMilliseconds / 1000.0);
-                
-                stopwatch.Reset();
+                await _mapekExecute.Execute(simulationToExecute);
 
                 // If configured, write MAPE-K state to CSV.
                 if (_coordinatorSettings.SaveMapekCycleData && simulationToExecute is not null) {

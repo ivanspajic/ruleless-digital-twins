@@ -9,9 +9,20 @@ using Logic.TTComponentInterfaces;
 
 namespace SmartNode.Factories {
     public class RoomM370Factory : AbstractFactory, IFactory {
-        private DummyRoomM370? _dummyRoomM370;
+        private static DummyRoomM370? _dummyRoomM370;
 
-        public RoomM370Factory(IServiceProvider serviceProvider) : base(serviceProvider) { }
+        public RoomM370Factory(IServiceProvider serviceProvider) : this(Wrapper(serviceProvider)) { }
+
+        private RoomM370Factory(Wrapped w) : base(w.ServiceProvider) { }
+
+        private static Wrapped Wrapper(IServiceProvider serviceProvider) {
+            // Make sure that we always have the Incubator initialised.
+            // Inspired by https://stackoverflow.com/q/12051/60462
+            EnsureDummyRoomM370Instance(serviceProvider);
+            return new Wrapped(serviceProvider);
+        }
+
+        private readonly record struct Wrapped(IServiceProvider ServiceProvider);
 
         protected override IDictionary<string, IActuator> MakeActuatorMap(IServiceProvider serviceProvider) {
             EnsureDummyRoomM370Instance(serviceProvider);
@@ -180,7 +191,7 @@ namespace SmartNode.Factories {
             };
         }
 
-        private void EnsureDummyRoomM370Instance(IServiceProvider serviceProvider) {
+        private static void EnsureDummyRoomM370Instance(IServiceProvider serviceProvider) {
             _dummyRoomM370 ??= new DummyRoomM370(serviceProvider);
         }
     }

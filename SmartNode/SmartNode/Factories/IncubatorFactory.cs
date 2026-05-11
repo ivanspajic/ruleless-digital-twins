@@ -3,7 +3,6 @@ using Implementations.Sensors.Incubator;
 using Implementations.SimulatedTwinningTargets;
 using Logic.FactoryInterface;
 using Logic.TTComponentInterfaces;
-using VDS.RDF.Query.Datasets;
 
 namespace SmartNode.Factories {
     public class IncubatorFactory : AbstractFactory, IFactory {
@@ -14,7 +13,7 @@ namespace SmartNode.Factories {
 
         public IncubatorFactory(IServiceProvider serviceProvider) : this(Wrapper(serviceProvider)) {}
 
-        private IncubatorFactory(Wrapped w) : base(w.isp) {}
+        private IncubatorFactory(Wrapped w) : base(w.ServiceProvider) {}
 
         private static Wrapped Wrapper(IServiceProvider serviceProvider){
             // Make sure that we always have the Incubator initialised.
@@ -23,7 +22,7 @@ namespace SmartNode.Factories {
             return new Wrapped(serviceProvider);
         }
 
-        private readonly record struct Wrapped(IServiceProvider isp);
+        private readonly record struct Wrapped(IServiceProvider ServiceProvider);
 
         protected override IDictionary<string, IActuator> MakeActuatorMap(IServiceProvider serviceProvider) {
             return new Dictionary<string, IActuator> {

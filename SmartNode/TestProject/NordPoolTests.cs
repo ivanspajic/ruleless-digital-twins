@@ -55,6 +55,8 @@ namespace TestProject
         [InlineData(null, "nordpool-simple.ttl", "nordpool-out.ttl", 4)]
         [InlineData("SimpleNordpool.py", "nordpool1.ttl", "nordpool1-out.ttl", 4)]
         public void Smallest_model_builds_tree_and_simulates(string? fromPython, string model, string inferred, int lookAheadCycles) {
+            Assert.SkipWhen(!FmuTestRuntime.TryEnablePythonFmuRuntime(out var skipReason), skipReason);
+
             var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
             var modelFilePath = Path.Combine(rootDirectory, "models-and-rules");
             var inferredFilePath = Path.Combine(rootDirectory, $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
@@ -65,7 +67,7 @@ namespace TestProject
 
             if (fromPython != null) {
                 var processInfo = new ProcessStartInfo {
-                    FileName = "python3",
+                    FileName = FmuTestRuntime.PythonExecutable,
                     Arguments = $"\"{fromPython}\"",
                     RedirectStandardOutput = true,
                     UseShellExecute = false,

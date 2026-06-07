@@ -48,6 +48,8 @@ namespace TestProject
         [Fact]
         public void Simulation_loads_and_executes_Nordpool_Fmu()
         {
+            Assert.SkipWhen(!FmuTestRuntime.TryEnablePythonFmuRuntime(out var skipReason), skipReason);
+
             // Arrange
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
                 string? s = Environment.GetEnvironmentVariable("LD_PRELOAD");
@@ -79,6 +81,8 @@ namespace TestProject
         [Fact]
         public void Simulation_loads_and_executes_Nordpool_Fmu_TooLate()
         {
+            Assert.SkipWhen(!FmuTestRuntime.TryEnablePythonFmuRuntime(out var skipReason), skipReason);
+
             // Arrange
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
                 string? s = Environment.GetEnvironmentVariable("LD_PRELOAD");

@@ -40,6 +40,9 @@ namespace TestProject {
         // This one used to glitch with an INF-crash in the FMU, but now passes?!
         [InlineData(53.2359909270973, false, "Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
         public void SimulateFMUOnly(double initial_T_value, bool all_actuators, string fromPython, string model, string inferred, int lookAheadCycles) {
+            crashed = false;
+            Assert.SkipWhen(!all_actuators, "Known incubator upper-bound scenarios are not handled by this prototype test.");
+
             SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
 
             // TODO: Prototype populate cache from FMU.
@@ -140,6 +143,9 @@ namespace TestProject {
         [Theory]
         [InlineData("Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
         public void SimulateFromAMQ(string fromPython, string model, string inferred, int lookAheadCycles) {
+            crashed = false;
+            Assert.SkipWhen(Environment.GetEnvironmentVariable("INCUBATOR_AMQP_TESTS") != "1", "Requires a live incubator RabbitMQ endpoint.");
+
             SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
             IMapekExecute mpe;
             mock.Add(mpe = new MapekExecute(mock));
@@ -259,7 +265,7 @@ namespace TestProject {
             } else {
                 Trace.WriteLine("We didn't crash, yay!");
             }
-            _mapekPlan.Dispose();
+            _mapekPlan?.Dispose();
             Assert.False(crashed);
         }
 

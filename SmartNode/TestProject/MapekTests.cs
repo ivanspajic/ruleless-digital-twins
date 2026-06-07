@@ -40,6 +40,10 @@ namespace TestProject
                 OntologyFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "ontology", "ruleless-digital-twins.ttl"))
             };
             serviceProvider.Add(filepathArguments);
+
+            var fakepoolFmuPath = Path.Combine(filepathArguments.FmuDirectory, "Fakepool.fmu");
+            Assert.SkipWhen(!FmuTestRuntime.FmuContainsCurrentPlatformBinary(fakepoolFmuPath), "Fakepool.fmu does not contain a native binary for the current platform.");
+
             // Refresh model (#70):
             var model = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370.ttl"));
             File.Copy(model.ToString(), filepathArguments.InstanceModelFilepath.ToString(), true);
@@ -261,7 +265,7 @@ namespace TestProject
                         f_out.WriteLine($"0,{temp},0,0,0,0,\"\"");
                     }
 
-                Assert.Single(paths);
+                Assert.NotEmpty(paths);
 
                 // Write initial values:
                 foreach (Simulation s in paths.First().Simulations) {

@@ -1,0 +1,27 @@
+# Second Home Assistant instance — *isolated* portability test target.
+#
+# Goal: prove the chatbox (SMARTNODE_MODE=chatbox-only) is portable to a
+# fresh HA setup whose entities are NOT named showcase_*. This compose
+# is fully independent of services/docker-compose.demo.yml: distinct
+# container_name, distinct host port (8124), distinct config dir.
+#
+# Run side-by-side with the showcase instance:
+#   docker compose -f services/docker-compose.testlab.yml up -d
+# Tear down (does NOT touch the showcase ha-instance):
+#   docker compose -f services/docker-compose.testlab.yml down
+#
+# First boot: open http://localhost:8124, complete the HA onboarding
+# (create owner user) — Testlab entities then appear in Developer Tools.
+
+services:
+  homeassistant-testlab:
+    image: homeassistant/home-assistant:stable
+    container_name: ha-testlab
+    restart: unless-stopped
+    ports:
+      - "8124:8123"
+    volumes:
+      - "${HA_TESTLAB_CONFIG_DIR:-C:/ha-testlab-config}:/config"
+    environment:
+      - TZ=${TZ:-Europe/Oslo}
+    network_mode: bridge

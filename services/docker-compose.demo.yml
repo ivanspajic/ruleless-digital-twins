@@ -1,0 +1,90 @@
+# Minimum container set for the RDT demo.
+#
+# Active by default: Home Assistant + MongoDB.
+# Optional (commented): RabbitMQ + Ollama. See the notes below each block
+# before uncommenting.
+#
+# SmartNode itself is NOT containerised — keep running it natively with
+# `dotnet run` so logs/breakpoints stay reachable during the live demo.
+#
+# Run from the repo root:
+#   docker compose -f services/docker-compose.demo.yml up -d
+# Tear down:
+#   docker compose -f services/docker-compose.demo.yml down
+
+services:
+
+  # -------------------------------------------------------------------------
+  # Home Assistant — required for the showcase chatbox + MAPE-K HA env.
+  # The bind-mount points to the existing showcase config (DEMO_SETUP.md).
+  # On a fresh machine, set HA_CONFIG_DIR before `docker compose up` or
+  # edit the path below.
+  # -------------------------------------------------------------------------
+  homeassistant:
+    image: homeassistant/home-assistant:stable
+    container_name: ha-instance
+    restart: unless-stopped
+    ports:
+      - "8123:8123"
+    volumes:
+      - "${HA_CONFIG_DIR:-C:/ha-showcase-config}:/config"
+    environment:
+      - TZ=${TZ:-Europe/Oslo}
+    network_mode: bridge
+
+  # -------------------------------------------------------------------------
+  # MongoDB — used by SmartNode's CaseRepository when
+  # CoordinatorSettings.UseCaseBasedFunctionality = true.
+  # Safe to leave running even with case-based reasoning disabled.
+  # -------------------------------------------------------------------------
+  mongodb:
+    image: mongo:7
+    container_name: rdt-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - rdt-mongo-data:/data/db
+
+  # -------------------------------------------------------------------------
+  # RabbitMQ — only useful when you switch SmartNode to the `incubator`
+  # environment (Factory.cs) which speaks AMQP to the incubator twin.
+  # The RDT homeassistant demo path does NOT use this. Uncomment only if
+  # demoing the incubator case study.
+  # Default credentials match `example_digital-twin_incubator/software/startup.conf`.
+  # -------------------------------------------------------------------------
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rdt-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=incubator
+      - RABBITMQ_DEFAULT_PASS=incubator
+    # NOTE: bringing up the broker alone is NOT enough for the
+    # IncubatorTests.SimulateFromAMQ test to pass. That test expects an
+    # incubator twin (hardware OR simulator from `example_digital-twin_incubator`)
+    # that publishes IncubatorFields messages on the AMQP exchange. Without
+    # such a publisher, the test will time out waiting for sensor data.
+
+  # -------------------------------------------------------------------------
+  # Ollama — only useful for reproducible chatbox NLU (qwen2.5-coder:7b).
+  # Most demos run Ollama natively on the host (it's already there for many
+  # devs). Uncommenting this AND running a local Ollama on the same port
+  # will conflict on 11434 — pick one.
+  # First run will pull ~4.7 GB of model data.
+  # -------------------------------------------------------------------------
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: rdt-ollama
+  #   restart: unless-stopped
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - rdt-ollama-data:/root/.ollama
+
+volumes:
+  rdt-mongo-data:
+  # rdt-ollama-data:

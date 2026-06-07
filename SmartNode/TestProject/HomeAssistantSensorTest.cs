@@ -30,6 +30,10 @@ public class HomeAssistantSensorTest : IDisposable {
     [InlineData("IoTLab-temperature", "http://100.104.156.81:8123/", "HA:TOKEN_IOTLAB", "weather.forecast_home", "temperature")]
     // example with potentially missing data & units, schema at https://developers.home-assistant.io/docs/core/entity/weather/:
     [InlineData("IoTLab-precipitation", "http://100.104.156.81:8123/", "HA:TOKEN_IOTLAB", "weather.forecast_home", "precipitation")]
+    // Local HA showcase instance — set with `dotnet user-secrets set "HA:TOKEN_LOCAL" "<long-lived-token>"`
+    // in the TestProject directory. See services/docker-compose.demo.yml to bring up the HA instance.
+    [InlineData("Local", "http://localhost:8123/", "HA:TOKEN_LOCAL", "sensor.showcase_living_room_temperature", null)]
+    [InlineData("Local-weather", "http://localhost:8123/", "HA:TOKEN_LOCAL", "weather.forecast_home", "temperature")]
     public void TestObservePropertyValue(string id, string url, string tokenName, string sensorId, string? attribute) {
         var TOKEN = _secrets[tokenName];
         Assert.SkipWhen(TOKEN == null, $"No token for host {id}.");

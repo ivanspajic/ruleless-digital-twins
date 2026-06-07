@@ -1,0 +1,37 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ssn:  <http://www.w3.org/ns/ssn/> .
+@prefix rdt:  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/> .
+@prefix mine: <http://example.org/lab/> .
+@prefix hass: <https://www.foldr.org/profiles/homeassistant/> .
+
+# HASS subclass declarations — mimic the output of hacvt_rdt.py.
+hass:Light    rdfs:subClassOf sosa:Actuator .
+hass:Switch   rdfs:subClassOf sosa:Actuator .
+hass:Climate  rdfs:subClassOf sosa:Actuator .
+
+# Direct sosa:Sensor with HA identifier.
+mine:LivingRoomTempSensor a sosa:Sensor ;
+    rdt:hasIdentifier "sensor.living_room_temperature"^^xsd:string .
+
+# Sensor with an explicit ssn:implements procedure.
+mine:HumiditySensor a sosa:Sensor ;
+    rdt:hasIdentifier "sensor.lab_humidity"^^xsd:string ;
+    ssn:implements mine:HumidityProcedure .
+
+mine:HumidityProcedure a sosa:Procedure .
+
+# Actuator typed via HASS subclass — should infer haKind=Light.
+mine:KitchenLight a hass:Light ;
+    rdt:hasIdentifier "light.kitchen"^^xsd:string .
+
+# Actuator typed via HASS subclass — climate domain, should be null + warning.
+mine:LivingRoomClimate a hass:Climate ;
+    rdt:hasIdentifier "climate.living_room"^^xsd:string .
+
+# Actuator typed directly as sosa:Actuator — should infer haKind=Switch.
+mine:LabSwitch a sosa:Actuator ;
+    rdt:hasIdentifier "switch.lab_switch"^^xsd:string .

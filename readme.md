@@ -108,6 +108,17 @@ These need a Python 3.11 runtime reachable from the test process plus the
 If `PYTHONFMU_RUNTIME_DIR` is not set, the NordPool and Fakepool tests skip
 cleanly with a self-explanatory message.
 
+**Known Windows limitation:** even with the right Python 3.11.x install and
+all packages in place, `fmi2Instantiate` on the PythonFMU-generated DLLs
+(NordPool, Fakepool) currently crashes with an Access Violation during
+embedded-Python initialization inside `pythonfmu-export.dll`. Verified with
+Python 3.10 and 3.11 from the official python.org installer, both with and
+without explicit `python311.dll`/`python310.dll` preloading and
+`PYTHONHOME` / `PYTHONPATH` env vars. The Linux CI path side-steps this via
+`LD_PRELOAD=libpython3.11.so` (see `SimulationTests.cs`). To actually
+exercise these tests today, run them in WSL2 or a Linux container after
+exporting `LD_PRELOAD` to the matching `libpython*.so`.
+
 ### Rebuilding the Fakepool FMU for the current platform
 
 `SmartNode/Implementations/FMUs/Fakepool.fmu` is rebuilt from sources in

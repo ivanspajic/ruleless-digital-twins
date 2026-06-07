@@ -1,9 +1,14 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace TestProject
 {
     internal static class FmuTestRuntime
     {
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern IntPtr LoadLibraryW(string lpFileName);
+
+        private static bool _interpreterPreloaded;
         public static bool TryEnablePythonFmuRuntime(out string reason)
         {
             // Step 1: ensure python3.dll is reachable (Femyou-side requirement).
@@ -50,6 +55,7 @@ namespace TestProject
                 if (DirectoryContains(configuredDirectory, "python3.dll"))
                 {
                     PrependToPath(configuredDirectory);
+                    PreloadPythonInterpreter(configuredDirectory);
                     reason = string.Empty;
                     return true;
                 }
@@ -66,6 +72,48 @@ namespace TestProject
 
             reason = "PythonFMU tests require python3.dll. Set PYTHONFMU_RUNTIME_DIR to a compatible Python runtime directory.";
             return false;
+        }
+
+        // Equivalent of `LD_PRELOAD=libpython3.11.so` on Linux: pre-load the
+        // versioned Python DLL into the test process so the FMU's forwarder
+        // (python3.dll → pythonNNN.dll) resolves cleanly, and so Python's
+        // sys.prefix detection finds the right install.
+        private static void PreloadPythonInterpreter(string directory)
+        {
+            if (_interpreterPreloaded)
+                return;
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+                return;
+
+            // Set PYTHONHOME so Python embedded mode finds its stdlib (Lib, DLLs).
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("PYTHONHOME")))
+                Environment.SetEnvironmentVariable("PYTHONHOME", directory);
+
+            // Preload the most specific python3X.dll we can find next to python3.dll.
+            string? versioned = null;
+            try
+            {
+                versioned = Directory
+                    .EnumerateFiles(directory, "python3*.dll")
+                    .Where(f =>
+                    {
+                        var name = Path.GetFileNameWithoutExtension(f);
+                        return name != null
+                            && name.StartsWith("python3", StringComparison.OrdinalIgnoreCase)
+                            && name.Length > "python3".Length;
+                    })
+                    .OrderByDescending(f => f)
+                    .FirstOrDefault();
+            }
+            catch
+            {
+                versioned = null;
+            }
+
+            if (versioned != null)
+                LoadLibraryW(versioned);
+            LoadLibraryW(Path.Combine(directory, "python3.dll"));
+            _interpreterPreloaded = true;
         }
 
         private static bool TryEnablePythonFmuExport(out string reason)

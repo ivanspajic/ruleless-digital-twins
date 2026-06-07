@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Generate Reference-FMUs Makefile (FMI 2.0)
+      run: cmake -S Reference-FMUs -D FMI_VERSION=2 -B bin2
+      working-directory: FMU
+    - name: Build Reference-FMUs (FMI 2.0)
+      run: make
+      working-directory: FMU/bin2
+
+    - name: Generate Reference-FMUs Makefile (FMI 3.0)
+      run: cmake -S Reference-FMUs -D FMI_VERSION=3 -B bin3
+      working-directory: FMU
+    - name: Build Reference-FMUs (FMI 3.0)
+      run: make
+      working-directory: FMU/bin3
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build assembly
+      run: dotnet build --configuration Release --no-restore
+    - name: Test assembly
+      run: dotnet test --no-restore --verbosity normal
+      
+    - name: Publish to nuget.org
+      uses: brandedoutcast/publish-nuget@v2.5.2
+      with:
+        PROJECT_FILE_PATH: src/Femyou.csproj
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+        NUGET_SOURCE: https://api.nuget.org

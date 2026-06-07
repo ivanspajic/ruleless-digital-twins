@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build-wrapper:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+
+      - name: Compile wrapper on Windows
+        if: startsWith(runner.os, 'Windows')
+        run: |
+          cmake . -B build -DCMAKE_BUILD_TYPE=Release -A x64
+          cmake --build build --config Release
+
+      - name: Compile wrapper on Linux / macOS
+        if: startsWith(runner.os, 'Linux') || startsWith(runner.os, 'macOS')
+        run: |
+          cmake . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+
+      - name: Archive wrapper library
+        uses: actions/upload-artifact@v4
+        with:
+          name: lib-wrapper-${{ matrix.os }}
+          path: pythonfmu/resources
+
+  build-python:
+    needs: build-wrapper
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+
+      - name: Download wrappers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: lib-wrapper-*
+          path: pythonfmu/resources
+          merge-multiple: true
+    
+      - name: Build distribution artifacts
+        run: |
+          python -m pip install setuptools wheel
+          python setup.py sdist bdist_wheel
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-wheel
+          path: dist
+
+  test:
+    needs: build-python
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+        python-version: ['3.9', '3.11', '3.13']
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: 'x64'
+
+      - name: Download python package
+        uses: actions/download-artifact@v4
+        with:
+          name: python-wheel
+
+      - name: Run the Tests
+        run: |
+          pip install -r requirements.txt
+          cd python-wheel
+          pip install pythonfmu*.whl
+          pytest --pyargs pythonfmu
+          cd ..
+        shell: bash -l {0}

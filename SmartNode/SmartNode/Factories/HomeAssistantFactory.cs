@@ -50,23 +50,13 @@ namespace SmartNode.Factories
         protected override IDictionary<(string, string), ISensor> MakeSensorMap(IServiceProvider serviceProvider)
         {
             EnsureLoaded();
-            var map = new Dictionary<(string, string), ISensor>();
-            foreach (var s in _config!.Sensors)
-            {
-                map[(s.SensorUri, s.ProcedureUri)] = new HomeAssistantSensor(s.SensorUri, s.ProcedureUri, s.Attribute, _httpClient!);
-            }
-            return map;
+            return HaBindingsLoader.BuildSensorMap(_config!, _httpClient!);
         }
 
         protected override IDictionary<string, IActuator> MakeActuatorMap(IServiceProvider serviceProvider)
         {
             EnsureLoaded();
-            var map = new Dictionary<string, IActuator>();
-            foreach (var a in _config!.Actuators)
-            {
-                map[a.ActuatorUri] = new HomeAssistantActuator(a.ActuatorUri, a.HaEntityId, a.Kind, _httpClient!, a.OnOption);
-            }
-            return map;
+            return HaBindingsLoader.BuildActuatorMap(_config!, _httpClient!);
         }
 
         protected override IDictionary<string, IConfigurableParameter> MakeConfigurableParameterMap(IServiceProvider serviceProvider)

@@ -43,6 +43,9 @@ namespace TestProject
 
             var fakepoolFmuPath = Path.Combine(filepathArguments.FmuDirectory, "Fakepool.fmu");
             Assert.SkipWhen(!FmuTestRuntime.FmuContainsCurrentPlatformBinary(fakepoolFmuPath), "Fakepool.fmu does not contain a native binary for the current platform.");
+            // Fakepool.fmu is a PythonFMU-generated FMU, so it needs python3.dll
+            // and pythonfmu-export.dll reachable at load time. Same recipe as NordPool.
+            Assert.SkipWhen(!FmuTestRuntime.TryEnablePythonFmuRuntime(out var fakepoolSkipReason), fakepoolSkipReason);
 
             // Refresh model (#70):
             var model = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370.ttl"));

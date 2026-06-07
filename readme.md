@@ -9,6 +9,133 @@ Coming soon!
 - Java (for running the inference engine)
 - MongoDB (for hosting the case repository - not needed if you are not using this)
 
+## Local Development (Windows)
+
+This fork is set up so a fresh clone builds and tests cleanly on Windows without
+external git submodule fetches. All previous submodules (Femyou, Nordpool-FMU,
+PythonFMU) are vendored directly into the repo.
+
+### Prerequisites
+
+- **.NET 8 SDK** — for building/testing the solution.
+- **Java 21** (any modern JDK works) — for the inference engine JAR.
+- **Docker Desktop** — only if you want the live HA / MongoDB / RabbitMQ tests.
+
+Optional, only if you want to run the PythonFMU-backed tests (NordPool, Fakepool):
+- **Python 3.11 from python.org** (the regular installer, NOT the Microsoft Store
+  build and NOT the embeddable ZIP — both have DLL loading constraints that
+  break the FMU runtime).
+
+### Build
+
+```powershell
+dotnet build SmartNode/SmartNode.sln
+```
+
+### Default test run
+
+```powershell
+dotnet test SmartNode/SmartNode.sln
+```
+
+Expected: **16 passed / 16 skipped / 0 failed**. Skipped tests need extra setup
+(see below).
+
+### Bringing up the supporting services
+
+Most non-trivial tests and the `dotnet run` path expect at least one of:
+
+- **Home Assistant** on `http://localhost:8123` — for HA sensor tests.
+- **MongoDB** on `localhost:27017` — for the case-based reasoning path.
+- **RabbitMQ** on `localhost:5672` — for the incubator AMQP path.
+
+A vendored compose file in `services/` brings up Mongo + RabbitMQ:
+
+```powershell
+docker compose -f services/docker-compose.demo.yml up -d mongodb rabbitmq
+```
+
+HA is left out of the bring-up command because the typical setup already has an
+`ha-instance` container running. If you don't have one, either uncomment the
+`homeassistant` service in `services/docker-compose.demo.yml` and run the
+command without `mongodb rabbitmq`, or use any other HA image you trust.
+
+### Home Assistant tests
+
+`TestProject/HomeAssistantSensorTest.cs` includes a `Local` case that targets
+`http://localhost:8123/sensor.showcase_living_room_temperature`. To enable it,
+store a long-lived HA token in `dotnet user-secrets`:
+
+```powershell
+cd SmartNode/TestProject
+dotnet user-secrets set "HA:TOKEN_LOCAL" "<your_long_lived_HA_token>"
+```
+
+The token is created from the HA UI under *Profile → Long-Lived Access Tokens*.
+Run `dotnet test --filter "FullyQualifiedName~HomeAssistantSensorTest"` to
+exercise the path. The pre-existing `MH30` / `IoTLab*` cases target external HA
+instances and will stay skipped unless you also set `HA:TOKEN` and
+`HA:TOKEN_IOTLAB` (only useful if you have access to those instances).
+
+### PythonFMU-backed tests (NordPool, Fakepool)
+
+These need a Python 3.11 runtime reachable from the test process plus the
+`pythonfmu` package and the FMU's own Python dependencies.
+
+1. **Install Python 3.11.x from python.org** (not Microsoft Store, not
+   embeddable). Use the regular installer and accept the default user-mode
+   install.
+2. **Install the Python packages** the FMUs need:
+   ```powershell
+   py -3.11 -m pip install pythonfmu==0.6.9 pytz requests_cache python-dateutil
+   ```
+3. **Point the test runtime at that Python install** before running the tests.
+   `FmuTestRuntime` reads two env vars:
+   - `PYTHONFMU_RUNTIME_DIR` — directory containing `python3.dll`
+     (the Python 3.11 install root).
+   - `PYTHONFMU_PYTHON_EXE` — full path to `python.exe` from the same install.
+     Used to auto-discover `pythonfmu-export.dll`. Falls back to
+     `PYTHONFMU_EXPORT_DIR` if auto-discovery fails.
+
+   Example (adjust paths to your install):
+   ```powershell
+   $py = (py -3.11 -c "import sys, os; print(os.path.dirname(sys.executable))")
+   $env:PYTHONFMU_RUNTIME_DIR = $py
+   $env:PYTHONFMU_PYTHON_EXE  = "$py\python.exe"
+   dotnet test SmartNode/SmartNode.sln
+   ```
+
+If `PYTHONFMU_RUNTIME_DIR` is not set, the NordPool and Fakepool tests skip
+cleanly with a self-explanatory message.
+
+### Rebuilding the Fakepool FMU for the current platform
+
+`SmartNode/Implementations/FMUs/Fakepool.fmu` is rebuilt from sources in
+`SmartNode/Implementations/FMUs/Fakepool-FMU/`. To regenerate it with a native
+binary for the host platform:
+
+```powershell
+cd SmartNode/Implementations/FMUs/Fakepool-FMU
+pythonfmu build --no-external-tool -f Fakepool.py fakepool.tsv requirements.txt
+Copy-Item Fakepool.fmu ..\Fakepool.fmu -Force
+```
+
+The `pythonfmu` CLI ships with the `pythonfmu` PyPI package installed above. The
+resulting Fakepool.fmu contains `binaries/<platform>/Fakepool.dll` (Windows) or
+`Fakepool.so` (Linux).
+
+### Running the SmartNode app
+
+```powershell
+cd SmartNode/SmartNode
+dotnet run --no-launch-profile -- --basedir "<absolute_path_to_repo_root>"
+```
+
+The default `Properties/appsettings.json` runs the M370 room scenario. To run
+the incubator scenario, pass `--appsettings appsettings-incubator.json`. Other
+preconfigured profiles in `Properties/` exercise different look-ahead horizons
+and fuzziness levels.
+
 ## Docker-based example
 
 The Dockerfile builds and runs the example inside the container. Note that `arm64` (and hence e.g. Apple Silicon) is currently not supported by one of the libraries that we depend on; see below for a workaround.
@@ -61,7 +188,7 @@ docker network connect <your_network_name> <container_name>
 ```
 
 ## Running the Control Loop Coordinator (SmartNode)
-The codebase is a .NET 8 solution consisting of multiple projects: `Logic` (MAPE-K and models), `Implementations` (for user-provided sensor/actuator implementations), `SmartNode` (startup and configuration project), and `TestProject` (unit and integration tests). We also include our own fork of [Femyou](https://codeberg.org/SELab_HVL/vsto-Femyou) for the logic that loads and executes our FMUs. Users may choose between running the solution natively or containerized.
+The codebase is a .NET 8 solution consisting of multiple projects: `Logic` (MAPE-K and models), `Implementations` (for user-provided sensor/actuator implementations), `SmartNode` (startup and configuration project), and `TestProject` (unit and integration tests). The codebase also vendors the [Femyou](https://codeberg.org/SELab_HVL/vsto-Femyou) FMU loader (in `SmartNode/Femyou/`) with a Windows-specific patch that prepends the FMU's `binaries/<platform>/` directory to `PATH` before `LoadLibrary`, so dependencies such as `libwinpthread-1.dll` resolve correctly. Users may choose between running the solution natively or containerized.
 
 The codebase uses a `appsettings.json` in the `SmartNode/Properties` directory as a configuration file. This file already comes preconfigured, but users are free to change their own settings. It contains the following parameters:
 1. Filepath arguments:

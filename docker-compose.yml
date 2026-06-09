@@ -1,0 +1,52 @@
+# Offline demo-in-a-box (P8-A). Run from the repo root:
+#   docker compose up -d --build
+# Then open http://localhost:8082/dashboard.html (API on http://localhost:8080).
+# Offline: replay prices + sqlite. No HA / Java / OpenModelica / FMU / RabbitMQ / Mongo / Ollama.
+services:
+  smartnode:
+    build:
+      context: .
+      dockerfile: SmartNode/SmartNode/Dockerfile.offline
+    container_name: rdt-smartnode
+    environment:
+      # Bind all interfaces so the host reaches the API via the published port.
+      SMARTNODE_HTTP_PREFIX: "http://+:8080/"
+      SMARTNODE_MODE: "chatbox-only"
+      PRICE_PROVIDER: "replay"
+      PRICE_REPLAY_FILE: "config/price-replay.sample.json"
+      PRICE_REPLAY_REBASE_TODAY: "true"
+      GOAL_REPOSITORY_PROVIDER: "sqlite"
+      GOAL_REPOSITORY_SQLITE_PATH: "data/goals.sqlite"
+      DECISION_LOG_PROVIDER: "sqlite"
+      DECISION_LOG_SQLITE_PATH: "data/decision-log.sqlite"
+      SETTINGS_STORE_PROVIDER: "sqlite"
+      SETTINGS_STORE_SQLITE_PATH: "data/settings.sqlite"
+    ports:
+      - "8080:8080"
+    volumes:
+      - rdt-data:/app/data
+    healthcheck:
+      # Liveness probe: /api/health always returns 200 with no HA token, MAPE-K
+      # loop, or SQLite dependency — the right signal for "container is up".
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+
+  web:
+    image: nginx:alpine
+    container_name: rdt-web
+    ports:
+      - "8082:80"
+    volumes:
+      - ./SmartNode/SmartNode/dashboard.html:/usr/share/nginx/html/dashboard.html:ro
+      - ./SmartNode/SmartNode/setup.html:/usr/share/nginx/html/setup.html:ro
+      - ./SmartNode/SmartNode/index.html:/usr/share/nginx/html/index.html:ro
+      - ./SmartNode/SmartNode/assets:/usr/share/nginx/html/assets:ro
+    depends_on:
+      smartnode:
+        condition: service_healthy
+
+volumes:
+  rdt-data:

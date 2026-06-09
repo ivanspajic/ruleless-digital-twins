@@ -1,0 +1,54 @@
+[
+  {
+    "id": "demo-evening-comfort",
+    "enabled": true,
+    "type": "comfort",
+    "condition": {
+      "timeAfter": "18:00",
+      "presence": "home"
+    },
+    "objective": {
+      "room": "demo_living_room",
+      "targetTemperature": 21.0
+    },
+    "constraints": {
+      "preferLowPrice": true,
+      "maxPriceNokPerKwh": 2.50,
+      "dryRun": true
+    },
+    "actions": [
+      {
+        "domain": "climate",
+        "service": "set_temperature",
+        "entityId": "climate.demo_living_room",
+        "data": {
+          "temperature": 21.0
+        }
+      }
+    ]
+  },
+  {
+    "id": "demo-night-savings",
+    "enabled": true,
+    "type": "energy_saving",
+    "condition": {
+      "timeAfter": "23:00"
+    },
+    "objective": {
+      "room": "demo_kitchen",
+      "targetTemperature": 18.0
+    },
+    "constraints": {
+      "preferLowPrice": true,
+      "dryRun": true
+    },
+    "actions": [
+      {
+        "domain": "light",
+        "service": "turn_off",
+        "entityId": "light.demo_kitchen",
+        "data": {}
+      }
+    ]
+  }
+]

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Validation — Ruleless Digital Twins</title>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<nav class="site-nav">
+  <a href="index.html" class="nav-brand">RDT Demo</a>
+  <div class="nav-links">
+    <a href="architecture.html">Architecture</a>
+    <a href="work-packages.html">Work Packages</a>
+    <a href="validation.html" class="active">Validation</a>
+    <a href="progress.html">Progress</a>
+    <a href="demo.html">Demo</a>
+    <a href="limitations.html">Limitations</a>
+  </div>
+</nav>
+<main class="page-content">
+  <h1>Model &amp; Bindings Validation</h1>
+  <p class="lead">WP2 provides a two-level validation mechanism: offline structural checks before startup, and optional live Home Assistant reachability checks on demand.</p>
+
+  <h2>Level 1 — Offline CLI (V1)</h2>
+  <p>Run before the MAPE-K loop. Requires no token, no running HA.</p>
+  <pre><code># Explicit path
+dotnet run --project .\SmartNode\SmartNode\SmartNode.csproj ^^
+  -- --validate-model .\config\ha-bindings.testlab.json
+
+# Via environment variable
+set HA_BINDINGS_FILE=.\config\ha-bindings.testlab.json
+dotnet run --project .\SmartNode\SmartNode\SmartNode.csproj -- --validate-model</code></pre>
+  <p>Exit codes: <code>0</code> = PASS or WARN &nbsp;|&nbsp; <code>1</code> = FAIL &nbsp;|&nbsp; <code>2</code> = bad invocation.</p>
+  <p>Checks performed: JSON shape and required fields, duplicate <code>(sensorUri, procedureUri)</code> keys, duplicate <code>actuatorUri</code>, reused <code>haEntityId</code> across actuators, <code>haEntityId</code> format (<code>domain.object_id</code>), known HA domains, actuator domain ↔ <code>ActuatorKind</code> consistency.</p>
+
+  <h2>Level 2 — HTTP endpoint (V1.5 offline / V2 live)</h2>
+
+  <h3>Offline (default)</h3>
+  <pre><code>GET /api/model/validation</code></pre>
+  <p>Returns the same structural report as the CLI. No token required. Response includes <code>"checksLiveHomeAssistant": false</code>.</p>
+  <pre><code>{
+  "mode": "offline",
+  "source": ".\\config\\ha-bindings.testlab.json",
+  "profile": "testlab",
+  "result": "PASS",
+  "errorCount": 0,
+  "warningCount": 0,
+  "sensors": 6,
+  "actuators": 3,
+  "errors": [],
+  "warnings": [],
+  "checksLiveHomeAssistant": false
+}</code></pre>
+
+  <h3>Live (V2 minimal)</h3>
+  <pre><code>GET /api/model/validation?live=true</code></pre>
+  <p>Runs the offline validator first, then checks the live HA runtime using <code>HA_URL</code> and <code>TOKEN_HA</code>.</p>
+  <p><strong>Live checks:</strong> entity existence for every bound sensor/actuator; expected services for supported actuator domains.</p>
+  <p>If <code>TOKEN_HA</code> is absent, returns a clear failure without exposing secrets.</p>
+  <pre><code>{
+  "mode": "live",
+  "source": ".\\config\\ha-bindings.testlab.json",
+  "profile": "testlab",
+  "result": "PASS",
+  "errorCount": 0,
+  "warningCount": 0,
+  "sensors": 6,
+  "actuators": 3,
+  "haEntitiesChecked": 4,
+  "haEntitiesReachable": 4,
+  "haServicesChecked": 2,
+  "haServicesReachable": 2,
+  "errors": [],
+  "warnings": [],
+  "checksLiveHomeAssistant": true
+}</code></pre>
+
+  <h3>HTTP status codes</h3>
+  <table>
+    <thead><tr><th>Code</th><th>Condition</th></tr></thead>
+    <tbody>
+      <tr><td><code>200</code></td><td>PASS or WARN</td></tr>
+      <tr><td><code>400</code></td><td><code>HA_BINDINGS_FILE</code> is unset</td></tr>
+      <tr><td><code>422</code></td><td>FAIL (hard validation error)</td></tr>
+      <tr><td><code>500</code></td><td>Unexpected exception</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Model health UI panel</h2>
+  <p>The SmartNode chat UI (<code>SmartNode/SmartNode/index.html</code>) includes a Model health panel with two actions:</p>
+  <ul>
+    <li><strong>Refresh</strong> (default) — calls <code>GET /api/model/validation</code> (offline, no token required).</li>
+    <li><strong>Live check</strong> — calls <code>GET /api/model/validation?live=true</code> and displays HA entity/service reachability counters.</li>
+  </ul>
+  <p>The panel always shows <code>checksLiveHomeAssistant: true/false</code> explicitly so the operator knows which level of check was run.</p>
+
+  <h2>Scope and limitations</h2>
+  <ul>
+    <li>V2 live validation does not check TTL ↔ bindings URI cross-consistency.</li>
+    <li>No soft-sensor dependency cycle detection yet.</li>
+    <li>No datatype normalisation pass yet.</li>
+    <li>V2 live checks require <code>HA_URL</code> and <code>TOKEN_HA</code> to be set.</li>
+    <li>No change to the MAPE-K loop.</li>
+  </ul>
+</main>
+</body>
+</html>

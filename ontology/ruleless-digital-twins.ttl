@@ -441,4 +441,86 @@ xsd:duration rdf:type rdfs:Datatype .
                         :Effect .
 
 
+#################################################################
+#    Device Energy Models — proactive cost-aware scheduling
+#
+#    Adds vocabulary so any sosa:Actuator can declare a quantitative
+#    energy demand model (battery, thermal load, …). The optimizer reads
+#    the model + the device's current observable state and computes the
+#    real number of charging hours needed instead of trusting a
+#    hard-coded `duration_hours` from the user.
+#################################################################
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasEnergyModel
+:hasEnergyModel rdf:type owl:ObjectProperty ;
+                rdfs:range :DeviceEnergyModel ;
+                rdfs:comment "Attaches an energy demand model to a device (typically a sosa:Actuator). The optimizer uses the model to derive the required charging/heating duration from the device's current observable state."@en ;
+                rdfs:label "hasEnergyModel"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasCurrentStateProperty
+:hasCurrentStateProperty rdf:type owl:ObjectProperty ;
+                         rdfs:domain :DeviceEnergyModel ;
+                         rdfs:comment "Points to the sosa:ObservableProperty that represents the device's current state (e.g. battery state-of-charge, water temperature). The corresponding sosa:Sensor's hasHaEntityId tells the system which Home Assistant entity to read."@en ;
+                         rdfs:label "hasCurrentStateProperty"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasTargetStateProperty
+:hasTargetStateProperty rdf:type owl:ObjectProperty ;
+                        rdfs:domain :DeviceEnergyModel ;
+                        rdfs:comment "Optional pointer to a Property that holds the default target state when the user doesn't specify one (e.g. default desired SoC = 1.0)."@en ;
+                        rdfs:label "hasTargetStateProperty"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasHaEntityId
+:hasHaEntityId rdf:type owl:DatatypeProperty ;
+               rdfs:range xsd:string ;
+               rdfs:comment "Maps a Sensor / Actuator individual to its Home Assistant entity_id (e.g. 'input_number.tesla_battery_level'). Lets SmartNode resolve TTL individuals to live HA state via the REST API."@en ;
+               rdfs:label "hasHaEntityId"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasCapacityKwh
+:hasCapacityKwh rdf:type owl:DatatypeProperty ;
+                rdfs:domain :BatteryStorageModel ;
+                rdfs:range xsd:double ;
+                rdfs:comment "Battery storage capacity in kWh (e.g. 75 for a Tesla Model 3 LR)."@en ;
+                rdfs:label "hasCapacityKwh"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasMaxChargePowerKw
+:hasMaxChargePowerKw rdf:type owl:DatatypeProperty ;
+                     rdfs:domain :BatteryStorageModel ;
+                     rdfs:range xsd:double ;
+                     rdfs:comment "Maximum sustained charging power in kW for the device's wiring/charger."@en ;
+                     rdfs:label "hasMaxChargePowerKw"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/isInterruptible
+:isInterruptible rdf:type owl:DatatypeProperty ;
+                 rdfs:domain :DeviceEnergyModel ;
+                 rdfs:range xsd:boolean ;
+                 rdfs:comment "Whether scheduled energy delivery may be paused and resumed across non-contiguous slots. Batteries and resistive heaters: true. Continuous-cycle appliances (dishwashers, washing machines): false."@en ;
+                 rdfs:label "isInterruptible"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/DeviceEnergyModel
+:DeviceEnergyModel rdf:type owl:Class ;
+                   rdfs:comment "Abstract energy demand model attached to a device via :hasEnergyModel. Concrete subclasses (BatteryStorageModel, ThermalLoadModel, …) describe how to compute kWh needed from a (currentState, targetState) pair."@en ;
+                   rdfs:label "DeviceEnergyModel"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/BatteryStorageModel
+:BatteryStorageModel rdf:type owl:Class ;
+                     rdfs:subClassOf :DeviceEnergyModel ;
+                     rdfs:comment "Battery model parameterised by capacity (kWh) and max sustained charge power (kW). Energy demand for a charging session = (targetSoC − currentSoC) × capacityKwh; required hours = energy / maxPower."@en ;
+                     rdfs:label "BatteryStorageModel"@en .
+
+
+###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ThermalLoadModel
+:ThermalLoadModel rdf:type owl:Class ;
+                  rdfs:subClassOf :DeviceEnergyModel ;
+                  rdfs:comment "Scaffold for thermal loads (water heater, HVAC). Concrete data properties (mass, specific heat, target temperature) will be added when the first thermal device is wired in."@en ;
+                  rdfs:label "ThermalLoadModel"@en .
+
+
 ###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

@@ -1,0 +1,22 @@
+# Lean OFFLINE image for the RDT demo: SmartNode API only (replay prices + sqlite).
+# No OpenModelica / Java / FMU — the offline path uses SimpleFutureSimulator and never
+# starts MAPE-K. Build context is the repo ROOT (config/ lives outside SmartNode/).
+# The heavy SmartNode/SmartNode/Dockerfile (omc+Java+FMU) is intentionally left untouched.
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+# Copy the whole solution tree (SmartNode + Logic + Implementations + Models + Femyou).
+COPY SmartNode/ ./SmartNode/
+RUN dotnet restore SmartNode/SmartNode/SmartNode.csproj
+RUN dotnet publish SmartNode/SmartNode/SmartNode.csproj -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/runtime:8.0 AS final
+# curl is only for the compose healthcheck.
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=build /app/publish ./
+# Replay price sample lives at repo-root config/ and is read relative to the working dir.
+COPY config/ ./config/
+RUN mkdir -p /app/data
+EXPOSE 8080
+ENTRYPOINT ["dotnet", "SmartNode.dll"]

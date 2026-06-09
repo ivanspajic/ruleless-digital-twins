@@ -150,9 +150,12 @@ namespace SmartNode.HaBindings
             var map = new Dictionary<(string, string), ISensor>();
             foreach (var s in cfg.Sensors) {
                 ISensor impl = s.Kind switch {
-                    HaSensorImpl.HomeAssistant => new HomeAssistantSensor(s.SensorUri, s.HaEntityId!, s.Attribute, haHttpClient),
-                    HaSensorImpl.Fakepool      => new FakepoolSensor(s.SensorUri, s.ProcedureUri),
-                    _ => throw new InvalidOperationException($"Unsupported sensor kind {s.Kind} for the homeassistant factory.")
+                    HaSensorImpl.HomeAssistant     => new HomeAssistantSensor(s.SensorUri, s.HaEntityId!, s.Attribute, haHttpClient),
+                    HaSensorImpl.Constant          => new ConstantSensor(s.SensorUri, s.ProcedureUri, s.ConstantValue!.Value),
+                    HaSensorImpl.GeneralConstant   => new GeneralConstantSensor(s.SensorUri, s.ProcedureUri, s.ConstantValue!.Value),
+                    HaSensorImpl.DummyEnergy       => new DummyEnergyConsumptionSensor(s.ProcedureUri, s.SensorUri),
+                    HaSensorImpl.Fakepool          => new FakepoolSensor(s.SensorUri, s.ProcedureUri),
+                    _ => throw new InvalidOperationException($"Unsupported sensor kind {s.Kind}")
                 };
                 map[(s.SensorUri, s.ProcedureUri)] = impl;
             }
@@ -164,8 +167,11 @@ namespace SmartNode.HaBindings
             var map = new Dictionary<string, IActuator>();
             foreach (var a in cfg.Actuators) {
                 IActuator impl = a.Kind switch {
-                    HaActuatorImpl.HomeAssistant => new HomeAssistantActuator(a.ActuatorUri, a.HaEntityId!, a.HaKind!.Value, haHttpClient, a.OnOption),
-                    _ => throw new InvalidOperationException($"Unsupported actuator kind {a.Kind} for the homeassistant factory.")
+                    HaActuatorImpl.HomeAssistant       => new HomeAssistantActuator(a.ActuatorUri, a.HaEntityId!, a.HaKind!.Value, haHttpClient, a.OnOption),
+                    HaActuatorImpl.DummyHeater         => new DummyHeater(a.ActuatorUri),
+                    HaActuatorImpl.DummyFloorHeating   => new DummyFloorHeating(a.ActuatorUri),
+                    HaActuatorImpl.DummyDehumidifier   => new DummyDehumidifier(a.ActuatorUri),
+                    _ => throw new InvalidOperationException($"Unsupported actuator kind {a.Kind}")
                 };
                 map[a.ActuatorUri] = impl;
             }

@@ -53,21 +53,17 @@ services:
   # demoing the incubator case study.
   # Default credentials match `example_digital-twin_incubator/software/startup.conf`.
   # -------------------------------------------------------------------------
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rdt-rabbitmq
-    restart: unless-stopped
-    ports:
-      - "5672:5672"     # AMQP
-      - "15672:15672"   # Management UI
-    environment:
-      - RABBITMQ_DEFAULT_USER=incubator
-      - RABBITMQ_DEFAULT_PASS=incubator
-    # NOTE: bringing up the broker alone is NOT enough for the
-    # IncubatorTests.SimulateFromAMQ test to pass. That test expects an
-    # incubator twin (hardware OR simulator from `example_digital-twin_incubator`)
-    # that publishes IncubatorFields messages on the AMQP exchange. Without
-    # such a publisher, the test will time out waiting for sensor data.
+  # rabbitmq:
+  #   image: rabbitmq:3-management
+  #   container_name: rdt-rabbitmq
+  #   restart: unless-stopped
+  #   ports:
+  #     - "5672:5672"     # AMQP
+  #     - "15672:15672"   # Management UI
+  #     - "1883:1883"     # MQTT (only if the rabbitmq_mqtt plugin is enabled)
+  #   environment:
+  #     - RABBITMQ_DEFAULT_USER=incubator
+  #     - RABBITMQ_DEFAULT_PASS=incubator
 
   # -------------------------------------------------------------------------
   # Ollama — only useful for reproducible chatbox NLU (qwen2.5-coder:7b).

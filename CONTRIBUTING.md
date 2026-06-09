@@ -63,7 +63,7 @@ Documentation-only changes may skip the build, but say so explicitly in the PR.
 
 ## Secrets
 
-Never commit secrets or runtime state: access tokens, real `.env` files, Home Assistant `.storage/` or databases, logs, `*.token`, `secrets.json`, generated inferred TTL files, or build output (`bin/`, `obj/`). `.env.example` is allowed only with clearly fake placeholder values.
+Never commit secrets or runtime state: access tokens, real `.env` files, Home Assistant `.storage/` or databases, logs, `*.token`, `secrets.json`, generated inferred TTL files, or build output (`bin/`, `obj/`). Runtime environment values must stay local and must not be committed.
 
 ## Pull request checklist
 

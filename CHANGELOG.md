@@ -25,7 +25,7 @@ integration, the MAPE-K loop, safety gates, and an offline demo.
   reachable). No Home Assistant token required.
 - **Read-only product dashboard** for observing decisions and state.
 - **Minimal offline Docker packaging.** Root `docker-compose.yml`, lean
-  `Dockerfile.offline`, and `.env.docker.example` run SmartNode on port `8080`
+  `Dockerfile.offline` and run SmartNode on port `8080`
   with replay prices and SQLite-backed state. The container healthcheck uses
   `/api/health`.
 - **Home Assistant live setup hardening.** Documented and verified the read-only
@@ -52,8 +52,7 @@ integration, the MAPE-K loop, safety gates, and an offline demo.
   `mapek.allow_execution`, a non-dry-run request, a present `TOKEN_HA`, the kill
   switch off, and the action's entity/service on the allowlists. The autonomous
   loop remains dry-run.
-- No secrets are committed; `.env.example` and `.env.docker.example` contain
-  placeholders only.
+- No secrets are committed; runtime environment values must be provided locally and must never be committed.
 
 [Unreleased]: https://github.com/sfrayan/ruleless-digital-twins-demo/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/sfrayan/ruleless-digital-twins-demo/releases/tag/v0.1.0

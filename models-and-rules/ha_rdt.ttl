@@ -1,0 +1,356 @@
+@prefix hass: <https://www.foldr.org/profiles/homeassistant/> .
+@prefix mine: <http://www.semanticweb.org/rayan/ontologies/2025/ha/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdt: <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ssn: <http://www.w3.org/ns/ssn/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+rdt:hasActuatorState a owl:DatatypeProperty .
+
+rdt:hasIdentifier a owl:DatatypeProperty .
+
+rdt:hasPossibleValue a owl:DatatypeProperty .
+
+mine: a owl:Ontology ;
+    owl:imports sosa:,
+        ssn: .
+
+mine:Backup a <http://www.semanticweb.org/rayan/ontologies/2025/ha/device/Home_Assistant_Home_Assistant_Backup> ;
+    rdfs:label "Backup" ;
+    sosa:hosts <http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_backup_backup_manager_state>,
+        <http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_backup_last_attempted_automatic_backup>,
+        <http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_backup_last_successful_automatic_backup>,
+        <http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_backup_next_scheduled_automatic_backup> .
+
+mine:Sun a sosa:Platform ;
+    rdfs:label "Sun" ;
+    sosa:hosts <http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_sun_next_dawn>,
+        <http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_sun_next_dusk>,
+        <http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_sun_next_midnight>,
+        <http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_sun_next_noon>,
+        <http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_sun_next_rising>,
+        <http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_sun_next_setting> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/binary_sensor_showcase_entry_open> a sosa:Sensor ;
+    rdfs:label "Showcase Entry Open" ;
+    rdt:hasIdentifier "binary_sensor.showcase_entry_open"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_entry_open> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/binary_sensor_showcase_laundry_done> a sosa:Sensor ;
+    rdfs:label "Showcase Laundry Done" ;
+    rdt:hasIdentifier "binary_sensor.showcase_laundry_done"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_laundry_done> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/binary_sensor_showcase_poor_air_quality> a sosa:Sensor ;
+    rdfs:label "Showcase Poor Air Quality" ;
+    rdt:hasIdentifier "binary_sensor.showcase_poor_air_quality"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_poor_air_quality> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/binary_sensor_showcase_quiet_hours> a sosa:Sensor ;
+    rdfs:label "Showcase Quiet Hours" ;
+    rdt:hasIdentifier "binary_sensor.showcase_quiet_hours"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_quiet_hours> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/input_boolean_showcase_air_purifier> a sosa:Sensor ;
+    rdfs:label "Air Purifier State" ;
+    rdt:hasIdentifier "input_boolean.showcase_air_purifier"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_air_purifier> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/input_boolean_showcase_front_door_open> a sosa:Sensor ;
+    rdfs:label "Front Door Open" ;
+    rdt:hasIdentifier "input_boolean.showcase_front_door_open"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_front_door_open> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/input_boolean_showcase_hallway_light> a sosa:Sensor ;
+    rdfs:label "Hallway Light State" ;
+    rdt:hasIdentifier "input_boolean.showcase_hallway_light"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_hallway_light> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/input_boolean_showcase_hallway_motion> a sosa:Sensor ;
+    rdfs:label "Hallway Motion" ;
+    rdt:hasIdentifier "input_boolean.showcase_hallway_motion"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_hallway_motion> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/input_boolean_showcase_home_occupied> a sosa:Sensor ;
+    rdfs:label "Home Occupied" ;
+    rdt:hasIdentifier "input_boolean.showcase_home_occupied"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_home_occupied> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/input_boolean_showcase_kitchen_light> a sosa:Sensor ;
+    rdfs:label "Kitchen Light State" ;
+    rdt:hasIdentifier "input_boolean.showcase_kitchen_light"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_kitchen_light> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/input_boolean_showcase_laundry_done> a sosa:Sensor ;
+    rdfs:label "Laundry Done" ;
+    rdt:hasIdentifier "input_boolean.showcase_laundry_done"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_laundry_done> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/input_boolean_showcase_laundry_running> a sosa:Sensor ;
+    rdfs:label "Laundry Running" ;
+    rdt:hasIdentifier "input_boolean.showcase_laundry_running"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_laundry_running> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/input_boolean_showcase_living_room_light> a sosa:Sensor ;
+    rdfs:label "Living Room Light State" ;
+    rdt:hasIdentifier "input_boolean.showcase_living_room_light"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_living_room_light> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/input_boolean_showcase_movie_mode> a sosa:Sensor ;
+    rdfs:label "Movie Mode" ;
+    rdt:hasIdentifier "input_boolean.showcase_movie_mode"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_movie_mode> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/input_boolean_showcase_sleep_mode> a sosa:Sensor ;
+    rdfs:label "Sleep Mode" ;
+    rdt:hasIdentifier "input_boolean.showcase_sleep_mode"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_sleep_mode> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/input_number_showcase_air_quality_index> a sosa:Sensor ;
+    rdfs:label "Indoor Air Quality Index" ;
+    rdt:hasIdentifier "input_number.showcase_air_quality_index"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_air_quality_index> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/input_number_showcase_power_draw> a sosa:Sensor ;
+    rdfs:label "Estimated Power Draw" ;
+    rdt:hasIdentifier "input_number.showcase_power_draw"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_power_draw> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/input_number_showcase_temperature> a sosa:Sensor ;
+    rdfs:label "Living Room Temperature" ;
+    rdt:hasIdentifier "input_number.showcase_temperature"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_temperature> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/light_showcase_hallway_light> a hass:Light ;
+    rdfs:label "Showcase Hallway Light" ;
+    rdt:hasActuatorState "off",
+        "on",
+        "range:-100.0:100.0:step1.0"^^xsd:string,
+        "range:0.0:100.0:step1.0"^^xsd:string,
+        "range:0.0:300.0:step1.0"^^xsd:string ;
+    rdt:hasIdentifier "light.showcase_hallway_light"^^xsd:string ;
+    sosa:implements <http://www.semanticweb.org/rayan/ontologies/2025/ha/procedure/showcase_hallway_light> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/light_showcase_kitchen_light> a hass:Light ;
+    rdfs:label "Showcase Kitchen Light" ;
+    rdt:hasActuatorState "off",
+        "on",
+        "range:-100.0:100.0:step1.0"^^xsd:string,
+        "range:0.0:100.0:step1.0"^^xsd:string,
+        "range:0.0:300.0:step1.0"^^xsd:string ;
+    rdt:hasIdentifier "light.showcase_kitchen_light"^^xsd:string ;
+    sosa:implements <http://www.semanticweb.org/rayan/ontologies/2025/ha/procedure/showcase_kitchen_light> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/light_showcase_living_room_lamp> a hass:Light ;
+    rdfs:label "Showcase Living Room Lamp" ;
+    rdt:hasActuatorState "off",
+        "on",
+        "range:-100.0:100.0:step1.0"^^xsd:string,
+        "range:0.0:100.0:step1.0"^^xsd:string,
+        "range:0.0:300.0:step1.0"^^xsd:string ;
+    rdt:hasIdentifier "light.showcase_living_room_lamp"^^xsd:string ;
+    sosa:implements <http://www.semanticweb.org/rayan/ontologies/2025/ha/procedure/showcase_living_room_lamp> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_showcase_active_lights> a sosa:Sensor ;
+    rdfs:label "Showcase Active Lights" ;
+    rdt:hasIdentifier "sensor.showcase_active_lights"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_active_lights> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_showcase_air_quality_index> a sosa:Sensor ;
+    rdfs:label "Showcase Air Quality Index" ;
+    rdt:hasIdentifier "sensor.showcase_air_quality_index"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_air_quality_index> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_showcase_estimated_power_draw> a sosa:Sensor ;
+    rdfs:label "Showcase Estimated Power Draw" ;
+    rdt:hasIdentifier "sensor.showcase_estimated_power_draw"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_estimated_power_draw> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_showcase_household_summary> a sosa:Sensor ;
+    rdfs:label "Showcase Household Summary" ;
+    rdt:hasIdentifier "sensor.showcase_household_summary"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_household_summary> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_showcase_laundry_status> a sosa:Sensor ;
+    rdfs:label "Showcase Laundry Status" ;
+    rdt:hasIdentifier "sensor.showcase_laundry_status"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_laundry_status> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_showcase_living_room_temperature> a sosa:Sensor ;
+    rdfs:label "Showcase Living Room Temperature" ;
+    rdt:hasIdentifier "sensor.showcase_living_room_temperature"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_living_room_temperature> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/switch_showcase_air_purifier> a hass:Switch ;
+    rdfs:label "Showcase Air Purifier" ;
+    rdt:hasActuatorState "off",
+        "on" ;
+    rdt:hasIdentifier "switch.showcase_air_purifier"^^xsd:string ;
+    sosa:implements <http://www.semanticweb.org/rayan/ontologies/2025/ha/procedure/showcase_air_purifier> .
+
+hass:Air_Quality rdfs:subClassOf sosa:Sensor .
+
+hass:Alarm_Control_Panel rdfs:subClassOf sosa:Platform .
+
+hass:Button rdfs:subClassOf sosa:Actuator .
+
+hass:Camera rdfs:subClassOf sosa:Platform .
+
+hass:Climate rdfs:subClassOf sosa:Actuator .
+
+hass:Cover rdfs:subClassOf sosa:Actuator .
+
+hass:Device_Tracker rdfs:subClassOf sosa:Sensor .
+
+hass:Fan rdfs:subClassOf sosa:Actuator .
+
+hass:Humidifier rdfs:subClassOf sosa:Actuator .
+
+hass:Input_Select rdfs:subClassOf sosa:Actuator .
+
+hass:Lock rdfs:subClassOf sosa:Actuator .
+
+hass:Media_Player rdfs:subClassOf sosa:Actuator .
+
+hass:Remote rdfs:subClassOf sosa:Actuator .
+
+hass:Siren rdfs:subClassOf sosa:Actuator .
+
+hass:Vacuum rdfs:subClassOf sosa:Actuator .
+
+hass:Valve rdfs:subClassOf sosa:Actuator .
+
+hass:Water_Heater rdfs:subClassOf sosa:Actuator .
+
+hass:Weather rdfs:subClassOf sosa:Sensor .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/device/Home_Assistant_Home_Assistant_Backup> rdfs:subClassOf sosa:Platform .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_backup_backup_manager_state> a sosa:Sensor ;
+    rdfs:label "Backup Backup Manager state" ;
+    rdt:hasIdentifier "sensor.backup_backup_manager_state"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/backup_backup_manager_state> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_backup_last_attempted_automatic_backup> a sosa:Sensor ;
+    rdfs:label "Backup Last attempted automatic backup" ;
+    rdt:hasIdentifier "sensor.backup_last_attempted_automatic_backup"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/backup_last_attempted_automatic_backup> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_backup_last_successful_automatic_backup> a sosa:Sensor ;
+    rdfs:label "Backup Last successful automatic backup" ;
+    rdt:hasIdentifier "sensor.backup_last_successful_automatic_backup"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/backup_last_successful_automatic_backup> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_backup_next_scheduled_automatic_backup> a sosa:Sensor ;
+    rdfs:label "Backup Next scheduled automatic backup" ;
+    rdt:hasIdentifier "sensor.backup_next_scheduled_automatic_backup"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/backup_next_scheduled_automatic_backup> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_sun_next_dawn> a sosa:Sensor ;
+    rdfs:label "Sun Next dawn" ;
+    rdt:hasIdentifier "sensor.sun_next_dawn"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/sun_next_dawn> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_sun_next_dusk> a sosa:Sensor ;
+    rdfs:label "Sun Next dusk" ;
+    rdt:hasIdentifier "sensor.sun_next_dusk"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/sun_next_dusk> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_sun_next_midnight> a sosa:Sensor ;
+    rdfs:label "Sun Next midnight" ;
+    rdt:hasIdentifier "sensor.sun_next_midnight"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/sun_next_midnight> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_sun_next_noon> a sosa:Sensor ;
+    rdfs:label "Sun Next noon" ;
+    rdt:hasIdentifier "sensor.sun_next_noon"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/sun_next_noon> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_sun_next_rising> a sosa:Sensor ;
+    rdfs:label "Sun Next rising" ;
+    rdt:hasIdentifier "sensor.sun_next_rising"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/sun_next_rising> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/entity/sensor_sun_next_setting> a sosa:Sensor ;
+    rdfs:label "Sun Next setting" ;
+    rdt:hasIdentifier "sensor.sun_next_setting"^^xsd:string ;
+    sosa:observes <http://www.semanticweb.org/rayan/ontologies/2025/ha/property/sun_next_setting> .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/procedure/showcase_air_purifier> a sosa:Procedure .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/procedure/showcase_hallway_light> a sosa:Procedure .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/procedure/showcase_kitchen_light> a sosa:Procedure .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/procedure/showcase_living_room_lamp> a sosa:Procedure .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/backup_backup_manager_state> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/backup_last_attempted_automatic_backup> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/backup_last_successful_automatic_backup> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/backup_next_scheduled_automatic_backup> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_active_lights> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_air_purifier> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_entry_open> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_estimated_power_draw> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_front_door_open> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_hallway_light> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_hallway_motion> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_home_occupied> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_household_summary> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_kitchen_light> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_laundry_running> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_laundry_status> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_living_room_light> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_living_room_temperature> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_movie_mode> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_poor_air_quality> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_power_draw> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_quiet_hours> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_sleep_mode> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_temperature> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/sun_next_dawn> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/sun_next_dusk> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/sun_next_midnight> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/sun_next_noon> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/sun_next_rising> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/sun_next_setting> a sosa:ObservableProperty .
+
+hass:Switch rdfs:subClassOf sosa:Actuator .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_air_quality_index> a sosa:ObservableProperty .
+
+<http://www.semanticweb.org/rayan/ontologies/2025/ha/property/showcase_laundry_done> a sosa:ObservableProperty .
+
+hass:Light rdfs:subClassOf sosa:Actuator .
+

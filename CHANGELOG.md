@@ -54,3 +54,6 @@ integration, the MAPE-K loop, safety gates, and an offline demo.
   loop remains dry-run.
 - No secrets are committed; `.env.example` and `.env.docker.example` contain
   placeholders only.
+
+[Unreleased]: https://github.com/sfrayan/ruleless-digital-twins-demo/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/sfrayan/ruleless-digital-twins-demo/releases/tag/v0.1.0

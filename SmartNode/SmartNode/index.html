@@ -1,5 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RDT Twin</title>
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
 
-<h1>roomM370</h1>
-<p> <i></i> </p> 
-<h4> <u> Information </u> </h4>
-<h4> <u> Revisions </u> </h4>
+    <div class="app-shell">
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Toggle sidebar" aria-expanded="false">
+            <span class="sidebar-toggle-bar"></span>
+            <span class="sidebar-toggle-bar"></span>
+            <span class="sidebar-toggle-bar"></span>
+        </button>
+        <aside class="app-sidebar" aria-label="Smart Home Assistant navigation">
+            <div>
+                <div class="brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 32 32" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                        <circle cx="11" cy="16" r="6"></circle>
+                        <circle cx="21" cy="16" r="6"></circle>
+                        <line x1="13" y1="16" x2="19" y2="16"></line>
+                    </svg>
+                </div>
+                <div class="brand-title">RDT Twin</div>
+                <div class="brand-tagline">Ruleless digital twin · Home Assistant</div>
+                <div class="brand-subtitle">Ruleless Digital Twins demo interface</div>
+            </div>
+
+            <nav class="nav-list" aria-label="Sections">
+                <a class="nav-link" href="#overview">Overview <span>01</span></a>
+                <a class="nav-link" href="#status">Live status <span>02</span></a>
+                <a class="nav-link" href="#guide">Guide <span>03</span></a>
+                <a class="nav-link" href="#chat">Chat <span>04</span></a>
+            </nav>
+
+            <div class="sidebar-block">
+                <div class="sidebar-kicker">Try these commands</div>
+                <div class="command-stack">
+                    <button type="button" class="command-pill" data-q="what can you control?">what can you control?</button>
+                    <button type="button" class="command-pill" data-q="what's the house status">what's the house status</button>
+                    <button type="button" class="command-pill" data-q="what is the energy price">what is the energy price</button>
+                    <button type="button" class="command-pill" data-q="state of Nord Pool NO5 Current price">state of Nord Pool NO5 Current price</button>
+                </div>
+            </div>
+
+            <div class="sidebar-block">
+                <div class="sidebar-kicker">Demo script</div>
+                <p class="sidebar-copy">Run the flow top to bottom when presenting the testlab.</p>
+                <div class="command-stack">
+                    <button type="button" class="command-pill" data-q="what can you control?">1. Ask capabilities</button>
+                    <button type="button" class="command-pill" data-q="what's the house status">2. Ask house status</button>
+                    <button type="button" class="command-pill" data-q="energy price">3. Ask energy price</button>
+                    <button type="button" class="command-pill" data-q="turn on bedroom light">4. Turn on a light</button>
+                    <button type="button" class="command-pill" data-q="turn on Testlab Eco Day">5. Trigger Eco Day scene</button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-workspace">
+            <section class="hero-band" id="overview" aria-labelledby="overview-title">
+                <div>
+                    <div class="section-kicker">Product demo</div>
+                    <h2 id="overview-title">A live control surface for SmartNode and Home Assistant.</h2>
+                    <p>Use the chat to inspect Home Assistant state, execute device actions, and fetch real Nord Pool energy prices without leaving the demo.</p>
+                </div>
+                <div class="badge-row" aria-label="Data availability">
+                    <span class="data-badge warn" id="live-data-badge"><span class="status-dot"></span>Live Home Assistant data</span>
+                    <span class="data-badge warn" id="nordpool-badge">Nord Pool pending</span>
+                </div>
+            </section>
+
+            <section class="system-strip" id="status" aria-label="Connection status">
+                <div class="status-card">
+                    <div class="card-label">SmartNode</div>
+                    <div class="value" id="smartnode-status">Connecting</div>
+                    <div class="hint">localhost:8080</div>
+                </div>
+                <div class="status-card">
+                    <div class="card-label">Home Assistant</div>
+                    <div class="value" id="ha-status">Waiting for entities</div>
+                    <div class="hint" id="entity-count">No catalog loaded yet</div>
+                </div>
+                <div class="status-card">
+                    <div class="card-label">Energy source</div>
+                    <div class="value" id="energy-source-status">Checking price feed</div>
+                    <div class="hint" id="energy-source-hint">No price snapshot yet</div>
+                </div>
+            </section>
+
+            <section class="model-health-panel" id="model-health" aria-labelledby="model-health-title">
+                <div class="model-health-header">
+                    <div class="model-health-title">
+                        <div class="card-label">Model health</div>
+                        <div class="value" id="model-health-title">Offline bindings validation</div>
+                        <div class="hint" id="model-health-summary">Not checked yet</div>
+                    </div>
+                    <div class="badge-row">
+                        <span class="data-badge muted model-health-badge" id="model-health-badge">Unavailable</span>
+                        <button type="button" class="model-health-refresh" id="model-health-refresh">Refresh</button>
+                        <button type="button" class="model-health-refresh" id="model-health-live-refresh">Live check</button>
+                    </div>
+                </div>
+                <div class="model-health-grid" aria-label="Model health details">
+                    <div class="model-health-field"><b>Profile</b><span id="model-health-profile">&mdash;</span></div>
+                    <div class="model-health-field"><b>Source</b><span id="model-health-source">&mdash;</span></div>
+                    <div class="model-health-field"><b>Sensors</b><span id="model-health-sensors">&mdash;</span></div>
+                    <div class="model-health-field"><b>Actuators</b><span id="model-health-actuators">&mdash;</span></div>
+                    <div class="model-health-field"><b>Errors</b><span id="model-health-errors">&mdash;</span></div>
+                    <div class="model-health-field"><b>Warnings</b><span id="model-health-warnings">&mdash;</span></div>
+                    <div class="model-health-field"><b>Mode</b><span id="model-health-mode">&mdash;</span></div>
+                    <div class="model-health-field"><b>Live HA checks</b><span id="model-health-live">&mdash;</span></div>
+                    <div class="model-health-field"><b>HA entities</b><span id="model-health-entities">&mdash;</span></div>
+                    <div class="model-health-field"><b>HA services</b><span id="model-health-services">&mdash;</span></div>
+                </div>
+                <p class="model-health-note">Offline bindings validation is the default. Live Home Assistant entity/service checks run only when requested.</p>
+                <div class="model-health-issues" id="model-health-issues" aria-live="polite"></div>
+            </section>
+
+            <section class="workspace-section" id="guide" aria-labelledby="guide-title">
+                <div class="section-header">
+                    <div>
+                        <div class="section-kicker">Guide</div>
+                        <h3 id="guide-title">What the assistant understands</h3>
+                        <p>Commands are resolved against the live Home Assistant catalog. Generic energy price intents are routed to the dedicated price endpoint.</p>
+                    </div>
+                </div>
+                <div class="guide-grid">
+                    <div class="category-grid">
+                        <div class="category-item"><b>Lights</b><span>Turn individual lights on or off, or switch all lights off.</span></div>
+                        <div class="category-item"><b>Switches</b><span>Control switches such as purifiers or demo loads.</span></div>
+                        <div class="category-item"><b>Climate</b><span>Set thermostat or input number temperature targets.</span></div>
+                        <div class="category-item"><b>Sensors</b><span>Ask for state readings from queryable Home Assistant entities.</span></div>
+                        <div class="category-item"><b>Energy price</b><span>Ask generic price questions to use <code>/api/price</code>.</span></div>
+                        <div class="category-item"><b>Scenes &amp; Scripts</b><span>Trigger available Home Assistant scenes and scripts by name.</span></div>
+                    </div>
+                    <div>
+                        <div class="sidebar-kicker">Suggested flow</div>
+                        <div class="flow-list">
+                            <button type="button" class="command-pill flow-step" data-q="what can you control?">Ask what can you control</button>
+                            <button type="button" class="command-pill flow-step" data-q="what's the house status">Ask house status</button>
+                            <button type="button" class="command-pill flow-step" data-q="nord pool price">Ask energy price</button>
+                            <button type="button" class="command-pill flow-step" data-q="turn on bedroom light">Turn on a light</button>
+                            <button type="button" class="command-pill flow-step" data-q="turn on Testlab Eco Day">Trigger Eco Day scene</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <section class="chat-container" id="chat" aria-label="Smart Home Assistant chat">
+        <div class="chat-header">
+            <h1>Assistant chat</h1>
+            <div class="subtitle">
+                <span class="dot-status" id="status-dot"></span>
+                <span id="status-text">Connecting to SmartNode and Home Assistant...</span>
+            </div>
+        </div>
+
+        <div class="dashboard" id="dashboard">
+            <div class="dash-card"><div class="label">Temperature</div><div class="value" id="dash-temp">&mdash;</div><div class="hint">Climate or temperature sensor</div></div>
+            <div class="dash-card"><div class="label">Power</div><div class="value" id="dash-power">&mdash;</div><div class="hint">Power sensor</div></div>
+            <div class="dash-card"><div class="label">Air quality</div><div class="value" id="dash-air">&mdash;</div><div class="hint">AQI or particulate sensor</div></div>
+            <div class="dash-card"><div class="label">Energy</div><div class="value" id="dash-energy">&mdash;</div><div class="hint" id="dash-energy-hint">Nord Pool price</div></div>
+        </div>
+
+        <div class="proactive-badge" id="proactive-badge" style="display:none"></div>
+
+        <div class="schedules-panel" id="schedules-panel"></div>
+
+        <div class="chat-messages" id="chat-messages">
+            <div class="chat-empty-state" id="chat-empty-state">
+                <h3 class="empty-title">Welcome to RDT Twin</h3>
+                <p class="empty-subtitle">Try one of these:</p>
+                <div class="prompt-cards">
+                    <button class="prompt-card" type="button" data-prompt="What can you control?">
+                        <span class="prompt-card-label">Devices</span>
+                        <span class="prompt-card-text">What can you control?</span>
+                    </button>
+                    <button class="prompt-card" type="button" data-prompt="What's the house status right now?">
+                        <span class="prompt-card-label">Status</span>
+                        <span class="prompt-card-text">What's the house status right now?</span>
+                    </button>
+                    <button class="prompt-card" type="button" data-prompt="What is the current Nord Pool price?">
+                        <span class="prompt-card-label">Energy</span>
+                        <span class="prompt-card-text">What is the current Nord Pool price?</span>
+                    </button>
+                    <button class="prompt-card" type="button" data-prompt="Charge the Tesla to 100% by 7am at the cheapest rate">
+                        <span class="prompt-card-label">EV</span>
+                        <span class="prompt-card-text">Charge the Tesla to 100% by 7am at the cheapest rate</span>
+                    </button>
+                </div>
+            </div>
+            <div class="message from-assistant">
+                <div class="message-meta">
+                    <span class="message-source">System</span>
+                    <span>Ready</span>
+                </div>
+                <div class="message-bubble">
+                    Hello. Ask me to control lights, check the house status, read Home Assistant sensors, fetch the energy price, or schedule a Tesla charge at the cheapest hours.
+                </div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typing-indicator" aria-live="polite">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <span class="typing-copy">SmartNode is working</span>
+        </div>
+
+        <div class="quick-actions-panel">
+            <div class="quick-actions-label">Quick actions</div>
+            <div class="quick-chips" id="quick-chips">
+                <!-- Populated dynamically by renderQuickChips() once /api/ha/states loads. -->
+                <div class="quick-group">
+                    <div class="quick-group-title">Explore</div>
+                    <div class="quick-row">
+                        <button type="button" class="chip" data-q="what can you control?">What can you control?</button>
+                        <button type="button" class="chip" data-q="what's the house status">House status</button>
+                        <button type="button" class="chip" data-q="what is the energy price">Energy price</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="chat-input" placeholder="Ask about devices, sensors, scenes, or Nord Pool prices" autocomplete="off">
+            <button class="send-btn" id="send-btn" aria-label="Send message">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                </svg>
+            </button>
+        </div>
+        </section>
+    </div>
+
+    <script src="assets/app.js" defer></script>
+    <!-- Original inline script content has been extracted to assets/app.js -->
+</body>
+</html>

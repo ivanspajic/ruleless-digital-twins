@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ruleless Digital Twins — Setup</title>
+  <style>
+    :root {
+      --bg: #0d1117; --panel: #161b22; --border: #30363d; --text: #e6edf3;
+      --muted: #8b949e; --accent: #58a6ff; --ok: #3fb950; --warn: #d29922; --err: #f85149;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text);
+      font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    header { padding: 18px 22px; border-bottom: 1px solid var(--border); }
+    header h1 { font-size: 18px; margin: 0; }
+    header .sub { color: var(--muted); font-size: 12px; }
+    main { max-width: 640px; margin: 0 auto; padding: 22px; }
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+    .panel h2 { font-size: 14px; margin: 0 0 12px; color: var(--accent); }
+    .row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+    label { color: var(--muted); font-size: 12px; }
+    input, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--border);
+      border-radius: 6px; padding: 8px 10px; font: inherit; }
+    input[type="checkbox"] { width: auto; accent-color: var(--accent); }
+    textarea { width: 100%; resize: vertical; min-height: 160px; white-space: pre; }
+    input:focus, textarea:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+    button { background: var(--accent); color: #0d1117; border: 0; border-radius: 6px;
+      padding: 9px 16px; font: inherit; font-weight: 600; cursor: pointer; }
+    button:disabled { opacity: .5; cursor: default; }
+    .state { color: var(--muted); font-style: italic; padding: 8px 0; }
+    .state.ok { color: var(--ok); font-style: normal; }
+    .state.warn { color: var(--warn); font-style: normal; }
+    .state.error { color: var(--err); font-style: normal; }
+    .result { margin-top: 12px; }
+    .result table { width: 100%; border-collapse: collapse; }
+    .result th, .result td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+    .result th { color: var(--muted); }
+    .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .summary { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+    .pill { border: 1px solid var(--border); border-radius: 999px; padding: 3px 8px; color: var(--muted); }
+    .group { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px; }
+    .group h3 { font-size: 13px; margin: 0 0 8px; color: var(--text); }
+    .caps { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+    .cap.ok { color: var(--ok); }
+    .cap.missing { color: var(--warn); }
+    .warning { color: var(--warn); margin: 6px 0; }
+    .select-cell { width: 1%; white-space: nowrap; }
+    .draft-output { display: none; margin-top: 12px; }
+    .draft-output.visible { display: block; }
+    .run-instructions { margin-top: 12px; }
+    .run-instructions h3 { font-size: 13px; margin: 12px 0 6px; color: var(--text); }
+    pre { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px;
+      overflow: auto; max-height: 360px; white-space: pre; }
+    a { color: var(--accent); }
+    code { color: var(--text); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🔌 Ruleless Digital Twins — Home Assistant Setup</h1>
+    <div class="sub">Connect Home Assistant. API: <code>http://localhost:8080</code>. The token stays in memory — never written to disk.</div>
+  </header>
+  <main>
+    <section class="panel">
+      <h2>Connect Home Assistant</h2>
+      <form id="conn-form" autocomplete="off">
+        <div class="row">
+          <label for="url">Home Assistant URL</label>
+          <input type="text" id="url" placeholder="http://localhost:8123" required />
+        </div>
+        <div class="row">
+          <label for="token">Long-lived access token</label>
+          <input type="password" id="token" placeholder="paste token" required />
+        </div>
+        <button type="submit" id="test">Test connection</button>
+        <div id="state" class="state" role="status" aria-live="polite" aria-atomic="true"></div>
+      </form>
+      <div id="result" class="result" aria-live="polite" aria-atomic="true"></div>
+      <div class="state"><a href="dashboard.html">→ Go to dashboard</a></div>
+    </section>
+    <section class="panel" id="discovery" hidden style="margin-top:18px;">
+      <h2>Home Assistant discovery</h2>
+      <div class="toolbar">
+        <button type="button" id="run-discovery">Run discovery</button>
+        <button type="button" id="generate-draft" disabled>Generate binding draft</button>
+        <button type="button" id="copy-draft" disabled>Copy JSON</button>
+        <button type="button" id="export-runtime-config" disabled>Export runtime config</button>
+        <button type="button" id="copy-runtime-config" disabled>Copy runtime config JSON</button>
+        <button type="button" id="download-runtime-config" disabled>Download runtime config</button>
+        <button type="button" id="copy-run-commands" disabled>Copy run commands</button>
+        <div id="discovery-state" class="state" role="status" aria-live="polite" aria-atomic="true"></div>
+      </div>
+      <div id="selection-summary" class="summary" aria-live="polite" aria-atomic="true"></div>
+      <div id="discovery-result" class="result" aria-live="polite" aria-atomic="true"></div>
+      <div id="draft-output" class="draft-output">
+        <pre id="draft-json" aria-live="polite" aria-atomic="true"></pre>
+      </div>
+      <div id="runtime-export-output" class="draft-output">
+        <div id="runtime-export-state" class="state" role="status" aria-live="polite" aria-atomic="true"></div>
+        <div id="runtime-export-notes" aria-live="polite" aria-atomic="true"></div>
+        <pre id="runtime-config-json" aria-live="polite" aria-atomic="true"></pre>
+        <div id="runtime-run-instructions" class="run-instructions" hidden>
+          <div class="state">Save the downloaded JSON, replace the file path below, and paste your own Home Assistant token.</div>
+          <h3>Full mode</h3>
+          <pre id="runtime-run-full" aria-live="polite" aria-atomic="true"></pre>
+          <h3>API-only mode</h3>
+          <pre id="runtime-run-chatbox" aria-live="polite" aria-atomic="true"></pre>
+        </div>
+      </div>
+      <div class="group" id="bindings-validate-group">
+        <h3>Edit &amp; validate bindings</h3>
+        <div class="state">Validation only. Saving/adoption is deferred.</div>
+        <div class="row">
+          <label for="wizard-bindings-editor">Binding config JSON (editable)</label>
+          <textarea id="wizard-bindings-editor" spellcheck="false"
+            placeholder="Export a runtime config above to load it here, or paste binding JSON to validate."></textarea>
+        </div>
+        <div class="toolbar">
+          <button type="button" id="wizard-validate-bindings">Validate edited bindings</button>
+          <button type="button" id="wizard-load-exported-bindings" disabled>Load exported config</button>
+          <div id="wizard-bindings-validate-state" class="state" role="status" aria-live="polite" aria-atomic="true"></div>
+        </div>
+        <div id="wizard-bindings-validate-result" class="result" aria-live="polite" aria-atomic="true"></div>
+      </div>
+    </section>
+  </main>
+  <script src="assets/setup.js"></script>
+  <script src="assets/discovery.js"></script>
+</body>
+</html>

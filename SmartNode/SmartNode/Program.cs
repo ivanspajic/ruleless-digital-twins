@@ -82,6 +82,8 @@ namespace SmartNode
                     return new RoomM370Factory(serviceProvider);
                 } else if (coordinatorSettings.Environment.Equals("incubator")) {
                     return new IncubatorFactory(serviceProvider);
+                } else if (coordinatorSettings.Environment.Equals("homeassistant")) {
+                    return new HomeAssistantFactory(serviceProvider);
                 } else {
                     throw new Exception($"No factory found for environment {coordinatorSettings.Environment}.");
                 }

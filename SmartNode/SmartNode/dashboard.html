@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ruleless Digital Twins - Product Dashboard</title>
+  <link rel="stylesheet" href="assets/dashboard.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="title-block">
+      <div class="eyebrow">Ruleless Digital Twins</div>
+      <h1>SmartNode Product Dashboard</h1>
+      <div class="meta-row">
+        <span class="badge dry">DRY-RUN ONLY</span>
+        <span>API <code id="api-base">http://localhost:8080</code></span>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn secondary" id="refresh" data-testid="refresh-dashboard">
+        Refresh
+      </button>
+      <button type="button" class="btn primary" id="run-tick" data-testid="run-dry-tick">
+        Run dry tick
+      </button>
+    </div>
+  </header>
+
+  <main class="dashboard-shell">
+    <section class="status-grid" aria-label="System overview">
+      <article class="metric-card">
+        <span class="metric-label">Product</span>
+        <strong id="product-state">Checking</strong>
+        <span id="product-detail">Waiting for SmartNode.</span>
+      </article>
+      <article class="metric-card">
+        <span class="metric-label">Home Assistant</span>
+        <strong id="ha-state">Checking</strong>
+        <span id="ha-detail">Configured status.</span>
+      </article>
+      <article class="metric-card">
+        <span class="metric-label">Safety</span>
+        <strong id="safety-state">Checking</strong>
+        <span id="safety-detail">Runtime gates.</span>
+      </article>
+      <article class="metric-card">
+        <span class="metric-label">Persistence</span>
+        <strong id="persistence-state">Checking</strong>
+        <span id="persistence-detail">Provider status.</span>
+      </article>
+    </section>
+
+    <section class="panel panel-wide" id="product-panel">
+      <div class="panel-head">
+        <div>
+          <span class="panel-kicker">Product</span>
+          <h2>Product status</h2>
+        </div>
+        <span class="status-pill neutral" id="product-pill">Loading</span>
+      </div>
+      <div class="panel-body" id="product-content">
+        <div class="state">Loading product status.</div>
+      </div>
+    </section>
+
+    <section class="panel panel-wide" id="settings-panel">
+      <div class="panel-head">
+        <div>
+          <span class="panel-kicker">Settings</span>
+          <h2>Product settings</h2>
+        </div>
+        <span class="status-pill neutral" id="settings-pill">Loading</span>
+      </div>
+      <div class="panel-body" id="settings-content">
+        <div class="state">Loading settings.</div>
+      </div>
+    </section>
+
+    <section class="panel panel-wide" id="safety-panel">
+      <div class="panel-head">
+        <div>
+          <span class="panel-kicker">Safety</span>
+          <h2>Safety state &amp; audit trail</h2>
+        </div>
+        <span class="status-pill neutral" id="safety-pill">Loading</span>
+      </div>
+      <div class="panel-body" id="safety-content">
+        <div class="state">Loading safety state.</div>
+      </div>
+    </section>
+
+    <section class="panel panel-wide" id="goals-panel">
+      <div class="panel-head">
+        <div>
+          <span class="panel-kicker">Goals</span>
+          <h2>Active goals</h2>
+        </div>
+        <span class="status-pill neutral" id="goals-pill">Loading</span>
+      </div>
+      <div class="panel-body" id="goals-content">
+        <div class="state">Loading goals.</div>
+      </div>
+    </section>
+
+    <section class="panel panel-wide" id="decisions-panel">
+      <div class="panel-head">
+        <div>
+          <span class="panel-kicker">MAPE-K</span>
+          <h2>Recent decisions</h2>
+        </div>
+        <span class="status-pill neutral" id="decisions-pill">Loading</span>
+      </div>
+      <div class="panel-body" id="decisions-content">
+        <div class="state">Loading decisions.</div>
+      </div>
+    </section>
+
+    <section class="panel panel-full" id="bindings-panel">
+      <div class="panel-head">
+        <div>
+          <span class="panel-kicker">Bindings</span>
+          <h2>Binding config validation</h2>
+        </div>
+        <span class="status-pill neutral" id="bindings-pill">Not run</span>
+      </div>
+      <div class="panel-body">
+        <div class="editor-grid">
+          <label class="field-block" for="bindings-editor">
+            <span>Binding JSON</span>
+            <textarea id="bindings-editor" spellcheck="false"></textarea>
+          </label>
+          <div class="editor-side">
+            <button type="button" class="btn primary" id="validate-bindings" data-testid="validate-bindings">
+              Validate bindings
+            </button>
+            <button type="button" class="btn secondary" id="reset-bindings-sample" data-testid="reset-bindings-sample">
+              Load sample
+            </button>
+            <div class="state" id="bindings-form-state">No validation run yet.</div>
+          </div>
+        </div>
+        <div id="bindings-result">
+          <div class="state">Validation results appear here.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel panel-full" id="tick-panel">
+      <div class="panel-head">
+        <div>
+          <span class="panel-kicker">Dry-run tick</span>
+          <h2>Latest tick result</h2>
+        </div>
+        <span class="status-pill dry" id="tick-pill">Dry-run only</span>
+      </div>
+      <div class="panel-body" id="tick-content">
+        <div class="empty-result">
+          <strong>No tick result yet.</strong>
+          <span>Scenarios, selected plan, staged actions, warnings, and execution state appear here.</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/dashboard.js"></script>
+</body>
+</html>

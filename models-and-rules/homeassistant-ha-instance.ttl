@@ -1,0 +1,181 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix ha: <http://www.semanticweb.org/rayan/ontologies/2025/ha/>.
+@prefix meta: <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix sosa: <http://www.w3.org/ns/sosa/>.
+@prefix ssn: <http://www.w3.org/ns/ssn/>.
+
+ha:AccumulatedEnergyTimesPrice meta:hasValue "0"^^xsd:double;
+                               a owl:NamedIndividual,
+                                 ssn:Property.
+ha:DehumidifierActuator meta:enacts ha:OfficeHumidityDecrease;
+                        meta:hasActuatorState "0"^^xsd:int,
+                                              "1"^^xsd:int;
+                        a owl:NamedIndividual,
+                          sosa:Actuator.
+ha:EnergyConsumption meta:hasValue "0"^^xsd:double;
+                     a owl:NamedIndividual,
+                       sosa:ObservableProperty.
+ha:EnergyConsumptionMeter a owl:NamedIndividual,
+                            sosa:Sensor;
+                          sosa:observes ha:EnergyConsumption;
+                          ssn:implements ha:EnergyConsumptionMeterProcedure.
+ha:EnergyConsumptionMeterOutput meta:hasValue "0"^^xsd:double;
+                                a owl:NamedIndividual,
+                                  ssn:Output,
+                                  ssn:Property.
+ha:EnergyConsumptionMeterProcedure a owl:NamedIndividual,
+                                     sosa:Procedure;
+                                   ssn:hasOutput ha:EnergyConsumptionMeterOutput.
+ha:FloorHeatingActuator meta:enacts ha:OfficeTemperatureIncrease;
+                        meta:hasActuatorState "0"^^xsd:int,
+                                              "1"^^xsd:int;
+                        a owl:NamedIndividual,
+                          sosa:Actuator.
+ha:HeaterActuator meta:enacts ha:OfficeTemperatureIncrease;
+                  meta:hasActuatorState "0"^^xsd:int,
+                                        "1"^^xsd:int;
+                  a owl:NamedIndividual,
+                    sosa:Actuator.
+ha:HumidityLowerLimit meta:hasValue "30.0"^^xsd:double;
+                      a owl:NamedIndividual,
+                        ssn:Property.
+ha:HumiditySensor a owl:NamedIndividual,
+                    sosa:Sensor;
+                  sosa:observes ha:OfficeHumidity;
+                  ssn:implements ha:HumiditySensorProcedure.
+ha:HumiditySensorOutput meta:hasValue "18"^^xsd:double;
+                        a owl:NamedIndividual,
+                          ssn:Output,
+                          ssn:Property.
+ha:HumiditySensorProcedure a owl:NamedIndividual,
+                             sosa:Procedure;
+                           ssn:hasOutput ha:HumiditySensorOutput.
+ha:HumidityUpperLimit meta:hasValue "50.0"^^xsd:double;
+                      a owl:NamedIndividual,
+                        ssn:Property.
+ha:MapekCycle meta:hasValue "0"^^xsd:int;
+              a owl:NamedIndividual,
+                ssn:Output,
+                ssn:Property.
+ha:MapekCycleProcedure a owl:NamedIndividual,
+                         sosa:Procedure;
+                       ssn:hasOutput ha:MapekCycle.
+ha:MapekCycleSensor a owl:NamedIndividual,
+                      sosa:Sensor;
+                    ssn:implements ha:MapekCycleProcedure.
+ha:OfficeFMU meta:hasSimulationFidelitySeconds "10"^^xsd:int;
+             meta:hasURI "OfficeTwin.fmu"^^xsd:anyURI;
+             a meta:FmuModel,
+               owl:NamedIndividual.
+ha:OfficeHumidity meta:hasValue "18"^^xsd:double;
+                  a owl:NamedIndividual,
+                    sosa:ObservableProperty.
+ha:OfficeHumidityDecrease meta:affectsPropertyWith meta:ValueDecrease;
+                          a owl:NamedIndividual,
+                            meta:PropertyChange;
+                          ssn:forProperty ha:OfficeHumidity.
+ha:OfficeHumidityOptimalCondition meta:isBreakable true;
+                                  a owl:NamedIndividual,
+                                    meta:OptimalCondition,
+                                    [a owl:Restriction ; 
+                                     owl:onProperty meta:hasConstraint ; 
+                                     owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
+                                     owl:onClass [owl:intersectionOf ([a owl:Restriction ; 
+                                                                      owl:onProperty meta:greaterThanOrEqualTo ; 
+                                                                      owl:hasValue ha:HumidityLowerLimit]
+                                                                      [a owl:Restriction ; 
+                                                                      owl:onProperty meta:lessThanOrEqualTo ; 
+                                                                      owl:hasValue ha:HumidityUpperLimit]) ; 
+                                                  a owl:Class]];
+                                  ssn:forProperty ha:OfficeHumidity.
+ha:OfficePlatform meta:generateCombinationsOnlyFromOptimalConditions false;
+                  meta:hasSimulationModel ha:OfficeFMU;
+                  a owl:NamedIndividual,
+                    sosa:Platform;
+                  rdfs:label "Office Platform (Home Assistant)";
+                  sosa:hosts ha:TempSensor1,
+                             ha:TempSensor2,
+                             ha:HumiditySensor,
+                             ha:HeaterActuator,
+                             ha:FloorHeatingActuator,
+                             ha:DehumidifierActuator.
+ha:OfficeTemperature meta:hasValue "19.6"^^xsd:double;
+                     a owl:NamedIndividual,
+                       sosa:ObservableProperty.
+ha:OfficeTemperatureIncrease meta:affectsPropertyWith meta:ValueIncrease;
+                             a owl:NamedIndividual,
+                               meta:PropertyChange;
+                             ssn:forProperty ha:OfficeTemperature.
+ha:OfficeTemperatureOptimalCondition meta:isBreakable true;
+                                     a owl:NamedIndividual,
+                                       meta:OptimalCondition,
+                                       [a owl:Restriction ; 
+                                        owl:onProperty meta:hasConstraint ; 
+                                        owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
+                                        owl:onClass [owl:intersectionOf ([a owl:Restriction ; 
+                                                                         owl:onProperty meta:greaterThan ; 
+                                                                         owl:hasValue ha:TemperatureLowerLimit]
+                                                                         [a owl:Restriction ; 
+                                                                         owl:onProperty meta:lessThanOrEqualTo ; 
+                                                                         owl:hasValue ha:TemperatureUpperLimit]) ; 
+                                                     a owl:Class]];
+                                     ssn:forProperty ha:OfficeTemperature.
+ha:PriceDummyOutput meta:hasValue "1.58"^^xsd:double;
+                    a owl:NamedIndividual,
+                      ssn:Output,
+                      ssn:Property.
+ha:PriceDummyProcedure a owl:NamedIndividual,
+                         sosa:Procedure;
+                       ssn:hasOutput ha:PriceDummyOutput.
+ha:PriceDummySensor a owl:NamedIndividual,
+                      sosa:Sensor;
+                    sosa:observes ha:price;
+                    ssn:implements ha:PriceDummyProcedure.
+ha:PriceOutput meta:hasValue "1.0042"^^xsd:double;
+               a owl:NamedIndividual,
+                 ssn:Output,
+                 ssn:Property.
+ha:PriceProcedure a owl:NamedIndividual,
+                    sosa:Procedure;
+                  ssn:hasInput ha:MapekCycle;
+                  ssn:hasOutput ha:PriceOutput.
+ha:PriceSensor a owl:NamedIndividual,
+                 sosa:Sensor;
+               sosa:observes ha:price;
+               ssn:implements ha:PriceProcedure.
+ha:TempSensor1 a owl:NamedIndividual,
+                 sosa:Sensor;
+               sosa:observes ha:OfficeTemperature;
+               ssn:implements ha:TempSensor1Procedure.
+ha:TempSensor1Output meta:hasValue "19.6"^^xsd:double;
+                     a owl:NamedIndividual,
+                       ssn:Output,
+                       ssn:Property.
+ha:TempSensor1Procedure a owl:NamedIndividual,
+                          sosa:Procedure;
+                        ssn:hasOutput ha:TempSensor1Output.
+ha:TempSensor2 a owl:NamedIndividual,
+                 sosa:Sensor;
+               sosa:observes ha:OfficeTemperature;
+               ssn:implements ha:TempSensor2Procedure.
+ha:TempSensor2Output meta:hasValue "19.6"^^xsd:double;
+                     a owl:NamedIndividual,
+                       ssn:Output,
+                       ssn:Property.
+ha:TempSensor2Procedure a owl:NamedIndividual,
+                          sosa:Procedure;
+                        ssn:hasOutput ha:TempSensor2Output.
+ha:TemperatureLowerLimit meta:hasValue "18.0"^^xsd:double;
+                         a owl:NamedIndividual,
+                           ssn:Property.
+ha:TemperatureUpperLimit meta:hasValue "22.0"^^xsd:double;
+                         a ssn:Property,
+                           owl:NamedIndividual.
+ha:office-instance a owl:Ontology;
+                   owl:imports meta:.
+ha:price meta:hasValue "1.2921"^^xsd:double;
+         a owl:NamedIndividual,
+           sosa:ObservableProperty.

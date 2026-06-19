@@ -1,0 +1,45 @@
+{
+  "_comment": "Intentionally broken bindings file. Used as the smoke-test fixture for `--validate-model` (see docs/archive/DEMO_READINESS_CHECKLIST.md § 6 and `scripts/smoke-test-broken-bindings.ps1`). Shape passes load, then four per-entry checks each fire one diagnostic: DUP_SENSOR_KEY (E), BAD_ENTITY_ID_SHAPE (E), DUP_ACTUATOR_URI (E), ACTUATOR_KIND_DOMAIN_MISMATCH (E). The file is NOT meant to load at runtime — confirm exit code 1 and Result: FAIL when running --validate-model.",
+  "profile": "broken-sample",
+  "platform": "ha:HomeAssistantTest",
+  "sensors": [
+    {
+      "sensorUri":    "http://example.org/broken/TempSensor",
+      "procedureUri": "http://example.org/broken/TempSensorProcedure",
+      "kind":         "HomeAssistant",
+      "haEntityId":   "sensor.broken_temperature"
+    },
+    {
+      "sensorUri":    "http://example.org/broken/TempSensor",
+      "procedureUri": "http://example.org/broken/TempSensorProcedure",
+      "kind":         "HomeAssistant",
+      "haEntityId":   "sensor.broken_temperature_other"
+    },
+    {
+      "sensorUri":    "http://example.org/broken/MalformedEntitySensor",
+      "procedureUri": "http://example.org/broken/MalformedEntitySensorProcedure",
+      "kind":         "HomeAssistant",
+      "haEntityId":   "not_a_valid_entity_id"
+    }
+  ],
+  "actuators": [
+    {
+      "actuatorUri": "http://example.org/broken/MismatchKind",
+      "kind":        "HomeAssistant",
+      "haEntityId":  "light.broken_living_room",
+      "haKind":      "Switch"
+    },
+    {
+      "actuatorUri": "http://example.org/broken/DuplicateUri",
+      "kind":        "HomeAssistant",
+      "haEntityId":  "switch.broken_purifier_one",
+      "haKind":      "Switch"
+    },
+    {
+      "actuatorUri": "http://example.org/broken/DuplicateUri",
+      "kind":        "HomeAssistant",
+      "haEntityId":  "switch.broken_purifier_two",
+      "haKind":      "Switch"
+    }
+  ]
+}

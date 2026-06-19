@@ -1,4 +1,18 @@
-﻿//using Logic.FactoryInterface;
+﻿/* 
+* 
+* ================================================================================
+* 
+* This class has been commented out due to its obsolescence. It used to handle
+* all logic relating to choosing appropriate mitigation actions, but this
+* functionality has since been automated by extending our inference rules.
+* 
+* It remains in limbo in case we wish to play around with tests or decide to
+* revive it for potential system performance gains.
+* 
+* ================================================================================ 
+*
+*/
+//using Logic.FactoryInterface;
 //using Logic.Mapek.Comparers;
 //using Logic.Models.MapekModels;
 //using Logic.Models.OntologicalModels;

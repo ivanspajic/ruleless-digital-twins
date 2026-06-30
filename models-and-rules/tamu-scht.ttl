@@ -1,0 +1,875 @@
+@prefix : <http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/> .
+
+<http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515> rdf:type owl:Ontology ;
+                                                                           owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins> .
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#Bedroom2Humidity
+:Bedroom2Humidity rdf:type owl:NamedIndividual ,
+                           <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#Bedroom2HumidityProcedure
+:Bedroom2HumidityProcedure rdf:type owl:NamedIndividual ,
+                                    <http://www.w3.org/ns/sosa/Procedure> ;
+                           <http://www.w3.org/ns/ssn/hasOutput> :Bedroom2MeasuredHumidity .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#Bedroom2HumiditySensor
+:Bedroom2HumiditySensor rdf:type owl:NamedIndividual ,
+                                 <http://www.w3.org/ns/sosa/Sensor> ;
+                        <http://www.w3.org/ns/sosa/observes> :Bedroom2Humidity ;
+                        <http://www.w3.org/ns/ssn/implements> :Bedroom2HumidityProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#Bedroom2MeasuredHumidity
+:Bedroom2MeasuredHumidity rdf:type owl:NamedIndividual ,
+                                   <http://www.w3.org/ns/ssn/Output> ,
+                                   <http://www.w3.org/ns/ssn/Property> ;
+                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#Bedroom2SpaceMeasuredTemperature
+:Bedroom2SpaceMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                           <http://www.w3.org/ns/ssn/Output> ,
+                                           <http://www.w3.org/ns/ssn/Property> ;
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#Bedroom2SpaceProcedure
+:Bedroom2SpaceProcedure rdf:type owl:NamedIndividual ,
+                                 <http://www.w3.org/ns/sosa/Procedure> ;
+                        <http://www.w3.org/ns/ssn/hasOutput> :Bedroom2SpaceMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#Bedroom2SpaceTemperature
+:Bedroom2SpaceTemperature rdf:type owl:NamedIndividual ,
+                                   <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#Bedroom2SpaceThermocouple
+:Bedroom2SpaceThermocouple rdf:type owl:NamedIndividual ,
+                                    <http://www.w3.org/ns/sosa/Sensor> ;
+                           <http://www.w3.org/ns/sosa/observes> :Bedroom2SpaceTemperature ;
+                           <http://www.w3.org/ns/ssn/implements> :Bedroom2SpaceProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#Bedroom2SurfaceMeasuredTemperature
+:Bedroom2SurfaceMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                             <http://www.w3.org/ns/ssn/Output> ,
+                                             <http://www.w3.org/ns/ssn/Property> ;
+                                    <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#Bedroom2SurfaceProcedure
+:Bedroom2SurfaceProcedure rdf:type owl:NamedIndividual ,
+                                   <http://www.w3.org/ns/sosa/Procedure> ;
+                          <http://www.w3.org/ns/ssn/hasOutput> :Bedroom2SurfaceMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#Bedroom2SurfaceTemperature
+:Bedroom2SurfaceTemperature rdf:type owl:NamedIndividual ,
+                                     <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#Bedroom2SurfaceThermocouple
+:Bedroom2SurfaceThermocouple rdf:type owl:NamedIndividual ,
+                                      <http://www.w3.org/ns/sosa/Sensor> ;
+                             <http://www.w3.org/ns/sosa/observes> :Bedroom2SurfaceTemperature ;
+                             <http://www.w3.org/ns/ssn/implements> :Bedroom2SurfaceProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomRadiantMeasuredTemperature
+:LivingRoomRadiantMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                               <http://www.w3.org/ns/ssn/Output> ,
+                                               <http://www.w3.org/ns/ssn/Property> ;
+                                      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomRadiantProcedure
+:LivingRoomRadiantProcedure rdf:type owl:NamedIndividual ,
+                                     <http://www.w3.org/ns/sosa/Procedure> ;
+                            <http://www.w3.org/ns/ssn/hasOutput> :LivingRoomRadiantMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomRadiantSensor
+:LivingRoomRadiantSensor rdf:type owl:NamedIndividual ,
+                                  <http://www.w3.org/ns/sosa/Sensor> ;
+                         <http://www.w3.org/ns/sosa/observes> :LivingRoomRadiantTemperature ;
+                         <http://www.w3.org/ns/ssn/implements> :LivingRoomRadiantProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomRadiantTemperature
+:LivingRoomRadiantTemperature rdf:type owl:NamedIndividual ,
+                                       <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace1Humidity
+:LivingRoomSpace1Humidity rdf:type owl:NamedIndividual ,
+                                   <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace1HumidityProcedure
+:LivingRoomSpace1HumidityProcedure rdf:type owl:NamedIndividual ,
+                                            <http://www.w3.org/ns/sosa/Procedure> ;
+                                   <http://www.w3.org/ns/ssn/hasOutput> :LivingRoomSpace1MeasuredHumidity .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace1HumiditySensor
+:LivingRoomSpace1HumiditySensor rdf:type owl:NamedIndividual ,
+                                         <http://www.w3.org/ns/sosa/Sensor> ;
+                                <http://www.w3.org/ns/sosa/observes> :LivingRoomSpace1Humidity ;
+                                <http://www.w3.org/ns/ssn/implements> :LivingRoomSpace1HumidityProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace1MeasuredHumidity
+:LivingRoomSpace1MeasuredHumidity rdf:type owl:NamedIndividual ,
+                                           <http://www.w3.org/ns/ssn/Output> ,
+                                           <http://www.w3.org/ns/ssn/Property> ;
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace1MeasuredTemperature
+:LivingRoomSpace1MeasuredTemperature rdf:type owl:NamedIndividual ,
+                                              <http://www.w3.org/ns/ssn/Output> ,
+                                              <http://www.w3.org/ns/ssn/Property> ;
+                                     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace1Procedure
+:LivingRoomSpace1Procedure rdf:type owl:NamedIndividual ,
+                                    <http://www.w3.org/ns/sosa/Procedure> ;
+                           <http://www.w3.org/ns/ssn/hasOutput> :LivingRoomSpace1MeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace1Temperature
+:LivingRoomSpace1Temperature rdf:type owl:NamedIndividual ,
+                                      <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace1Thermocouple
+:LivingRoomSpace1Thermocouple rdf:type owl:NamedIndividual ,
+                                       <http://www.w3.org/ns/sosa/Sensor> ;
+                              <http://www.w3.org/ns/sosa/observes> :LivingRoomSpace1Temperature ;
+                              <http://www.w3.org/ns/ssn/implements> :LivingRoomSpace1Procedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace2Humidity
+:LivingRoomSpace2Humidity rdf:type owl:NamedIndividual ,
+                                   <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace2HumidityProcedure
+:LivingRoomSpace2HumidityProcedure rdf:type owl:NamedIndividual ,
+                                            <http://www.w3.org/ns/sosa/Procedure> ;
+                                   <http://www.w3.org/ns/ssn/hasOutput> :LivingRoomSpace2MeasuredHumidity .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace2HumiditySensor
+:LivingRoomSpace2HumiditySensor rdf:type owl:NamedIndividual ,
+                                         <http://www.w3.org/ns/sosa/Sensor> ;
+                                <http://www.w3.org/ns/sosa/observes> :LivingRoomSpace2Humidity ;
+                                <http://www.w3.org/ns/ssn/implements> :LivingRoomSpace2HumidityProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace2MeasuredHumidity
+:LivingRoomSpace2MeasuredHumidity rdf:type owl:NamedIndividual ,
+                                           <http://www.w3.org/ns/ssn/Output> ,
+                                           <http://www.w3.org/ns/ssn/Property> ;
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace2MeasuredTemperature
+:LivingRoomSpace2MeasuredTemperature rdf:type owl:NamedIndividual ,
+                                              <http://www.w3.org/ns/ssn/Output> ,
+                                              <http://www.w3.org/ns/ssn/Property> ;
+                                     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace2Procedure
+:LivingRoomSpace2Procedure rdf:type owl:NamedIndividual ,
+                                    <http://www.w3.org/ns/sosa/Procedure> ;
+                           <http://www.w3.org/ns/ssn/hasOutput> :LivingRoomSpace2MeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace2Temperature
+:LivingRoomSpace2Temperature rdf:type owl:NamedIndividual ,
+                                      <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSpace2Thermocouple
+:LivingRoomSpace2Thermocouple rdf:type owl:NamedIndividual ,
+                                       <http://www.w3.org/ns/sosa/Sensor> ;
+                              <http://www.w3.org/ns/sosa/observes> :LivingRoomSpace2Temperature ;
+                              <http://www.w3.org/ns/ssn/implements> :LivingRoomSpace2Procedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSurface1MeasuredTemperature
+:LivingRoomSurface1MeasuredTemperature rdf:type owl:NamedIndividual ,
+                                                <http://www.w3.org/ns/ssn/Output> ,
+                                                <http://www.w3.org/ns/ssn/Property> ;
+                                       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSurface1Procedure
+:LivingRoomSurface1Procedure rdf:type owl:NamedIndividual ,
+                                      <http://www.w3.org/ns/sosa/Procedure> ;
+                             <http://www.w3.org/ns/ssn/hasOutput> :LivingRoomSurface1MeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSurface1Temperature
+:LivingRoomSurface1Temperature rdf:type owl:NamedIndividual ,
+                                        <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSurface1Thermocouple
+:LivingRoomSurface1Thermocouple rdf:type owl:NamedIndividual ,
+                                         <http://www.w3.org/ns/sosa/Sensor> ;
+                                <http://www.w3.org/ns/sosa/observes> :LivingRoomSurface1Temperature ;
+                                <http://www.w3.org/ns/ssn/implements> :LivingRoomSurface1Procedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSurface2MeasuredTemperature
+:LivingRoomSurface2MeasuredTemperature rdf:type owl:NamedIndividual ,
+                                                <http://www.w3.org/ns/ssn/Output> ,
+                                                <http://www.w3.org/ns/ssn/Property> ;
+                                       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSurface2Procedure
+:LivingRoomSurface2Procedure rdf:type owl:NamedIndividual ,
+                                      <http://www.w3.org/ns/sosa/Procedure> ;
+                             <http://www.w3.org/ns/ssn/hasOutput> :LivingRoomSurface2MeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSurface2Temperature
+:LivingRoomSurface2Temperature rdf:type owl:NamedIndividual ,
+                                        <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#LivingRoomSurface2Thermocouple
+:LivingRoomSurface2Thermocouple rdf:type owl:NamedIndividual ,
+                                         <http://www.w3.org/ns/sosa/Sensor> ;
+                                <http://www.w3.org/ns/sosa/observes> :LivingRoomSurface2Temperature ;
+                                <http://www.w3.org/ns/ssn/implements> :LivingRoomSurface2Procedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomRadiantMeasuredTemperature
+:PrimaryBedroomRadiantMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                                   <http://www.w3.org/ns/ssn/Output> ,
+                                                   <http://www.w3.org/ns/ssn/Property> ;
+                                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomRadiantProcedure
+:PrimaryBedroomRadiantProcedure rdf:type owl:NamedIndividual ,
+                                         <http://www.w3.org/ns/sosa/Procedure> ;
+                                <http://www.w3.org/ns/ssn/hasOutput> :PrimaryBedroomRadiantMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomRadiantSensor
+:PrimaryBedroomRadiantSensor rdf:type owl:NamedIndividual ,
+                                      <http://www.w3.org/ns/sosa/Sensor> ;
+                             <http://www.w3.org/ns/sosa/observes> :PrimaryBedroomRadiantTemperature ;
+                             <http://www.w3.org/ns/ssn/implements> :PrimaryBedroomRadiantProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomRadiantTemperature
+:PrimaryBedroomRadiantTemperature rdf:type owl:NamedIndividual ,
+                                           <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomSpace1Humidity
+:PrimaryBedroomSpace1Humidity rdf:type owl:NamedIndividual ,
+                                       <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomSpace1HumidityProcedure
+:PrimaryBedroomSpace1HumidityProcedure rdf:type owl:NamedIndividual ,
+                                                <http://www.w3.org/ns/sosa/Procedure> ;
+                                       <http://www.w3.org/ns/ssn/hasOutput> :PrimaryBedroomSpace1MeasuredHumidity .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomSpace1HumiditySensor
+:PrimaryBedroomSpace1HumiditySensor rdf:type owl:NamedIndividual ,
+                                             <http://www.w3.org/ns/sosa/Sensor> ;
+                                    <http://www.w3.org/ns/sosa/observes> :PrimaryBedroomSpace1Humidity ;
+                                    <http://www.w3.org/ns/ssn/implements> :PrimaryBedroomSpace1HumidityProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomSpace1MeasuredHumidity
+:PrimaryBedroomSpace1MeasuredHumidity rdf:type owl:NamedIndividual ,
+                                               <http://www.w3.org/ns/ssn/Output> ,
+                                               <http://www.w3.org/ns/ssn/Property> ;
+                                      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomSpace2Humidity
+:PrimaryBedroomSpace2Humidity rdf:type owl:NamedIndividual ,
+                                       <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomSpace2HumidityProcedure
+:PrimaryBedroomSpace2HumidityProcedure rdf:type owl:NamedIndividual ,
+                                                <http://www.w3.org/ns/sosa/Procedure> ;
+                                       <http://www.w3.org/ns/ssn/hasOutput> :PrimaryBedroomSpace2MeasuredHumidity .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomSpace2HumiditySensor
+:PrimaryBedroomSpace2HumiditySensor rdf:type owl:NamedIndividual ,
+                                             <http://www.w3.org/ns/sosa/Sensor> ;
+                                    <http://www.w3.org/ns/sosa/observes> :PrimaryBedroomSpace2Humidity ;
+                                    <http://www.w3.org/ns/ssn/implements> :PrimaryBedroomSpace2HumidityProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomSpace2MeasuredHumidity
+:PrimaryBedroomSpace2MeasuredHumidity rdf:type owl:NamedIndividual ,
+                                               <http://www.w3.org/ns/ssn/Output> ,
+                                               <http://www.w3.org/ns/ssn/Property> ;
+                                      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomSpace2MeasuredTemperature
+:PrimaryBedroomSpace2MeasuredTemperature rdf:type owl:NamedIndividual ,
+                                                  <http://www.w3.org/ns/ssn/Output> ,
+                                                  <http://www.w3.org/ns/ssn/Property> ;
+                                         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomSpace2Procedure
+:PrimaryBedroomSpace2Procedure rdf:type owl:NamedIndividual ,
+                                        <http://www.w3.org/ns/sosa/Procedure> ;
+                               <http://www.w3.org/ns/ssn/hasOutput> :PrimaryBedroomSpace2MeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomSpace2Temperature
+:PrimaryBedroomSpace2Temperature rdf:type owl:NamedIndividual ,
+                                          <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515#PrimaryBedroomSpace2Thermocouple
+:PrimaryBedroomSpace2Thermocouple rdf:type owl:NamedIndividual ,
+                                           <http://www.w3.org/ns/sosa/Sensor> ;
+                                  <http://www.w3.org/ns/sosa/observes> :PrimaryBedroomSpace2Temperature ;
+                                  <http://www.w3.org/ns/ssn/implements> :PrimaryBedroomSpace2Procedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/BathHumidity
+:BathHumidity rdf:type owl:NamedIndividual ,
+                       <http://www.w3.org/ns/sosa/ObservableProperty> ;
+              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/BathHumiditySensor
+:BathHumiditySensor rdf:type owl:NamedIndividual ,
+                             <http://www.w3.org/ns/sosa/Sensor> ;
+                    <http://www.w3.org/ns/sosa/observes> :BathHumidity ;
+                    <http://www.w3.org/ns/ssn/implements> :BathProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/BathMeasuredHumidity
+:BathMeasuredHumidity rdf:type owl:NamedIndividual ,
+                               <http://www.w3.org/ns/ssn/Output> ,
+                               <http://www.w3.org/ns/ssn/Property> ;
+                      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/BathProcedure
+:BathProcedure rdf:type owl:NamedIndividual ,
+                        <http://www.w3.org/ns/sosa/Procedure> ;
+               <http://www.w3.org/ns/ssn/hasOutput> :BathMeasuredHumidity .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/BathSpaceMeasuredTemperature
+:BathSpaceMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                       <http://www.w3.org/ns/ssn/Output> ,
+                                       <http://www.w3.org/ns/ssn/Property> ;
+                              <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/BathSpaceProcedure
+:BathSpaceProcedure rdf:type owl:NamedIndividual ,
+                             <http://www.w3.org/ns/sosa/Procedure> ;
+                    <http://www.w3.org/ns/ssn/hasOutput> :BathSpaceMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/BathSpaceTemperature
+:BathSpaceTemperature rdf:type owl:NamedIndividual ,
+                               <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/BathSpaceThermocouple
+:BathSpaceThermocouple rdf:type owl:NamedIndividual ,
+                                <http://www.w3.org/ns/sosa/Sensor> .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/BathSurfaceMeasuredTemperature
+:BathSurfaceMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                         <http://www.w3.org/ns/ssn/Output> ,
+                                         <http://www.w3.org/ns/ssn/Property> ;
+                                <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/BathSurfaceProcedure
+:BathSurfaceProcedure rdf:type owl:NamedIndividual ,
+                               <http://www.w3.org/ns/sosa/Procedure> ;
+                      <http://www.w3.org/ns/ssn/hasOutput> :BathSurfaceMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/BathSurfaceTemperature
+:BathSurfaceTemperature rdf:type owl:NamedIndividual ,
+                                 <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/BathSurfaceThermocouple
+:BathSurfaceThermocouple rdf:type owl:NamedIndividual ,
+                                  <http://www.w3.org/ns/sosa/Sensor> ;
+                         <http://www.w3.org/ns/sosa/observes> :BathSurfaceTemperature ;
+                         <http://www.w3.org/ns/ssn/implements> :BathSurfaceProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/Bedroom3Humidity
+:Bedroom3Humidity rdf:type owl:NamedIndividual ,
+                           <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/Bedroom3HumidityProcedure
+:Bedroom3HumidityProcedure rdf:type owl:NamedIndividual ,
+                                    <http://www.w3.org/ns/sosa/Procedure> ;
+                           <http://www.w3.org/ns/ssn/hasOutput> :Bedroom3MeasuredHumidity .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/Bedroom3HumiditySensor
+:Bedroom3HumiditySensor rdf:type owl:NamedIndividual ,
+                                 <http://www.w3.org/ns/sosa/Sensor> ;
+                        <http://www.w3.org/ns/sosa/observes> :Bedroom3Humidity ;
+                        <http://www.w3.org/ns/ssn/implements> :Bedroom3HumidityProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/Bedroom3MeasuredHumidity
+:Bedroom3MeasuredHumidity rdf:type owl:NamedIndividual ,
+                                   <http://www.w3.org/ns/ssn/Output> ,
+                                   <http://www.w3.org/ns/ssn/Property> ;
+                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/Bedroom3SpaceMeasuredTemperature
+:Bedroom3SpaceMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                           <http://www.w3.org/ns/ssn/Output> ,
+                                           <http://www.w3.org/ns/ssn/Property> ;
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/Bedroom3SpaceProcedure
+:Bedroom3SpaceProcedure rdf:type owl:NamedIndividual ,
+                                 <http://www.w3.org/ns/sosa/Procedure> ;
+                        <http://www.w3.org/ns/ssn/hasOutput> :Bedroom3SpaceMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/Bedroom3SpaceTemperature
+:Bedroom3SpaceTemperature rdf:type owl:NamedIndividual ,
+                                   <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/Bedroom3SpaceThermocouple
+:Bedroom3SpaceThermocouple rdf:type owl:NamedIndividual ,
+                                    <http://www.w3.org/ns/sosa/Sensor> ;
+                           <http://www.w3.org/ns/sosa/observes> :Bedroom3SpaceTemperature ;
+                           <http://www.w3.org/ns/ssn/implements> :Bedroom3SpaceProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/Bedroom3SurfaceMeasuredTemperature
+:Bedroom3SurfaceMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                             <http://www.w3.org/ns/ssn/Output> ,
+                                             <http://www.w3.org/ns/ssn/Property> ;
+                                    <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/Bedroom3SurfaceProcedure
+:Bedroom3SurfaceProcedure rdf:type owl:NamedIndividual ,
+                                   <http://www.w3.org/ns/sosa/Procedure> ;
+                          <http://www.w3.org/ns/ssn/hasOutput> :Bedroom3SurfaceMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/Bedroom3SurfaceTemperature
+:Bedroom3SurfaceTemperature rdf:type owl:NamedIndividual ,
+                                     <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/Bedroom3SurfaceThermocouple
+:Bedroom3SurfaceThermocouple rdf:type owl:NamedIndividual ,
+                                      <http://www.w3.org/ns/sosa/Sensor> ;
+                             <http://www.w3.org/ns/sosa/observes> :Bedroom3SurfaceTemperature ;
+                             <http://www.w3.org/ns/ssn/implements> :Bedroom3SurfaceProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/HVAC
+:HVAC rdf:type owl:NamedIndividual ,
+               <http://www.w3.org/ns/sosa/Actuator> ;
+      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> "0"^^xsd:int ,
+                                                                                                 "1"^^xsd:int .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/HVACCoolingSetpoint
+:HVACCoolingSetpoint rdf:type owl:NamedIndividual ,
+                              <http://www.w3.org/ns/ssn/Property> ;
+                     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/HVACHeatingSetpoint
+:HVACHeatingSetpoint rdf:type owl:NamedIndividual ,
+                              <http://www.w3.org/ns/ssn/Property> ;
+                     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/HumiditySetpoint
+:HumiditySetpoint rdf:type owl:NamedIndividual ,
+                           <http://www.w3.org/ns/ssn/Property> ;
+                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "30.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenHumidity
+:KitchenHumidity rdf:type owl:NamedIndividual ,
+                          <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenHumidityProcedure
+:KitchenHumidityProcedure rdf:type owl:NamedIndividual ,
+                                   <http://www.w3.org/ns/sosa/Procedure> ;
+                          <http://www.w3.org/ns/ssn/hasOutput> :KitchenMeasuredHumidity .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenHumiditySensor
+:KitchenHumiditySensor rdf:type owl:NamedIndividual ,
+                                <http://www.w3.org/ns/sosa/Sensor> ;
+                       <http://www.w3.org/ns/sosa/observes> :KitchenHumidity ;
+                       <http://www.w3.org/ns/ssn/implements> :KitchenHumidityProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenMeasuredHumidity
+:KitchenMeasuredHumidity rdf:type owl:NamedIndividual ,
+                                  <http://www.w3.org/ns/ssn/Output> ,
+                                  <http://www.w3.org/ns/ssn/Property> ;
+                         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenRadiantMeasuredTemperature
+:KitchenRadiantMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                            <http://www.w3.org/ns/ssn/Output> ,
+                                            <http://www.w3.org/ns/ssn/Property> ;
+                                   <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenRadiantProcedure
+:KitchenRadiantProcedure rdf:type owl:NamedIndividual ,
+                                  <http://www.w3.org/ns/sosa/Procedure> ;
+                         <http://www.w3.org/ns/ssn/hasOutput> :KitchenRadiantMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenRadiantSensor
+:KitchenRadiantSensor rdf:type owl:NamedIndividual ,
+                               <http://www.w3.org/ns/sosa/Sensor> ;
+                      <http://www.w3.org/ns/sosa/observes> :KitchenRadiantTemperature ;
+                      <http://www.w3.org/ns/ssn/implements> :KitchenRadiantProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenRadiantTemperature
+:KitchenRadiantTemperature rdf:type owl:NamedIndividual ,
+                                    <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                           <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenSpaceMeasuredTemperature
+:KitchenSpaceMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                          <http://www.w3.org/ns/ssn/Output> ,
+                                          <http://www.w3.org/ns/ssn/Property> ;
+                                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenSpaceProcedure
+:KitchenSpaceProcedure rdf:type owl:NamedIndividual ,
+                                <http://www.w3.org/ns/sosa/Procedure> ;
+                       <http://www.w3.org/ns/ssn/hasOutput> :KitchenSpaceMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenSpaceTemperature
+:KitchenSpaceTemperature rdf:type owl:NamedIndividual ,
+                                  <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenSpaceThermocouple
+:KitchenSpaceThermocouple rdf:type owl:NamedIndividual ,
+                                   <http://www.w3.org/ns/sosa/Sensor> ;
+                          <http://www.w3.org/ns/sosa/observes> :KitchenSpaceTemperature ;
+                          <http://www.w3.org/ns/ssn/implements> :KitchenSpaceProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenWindow1SurfaceMeasuredTemperature
+:KitchenWindow1SurfaceMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                                   <http://www.w3.org/ns/ssn/Output> ,
+                                                   <http://www.w3.org/ns/ssn/Property> ;
+                                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenWindow1SurfaceProcedure
+:KitchenWindow1SurfaceProcedure rdf:type owl:NamedIndividual ,
+                                         <http://www.w3.org/ns/sosa/Procedure> ;
+                                <http://www.w3.org/ns/ssn/hasOutput> :KitchenWindow1SurfaceMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenWindow1SurfaceTemperature
+:KitchenWindow1SurfaceTemperature rdf:type owl:NamedIndividual ,
+                                           <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenWindow1SurfaceThermocouple
+:KitchenWindow1SurfaceThermocouple rdf:type owl:NamedIndividual ,
+                                            <http://www.w3.org/ns/sosa/Sensor> ;
+                                   <http://www.w3.org/ns/sosa/observes> :KitchenWindow1SurfaceTemperature ;
+                                   <http://www.w3.org/ns/ssn/implements> :KitchenWindow1SurfaceProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenWindow2SurfaceMeasuredTemperature
+:KitchenWindow2SurfaceMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                                   <http://www.w3.org/ns/ssn/Output> ,
+                                                   <http://www.w3.org/ns/ssn/Property> ;
+                                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenWindow2SurfaceProcedure
+:KitchenWindow2SurfaceProcedure rdf:type owl:NamedIndividual ,
+                                         <http://www.w3.org/ns/sosa/Procedure> ;
+                                <http://www.w3.org/ns/ssn/hasOutput> :KitchenWindow2SurfaceMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenWindow2SurfaceTemperature
+:KitchenWindow2SurfaceTemperature rdf:type owl:NamedIndividual ,
+                                           <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/KitchenWindow2SurfaceThermocouple
+:KitchenWindow2SurfaceThermocouple rdf:type owl:NamedIndividual ,
+                                            <http://www.w3.org/ns/sosa/Sensor> ;
+                                   <http://www.w3.org/ns/sosa/observes> :KitchenWindow2SurfaceTemperature ;
+                                   <http://www.w3.org/ns/ssn/implements> :KitchenWindow2SurfaceProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBathHumidity
+:PrimaryBathHumidity rdf:type owl:NamedIndividual ,
+                              <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBathHumidityProcedure
+:PrimaryBathHumidityProcedure rdf:type owl:NamedIndividual ,
+                                       <http://www.w3.org/ns/sosa/Procedure> ;
+                              <http://www.w3.org/ns/ssn/hasOutput> :PrimaryBathMeasuredHumidity .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBathHumiditySensor
+:PrimaryBathHumiditySensor rdf:type owl:NamedIndividual ,
+                                    <http://www.w3.org/ns/sosa/Sensor> ;
+                           <http://www.w3.org/ns/sosa/observes> :PrimaryBathHumidity ;
+                           <http://www.w3.org/ns/ssn/implements> :PrimaryBathHumidityProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBathMeasuredHumidity
+:PrimaryBathMeasuredHumidity rdf:type owl:NamedIndividual ,
+                                      <http://www.w3.org/ns/ssn/Output> ,
+                                      <http://www.w3.org/ns/ssn/Property> ;
+                             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBathSpaceMeasuredTemperature
+:PrimaryBathSpaceMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                              <http://www.w3.org/ns/ssn/Output> ,
+                                              <http://www.w3.org/ns/ssn/Property> ;
+                                     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBathSpaceProcedure
+:PrimaryBathSpaceProcedure rdf:type owl:NamedIndividual ,
+                                    <http://www.w3.org/ns/sosa/Procedure> ;
+                           <http://www.w3.org/ns/ssn/hasOutput> :PrimaryBathSpaceMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBathSpaceTemperature
+:PrimaryBathSpaceTemperature rdf:type owl:NamedIndividual ,
+                                      <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBathSpaceThermocouple
+:PrimaryBathSpaceThermocouple rdf:type owl:NamedIndividual ,
+                                       <http://www.w3.org/ns/sosa/Sensor> ;
+                              <http://www.w3.org/ns/sosa/observes> :PrimaryBathSpaceTemperature ;
+                              <http://www.w3.org/ns/ssn/implements> :PrimaryBathSpaceProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBathSurfaceMeasuredTemperature
+:PrimaryBathSurfaceMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                                <http://www.w3.org/ns/ssn/Output> ,
+                                                <http://www.w3.org/ns/ssn/Property> ;
+                                       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBathSurfaceProcedure
+:PrimaryBathSurfaceProcedure rdf:type owl:NamedIndividual ,
+                                      <http://www.w3.org/ns/sosa/Procedure> ;
+                             <http://www.w3.org/ns/ssn/hasOutput> :PrimaryBathSurfaceMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBathSurfaceTemperature
+:PrimaryBathSurfaceTemperature rdf:type owl:NamedIndividual ,
+                                        <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBathSurfaceThermocouple
+:PrimaryBathSurfaceThermocouple rdf:type owl:NamedIndividual ,
+                                         <http://www.w3.org/ns/sosa/Sensor> ;
+                                <http://www.w3.org/ns/sosa/observes> :PrimaryBathSurfaceTemperature ;
+                                <http://www.w3.org/ns/ssn/implements> :PrimaryBathSurfaceProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBedroomSpace1MeasuredTemperature
+:PrimaryBedroomSpace1MeasuredTemperature rdf:type owl:NamedIndividual ,
+                                                  <http://www.w3.org/ns/ssn/Output> ,
+                                                  <http://www.w3.org/ns/ssn/Property> ;
+                                         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBedroomSpace1Procedure
+:PrimaryBedroomSpace1Procedure rdf:type owl:NamedIndividual ,
+                                        <http://www.w3.org/ns/sosa/Procedure> ;
+                               <http://www.w3.org/ns/ssn/hasOutput> :PrimaryBedroomSpace1MeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBedroomSpace1Temperature
+:PrimaryBedroomSpace1Temperature rdf:type owl:NamedIndividual ,
+                                          <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBedroomSpace1Thermocouple
+:PrimaryBedroomSpace1Thermocouple rdf:type owl:NamedIndividual ,
+                                           <http://www.w3.org/ns/sosa/Sensor> ;
+                                  <http://www.w3.org/ns/sosa/observes> :PrimaryBedroomSpace1Temperature ;
+                                  <http://www.w3.org/ns/ssn/implements> :PrimaryBedroomSpace1Procedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBedroomSurfaceMeasuredTemperature
+:PrimaryBedroomSurfaceMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                                   <http://www.w3.org/ns/ssn/Output> ,
+                                                   <http://www.w3.org/ns/ssn/Property> ;
+                                          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBedroomSurfaceProcedure
+:PrimaryBedroomSurfaceProcedure rdf:type owl:NamedIndividual ,
+                                         <http://www.w3.org/ns/sosa/Procedure> ;
+                                <http://www.w3.org/ns/ssn/hasOutput> :PrimaryBedroomSurfaceMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBedroomSurfaceTemperature
+:PrimaryBedroomSurfaceTemperature rdf:type owl:NamedIndividual ,
+                                           <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                                  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBedroomSurfaceThemocouple
+:PrimaryBedroomSurfaceThemocouple rdf:type owl:NamedIndividual ,
+                                           <http://www.w3.org/ns/sosa/Sensor> ;
+                                  <http://www.w3.org/ns/sosa/observes> :PrimaryBedroomSurfaceTemperature ;
+                                  <http://www.w3.org/ns/ssn/implements> :PrimaryBedroomSurfaceProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/TAMSCHTHouse
+:TAMSCHTHouse rdf:type owl:NamedIndividual ,
+                       <http://www.w3.org/ns/sosa/Platform> .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/UtilityHumidity
+:UtilityHumidity rdf:type owl:NamedIndividual ,
+                          <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/UtilityHumidityProcedure
+:UtilityHumidityProcedure rdf:type owl:NamedIndividual ,
+                                   <http://www.w3.org/ns/sosa/Procedure> ;
+                          <http://www.w3.org/ns/ssn/hasOutput> :UtilityMeasuredHumidity .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/UtilityHumiditySensor
+:UtilityHumiditySensor rdf:type owl:NamedIndividual ,
+                                <http://www.w3.org/ns/sosa/Sensor> ;
+                       <http://www.w3.org/ns/sosa/observes> :UtilityHumidity ;
+                       <http://www.w3.org/ns/ssn/implements> :UtilityHumidityProcedure .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/UtilityMeasuredHumidity
+:UtilityMeasuredHumidity rdf:type owl:NamedIndividual ,
+                                  <http://www.w3.org/ns/ssn/Output> ,
+                                  <http://www.w3.org/ns/ssn/Property> .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/UtilitySpaceMeasuredTemperature
+:UtilitySpaceMeasuredTemperature rdf:type owl:NamedIndividual ,
+                                          <http://www.w3.org/ns/ssn/Output> ,
+                                          <http://www.w3.org/ns/ssn/Property> ;
+                                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/UtilitySpaceProcedure
+:UtilitySpaceProcedure rdf:type owl:NamedIndividual ,
+                                <http://www.w3.org/ns/sosa/Procedure> ;
+                       <http://www.w3.org/ns/ssn/hasOutput> :UtilitySpaceMeasuredTemperature .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/UtilitySpaceTemperature
+:UtilitySpaceTemperature rdf:type owl:NamedIndividual ,
+                                  <http://www.w3.org/ns/sosa/ObservableProperty> ;
+                         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double .
+
+
+###  http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/UtilitySpaceThermocouple
+:UtilitySpaceThermocouple rdf:type owl:NamedIndividual ,
+                                   <http://www.w3.org/ns/sosa/Sensor> ;
+                          <http://www.w3.org/ns/sosa/observes> :UtilitySpaceTemperature ;
+                          <http://www.w3.org/ns/ssn/implements> :UtilitySpaceProcedure .
+
+
+###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

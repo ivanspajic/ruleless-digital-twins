@@ -82,6 +82,8 @@ namespace SmartNode
                     return new RoomM370Factory(serviceProvider);
                 } else if (coordinatorSettings.Environment.Equals("incubator")) {
                     return new IncubatorFactory(serviceProvider);
+                } else if (coordinatorSettings.Environment.Equals("tam-scht")) {
+                    return new TamSchtFactory(serviceProvider);
                 } else {
                     throw new Exception($"No factory found for environment {coordinatorSettings.Environment}.");
                 }

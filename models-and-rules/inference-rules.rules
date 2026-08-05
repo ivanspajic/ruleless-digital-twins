@@ -2,10 +2,15 @@
 @prefix meta: <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/>.
 @prefix ssn: <http://www.w3.org/ns/ssn/>.
 @prefix sosa: <http://www.w3.org/ns/sosa/>.
-@include <verification-rules.rules>.
-@include <user-rules.rules>.
+@include <verification-rules.rules>. // TODO: REMOVE THIS!!!!
+@include <user-rules.rules>. // TODO: REMOVE THIS!!!!
 
 
+
+// TODO: create rules for marking arbitrarily nested constraints. the rest should work more or less the same...
+// you just need to pass the name of the OC down the ladder. each next iteration just checks if the object is something
+// that has the name of the OC and then check for the next thing, be it a conjunction, disjunction, or atomic constraint.
+// this will keep the number of rules down to a minimum.
 
 // Creates containers of information for evaluating atomic constraints in OptimalConditions.
 [rule1a:    (?platform rdf:type sosa:Platform)
@@ -151,6 +156,7 @@
             (?aNode3 :withEvaluationResult "true"^^xsd:boolean)
             (?aNode3 :withOptimalCondition ?optimalCondition)
             (?aNode3 :withIdentifier ?identifier)
+            notEqual(?aNode2, ?aNode3)
             ->  (?aNode1 :withEvaluationResult "true"^^xsd:boolean)
 ]
 
@@ -159,30 +165,17 @@
             (?aList rdf:first ?aNode2)
             (?aNode2 rdf:type owl:Restriction)
             (?aNode2 :withCheck "conjunction")
-            (?aNode2 :withEvaluationResult "true"^^xsd:boolean)
-            (?aNode2 :withOptimalCondition ?optimalCondition)
-            (?aNode2 :withIdentifier ?identifier)
-            (?aNode3 rdf:type owl:Restriction)
-            (?aNode3 :withCheck "conjunction")
-            (?aNode3 :withEvaluationResult "false"^^xsd:boolean)
-            (?aNode3 :withOptimalCondition ?optimalCondition)
-            (?aNode3 :withIdentifier ?identifier)
+            (?aNode2 :withEvaluationResult "false"^^xsd:boolean)
             ->  (?aNode1 :withEvaluationResult "false"^^xsd:boolean)
 ]
 
 // If the second conjunctive child evaluates to false, mark the shared ancestor node as false.
-[rule2n:    (?aNode1 owl:intersectionOf ?aList)
-            (?aList rdf:first ?aNode2)
+[rule2n:    (?aNode1 owl:intersectionOf ?aList1)
+            (?aList1 rdf:rest ?aList2)
+            (?aList2 rdf:first ?aNode2)
             (?aNode2 rdf:type owl:Restriction)
             (?aNode2 :withCheck "conjunction")
             (?aNode2 :withEvaluationResult "false"^^xsd:boolean)
-            (?aNode2 :withOptimalCondition ?optimalCondition)
-            (?aNode2 :withIdentifier ?identifier)
-            (?aNode3 rdf:type owl:Restriction)
-            (?aNode3 :withCheck "conjunction")
-            (?aNode3 :withEvaluationResult "true"^^xsd:boolean)
-            (?aNode3 :withOptimalCondition ?optimalCondition)
-            (?aNode3 :withIdentifier ?identifier)
             ->  (?aNode1 :withEvaluationResult "false"^^xsd:boolean)
 ]
 

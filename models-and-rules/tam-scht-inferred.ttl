@@ -31,56 +31,87 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
           ]
 ] .
 
-:LivingRoomSpace1HumiditySensor
+:HVAC_0  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
+                :HVAC;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
+                "0"^^xsd:int .
+
+:HVAC_1  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
+                :HVAC;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
+                "1"^^xsd:int .
+
+:Bedroom3SurfaceProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :Bedroom3SurfaceMeasuredTemperature .
+
+:PrimaryBedroomSpace2HumiditySensor
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
         <http://www.w3.org/ns/sosa/observes>
-                :LivingRoomSpace1Humidity;
+                :PrimaryBedroomSpace2Humidity;
         <http://www.w3.org/ns/ssn/implements>
-                :LivingRoomSpace1HumidityProcedure .
+                :PrimaryBedroomSpace2HumidityProcedure .
 
-:Bedroom2SpaceThermocouple
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :Bedroom2SpaceTemperature;
-        <http://www.w3.org/ns/ssn/implements>
-                :Bedroom2SpaceProcedure .
-
-:LivingRoomRadiantTemperature
+:PrimaryBedroomSpace1Temperature
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
 
-:HeatingOptimalCondition
-        rdf:type  owl:NamedIndividual , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>;
-        rdf:type  [ rdf:type                  owl:Restriction;
-                    owl:onClass               [ rdf:type        owl:Restriction;
-                                                <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withConstraintType>
-                                                        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
-                                                <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOperatorCheck>
-                                                        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo>;
-                                                <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalCondition>
-                                                        :HeatingOptimalCondition;
-                                                <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalConditionProperty>
-                                                        :LivingRoomSpace1Temperature;
-                                                <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyChangeCheck>
-                                                        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease>;
-                                                <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyCheck>
-                                                        :LivingRoomSpace1Temperature , :HVACHeatingSetpoint;
-                                                owl:hasValue    :HVACHeatingSetpoint;
-                                                owl:onProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo>
-                                              ];
-                    owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
-                    owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger
-                  ];
-        <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#isEnabled>
-                true;
-        <http://www.w3.org/ns/ssn/forProperty>
-                :LivingRoomSpace1Temperature .
+:KitchenWindow1SurfaceTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
 
-:KitchenSpaceProcedure
+:LivingRoomSurface2Temperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:PrimaryBathSurfaceThermocouple
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :PrimaryBathSurfaceTemperature;
+        <http://www.w3.org/ns/ssn/implements>
+                :PrimaryBathSurfaceProcedure .
+
+:PrimaryBedroomSpace1Procedure
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
         <http://www.w3.org/ns/ssn/hasOutput>
-                :KitchenSpaceMeasuredTemperature .
+                :PrimaryBedroomSpace1MeasuredTemperature .
+
+:KitchenRadiantMeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:LivingRoomSurface2Thermocouple
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :LivingRoomSurface2Temperature;
+        <http://www.w3.org/ns/ssn/implements>
+                :LivingRoomSurface2Procedure .
+
+:KitchenHumidity  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:KitchenWindow1SurfaceProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :KitchenWindow1SurfaceMeasuredTemperature .
+
+:LivingRoomSpace2Temperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:LivingRoomSpace2MeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
 
 :LivingRoomSpace1TemperatureIncrease
         rdf:type  owl:NamedIndividual , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>;
@@ -89,208 +120,20 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
         <http://www.w3.org/ns/ssn/forProperty>
                 :LivingRoomSpace1Temperature .
 
-:KitchenSpaceTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
+<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withConstraintType>
+        rdf:type  owl:AnnotationProperty .
 
-:HVACCoolingSetpoint  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "0.0"^^xsd:double .
-
-:LivingRoomSpace2Procedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :LivingRoomSpace2MeasuredTemperature .
-
-:UtilityMeasuredHumidity
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:HVAC_1  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
-                :HVAC;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
-                "1"^^xsd:int .
-
-:PrimaryBathSurfaceTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:UtilityHumidity  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:PrimaryBedroomSpace1Temperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:LivingRoomSpace1Humidity
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:UtilitySpaceProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :UtilitySpaceMeasuredTemperature .
-
-:KitchenWindow1SurfaceTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:PrimaryBedroomSpace2MeasuredHumidity
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:PrimaryBedroomSpace1MeasuredHumidity
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:UtilitySpaceTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:BathSpaceProcedure  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :BathSpaceMeasuredTemperature .
-
-:Bedroom3SpaceProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :Bedroom3SpaceMeasuredTemperature .
-
-:LivingRoomSpace1HumidityProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :LivingRoomSpace1MeasuredHumidity .
-
-:PrimaryBathSpaceProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :PrimaryBathSpaceMeasuredTemperature .
-
-:PrimaryBedroomSpace2Procedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :PrimaryBedroomSpace2MeasuredTemperature .
-
-:PrimaryBedroomSpace2Temperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:LivingRoomSpace1MeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:BathSpaceMeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "0.0"^^xsd:double .
-
-:KitchenMeasuredHumidity
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:LivingRoomSpace1Thermocouple
+:KitchenHumiditySensor
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
         <http://www.w3.org/ns/sosa/observes>
-                :LivingRoomSpace1Temperature;
+                :KitchenHumidity;
         <http://www.w3.org/ns/ssn/implements>
-                :LivingRoomSpace1Procedure .
-
-:Bedroom2SurfaceMeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:LivingRoomSurface1MeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:KitchenWindow1SurfaceThermocouple
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :KitchenWindow1SurfaceTemperature;
-        <http://www.w3.org/ns/ssn/implements>
-                :KitchenWindow1SurfaceProcedure .
-
-:PrimaryBathHumidity  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:KitchenSpaceMeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:Bedroom3SurfaceMeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:KitchenRadiantTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:LivingRoomSpace2Temperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:Bedroom3SpaceMeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:PrimaryBedroomSpace1HumidityProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :PrimaryBedroomSpace1MeasuredHumidity .
-
-:KitchenWindow1SurfaceMeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:PrimaryBedroomSpace1MeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:PrimaryBathMeasuredHumidity
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
+                :KitchenHumidityProcedure .
 
 :CoolingOptimalCondition
         rdf:type  owl:NamedIndividual , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>;
         rdf:type  [ rdf:type                  owl:Restriction;
                     owl:onClass               [ rdf:type        owl:Restriction;
-                                                <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withConstraintType>
-                                                        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
-                                                <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOperatorCheck>
-                                                        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo>;
-                                                <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalCondition>
-                                                        :CoolingOptimalCondition;
-                                                <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalConditionProperty>
-                                                        :LivingRoomSpace1Temperature;
-                                                <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyChangeCheck>
-                                                        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
-                                                <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyCheck>
-                                                        :HVACCoolingSetpoint , :LivingRoomSpace1Temperature;
                                                 owl:hasValue    :HVACCoolingSetpoint;
                                                 owl:onProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo>
                                               ];
@@ -302,68 +145,133 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
         <http://www.w3.org/ns/ssn/forProperty>
                 :LivingRoomSpace1Temperature .
 
-:KitchenWindow2SurfaceMeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:HumiditySetpoint  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "30.0"^^xsd:double .
-
-:KitchenHumiditySensor
+:PrimaryBedroomSurfaceThermocouple
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
         <http://www.w3.org/ns/sosa/observes>
-                :KitchenHumidity;
+                :PrimaryBedroomSurfaceTemperature;
         <http://www.w3.org/ns/ssn/implements>
-                :KitchenHumidityProcedure .
+                :PrimaryBedroomSurfaceProcedure .
 
-:LivingRoomSpace1TemperatureDecrease
-        rdf:type  owl:NamedIndividual , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith>
-                <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
-        <http://www.w3.org/ns/ssn/forProperty>
-                :LivingRoomSpace1Temperature .
+:LivingRoomSpace1HumidityProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :LivingRoomSpace1MeasuredHumidity .
 
-:PrimaryBedroomSurfaceTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
+:Bedroom3SurfaceThermocouple
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :Bedroom3SurfaceTemperature;
+        <http://www.w3.org/ns/ssn/implements>
+                :Bedroom3SurfaceProcedure .
+
+:LivingRoomSpace1Thermocouple
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :LivingRoomSpace1Temperature;
+        <http://www.w3.org/ns/ssn/implements>
+                :LivingRoomSpace1Procedure .
+
+:BathSurfaceProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :BathSurfaceMeasuredTemperature .
 
 :HVACHeatingSetpoint  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Property>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "0.0"^^xsd:double .
 
-:PrimaryBathSpaceTemperature
+:KitchenRadiantTemperature
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
 
-:LivingRoomSurface2Thermocouple
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :LivingRoomSurface2Temperature;
-        <http://www.w3.org/ns/ssn/implements>
-                :LivingRoomSurface2Procedure .
-
-:PrimaryBedroomRadiantSensor
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :PrimaryBedroomRadiantTemperature;
-        <http://www.w3.org/ns/ssn/implements>
-                :PrimaryBedroomRadiantProcedure .
-
-:BathHumidityProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :BathMeasuredHumidity .
-
-:Bedroom3Humidity  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+:LivingRoomRadiantMeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
 
+:LivingRoomSpace1Humidity
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:BathSpaceProcedure  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :BathSpaceMeasuredTemperature .
+
+:PrimaryBedroomSurfaceProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :PrimaryBedroomSurfaceMeasuredTemperature .
+
+:PrimaryBedroomSpace2HumidityProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :PrimaryBedroomSpace2MeasuredHumidity .
+
+:PrimaryBedroomSpace1HumiditySensor
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :PrimaryBedroomSpace1Humidity;
+        <http://www.w3.org/ns/ssn/implements>
+                :PrimaryBedroomSpace1HumidityProcedure .
+
+:PrimaryBedroomSpace2Humidity
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:KitchenHumidityProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :KitchenMeasuredHumidity .
+
 :BathSpaceThermocouple
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor> .
+
+:UtilitySpaceMeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:Bedroom2SurfaceMeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:LivingRoomSurface2MeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:KitchenWindow2SurfaceTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:Bedroom3SpaceMeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:PrimaryBathSpaceMeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+[ <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withConstraintType>
+          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOperatorCheck>
+          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalCondition>
+          :HeatingOptimalCondition;
+  <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalConditionProperty>
+          :LivingRoomSpace1Temperature;
+  <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyChangeCheck>
+          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyCheck>
+          :HVACHeatingSetpoint , :LivingRoomSpace1Temperature
+] .
 
 :KitchenWindow2SurfaceThermocouple
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
@@ -372,57 +280,17 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
         <http://www.w3.org/ns/ssn/implements>
                 :KitchenWindow2SurfaceProcedure .
 
-:LivingRoomSurface2MeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:LivingRoomSpace1Temperature
+:KitchenSpaceTemperature
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
 
-:KitchenRadiantProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :KitchenRadiantMeasuredTemperature .
-
-:LivingRoomRadiantProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :LivingRoomRadiantMeasuredTemperature .
-
-:PrimaryBathSurfaceProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :PrimaryBathSurfaceMeasuredTemperature .
-
-:HVAC_0  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
-                :HVAC;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
-                "0"^^xsd:int .
-
-:KitchenHumidity  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+:HVACCoolingSetpoint  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Property>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
+                "0.0"^^xsd:double .
 
-:PrimaryBedroomRadiantProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :PrimaryBedroomRadiantMeasuredTemperature .
-
-:PrimaryBedroomRadiantTemperature
+:UtilitySpaceTemperature
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:PrimaryBedroomSpace2MeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:BathHumidity  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
 
@@ -433,140 +301,18 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
         <http://www.w3.org/ns/ssn/implements>
                 :Bedroom2SurfaceProcedure .
 
-:BathMeasuredHumidity
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
+:KitchenSpaceProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :KitchenSpaceMeasuredTemperature .
 
-:Bedroom2HumiditySensor
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :Bedroom2Humidity;
-        <http://www.w3.org/ns/ssn/implements>
-                :Bedroom2HumidityProcedure .
-
-:PrimaryBedroomSpace1HumiditySensor
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :PrimaryBedroomSpace1Humidity;
-        <http://www.w3.org/ns/ssn/implements>
-                :PrimaryBedroomSpace1HumidityProcedure .
-
-:Bedroom3SurfaceTemperature
+:PrimaryBedroomSpace2Temperature
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
-
-<http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515>
-        rdf:type     owl:Ontology;
-        owl:imports  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins> .
-
-:PrimaryBedroomSurfaceThermocouple
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :PrimaryBedroomSurfaceTemperature;
-        <http://www.w3.org/ns/ssn/implements>
-                :PrimaryBedroomSurfaceProcedure .
-
-:KitchenHumidityProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :KitchenMeasuredHumidity .
-
-:LivingRoomSurface1Procedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :LivingRoomSurface1MeasuredTemperature .
-
-rdf:nil  rdf:type  rdf:List .
-
-:LivingRoomSpace1Procedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :LivingRoomSpace1MeasuredTemperature .
-
-:Bedroom3HumidityProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :Bedroom3MeasuredHumidity .
-
-:BathSpaceTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "0.0"^^xsd:double .
-
-:KitchenSpaceThermocouple
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :KitchenSpaceTemperature;
-        <http://www.w3.org/ns/ssn/implements>
-                :KitchenSpaceProcedure .
-
-:BathSurfaceMeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:Bedroom3MeasuredHumidity
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:Bedroom3SpaceThermocouple
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :Bedroom3SpaceTemperature;
-        <http://www.w3.org/ns/ssn/implements>
-                :Bedroom3SpaceProcedure .
 
 :Bedroom2MeasuredHumidity
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:LivingRoomRadiantSensor
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :LivingRoomRadiantTemperature;
-        <http://www.w3.org/ns/ssn/implements>
-                :LivingRoomRadiantProcedure .
-
-:LivingRoomSpace2MeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:PrimaryBedroomSurfaceProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :PrimaryBedroomSurfaceMeasuredTemperature .
-
-:PrimaryBedroomSpace2Thermocouple
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :PrimaryBedroomSpace2Temperature;
-        <http://www.w3.org/ns/ssn/implements>
-                :PrimaryBedroomSpace2Procedure .
-
-:BathSurfaceProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :BathSurfaceMeasuredTemperature .
-
-:Bedroom3SurfaceThermocouple
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :Bedroom3SurfaceTemperature;
-        <http://www.w3.org/ns/ssn/implements>
-                :Bedroom3SurfaceProcedure .
-
-:Bedroom3SpaceTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:Bedroom2SpaceTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
 
@@ -577,43 +323,43 @@ rdf:nil  rdf:type  rdf:List .
         <http://www.w3.org/ns/ssn/implements>
                 :LivingRoomSurface1Procedure .
 
-:LivingRoomRadiantMeasuredTemperature
+:LivingRoomSurface1MeasuredTemperature
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
 
-:PrimaryBedroomRadiantMeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+:UtilityHumidity  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
+
+:Bedroom2SpaceThermocouple
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :Bedroom2SpaceTemperature;
+        <http://www.w3.org/ns/ssn/implements>
+                :Bedroom2SpaceProcedure .
+
+:Bedroom3SpaceProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :Bedroom3SpaceMeasuredTemperature .
+
+:LivingRoomSpace2HumidityProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :LivingRoomSpace2MeasuredHumidity .
 
 :UtilityHumidityProcedure
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
         <http://www.w3.org/ns/ssn/hasOutput>
                 :UtilityMeasuredHumidity .
 
-:UtilityHumiditySensor
+:KitchenWindow1SurfaceThermocouple
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
         <http://www.w3.org/ns/sosa/observes>
-                :UtilityHumidity;
+                :KitchenWindow1SurfaceTemperature;
         <http://www.w3.org/ns/ssn/implements>
-                :UtilityHumidityProcedure .
-
-:PrimaryBedroomSpace2Humidity
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:BathHumiditySensor  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :BathHumidity;
-        <http://www.w3.org/ns/ssn/implements>
-                :BathHumidityProcedure .
-
-:PrimaryBedroomSpace1Procedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :PrimaryBedroomSpace1MeasuredTemperature .
+                :KitchenWindow1SurfaceProcedure .
 
 :PrimaryBedroomSpace1Thermocouple
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
@@ -622,126 +368,18 @@ rdf:nil  rdf:type  rdf:List .
         <http://www.w3.org/ns/ssn/implements>
                 :PrimaryBedroomSpace1Procedure .
 
-:PrimaryBedroomSurfaceMeasuredTemperature
+:LivingRoomSurface1Procedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :LivingRoomSurface1MeasuredTemperature .
+
+:KitchenSpaceMeasuredTemperature
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
 
-:Bedroom3HumiditySensor
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :Bedroom3Humidity;
-        <http://www.w3.org/ns/ssn/implements>
-                :Bedroom3HumidityProcedure .
-
-:TamSchtHouse  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Platform>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromOptimalConditions>
-                false;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel>
-                :TamSchtFmu .
-
-:UtilitySpaceThermocouple
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :UtilitySpaceTemperature;
-        <http://www.w3.org/ns/ssn/implements>
-                :UtilitySpaceProcedure .
-
-:Bedroom2SpaceMeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:KitchenWindow2SurfaceTemperature
+:BathSurfaceTemperature
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:PrimaryBedroomSpace2HumiditySensor
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :PrimaryBedroomSpace2Humidity;
-        <http://www.w3.org/ns/ssn/implements>
-                :PrimaryBedroomSpace2HumidityProcedure .
-
-:PrimaryBathHumiditySensor
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :PrimaryBathHumidity;
-        <http://www.w3.org/ns/ssn/implements>
-                :PrimaryBathHumidityProcedure .
-
-:Bedroom3SurfaceProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :Bedroom3SurfaceMeasuredTemperature .
-
-:Bedroom2SurfaceProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :Bedroom2SurfaceMeasuredTemperature .
-
-:KitchenRadiantMeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:LivingRoomSurface2Procedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :LivingRoomSurface2MeasuredTemperature .
-
-:PrimaryBathSurfaceThermocouple
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :PrimaryBathSurfaceTemperature;
-        <http://www.w3.org/ns/ssn/implements>
-                :PrimaryBathSurfaceProcedure .
-
-:BathSurfaceThermocouple
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
-        <http://www.w3.org/ns/sosa/observes>
-                :BathSurfaceTemperature;
-        <http://www.w3.org/ns/ssn/implements>
-                :BathSurfaceProcedure .
-
-:UtilitySpaceMeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:LivingRoomSurface1Temperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:LivingRoomSpace2HumidityProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :LivingRoomSpace2MeasuredHumidity .
-
-:LivingRoomSpace1MeasuredHumidity
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:LivingRoomSpace2MeasuredHumidity
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:PrimaryBathSurfaceMeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
-
-:PrimaryBathHumidityProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :PrimaryBathMeasuredHumidity .
-
-:PrimaryBathSpaceMeasuredTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
 
@@ -752,29 +390,370 @@ rdf:nil  rdf:type  rdf:List .
         <http://www.w3.org/ns/ssn/implements>
                 :PrimaryBathSpaceProcedure .
 
+:HumiditySetpoint  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "30.0"^^xsd:double .
+
+:Bedroom3SurfaceMeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+<http://www.w3.org/ns/ssn/hasOutput>
+        rdf:type  owl:AnnotationProperty .
+
+:PrimaryBedroomSpace2MeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
 :LivingRoomSpace2Humidity
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
 
-:LivingRoomSurface2Temperature
+:Bedroom2SpaceMeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:KitchenMeasuredHumidity
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:PrimaryBedroomSpace1MeasuredHumidity
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:Bedroom2SpaceProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :Bedroom2SpaceMeasuredTemperature .
+
+:LivingRoomSpace1Temperature
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
 
-:KitchenRadiantSensor
+:PrimaryBathMeasuredHumidity
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+<http://www.w3.org/ns/sosa/observes>
+        rdf:type  owl:AnnotationProperty .
+
+:TamSchtHouse  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Platform>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/generateCombinationsOnlyFromOptimalConditions>
+                false;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel>
+                :TamSchtFmu .
+
+:fmu_cloTim  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "0.0"^^xsd:double .
+
+:Bedroom3SpaceThermocouple
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
         <http://www.w3.org/ns/sosa/observes>
-                :KitchenRadiantTemperature;
+                :Bedroom3SpaceTemperature;
         <http://www.w3.org/ns/ssn/implements>
-                :KitchenRadiantProcedure .
+                :Bedroom3SpaceProcedure .
 
-:Bedroom2Humidity  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+:PrimaryBedroomSpace1MeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:LivingRoomSurface2Procedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :LivingRoomSurface2MeasuredTemperature .
+
+:KitchenWindow2SurfaceProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :KitchenWindow2SurfaceMeasuredTemperature .
+
+:LivingRoomSpace2Procedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :LivingRoomSpace2MeasuredTemperature .
+
+:PrimaryBedroomSurfaceMeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:BathHumidityProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :BathMeasuredHumidity .
+
+<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyCheck>
+        rdf:type  owl:AnnotationProperty .
+
+:PrimaryBedroomRadiantProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :PrimaryBedroomRadiantMeasuredTemperature .
+
+:UtilitySpaceProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :UtilitySpaceMeasuredTemperature .
+
+:PrimaryBedroomRadiantSensor
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :PrimaryBedroomRadiantTemperature;
+        <http://www.w3.org/ns/ssn/implements>
+                :PrimaryBedroomRadiantProcedure .
+
+<http://www.w3.org/ns/ssn/implements>
+        rdf:type  owl:AnnotationProperty .
+
+:BathHumiditySensor  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :BathHumidity;
+        <http://www.w3.org/ns/ssn/implements>
+                :BathHumidityProcedure .
+
+:LivingRoomSpace1HumiditySensor
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :LivingRoomSpace1Humidity;
+        <http://www.w3.org/ns/ssn/implements>
+                :LivingRoomSpace1HumidityProcedure .
+
+<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#isEnabled>
+        rdf:type  owl:AnnotationProperty .
+
+:BathSpaceMeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "0.0"^^xsd:double .
+
+:Bedroom2HumidityProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :Bedroom2MeasuredHumidity .
+
+:Bedroom2SpaceTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:Bedroom3MeasuredHumidity
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:KitchenWindow1SurfaceMeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:PrimaryBedroomSurfaceTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:PrimaryBathHumidityProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :PrimaryBathMeasuredHumidity .
+
+:BathSurfaceThermocouple
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :BathSurfaceTemperature;
+        <http://www.w3.org/ns/ssn/implements>
+                :BathSurfaceProcedure .
+
+:PrimaryBathHumidity  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:PrimaryBedroomSpace2Thermocouple
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :PrimaryBedroomSpace2Temperature;
+        <http://www.w3.org/ns/ssn/implements>
+                :PrimaryBedroomSpace2Procedure .
+
+:PrimaryBathSpaceProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :PrimaryBathSpaceMeasuredTemperature .
+
+:KitchenRadiantProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :KitchenRadiantMeasuredTemperature .
+
+:Bedroom3HumiditySensor
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :Bedroom3Humidity;
+        <http://www.w3.org/ns/ssn/implements>
+                :Bedroom3HumidityProcedure .
+
+:LivingRoomSpace1MeasuredHumidity
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:BathHumidity  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
 
 :Bedroom2SurfaceTemperature
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:HeatingOptimalCondition
+        rdf:type  owl:NamedIndividual , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>;
+        rdf:type  [ rdf:type                  owl:Restriction;
+                    owl:onClass               [ rdf:type        owl:Restriction;
+                                                owl:hasValue    :HVACHeatingSetpoint;
+                                                owl:onProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo>
+                                              ];
+                    owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
+                    owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger
+                  ];
+        <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#isEnabled>
+                true;
+        <http://www.w3.org/ns/ssn/forProperty>
+                :LivingRoomSpace1Temperature .
+
+:BathMeasuredHumidity
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:PrimaryBedroomSpace2Procedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :PrimaryBedroomSpace2MeasuredTemperature .
+
+:PrimaryBedroomSpace2MeasuredHumidity
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:PrimaryBathSurfaceMeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:Bedroom3HumidityProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :Bedroom3MeasuredHumidity .
+
+:KitchenWindow2SurfaceMeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:PrimaryBathSpaceTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:Bedroom3Humidity  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:Bedroom2HumiditySensor
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :Bedroom2Humidity;
+        <http://www.w3.org/ns/ssn/implements>
+                :Bedroom2HumidityProcedure .
+
+:LivingRoomRadiantTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:Bedroom2SurfaceProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :Bedroom2SurfaceMeasuredTemperature .
+
+<http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515>
+        rdf:type     owl:Ontology;
+        owl:imports  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins> .
+
+:LivingRoomSpace1MeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+[ <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withConstraintType>
+          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOperatorCheck>
+          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalCondition>
+          :CoolingOptimalCondition;
+  <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalConditionProperty>
+          :LivingRoomSpace1Temperature;
+  <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyChangeCheck>
+          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyCheck>
+          :HVACCoolingSetpoint , :LivingRoomSpace1Temperature
+] .
+
+:HVAC   rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Actuator>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts>
+                :LivingRoomSpace1TemperatureDecrease , :LivingRoomSpace1TemperatureIncrease;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
+                "0"^^xsd:int , "1"^^xsd:int .
+
+:Bedroom3SurfaceTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+<http://www.w3.org/ns/ssn/forProperty>
+        rdf:type  owl:AnnotationProperty .
+
+:LivingRoomRadiantSensor
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :LivingRoomRadiantTemperature;
+        <http://www.w3.org/ns/ssn/implements>
+                :LivingRoomRadiantProcedure .
+
+:BathSurfaceMeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:UtilityHumiditySensor
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :UtilityHumidity;
+        <http://www.w3.org/ns/ssn/implements>
+                :UtilityHumidityProcedure .
+
+:LivingRoomSpace1Procedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :LivingRoomSpace1MeasuredTemperature .
+
+:Bedroom3SpaceTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:PrimaryBedroomRadiantMeasuredTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
 
@@ -784,22 +763,77 @@ rdf:nil  rdf:type  rdf:List .
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI>
                 "TAM_SCHT.fmu"^^xsd:anyURI .
 
-:LivingRoomSpace2Thermocouple
+<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyChangeCheck>
+        rdf:type  owl:AnnotationProperty .
+
+<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalCondition>
+        rdf:type  owl:AnnotationProperty .
+
+:LivingRoomSurface1Temperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:PrimaryBedroomRadiantTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:PrimaryBathSurfaceTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:PrimaryBathSurfaceProcedure
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
+        <http://www.w3.org/ns/ssn/hasOutput>
+                :PrimaryBathSurfaceMeasuredTemperature .
+
+:KitchenSpaceThermocouple
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
         <http://www.w3.org/ns/sosa/observes>
-                :LivingRoomSpace2Temperature;
+                :KitchenSpaceTemperature;
         <http://www.w3.org/ns/ssn/implements>
-                :LivingRoomSpace2Procedure .
+                :KitchenSpaceProcedure .
 
-:KitchenWindow2SurfaceProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :KitchenWindow2SurfaceMeasuredTemperature .
+:LivingRoomSpace1TemperatureDecrease
+        rdf:type  owl:NamedIndividual , <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/affectsPropertyWith>
+                <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
+        <http://www.w3.org/ns/ssn/forProperty>
+                :LivingRoomSpace1Temperature .
 
-:KitchenWindow1SurfaceProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :KitchenWindow1SurfaceMeasuredTemperature .
+:UtilityMeasuredHumidity
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:PrimaryBathHumiditySensor
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :PrimaryBathHumidity;
+        <http://www.w3.org/ns/ssn/implements>
+                :PrimaryBathHumidityProcedure .
+
+:KitchenRadiantSensor
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :KitchenRadiantTemperature;
+        <http://www.w3.org/ns/ssn/implements>
+                :KitchenRadiantProcedure .
+
+<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOperatorCheck>
+        rdf:type  owl:AnnotationProperty .
+
+:LivingRoomSpace2MeasuredHumidity
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/ssn/Output> , <http://www.w3.org/ns/ssn/Property>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:BathSpaceTemperature
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "0.0"^^xsd:double .
 
 :LivingRoomSpace2HumiditySensor
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
@@ -808,33 +842,38 @@ rdf:nil  rdf:type  rdf:List .
         <http://www.w3.org/ns/ssn/implements>
                 :LivingRoomSpace2HumidityProcedure .
 
-:Bedroom2SpaceProcedure
+:Bedroom2Humidity  rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1"^^xsd:double .
+
+:LivingRoomRadiantProcedure
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
         <http://www.w3.org/ns/ssn/hasOutput>
-                :Bedroom2SpaceMeasuredTemperature .
+                :LivingRoomRadiantMeasuredTemperature .
 
 :PrimaryBedroomSpace1Humidity
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "1"^^xsd:double .
 
-:Bedroom2HumidityProcedure
+:LivingRoomSpace2Thermocouple
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :LivingRoomSpace2Temperature;
+        <http://www.w3.org/ns/ssn/implements>
+                :LivingRoomSpace2Procedure .
+
+<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalConditionProperty>
+        rdf:type  owl:AnnotationProperty .
+
+:UtilitySpaceThermocouple
+        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Sensor>;
+        <http://www.w3.org/ns/sosa/observes>
+                :UtilitySpaceTemperature;
+        <http://www.w3.org/ns/ssn/implements>
+                :UtilitySpaceProcedure .
+
+:PrimaryBedroomSpace1HumidityProcedure
         rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
         <http://www.w3.org/ns/ssn/hasOutput>
-                :Bedroom2MeasuredHumidity .
-
-:PrimaryBedroomSpace2HumidityProcedure
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Procedure>;
-        <http://www.w3.org/ns/ssn/hasOutput>
-                :PrimaryBedroomSpace2MeasuredHumidity .
-
-:HVAC   rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/Actuator>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts>
-                :LivingRoomSpace1TemperatureDecrease , :LivingRoomSpace1TemperatureIncrease;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
-                "0"^^xsd:int , "1"^^xsd:int .
-
-:BathSurfaceTemperature
-        rdf:type  owl:NamedIndividual , <http://www.w3.org/ns/sosa/ObservableProperty>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1"^^xsd:double .
+                :PrimaryBedroomSpace1MeasuredHumidity .

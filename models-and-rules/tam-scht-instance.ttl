@@ -1,3 +1,5 @@
+@base <http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/>.
+
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -5,6 +7,20 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix xml: <http://www.w3.org/XML/1998/namespace>.
 
+_:remapped1 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withConstraintType> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
+            <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOperatorCheck> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo>;
+            <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalCondition> :CoolingOptimalCondition;
+            <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalConditionProperty> :LivingRoomSpace1Temperature;
+            <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyChangeCheck> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
+            <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyCheck> :LivingRoomSpace1Temperature,
+                                                                                                  :HVACCoolingSetpoint.
+_:remapped2 <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withConstraintType> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
+            <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOperatorCheck> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo>;
+            <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalCondition> :HeatingOptimalCondition;
+            <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalConditionProperty> :LivingRoomSpace1Temperature;
+            <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyChangeCheck> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease>;
+            <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyCheck> :LivingRoomSpace1Temperature,
+                                                                                                  :HVACHeatingSetpoint.
 <http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515> a owl:Ontology;
                                                                           owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins>.
 :BathHumidity <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1"^^xsd:double;
@@ -133,18 +149,11 @@
                              <http://www.w3.org/ns/ssn/implements> :Bedroom3SurfaceProcedure.
 :CoolingOptimalCondition <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#isEnabled> true;
                          a [a owl:Restriction ; 
-                            owl:onClass [a owl:Restriction ; 
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withConstraintType> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint> ; 
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOperatorCheck> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo> ; 
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalCondition> :CoolingOptimalCondition ; 
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalConditionProperty> :LivingRoomSpace1Temperature ; 
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyChangeCheck> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease> ; 
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyCheck> :LivingRoomSpace1Temperature ; 
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyCheck> :HVACCoolingSetpoint ; 
-                                         owl:hasValue :HVACCoolingSetpoint ; 
-                                         owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo>] ; 
                             owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint> ; 
-                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger],
+                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
+                            owl:onClass [a owl:Restriction ; 
+                                         owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo> ; 
+                                         owl:hasValue :HVACCoolingSetpoint]],
                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>,
                            owl:NamedIndividual;
                          <http://www.w3.org/ns/ssn/forProperty> :LivingRoomSpace1Temperature.
@@ -160,26 +169,13 @@
 :HVACHeatingSetpoint <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double;
                      a <http://www.w3.org/ns/ssn/Property>,
                        owl:NamedIndividual.
-:HVAC_0 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator> :HVAC;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> "0"^^xsd:int;
-        a <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>.
-:HVAC_1 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator> :HVAC;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> "1"^^xsd:int;
-        a <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>.
 :HeatingOptimalCondition <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#isEnabled> true;
                          a [a owl:Restriction ; 
-                            owl:onClass [a owl:Restriction ; 
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withConstraintType> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint> ; 
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOperatorCheck> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo> ; 
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalCondition> :HeatingOptimalCondition ; 
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalConditionProperty> :LivingRoomSpace1Temperature ; 
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyChangeCheck> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease> ; 
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyCheck> :HVACHeatingSetpoint ; 
-                                         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyCheck> :LivingRoomSpace1Temperature ; 
-                                         owl:hasValue :HVACHeatingSetpoint ; 
-                                         owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo>] ; 
                             owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint> ; 
-                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger],
+                            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
+                            owl:onClass [a owl:Restriction ; 
+                                         owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo> ; 
+                                         owl:hasValue :HVACHeatingSetpoint]],
                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>,
                            owl:NamedIndividual;
                          <http://www.w3.org/ns/ssn/forProperty> :LivingRoomSpace1Temperature.
@@ -524,4 +520,17 @@
                             owl:NamedIndividual;
                           <http://www.w3.org/ns/sosa/observes> :UtilitySpaceTemperature;
                           <http://www.w3.org/ns/ssn/implements> :UtilitySpaceProcedure.
-rdf:nil a rdf:List.
+:fmu_cloTim <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double;
+            a <http://www.w3.org/ns/sosa/ObservableProperty>,
+              owl:NamedIndividual.
+<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#isEnabled> a owl:AnnotationProperty.
+<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withConstraintType> a owl:AnnotationProperty.
+<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOperatorCheck> a owl:AnnotationProperty.
+<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalCondition> a owl:AnnotationProperty.
+<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withOptimalConditionProperty> a owl:AnnotationProperty.
+<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyChangeCheck> a owl:AnnotationProperty.
+<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#withPropertyCheck> a owl:AnnotationProperty.
+<http://www.w3.org/ns/sosa/observes> a owl:AnnotationProperty.
+<http://www.w3.org/ns/ssn/forProperty> a owl:AnnotationProperty.
+<http://www.w3.org/ns/ssn/hasOutput> a owl:AnnotationProperty.
+<http://www.w3.org/ns/ssn/implements> a owl:AnnotationProperty.

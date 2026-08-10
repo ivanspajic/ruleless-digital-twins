@@ -1,325 +1,190 @@
-@prefix : <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdt: <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/> .
-@prefix xml: <http://www.w3.org/XML/1998/namespace> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@base <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#> .
-
-<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1> rdf:type owl:Ontology ;
-                                                                     owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins> .
-
-#################################################################
-#    Classes
-#################################################################
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChangeByActuation
-rdt:PropertyChangeByActuation rdf:type owl:Class .
-
-
-#################################################################
-#    Individuals
-#################################################################
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Dehumidifier
-:Dehumidifier rdf:type owl:NamedIndividual ,
-                       <http://www.w3.org/ns/sosa/Actuator> ;
-              rdt:enacts :EnergyConsumptionIncrease ,
-                         :RoomHumidityDecrease ;
-              rdt:hasActuatorState "0"^^xsd:int ,
-                                   "1"^^xsd:int .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption
-:EnergyConsumption rdf:type owl:NamedIndividual ,
-                            <http://www.w3.org/ns/sosa/ObservableProperty> ;
-                   rdt:hasValue "72.6480883"^^xsd:double .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionDecrease
-:EnergyConsumptionDecrease rdf:type owl:NamedIndividual ,
-                                    rdt:PropertyChange ;
-                           rdt:affectsPropertyWith rdt:ValueDecrease ;
-                           <http://www.w3.org/ns/ssn/forProperty> :EnergyConsumption .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionIncrease
-:EnergyConsumptionIncrease rdf:type owl:NamedIndividual ,
-                                    rdt:PropertyChange ;
-                           rdt:affectsPropertyWith rdt:ValueIncrease ;
-                           <http://www.w3.org/ns/ssn/forProperty> :EnergyConsumption .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeter
-:EnergyConsumptionMeter rdf:type owl:NamedIndividual ,
-                                 <http://www.w3.org/ns/sosa/Sensor> ;
-                        <http://www.w3.org/ns/sosa/observes> :EnergyConsumption ;
-                        <http://www.w3.org/ns/ssn/implements> :EnergyConsumptionMeterProcedure .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterMeasuredEnergyConsumption
-:EnergyConsumptionMeterMeasuredEnergyConsumption rdf:type owl:NamedIndividual ,
-                                                          <http://www.w3.org/ns/ssn/Output> ,
-                                                          <http://www.w3.org/ns/ssn/Property> ;
-                                                 rdt:hasValue "72.6480883"^^xsd:double .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterProcedure
-:EnergyConsumptionMeterProcedure rdf:type owl:NamedIndividual ,
-                                          <http://www.w3.org/ns/sosa/Procedure> ;
-                                 <http://www.w3.org/ns/ssn/hasOutput> :EnergyConsumptionMeterMeasuredEnergyConsumption .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FloorHeating
-:FloorHeating rdf:type owl:NamedIndividual ,
-                       <http://www.w3.org/ns/sosa/Actuator> ;
-              rdt:enacts :EnergyConsumptionIncrease ,
-                         :RoomTemperatureIncrease ;
-              rdt:hasActuatorState "0"^^xsd:int ,
-                                   "1"^^xsd:int .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater
-:Heater rdf:type owl:NamedIndividual ,
-                 <http://www.w3.org/ns/sosa/Actuator> ;
-        rdt:enacts :EnergyConsumptionIncrease ,
-                   :RoomTemperatureIncrease ;
-        rdt:hasActuatorState "0"^^xsd:int ,
-                             "1"^^xsd:int ,
-                             "2"^^xsd:int .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor
-:HumiditySensor rdf:type owl:NamedIndividual ,
-                         <http://www.w3.org/ns/sosa/Sensor> ;
-                <http://www.w3.org/ns/sosa/observes> :RoomHumidity ;
-                <http://www.w3.org/ns/ssn/implements> :HumiditySensorProcedure .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorMeasuredRoomHumidity
-:HumiditySensorMeasuredRoomHumidity rdf:type owl:NamedIndividual ,
-                                             <http://www.w3.org/ns/ssn/Output> ,
-                                             <http://www.w3.org/ns/ssn/Property> ;
-                                    rdt:hasValue "36.73569468758186"^^xsd:double .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure
-:HumiditySensorProcedure rdf:type owl:NamedIndividual ,
-                                  <http://www.w3.org/ns/sosa/Procedure> ;
-                         <http://www.w3.org/ns/ssn/hasOutput> :HumiditySensorMeasuredRoomHumidity .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Motion
-:Motion rdf:type owl:NamedIndividual ,
-                 <http://www.w3.org/ns/sosa/ObservableProperty> ;
-        rdt:hasValue "true"^^xsd:boolean .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionActivated
-:MotionActivated rdf:type owl:NamedIndividual ,
-                          <http://www.w3.org/ns/ssn/Property> ;
-                 rdt:hasValue "true"^^xsd:boolean .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensor
-:MotionSensor rdf:type owl:NamedIndividual ,
-                       <http://www.w3.org/ns/sosa/Sensor> ;
-              <http://www.w3.org/ns/sosa/observes> :Motion ;
-              <http://www.w3.org/ns/ssn/implements> :MotionSensorProcedure .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensorMeasuredMotion
-:MotionSensorMeasuredMotion rdf:type owl:NamedIndividual ,
-                                     <http://www.w3.org/ns/ssn/Output> ,
-                                     <http://www.w3.org/ns/ssn/Property> ;
-                            rdt:hasValue "false"^^xsd:boolean .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensorProcedure
-:MotionSensorProcedure rdf:type owl:NamedIndividual ,
-                                <http://www.w3.org/ns/sosa/Procedure> ;
-                       <http://www.w3.org/ns/ssn/hasOutput> :MotionSensorMeasuredMotion .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OfficeHumidityLowerLimit
-:OfficeHumidityLowerLimit rdf:type owl:NamedIndividual ,
-                                   <http://www.w3.org/ns/ssn/Property> ;
-                          rdt:hasValue "30.0"^^xsd:double .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OfficeHumidityOptimalCondition
-:OfficeHumidityOptimalCondition rdf:type owl:NamedIndividual ,
-                                         rdt:OptimalCondition ,
-                                         [ rdf:type owl:Restriction ;
-                                           owl:onProperty rdt:hasConstraint ;
-                                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                           owl:onClass [ owl:intersectionOf ( [ rdf:type owl:Restriction ;
-                                                                                owl:onProperty rdt:greaterThanOrEqualTo ;
-                                                                                owl:hasValue :OfficeHumidityLowerLimit
-                                                                              ]
-                                                                              [ rdf:type owl:Restriction ;
-                                                                                owl:onProperty rdt:lessThanOrEqualTo ;
-                                                                                owl:hasValue :OfficeHumidityUpperLimit
-                                                                              ]
-                                                                            ) ;
-                                                         rdf:type owl:Class
-                                                       ]
-                                         ] ;
-                                <http://www.w3.org/ns/ssn/forProperty> :RoomHumidity ;
-                                rdt:isBreakable "true"^^xsd:boolean ;
-                                rdt:satisfiedBy "0001-01-01T09:00:00Z"^^xsd:dateTimeStamp .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OfficeHumidityUpperLimit
-:OfficeHumidityUpperLimit rdf:type owl:NamedIndividual ,
-                                   <http://www.w3.org/ns/ssn/Property> ;
-                          rdt:hasValue "50.0"^^xsd:double .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OfficeTemperatureLowerLimit
-:OfficeTemperatureLowerLimit rdf:type owl:NamedIndividual ,
-                                      <http://www.w3.org/ns/ssn/Property> ;
-                             rdt:hasValue "18.0"^^xsd:double .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OfficeTemperatureOptimalCondition
-:OfficeTemperatureOptimalCondition rdf:type owl:NamedIndividual ,
-                                            rdt:OptimalCondition ,
-                                            [ rdf:type owl:Restriction ;
-                                              owl:onProperty rdt:hasConstraint ;
-                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                              owl:onClass [ owl:intersectionOf ( [ rdf:type owl:Restriction ;
-                                                                                   owl:onProperty rdt:greaterThan ;
-                                                                                   owl:hasValue :OfficeTemperatureLowerLimit
-                                                                                 ]
-                                                                                 [ rdf:type owl:Restriction ;
-                                                                                   owl:onProperty rdt:lessThanOrEqualTo ;
-                                                                                   owl:hasValue :OfficeTemperatureUpperLimit
-                                                                                 ]
-                                                                               ) ;
-                                                            rdf:type owl:Class
-                                                          ]
-                                            ] ,
-                                            [ rdf:type owl:Restriction ;
-                                              owl:onProperty rdt:hasEnablingConstraint ;
-                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-                                              owl:onClass [ rdf:type owl:Restriction ;
-                                                            owl:onProperty rdt:equalTo ;
-                                                            owl:hasValue :MotionActivated
-                                                          ]
-                                            ] ;
-                                   rdt:forEnablingProperty :Motion ;
-                                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature ;
-                                   rdt:isBreakable "true"^^xsd:boolean .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#OfficeTemperatureUpperLimit
-:OfficeTemperatureUpperLimit rdf:type owl:NamedIndividual ,
-                                      <http://www.w3.org/ns/ssn/Property> ;
-                             rdt:hasValue "22.0"^^xsd:double .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomHumidity
-:RoomHumidity rdf:type owl:NamedIndividual ,
-                       <http://www.w3.org/ns/sosa/ObservableProperty> ;
-              rdt:hasValue "36.73569468758186"^^xsd:double .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomHumidityDecrease
-:RoomHumidityDecrease rdf:type owl:NamedIndividual ,
-                               rdt:PropertyChange ;
-                      rdt:affectsPropertyWith rdt:ValueDecrease ;
-                      <http://www.w3.org/ns/ssn/forProperty> :RoomHumidity .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomM370
-:RoomM370 rdf:type owl:NamedIndividual ,
-                   <http://www.w3.org/ns/sosa/Platform> ;
-          rdt:hasSimulationModel :RoomM370FMU ;
-          rdt:minimizes :EnergyConsumption ;
-          <http://www.w3.org/ns/sosa/hosts> :Dehumidifier ,
-                                            :EnergyConsumptionMeter ,
-                                            :FloorHeating ,
-                                            :Heater ,
-                                            :HumiditySensor ,
-                                            :TemperatureSensor1 ,
-                                            :TemperatureSensor2 ;
-          rdt:generateCombinationsOnlyFromOptimalConditions "false"^^xsd:boolean .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomM370FMU
-:RoomM370FMU rdf:type owl:NamedIndividual ,
-                      rdt:FmuModel ;
-             rdt:hasSimulationFidelitySeconds "100"^^xsd:int ;
-             rdt:hasURI "roomM370.fmu"^^xsd:anyURI .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperature
-:RoomTemperature rdf:type owl:NamedIndividual ,
-                          <http://www.w3.org/ns/sosa/ObservableProperty> ;
-                 rdt:hasValue "18.75715490032062"^^xsd:double .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperatureIncrease
-:RoomTemperatureIncrease rdf:type owl:NamedIndividual ,
-                                  rdt:PropertyChange ;
-                         rdt:affectsPropertyWith rdt:ValueIncrease ;
-                         <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperatureLowerLimit1
-:RoomTemperatureLowerLimit1 rdf:type owl:NamedIndividual ,
-                                     <http://www.w3.org/ns/ssn/Property> ;
-                            rdt:hasValue "27.5"^^xsd:double .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#RoomTemperatureUpperLimit1
-:RoomTemperatureUpperLimit1 rdf:type owl:NamedIndividual ,
-                                     <http://www.w3.org/ns/ssn/Property> ;
-                            rdt:hasValue "30.2"^^xsd:double .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1
-:TemperatureSensor1 rdf:type owl:NamedIndividual ,
-                             <http://www.w3.org/ns/sosa/Sensor> ;
-                    <http://www.w3.org/ns/sosa/observes> :RoomTemperature ;
-                    <http://www.w3.org/ns/ssn/implements> :TemperatureSensor1Procedure .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1MeasuredRoomTemperature
-:TemperatureSensor1MeasuredRoomTemperature rdf:type owl:NamedIndividual ,
-                                                    <http://www.w3.org/ns/ssn/Input> ,
-                                                    <http://www.w3.org/ns/ssn/Output> ,
-                                                    <http://www.w3.org/ns/ssn/Property> ;
-                                           rdt:hasValue "18.75715490032062"^^xsd:double .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor1Procedure
-:TemperatureSensor1Procedure rdf:type owl:NamedIndividual ,
-                                      <http://www.w3.org/ns/sosa/Procedure> ;
-                             <http://www.w3.org/ns/ssn/hasOutput> :TemperatureSensor1MeasuredRoomTemperature .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2
-:TemperatureSensor2 rdf:type owl:NamedIndividual ,
-                             <http://www.w3.org/ns/sosa/Sensor> ;
-                    <http://www.w3.org/ns/sosa/observes> :RoomTemperature ;
-                    <http://www.w3.org/ns/ssn/implements> :TemperatureSensor2Procedure .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2MeasuredRoomTemperature
-:TemperatureSensor2MeasuredRoomTemperature rdf:type owl:NamedIndividual ,
-                                                    <http://www.w3.org/ns/ssn/Input> ,
-                                                    <http://www.w3.org/ns/ssn/Output> ,
-                                                    <http://www.w3.org/ns/ssn/Property> ;
-                                           rdt:hasValue "18.75715490032062"^^xsd:double .
-
-
-###  http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#TemperatureSensor2Procedure
-:TemperatureSensor2Procedure rdf:type owl:NamedIndividual ,
-                                      <http://www.w3.org/ns/sosa/Procedure> ;
-                             <http://www.w3.org/ns/ssn/hasOutput> :TemperatureSensor2MeasuredRoomTemperature .
-
-
-###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi
+@base <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#>.
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix : <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix rdt: <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/>.
+@prefix xml: <http://www.w3.org/XML/1998/namespace>.
+
+<http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1> a owl:Ontology;
+                                                                    owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins>.
+:Dehumidifier rdt:enacts :EnergyConsumptionIncrease,
+                         :RoomHumidityDecrease;
+              rdt:hasActuatorState "0"^^xsd:int,
+                                   "1"^^xsd:int;
+              a owl:NamedIndividual,
+                <http://www.w3.org/ns/sosa/Actuator>.
+:EnergyConsumption rdt:hasValue "24.177685499999995"^^xsd:double;
+                   a owl:NamedIndividual,
+                     <http://www.w3.org/ns/sosa/ObservableProperty>.
+:EnergyConsumptionDecrease rdt:affectsPropertyWith rdt:ValueDecrease;
+                           a owl:NamedIndividual,
+                             rdt:PropertyChange;
+                           <http://www.w3.org/ns/ssn/forProperty> :EnergyConsumption.
+:EnergyConsumptionIncrease rdt:affectsPropertyWith rdt:ValueIncrease;
+                           a owl:NamedIndividual,
+                             rdt:PropertyChange;
+                           <http://www.w3.org/ns/ssn/forProperty> :EnergyConsumption.
+:EnergyConsumptionMeter a owl:NamedIndividual,
+                          <http://www.w3.org/ns/sosa/Sensor>;
+                        <http://www.w3.org/ns/sosa/observes> :EnergyConsumption;
+                        <http://www.w3.org/ns/ssn/implements> :EnergyConsumptionMeterProcedure.
+:EnergyConsumptionMeterMeasuredEnergyConsumption rdt:hasValue "24.177685499999995"^^xsd:double;
+                                                 a owl:NamedIndividual,
+                                                   <http://www.w3.org/ns/ssn/Output>,
+                                                   <http://www.w3.org/ns/ssn/Property>.
+:EnergyConsumptionMeterProcedure a owl:NamedIndividual,
+                                   <http://www.w3.org/ns/sosa/Procedure>;
+                                 <http://www.w3.org/ns/ssn/hasOutput> :EnergyConsumptionMeterMeasuredEnergyConsumption.
+:FloorHeating rdt:enacts :EnergyConsumptionIncrease,
+                         :RoomTemperatureIncrease;
+              rdt:hasActuatorState "0"^^xsd:int,
+                                   "1"^^xsd:int;
+              a owl:NamedIndividual,
+                <http://www.w3.org/ns/sosa/Actuator>.
+:Heater rdt:enacts :EnergyConsumptionIncrease,
+                   :RoomTemperatureIncrease;
+        rdt:hasActuatorState "0"^^xsd:int,
+                             "1"^^xsd:int,
+                             "2"^^xsd:int;
+        a owl:NamedIndividual,
+          <http://www.w3.org/ns/sosa/Actuator>.
+:HumiditySensor a owl:NamedIndividual,
+                  <http://www.w3.org/ns/sosa/Sensor>;
+                <http://www.w3.org/ns/sosa/observes> :RoomHumidity;
+                <http://www.w3.org/ns/ssn/implements> :HumiditySensorProcedure.
+:HumiditySensorMeasuredRoomHumidity rdt:hasValue "65.14531548783408"^^xsd:double;
+                                    a owl:NamedIndividual,
+                                      <http://www.w3.org/ns/ssn/Output>,
+                                      <http://www.w3.org/ns/ssn/Property>.
+:HumiditySensorProcedure a owl:NamedIndividual,
+                           <http://www.w3.org/ns/sosa/Procedure>;
+                         <http://www.w3.org/ns/ssn/hasOutput> :HumiditySensorMeasuredRoomHumidity.
+:Motion rdt:hasValue "True"^^xsd:boolean;
+        a owl:NamedIndividual,
+          <http://www.w3.org/ns/sosa/ObservableProperty>.
+:MotionActivated rdt:hasValue true;
+                 a owl:NamedIndividual,
+                   <http://www.w3.org/ns/ssn/Property>.
+:MotionSensor a owl:NamedIndividual,
+                <http://www.w3.org/ns/sosa/Sensor>;
+              <http://www.w3.org/ns/sosa/observes> :Motion;
+              <http://www.w3.org/ns/ssn/implements> :MotionSensorProcedure.
+:MotionSensorMeasuredMotion rdt:hasValue "True"^^xsd:boolean;
+                            a owl:NamedIndividual,
+                              <http://www.w3.org/ns/ssn/Output>,
+                              <http://www.w3.org/ns/ssn/Property>.
+:MotionSensorProcedure a owl:NamedIndividual,
+                         <http://www.w3.org/ns/sosa/Procedure>;
+                       <http://www.w3.org/ns/ssn/hasOutput> :MotionSensorMeasuredMotion.
+:OfficeHumidityLowerLimit rdt:hasValue "30.0"^^xsd:double;
+                          a owl:NamedIndividual,
+                            <http://www.w3.org/ns/ssn/Property>.
+:OfficeHumidityOptimalCondition rdt:isBreakable true;
+                                rdt:satisfiedBy "0001-01-01T09:00:00Z"^^xsd:dateTimeStamp;
+                                a owl:NamedIndividual,
+                                  rdt:OptimalCondition,
+                                  [a owl:Restriction ; 
+                                   owl:onProperty rdt:hasConstraint ; 
+                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
+                                   owl:onClass [owl:intersectionOf ([a owl:Restriction ; 
+                                                                    owl:onProperty rdt:greaterThanOrEqualTo ; 
+                                                                    owl:hasValue :OfficeHumidityLowerLimit]
+                                                                    [a owl:Restriction ; 
+                                                                    owl:onProperty rdt:lessThanOrEqualTo ; 
+                                                                    owl:hasValue :OfficeHumidityUpperLimit]) ; 
+                                                a owl:Class]];
+                                <http://www.w3.org/ns/ssn/forProperty> :RoomHumidity.
+:OfficeHumidityUpperLimit rdt:hasValue "50.0"^^xsd:double;
+                          a owl:NamedIndividual,
+                            <http://www.w3.org/ns/ssn/Property>.
+:OfficeTemperatureLowerLimit rdt:hasValue "18.0"^^xsd:double;
+                             a owl:NamedIndividual,
+                               <http://www.w3.org/ns/ssn/Property>.
+:OfficeTemperatureOptimalCondition rdt:forEnablingProperty :Motion;
+                                   rdt:isBreakable true;
+                                   a owl:NamedIndividual,
+                                     rdt:OptimalCondition,
+                                     [a owl:Restriction ; 
+                                      owl:onProperty rdt:hasConstraint ; 
+                                      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
+                                      owl:onClass [owl:intersectionOf ([a owl:Restriction ; 
+                                                                       owl:onProperty rdt:greaterThan ; 
+                                                                       owl:hasValue :OfficeTemperatureLowerLimit]
+                                                                       [a owl:Restriction ; 
+                                                                       owl:onProperty rdt:lessThanOrEqualTo ; 
+                                                                       owl:hasValue :OfficeTemperatureUpperLimit]) ; 
+                                                   a owl:Class]],
+                                     [a owl:Restriction ; 
+                                      owl:onProperty rdt:hasEnablingConstraint ; 
+                                      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
+                                      owl:onClass [a owl:Restriction ; 
+                                                   owl:onProperty rdt:equalTo ; 
+                                                   owl:hasValue :MotionActivated]];
+                                   <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature.
+:OfficeTemperatureUpperLimit rdt:hasValue "22.0"^^xsd:double;
+                             a owl:NamedIndividual,
+                               <http://www.w3.org/ns/ssn/Property>.
+:RoomHumidity rdt:hasValue "65.14531548783408"^^xsd:double;
+              a owl:NamedIndividual,
+                <http://www.w3.org/ns/sosa/ObservableProperty>.
+:RoomHumidityDecrease rdt:affectsPropertyWith rdt:ValueDecrease;
+                      a owl:NamedIndividual,
+                        rdt:PropertyChange;
+                      <http://www.w3.org/ns/ssn/forProperty> :RoomHumidity.
+:RoomM370 rdt:generateCombinationsOnlyFromOptimalConditions false;
+          rdt:hasSimulationModel :RoomM370FMU;
+          rdt:minimizes :EnergyConsumption;
+          a owl:NamedIndividual,
+            <http://www.w3.org/ns/sosa/Platform>;
+          <http://www.w3.org/ns/sosa/hosts> :Dehumidifier,
+                                            :EnergyConsumptionMeter,
+                                            :FloorHeating,
+                                            :Heater,
+                                            :HumiditySensor,
+                                            :TemperatureSensor1,
+                                            :TemperatureSensor2.
+:RoomM370FMU rdt:hasSimulationFidelitySeconds "100"^^xsd:int;
+             rdt:hasURI "roomM370.fmu"^^xsd:anyURI;
+             a owl:NamedIndividual,
+               rdt:FmuModel.
+:RoomTemperature rdt:hasValue "16.916285342960098"^^xsd:double;
+                 a owl:NamedIndividual,
+                   <http://www.w3.org/ns/sosa/ObservableProperty>.
+:RoomTemperatureIncrease rdt:affectsPropertyWith rdt:ValueIncrease;
+                         a owl:NamedIndividual,
+                           rdt:PropertyChange;
+                         <http://www.w3.org/ns/ssn/forProperty> :RoomTemperature.
+:RoomTemperatureLowerLimit1 rdt:hasValue "27.5"^^xsd:double;
+                            a owl:NamedIndividual,
+                              <http://www.w3.org/ns/ssn/Property>.
+:RoomTemperatureUpperLimit1 rdt:hasValue "30.2"^^xsd:double;
+                            a owl:NamedIndividual,
+                              <http://www.w3.org/ns/ssn/Property>.
+:TemperatureSensor1 a owl:NamedIndividual,
+                      <http://www.w3.org/ns/sosa/Sensor>;
+                    <http://www.w3.org/ns/sosa/observes> :RoomTemperature;
+                    <http://www.w3.org/ns/ssn/implements> :TemperatureSensor1Procedure.
+:TemperatureSensor1MeasuredRoomTemperature rdt:hasValue "16.916285342960098"^^xsd:double;
+                                           a owl:NamedIndividual,
+                                             <http://www.w3.org/ns/ssn/Input>,
+                                             <http://www.w3.org/ns/ssn/Output>,
+                                             <http://www.w3.org/ns/ssn/Property>.
+:TemperatureSensor1Procedure a owl:NamedIndividual,
+                               <http://www.w3.org/ns/sosa/Procedure>;
+                             <http://www.w3.org/ns/ssn/hasOutput> :TemperatureSensor1MeasuredRoomTemperature.
+:TemperatureSensor2 a owl:NamedIndividual,
+                      <http://www.w3.org/ns/sosa/Sensor>;
+                    <http://www.w3.org/ns/sosa/observes> :RoomTemperature;
+                    <http://www.w3.org/ns/ssn/implements> :TemperatureSensor2Procedure.
+:TemperatureSensor2MeasuredRoomTemperature rdt:hasValue "16.916285342960098"^^xsd:double;
+                                           a owl:NamedIndividual,
+                                             <http://www.w3.org/ns/ssn/Input>,
+                                             <http://www.w3.org/ns/ssn/Output>,
+                                             <http://www.w3.org/ns/ssn/Property>.
+:TemperatureSensor2Procedure a owl:NamedIndividual,
+                               <http://www.w3.org/ns/sosa/Procedure>;
+                             <http://www.w3.org/ns/ssn/hasOutput> :TemperatureSensor2MeasuredRoomTemperature.
+rdt:PropertyChangeByActuation a owl:Class.

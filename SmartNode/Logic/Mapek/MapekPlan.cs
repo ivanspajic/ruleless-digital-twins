@@ -660,60 +660,42 @@ namespace Logic.Mapek
 
         // Initialize the FMU between enter/exitInitialization (#42).
         protected virtual bool Initialization(Simulation simulation, IModel model, IInstance fmuInstance) {
-            var actions = simulation.InitializationActions.Select(action => (action.Actuator.ParameterName ?? MapekUtilities.GetSimpleName(action.Name), action.Actuator.Type!, action.NewStateValue)).ToList();
-            AssignSimulationInputsToParameters("parameters", model, fmuInstance, actions);
+            // Run the simulation by executing ActuationActions.
+            var fmuActuationInputs = new List<(string, string, object)>();
 
-            // ==================================
-            var tDryBul = model.Variables["fmu_TDryBul"];
-            var tWetBul = model.Variables["fmu_TWetBul"];
-            var tDewPoi = model.Variables["fmu_TDewPoi"];
-            var tBlaSky = model.Variables["fmu_TBlaSky"];
-            var relHum = model.Variables["fmu_relHum"];
-            var hDirNor = model.Variables["fmu_HDirNor"];
-            var hGloHor = model.Variables["fmu_HGloHor"];
-            var hDifHor = model.Variables["fmu_HDifHor"];
-            var hHorIr = model.Variables["fmu_HHorIR"];
-            var winDir = model.Variables["fmu_winDir"];
-            var winSpe = model.Variables["fmu_winSpe"];
-            var ceiHei = model.Variables["fmu_ceiHei"];
-            var nOpa = model.Variables["fmu_nOpa"];
-            var nTot = model.Variables["fmu_nTot"];
-            var lat = model.Variables["fmu_lat"];
-            var lon = model.Variables["fmu_lon"];
-            var alt = model.Variables["fmu_alt"];
-            var pAtm = model.Variables["fmu_pAtm"];
-            var solAlt = model.Variables["fmu_solAlt"];
-            var solDec = model.Variables["fmu_solDec"];
-            var solHouAng = model.Variables["fmu_solHouAng"];
-            var solZen = model.Variables["fmu_solZen"];
-            var solTim = model.Variables["fmu_solTim"];
-            var cloTim = model.Variables["fmu_cloTim"];
+            // Get all ObservableProperties and add them to the inputs for the FMU.
+            var observableProperties = GetObservablePropertiesFromPropertyCache(simulation.PropertyCache!);
 
-            fmuInstance.WriteReal((tDryBul, 300.0));
-            fmuInstance.WriteReal((tWetBul, 290.0));
-            fmuInstance.WriteReal((tDewPoi, 290.0));
-            fmuInstance.WriteReal((tBlaSky, 295.0));
-            fmuInstance.WriteReal((relHum, 0.5));
-            fmuInstance.WriteReal((hDirNor, 0.0));
-            fmuInstance.WriteReal((hGloHor, 0.0));
-            fmuInstance.WriteReal((hDifHor, 0.0));
-            fmuInstance.WriteReal((hHorIr, 0.0));
-            fmuInstance.WriteReal((winDir, 0.0));
-            fmuInstance.WriteReal((winSpe, 1.0));
-            fmuInstance.WriteReal((ceiHei, 2.5));
-            fmuInstance.WriteReal((nOpa, 1.0));
-            fmuInstance.WriteReal((nTot, 1.0));
-            fmuInstance.WriteReal((lat, 30.6));
-            fmuInstance.WriteReal((lon, -26.4));
-            fmuInstance.WriteReal((alt, 90.0));
-            fmuInstance.WriteReal((pAtm, 98900.0));
-            fmuInstance.WriteReal((solAlt, 30.0));
-            fmuInstance.WriteReal((solDec, 15.0));
-            fmuInstance.WriteReal((solHouAng, 0.0));
-            fmuInstance.WriteReal((solZen, 60.0));
-            fmuInstance.WriteReal((solTim, 36000.0));
-            fmuInstance.WriteReal((cloTim, 0.0));
-            // ==================================
+            foreach (var observableProperty in observableProperties) {
+                // Shave off the long name URIs from the instance model.
+                var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
+                fmuActuationInputs.Add((simpleObservablePropertyName, observableProperty.OwlType, observableProperty.Value));
+            }
+
+            // Add all ActuatorStates to the inputs for the FMU.
+            foreach (var action in simulation.Actions) {
+                string name;
+                string type;
+                object value;
+                if (action is ActuationAction actuationAction) {
+                    name = actuationAction.Actuator.ParameterName ?? actuationAction.Actuator.Name;
+                    type = actuationAction.Actuator.Type!;
+                    value = actuationAction.NewStateValue;
+                } else {
+                    var reconfigurationAction = (ReconfigurationAction)action;
+                    // TODO: override here as well?
+                    name = reconfigurationAction.ConfigurableParameter.Name;
+                    type = reconfigurationAction.ConfigurableParameter.OwlType;
+                    value = reconfigurationAction.NewParameterValue;
+                }
+
+                // Shave off the long name URIs from the instance model.
+                var simpleName = MapekUtilities.GetSimpleName(name);
+                fmuActuationInputs.Add((simpleName, type, value));
+            }
+
+            _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
+            AssignSimulationInputsToParameters("inputs", model, fmuInstance, fmuActuationInputs);
 
             return true;
         }
@@ -751,44 +733,6 @@ namespace Logic.Mapek
             Debug.Assert(fmuInstance != null, "Instance is null after creation.");
             _logger.LogDebug("Setting time {t}", simulation.Index * simulationDurationSeconds);
             fmuInstance.StartTime(simulation.Index * simulationDurationSeconds, (i) => Initialization(simulation, model, i));
-
-            // Run the simulation by executing ActuationActions.
-            var fmuActuationInputs = new List<(string, string, object)>();
-
-            // Get all ObservableProperties and add them to the inputs for the FMU.
-            var observableProperties = GetObservablePropertiesFromPropertyCache(simulation.PropertyCache!);
-
-            foreach (var observableProperty in observableProperties) {
-                // Shave off the long name URIs from the instance model.
-                var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
-                fmuActuationInputs.Add((simpleObservablePropertyName, observableProperty.OwlType, observableProperty.Value));
-            }
-
-            // Add all ActuatorStates to the inputs for the FMU.
-            foreach (var action in simulation.Actions)
-            {
-                string name;
-                string type;
-                object value;
-                if (action is ActuationAction actuationAction) {
-                    name = actuationAction.Actuator.ParameterName ?? actuationAction.Actuator.Name;
-                    type = actuationAction.Actuator.Type!;
-                    value = actuationAction.NewStateValue;
-                } else {
-                    var reconfigurationAction = (ReconfigurationAction)action;
-                    // TODO: override here as well?
-                    name = reconfigurationAction.ConfigurableParameter.Name;
-                    type = reconfigurationAction.ConfigurableParameter.OwlType;
-                    value = reconfigurationAction.NewParameterValue;
-                }
-
-                // Shave off the long name URIs from the instance model.
-                var simpleName = MapekUtilities.GetSimpleName(name);
-                fmuActuationInputs.Add((simpleName, type, value));
-            }
-
-            _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
-            AssignSimulationInputsToParameters("inputs", model, fmuInstance, fmuActuationInputs);
 
             _logger.LogDebug("Tick ({fmuName}), {secs}s", fmuInstance.Name, simulationDurationSeconds);
             // Advance the FMU time for the duration of the simulation tick in steps of simulation fidelity.

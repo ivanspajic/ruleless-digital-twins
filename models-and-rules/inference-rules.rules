@@ -2,15 +2,65 @@
 @prefix meta: <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/>.
 @prefix ssn: <http://www.w3.org/ns/ssn/>.
 @prefix sosa: <http://www.w3.org/ns/sosa/>.
-@include <verification-rules.rules>.
-@include <user-rules.rules>.
 
 
 
-// Creates containers of information for evaluating atomic constraints in OptimalConditions.
+// These rules mark the constraint nodes of OptimalConditions as part of their OptimalCondition and extract
+// information for further processing.
+
+// Marks the start of an OptimalCondition constraint tree.
 [rule1a:    (?platform rdf:type sosa:Platform)
             (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
-            (?aNode :withOptimalConditionProperty ?optimalConditionProperty)
+            (?optimalCondition rdf:type meta:OptimalCondition)
+            (?optimalCondition rdf:type ?aNode1)
+            (?aNode1 rdf:type owl:Restriction)
+            (?aNode1 owl:onClass ?aNode2)
+            ->  (?aNode2 :withOptimalCondition ?optimalCondition)
+]
+
+// Marks the nodes of a conjunctive constraint.
+[rule1b:    (?platform rdf:type sosa:Platform)
+            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?aNode1 :withOptimalCondition ?optimalCondition)
+            (?aNode1 owl:intersectionOf ?aList1)
+            (?aList1 rdf:first ?aNode2)
+            (?aList1 rdf:rest ?aList2)
+            (?aList2 rdf:first ?aNode3)
+            ->  (?aNode2 :withOptimalCondition ?optimalCondition)
+                (?aNode3 :withOptimalCondition ?optimalCondition)
+]
+
+// Marks the nodes of a disjunctive constraint.
+[rule1c:    (?platform rdf:type sosa:Platform)
+            (?platform meta:generateCombinationsOnlyFromOptimalConditions "true"^^xsd:boolean)
+            (?aNode1 :withOptimalCondition ?optimalCondition)
+            (?aNode1 owl:unionOf ?aList1)
+            (?aList1 rdf:first ?aNode2)
+            (?aList1 rdf:rest ?aList2)
+            (?aList2 rdf:first ?aNode3)
+            ->  (?aNode2 :withOptimalCondition ?optimalCondition)
+                (?aNode3 :withOptimalCondition ?optimalCondition)
+]
+
+// The following rules extract property values directly into the node for easier subsequent processing.
+
+// Extracts OptimalCondition constraint values.
+[rule1d:    (?aNode :withOptimalCondition ?optimalCondition)
+            (?optimalCondition ssn:forProperty ?optimalConditionProperty)
+            (?optimalConditionProperty meta:hasValue ?optimalConditionPropertyValue)
+            (?aNode owl:hasValue ?boundProperty)
+            (?boundProperty meta:hasValue ?boundPropertyValue)
+            (?aNode owl:onProperty ?operator)
+            makeTemp(?evaluationContainer)
+            ->  (?evaluationContainer :withOperator ?operator)
+                (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
+                (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
+                (?evaluationContainer :withAtomicConstraintContainer ?aNode)
+]
+
+// Extracts OptimalCondition enabling values.
+[rule1e:    (?aNode :withOptimalCondition ?optimalCondition)
+            (?optimalCondition meta:forEnablingProperty ?optimalConditionProperty)
             (?optimalConditionProperty meta:hasValue ?optimalConditionPropertyValue)
             (?aNode owl:hasValue ?boundProperty)
             (?boundProperty meta:hasValue ?boundPropertyValue)
@@ -35,29 +85,19 @@
             ->  (?aNode :withEvaluationResult "true"^^xsd:boolean)
 ]
 
-// If the comparison operator is equalTo (=) and the condition Property is less than the bound Property, mark the container with a false
+// If the comparison operator is equalTo (=) and the condition Property is not equal to the bound Property, mark the container with a false
 // evaluation result.
 [rule2b:    (?evaluationContainer :withOperator meta:equalTo)
             (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
             (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
             (?evaluationContainer :withAtomicConstraintContainer ?aNode)
-            lessThan(?optimalConditionPropertyValue, ?boundPropertyValue)
-            ->  (?aNode :withEvaluationResult "false"^^xsd:boolean)
-]
-
-// If the comparison operator is equalTo (=) and the condition Property is greater than the bound Property, mark the container with a false
-// evaluation result.
-[rule2c:    (?evaluationContainer :withOperator meta:equalTo)
-            (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
-            (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
-            (?evaluationContainer :withAtomicConstraintContainer ?aNode)
-            greaterThan(?optimalConditionPropertyValue, ?boundPropertyValue)
+            notEqual(?optimalConditionPropertyValue, ?boundPropertyValue)
             ->  (?aNode :withEvaluationResult "false"^^xsd:boolean)
 ]
 
 // If the comparison operator is lessThan (<) and the condition Property is less than the bound Property, mark the container with a true
 // evaluation result.
-[rule2d:    (?evaluationContainer :withOperator meta:lessThan)
+[rule2c:    (?evaluationContainer :withOperator meta:lessThan)
             (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
             (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
             (?evaluationContainer :withAtomicConstraintContainer ?aNode)
@@ -67,7 +107,7 @@
 
 // If the comparison operator is lessThan (<) and the condition Property is greater than or equal to the bound Property, mark the container
 // with a false evaluation result.
-[rule2e:    (?evaluationContainer :withOperator meta:lessThan)
+[rule2d:    (?evaluationContainer :withOperator meta:lessThan)
             (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
             (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
             (?evaluationContainer :withAtomicConstraintContainer ?aNode)
@@ -77,7 +117,7 @@
 
 // If the comparison operator is lessThanOrEqualTo (<=) and the condition Property is less than or equal to the bound Property, mark the
 // container with a true evaluation result.
-[rule2f:    (?evaluationContainer :withOperator meta:lessThanOrEqualTo)
+[rule2e:    (?evaluationContainer :withOperator meta:lessThanOrEqualTo)
             (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
             (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
             (?evaluationContainer :withAtomicConstraintContainer ?aNode)
@@ -87,7 +127,7 @@
 
 // If the comparison operator is lessThanOrEqualTo (<=) and the condition Property is greater than the bound Property, mark the container with
 // a false evaluation result.
-[rule2g:    (?evaluationContainer :withOperator meta:lessThanOrEqualTo)
+[rule2f:    (?evaluationContainer :withOperator meta:lessThanOrEqualTo)
             (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
             (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
             (?evaluationContainer :withAtomicConstraintContainer ?aNode)
@@ -97,7 +137,7 @@
 
 // If the comparison operator is greaterThan (>) and the condition Property is greater than the bound Property, mark the container with a true
 // evaluation result.
-[rule2h:    (?evaluationContainer :withOperator meta:greaterThan)
+[rule2g:    (?evaluationContainer :withOperator meta:greaterThan)
             (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
             (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
             (?evaluationContainer :withAtomicConstraintContainer ?aNode)
@@ -107,7 +147,7 @@
 
 // If the comparison operator is greaterThan (>) and the condition Property is less than or equal to the bound Property, mark the container
 // with a false evaluation result.
-[rule2i:    (?evaluationContainer :withOperator meta:greaterThan)
+[rule2h:    (?evaluationContainer :withOperator meta:greaterThan)
             (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
             (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
             (?evaluationContainer :withAtomicConstraintContainer ?aNode)
@@ -117,7 +157,7 @@
 
 // If the comparison operator is greaterThanOrEqualTo (>=) and the condition Property is greater than or equal to the bound Property, mark the
 // container with a true evaluation result.
-[rule2j:    (?evaluationContainer :withOperator meta:greaterThanOrEqualTo)
+[rule2i:    (?evaluationContainer :withOperator meta:greaterThanOrEqualTo)
             (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
             (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
             (?evaluationContainer :withAtomicConstraintContainer ?aNode)
@@ -127,7 +167,7 @@
 
 // If the comparison operator is greaterThanOrEqualTo (>=) and the condition Property is less than the bound Property, mark the container with
 // a false evaluation result.
-[rule2k:    (?evaluationContainer :withOperator meta:greaterThanOrEqualTo)
+[rule2j:    (?evaluationContainer :withOperator meta:greaterThanOrEqualTo)
             (?evaluationContainer :withOptimalConditionPropertyValue ?optimalConditionPropertyValue)
             (?evaluationContainer :withBoundPropertyValue ?boundPropertyValue)
             (?evaluationContainer :withAtomicConstraintContainer ?aNode)
@@ -138,59 +178,61 @@
 // The following rules add an evaluation result to a conjunctive constraint node based on the evaluations of its atomic constraints. This step
 // simplifies further checks for whether an OptimalCondition is satisfied.
 
-// If both conjunctive children evaluate to true, mark their shared ancestor node as true as well.
-[rule2l:    (?aNode1 owl:intersectionOf ?aList)
-            (?aList rdf:first ?aNode2)
-            (?aNode2 rdf:type owl:Restriction)
-            (?aNode2 :withCheck "conjunction")
+// Marks the ancestor node of a conjunction as evaluated to "true" if both its descendants evaluated to "true".
+[rule2k:    (?aNode1 owl:intersectionOf ?aList1)
+            (?aList1 rdf:first ?aNode2)
             (?aNode2 :withEvaluationResult "true"^^xsd:boolean)
-            (?aNode2 :withOptimalCondition ?optimalCondition)
-            (?aNode2 :withIdentifier ?identifier)
-            (?aNode3 rdf:type owl:Restriction)
-            (?aNode3 :withCheck "conjunction")
+            (?aList1 rdf:rest ?aList2)
+            (?aList2 rdf:first ?aNode3)
             (?aNode3 :withEvaluationResult "true"^^xsd:boolean)
-            (?aNode3 :withOptimalCondition ?optimalCondition)
-            (?aNode3 :withIdentifier ?identifier)
             ->  (?aNode1 :withEvaluationResult "true"^^xsd:boolean)
 ]
 
-// If the first conjunctive child evaluates to false, mark the shared ancestor node as false.
-[rule2m:    (?aNode1 owl:intersectionOf ?aList)
+// Marks the ancestor node of a conjunction as evaluated to "false" if the first of its descendants evaluated to "false".
+[rule2l:    (?aNode1 owl:intersectionOf ?aList)
             (?aList rdf:first ?aNode2)
-            (?aNode2 rdf:type owl:Restriction)
-            (?aNode2 :withCheck "conjunction")
-            (?aNode2 :withEvaluationResult "true"^^xsd:boolean)
-            (?aNode2 :withOptimalCondition ?optimalCondition)
-            (?aNode2 :withIdentifier ?identifier)
-            (?aNode3 rdf:type owl:Restriction)
-            (?aNode3 :withCheck "conjunction")
-            (?aNode3 :withEvaluationResult "false"^^xsd:boolean)
-            (?aNode3 :withOptimalCondition ?optimalCondition)
-            (?aNode3 :withIdentifier ?identifier)
+            (?aNode2 :withEvaluationResult "false"^^xsd:boolean)
             ->  (?aNode1 :withEvaluationResult "false"^^xsd:boolean)
 ]
 
-// If the second conjunctive child evaluates to false, mark the shared ancestor node as false.
-[rule2n:    (?aNode1 owl:intersectionOf ?aList)
-            (?aList rdf:first ?aNode2)
-            (?aNode2 rdf:type owl:Restriction)
-            (?aNode2 :withCheck "conjunction")
+// Marks the ancestor node of a conjunction as evaluated to "false" if the second of its descendants evaluated to "false".
+[rule2m:    (?aNode1 owl:intersectionOf ?aList1)
+            (?aList1 rdf:rest ?aList2)
+            (?aList2 rdf:first ?aNode2)
             (?aNode2 :withEvaluationResult "false"^^xsd:boolean)
-            (?aNode2 :withOptimalCondition ?optimalCondition)
-            (?aNode2 :withIdentifier ?identifier)
-            (?aNode3 rdf:type owl:Restriction)
-            (?aNode3 :withCheck "conjunction")
-            (?aNode3 :withEvaluationResult "true"^^xsd:boolean)
-            (?aNode3 :withOptimalCondition ?optimalCondition)
-            (?aNode3 :withIdentifier ?identifier)
             ->  (?aNode1 :withEvaluationResult "false"^^xsd:boolean)
+]
+
+// Marks the ancestor node of a disjunction as evaluated to "false" if both of its descendants evaluated to "false".
+[rule2n:    (?aNode1 owl:unionOf ?aList1)
+            (?aList1 rdf:first ?aNode2)
+            (?aNode2 :withEvaluationResult "false"^^xsd:boolean)
+            (?aList1 rdf:rest ?aList2)
+            (?aList2 rdf:first ?aNode3)
+            (?aNode3 :withEvaluationResult "false"^^xsd:boolean)
+            ->  (?aNode1 :withEvaluationResult "false"^^xsd:boolean)
+]
+
+// Marks the ancestor node of a disjunction as evaluated to "true" if the first of its descendants evaluated to "true".
+[rule2o:    (?aNode1 owl:unionOf ?aList)
+            (?aList rdf:first ?aNode2)
+            (?aNode2 :withEvaluationResult "true"^^xsd:boolean)
+            ->  (?aNode1 :withEvaluationResult "true"^^xsd:boolean)
+]
+
+// Marks the ancestor node of a disjunction as evaluated to "true" if the second of its descendants evaluated to "true".
+[rule2p:    (?aNode1 owl:unionOf ?aList1)
+            (?aList1 rdf:rest ?aList2)
+            (?aList2 rdf:first ?aNode2)
+            (?aNode2 :withEvaluationResult "true"^^xsd:boolean)
+            ->  (?aNode1 :withEvaluationResult "true"^^xsd:boolean)
 ]
 
 
 
 // These rules mark OptimalConditions as enabled provided their respective enabling constraints evaluate to true.
 
-// If the enabling constraint is a single (e.g., >15) or conjunctive constraint (e.g., >15 and <22), and it`s true, enable the OptimalCondition.
+// If the enabling constraint is true, enable the OptimalCondition.
 [rule3a:    (?optimalCondition rdf:type meta:OptimalCondition)
             (?optimalCondition rdf:type ?aNode1)
             (?aNode1 rdf:type owl:Restriction)
@@ -200,62 +242,29 @@
             ->  (?optimalCondition :isEnabled "true"^^xsd:boolean)
 ]
 
-// If the enabling constraint is a non-conjunctive, disjunctive constraint (e.g., <15 or >22) and it`s true, enable the OptimalCondition.
-[rule3b:    (?aNode rdf:type owl:Restriction)
-            (?aNode :withOptimalCondition ?optimalCondition)
-            (?aNode :withConstraintType meta:hasEnablingConstraint)
-            (?aNode :withCheck "disjunction")
-            (?aNode :withEvaluationResult "true"^^xsd:boolean)
-            noValue(?aNode :withCheck "conjunction")
-            ->  (?optimalCondition :isEnabled "true"^^xsd:boolean)
-]
-
 // In case the OptimalCondition has no enabling constraints, it is enabled by default.
-[rule3c:    (?optimalCondition rdf:type meta:OptimalCondition)
-            (?optimalCondition rdf:type ?aNode)
-            (?aNode rdf:type owl:Restriction)
-            noValue(?aNode owl:onProperty meta:hasEnablingConstraint)
+[rule3b:    (?optimalCondition rdf:type meta:OptimalCondition)
+            noValue(?optimalCondition meta:forEnablingProperty ?enablingProperty)
             ->  (?optimalCondition :isEnabled "true"^^xsd:boolean)
 ]
 
 
 
-// The following rules mark specific types of unsatisfied operators based on their evaluation result.
-
-// All non-disjunctive constraints evaluating to false should generate mitigation Actions. Thus, their operators are marked as unsatisfied.
-[rule4a:    (?aNode rdf:type owl:Restriction)
-            (?aNode :withOptimalCondition ?optimalCondition)
-            (?optimalCondition :isEnabled "true"^^xsd:boolean)
-            (?aNode :withOptimalConditionProperty ?optimalConditionProperty)
-            (?aNode :withConstraintType meta:hasConstraint)
-            (?aNode :withOperatorCheck ?operator)
-            (?aNode :withEvaluationResult "false"^^xsd:boolean)
-            noValue(?aNode :withCheck "disjunction")
-            makeTemp(?evaluationContainer)
-            ->  (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
-                (?evaluationContainer :withUnsatisfiedOperator ?operator)
-]
-
-// In case both sides of a disjunctive constraint evaluate to false, the OptimalCondition should generate mitigation Actions. Since
-// disjunctive OptimalConditions only become unsatisfied if their condition Property is between or outside both range constraints,
-// the OptimalCondition can be restored by both a ValueIncrease and a ValueDecrease on that Property. For simplicity, we therefore
-// say that an equalTo is the unsatisfied operator.
-[rule4b:    (?optimalCondition rdf:type meta:OptimalCondition)
+// The following rule marks specific types of unsatisfied operators based on their OptimalCondition`s evaluation result.
+[rule4a:    (?optimalCondition rdf:type meta:OptimalCondition)
             (?optimalCondition :isEnabled "true"^^xsd:boolean)
             (?optimalCondition rdf:type ?aNode1)
             (?optimalCondition ssn:forProperty ?optimalConditionProperty)
             (?aNode1 rdf:type owl:Restriction)
             (?aNode1 owl:onProperty meta:hasConstraint)
             (?aNode1 owl:onClass ?aNode2)
-            (?aNode2 owl:unionOf ?aList1)
-            (?aList1 rdf:first ?aNode3)
+            (?aNode2 :withEvaluationResult "false"^^xsd:boolean)
+            (?aNode3 :withOptimalCondition ?optimalCondition)
             (?aNode3 :withEvaluationResult "false"^^xsd:boolean)
-            (?aList1 rdf:rest ?aList2)
-            (?aList2 rdf:first ?aNode4)
-            (?aNode4 :withEvaluationResult "false"^^xsd:boolean)
+            (?aNode3 owl:onProperty ?operator)
             makeTemp(?evaluationContainer)
             ->  (?evaluationContainer :withOptimalConditionProperty ?optimalConditionProperty)
-                (?evaluationContainer :withUnsatisfiedOperator meta:equalTo)
+                (?evaluationContainer :withUnsatisfiedOperator ?operator)
 ]
 
 

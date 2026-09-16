@@ -37,14 +37,14 @@ namespace Logic.Mapek {
             if (officeTemperature <= MinimumOfficeTemperature) {
                 heater.State = 1;
                 floorHeating.State = 1;
-            } else {
+            } else if (officeTemperature >= MaximumOfficeTemperature) {
                 heater.State = 0;
                 floorHeating.State = 0;
             }
 
             if (officeHumidity >= MaximumOfficeHumidity) {
                 dehumidifier.State = 1;
-            } else {
+            } else if (officeHumidity <= MinimumOfficeHumidity) {
                 dehumidifier.State = 0;
             }
 

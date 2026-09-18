@@ -122,7 +122,7 @@ namespace Logic.Mapek {
                     @property meta:hasValue ?oldValue .
                 }");
 
-            query.SetLiteral("newValue", propertyValue, false);
+            query.SetLiteral("newValue", propertyValue.ToLowerInvariant(), false);
             query.SetUri("type", new Uri(property.OwlType));
             query.SetUri("property", new Uri(property.Name));
 
@@ -141,7 +141,7 @@ namespace Logic.Mapek {
                     @property meta:hasValue ?oldValue .
                 }");
 
-            query.SetLiteral("newValue", propertyValue, false);
+            query.SetLiteral("newValue", propertyValue.ToLowerInvariant(), false);
             query.SetUri("type", new Uri(property.OwlType));
             query.SetUri("property", new Uri(property.Name));
 
@@ -160,7 +160,7 @@ namespace Logic.Mapek {
                     @property meta:hasValue ?oldValue .
                 }");
 
-            query.SetLiteral("newValue", configurableParameter.Value.ToString(), false);
+            query.SetLiteral("newValue", configurableParameter.Value.ToString()!.ToLowerInvariant(), false);
             query.SetUri("type", new Uri(configurableParameter.OwlType));
             query.SetUri("configurableParameter", new Uri(configurableParameter.Name));
 

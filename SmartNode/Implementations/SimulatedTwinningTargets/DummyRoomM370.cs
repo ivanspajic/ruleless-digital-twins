@@ -121,13 +121,15 @@ namespace Implementations.SimulatedTwinningTargets
             var dehumidifierParameter = _fmuModel.Variables[DehumidifierParameterName];
 
             // Set the old actuator states to account for TT changes during MAPE-K cycle execution before the DT enacted its decision.
-            _fmuInstance.StartTime(0, (i) => true);
+            _fmuInstance.StartTime(0, (i) => {
+                _fmuInstance.WriteInteger((heaterParameter, _oldHeaterState));
+                _fmuInstance.WriteInteger((floorHeatingParameter, _oldFloorHeatingState));
+                _fmuInstance.WriteInteger((dehumidifierParameter, _oldDehumidifierState));
+                _fmuInstance.WriteReal((roomTemperature, _roomTemperature));
+                _fmuInstance.WriteReal((roomHumidity, _roomHumidity));
 
-            _fmuInstance.WriteInteger((heaterParameter, _oldHeaterState));
-            _fmuInstance.WriteInteger((floorHeatingParameter, _oldFloorHeatingState));
-            _fmuInstance.WriteInteger((dehumidifierParameter, _oldDehumidifierState));
-            _fmuInstance.WriteReal((roomTemperature, _roomTemperature));
-            _fmuInstance.WriteReal((roomHumidity, _roomHumidity));
+                return true;
+            });
 
             // Advance time for the duration of the MAPE-K execution to simulate TT changes in the meantime.
             AdvanceFmuTimeInSteps(_fmuInstance, mapekExecutionDuration);

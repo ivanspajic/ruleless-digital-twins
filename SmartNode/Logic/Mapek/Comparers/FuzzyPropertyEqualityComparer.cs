@@ -14,13 +14,13 @@ namespace Logic.Mapek.Comparers {
             bool valuesWithinRange;
             // No fuzzy non-numericals!
 
-            //// This is a workaround for CBR testing due to no matches being possible on accumulated properties.
-            //if (x!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption") && y!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption")) {
-            //    return true;
-            //}
-            //if (x!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterMeasuredEnergyConsumption") && y!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterMeasuredEnergyConsumption")) {
-            //    return true;
-            //}
+            // This is a workaround for buffered decision hits and CBR testing due to no matches being possible on accumulated properties.
+            if (x!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption") && y!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption")) {
+                return true;
+            }
+            if (x!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterMeasuredEnergyConsumption") && y!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterMeasuredEnergyConsumption")) {
+                return true;
+            }
 
             if ((!x!.OwlType.Equals("http://www.w3.org/2001/XMLSchema#double") || !y!.OwlType.Equals("http://www.w3.org/2001/XMLSchema#double")) &&
                 (!x!.OwlType.Equals("http://www.w3.org/2001/XMLSchema#int") || !y!.OwlType.Equals("http://www.w3.org/2001/XMLSchema#int"))) {

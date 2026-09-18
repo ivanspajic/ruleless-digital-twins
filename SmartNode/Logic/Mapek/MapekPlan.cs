@@ -1,7 +1,6 @@
 ﻿using Femyou;
 using Fitness;
 using Logic.FactoryInterface;
-using Logic.Mapek.Comparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.DependencyInjection;

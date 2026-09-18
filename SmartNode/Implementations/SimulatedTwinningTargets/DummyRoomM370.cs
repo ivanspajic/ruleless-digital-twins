@@ -24,7 +24,7 @@ namespace Implementations.SimulatedTwinningTargets
         private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
         private readonly string _fmuModelFullFilepath;
 
-        private double _roomTemperature = 27.7;
+        private double _roomTemperature = 17.7;
         private double _roomHumidity = 10.2;
         private double _energyConsumption = 0.0;
         private double _energyConsumptionAccumulated = 0.0;
@@ -184,20 +184,24 @@ namespace Implementations.SimulatedTwinningTargets
         }
 
         private static void AdvanceFmuTimeInSteps(IInstance fmuInstance, double mapekExecutionDuration) {
-            if (mapekExecutionDuration >= SimulationFidelitySeconds) {
-                var maximumSteps = (double)mapekExecutionDuration / SimulationFidelitySeconds;
-                var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
-                var difference = maximumSteps - maximumStepsRoundedDown;
+            if (mapekExecutionDuration >= 0) {
+                if (mapekExecutionDuration >= SimulationFidelitySeconds) {
+                    var maximumSteps = (double)mapekExecutionDuration / SimulationFidelitySeconds;
+                    var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
+                    var difference = maximumSteps - maximumStepsRoundedDown;
 
-                for (var i = 0; i < maximumStepsRoundedDown; i++) {
-                    fmuInstance.AdvanceTime(SimulationFidelitySeconds);
+                    for (var i = 0; i < maximumStepsRoundedDown; i++) {
+                        fmuInstance.AdvanceTime(SimulationFidelitySeconds);
+                    }
+
+                    // Advance the remainder of time to stay true to the simulation duration.
+                    fmuInstance.AdvanceTime(difference);
+                } else {
+                    fmuInstance.AdvanceTime(mapekExecutionDuration);
                 }
-
-                // Advance the remainder of time to stay true to the simulation duration.
-                fmuInstance.AdvanceTime(difference);
             } else {
-                fmuInstance.AdvanceTime(mapekExecutionDuration);
-            }            
+                throw new Exception($"MAPE execution took longer than the alloted time ({CycleDurationSeconds}s)!");
+            }
         }
     }
 }

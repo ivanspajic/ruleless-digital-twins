@@ -150,10 +150,19 @@ namespace Logic.Mapek {
 
             var procedureQueryResult = _mapekKnowledge.ExecuteQuery(query);
 
-            // Although there may be multiple results here, the instance models should be configured such that a single soft Sensor
+            // Although there may be multiple results here, instance models should be configured such that a single soft Sensor
             // (Procedure) outputs a unique Property. This avoids potential cases of multiple values for the same Property.
             if (procedureQueryResult.Results.Count > 1) {
                 _logger.LogDebug("Ooops, more results than expected!");
+            } else if (procedureQueryResult.Results.Count == 0) {
+                // In case of meta-Properties being used as Inputs for soft Sensors, simply create a node without a Sensor.
+                _logger.LogDebug("Standalone property found. Continuing without further querying.");
+
+                softSensorTreeNode.NodeItem = null!;
+                softSensorTreeNode.Children = softSensorNodeChildren;
+                softSensorTreeNode.OutputProperty = propertyName;
+
+                return;
             }
             var procedureNode = procedureQueryResult.Results[0]["procedure"];
             var sensorNode = procedureQueryResult.Results[0]["sensor"];

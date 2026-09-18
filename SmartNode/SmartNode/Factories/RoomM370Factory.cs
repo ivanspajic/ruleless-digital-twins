@@ -114,6 +114,20 @@ namespace SmartNode.Factories {
                         _dummyRoomM370)
                 },
                 {
+                    ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionAccumulator",
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionAccumulatorProcedure"),
+                    new DummyEnergyConsumptionAccumulatorSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionAccumulatorProcedure",
+                        "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionAccumulator",
+                        _dummyRoomM370)
+                },
+                {
+                    ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyAccumulator",
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyAccumulatorProcedure"),
+                    new DummyEnergyConsumptionAccumulatorSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyAccumulatorProcedure",
+                        "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyAccumulator",
+                        _dummyRoomM370)
+                },
+                {
                     ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensor",
                     "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure"),
                     new DummyHumiditySensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#HumiditySensorProcedure",
@@ -145,10 +159,10 @@ namespace SmartNode.Factories {
                         "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MotionSensorProcedure")
                 },
                 {
-                    ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
-                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure"),
-                    new FakepoolSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
-                        "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure")
+                    ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fakepool",
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolProcedure"),
+                    new FakepoolSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fakepool",
+                        "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolProcedure")
                 },
                 {
                     ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceDummySensor",
@@ -158,9 +172,9 @@ namespace SmartNode.Factories {
 
                 },
                 {
-                    ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergySoftSensor",
+                    ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergySensor",
                     "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyProcedure"),
-                    new PricePerEnergySoftSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergySoftSensor",
+                    new PricePerEnergySoftSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergySensor",
                         "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyProcedure", (x,y) => x*y)
                 },
 

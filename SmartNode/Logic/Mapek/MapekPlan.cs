@@ -533,7 +533,10 @@ namespace Logic.Mapek
         }
 
         private void UpdateMapekCycleNumberForSimulation(Simulation simulation) {
-            var simulatedMapekCycle = _currentMapekCycle + simulation.Index;
+            // Add 1 to adjust for the price sensor looking at one cycle back by default.
+            // TODO: review if there's a nicer way of implementing this mechanism.
+            var simulatedMapekCycle = _currentMapekCycle + simulation.Index + 1;
+
             // XXX: respect model-authority
             // Only inject into models that actually have this "sensor". TODO: review.
             if (simulation.PropertyCache.Properties.ContainsKey("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MapekCycle")) {

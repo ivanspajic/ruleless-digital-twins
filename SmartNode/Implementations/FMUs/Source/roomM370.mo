@@ -7,10 +7,10 @@ model roomM370
   Real EnergyConsumption;
   constant Integer slowdownValue = 1000;
   
-  // Used for testing with CLI tools since they complain they can't initialize with non input/parameter variables.
-  input Real RoomTemperatureInitial(start = 20);
-  input Real RoomHumidityInitial(start = 20);
-  input Real EnergyConsumptionInitial(start = 0);
+  //// Used for testing with CLI tools since they complain they can't initialize with non input/parameter variables.
+  //input Real RoomTemperatureInitial(start = 20);
+  //input Real RoomHumidityInitial(start = 20);
+  //input Real EnergyConsumptionInitial(start = 0);
  
 function GetRoomTemperatureLimit
   input Integer Heater;
@@ -59,11 +59,11 @@ algorithm
   end if;
 end GetEnergyConsumptionRate;
 
-initial equation
-  // Used for testing with CLI tools since they complain they can't initialize with non input/parameter variables.
-  RoomTemperature = RoomTemperatureInitial;
-  RoomHumidity = RoomHumidityInitial;
-  EnergyConsumption = EnergyConsumptionInitial;
+//initial equation
+  //// Used for testing with CLI tools since they complain they can't initialize with non input/parameter variables.
+  //RoomTemperature = RoomTemperatureInitial;
+  //RoomHumidity = RoomHumidityInitial;
+  //EnergyConsumption = EnergyConsumptionInitial;
 equation
   der(RoomTemperature) = (GetRoomTemperatureLimit(Heater, FloorHeating) - RoomTemperature) / slowdownValue;
   der(RoomHumidity) = (GetRoomHumidityLimit(Dehumidifier) - RoomHumidity) / slowdownValue;

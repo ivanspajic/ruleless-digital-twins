@@ -3,7 +3,6 @@ using Logic.Models.MapekModels;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Reflection;
 using static Femyou.IModel;
 
 namespace Implementations.SimulatedTwinningTargets
@@ -25,9 +24,11 @@ namespace Implementations.SimulatedTwinningTargets
         private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
         private readonly string _fmuModelFullFilepath;
 
-        private double _roomTemperature = 17.7;
+        private double _roomTemperature = 27.7;
         private double _roomHumidity = 10.2;
         private double _energyConsumption = 0.0;
+        private double _energyConsumptionAccumulated = 0.0;
+        private double _pricePerEnergyAccumulated = 0.0;
 
         private int _heaterState = 0;
         private int _floorHeatingState = 0;
@@ -58,6 +59,15 @@ namespace Implementations.SimulatedTwinningTargets
 
         public double EnergyConsumption {
             get => _energyConsumption;
+        }
+
+        public double EnergyConsumptionAccumulated {
+            get => _energyConsumptionAccumulated;
+        }
+
+        public double PricePerEnergyAccumulated {
+            get => _pricePerEnergyAccumulated;
+            set => _pricePerEnergyAccumulated = value;
         }
 
         // Used for Actuator access.
@@ -161,8 +171,10 @@ namespace Implementations.SimulatedTwinningTargets
             // Set the output properties for the next cycle.
             _roomTemperature = roomTemperatureOutput + roomTemperatureDeviation;
             _roomHumidity = roomHumidityOutput + roomHumidityDeviation;
-            // Accumulate this since it's accumulated in the simulations.
-            _energyConsumption = energyConsumptionOutput + _energyConsumption;
+            // Set this for soft sensors depending on the calculation.
+            _energyConsumption = energyConsumptionOutput;
+            // Accumulate this for experimental data gathering.
+            _energyConsumptionAccumulated = _energyConsumptionAccumulated + _energyConsumption;
             
             // PURRRRRRRRRRRGEEEEEE!!!
             _fmuInstance.Dispose();

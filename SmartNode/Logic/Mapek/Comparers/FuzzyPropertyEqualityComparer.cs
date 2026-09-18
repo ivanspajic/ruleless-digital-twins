@@ -14,11 +14,26 @@ namespace Logic.Mapek.Comparers {
             bool valuesWithinRange;
             // No fuzzy non-numericals!
 
-            // This is a workaround for buffered decision hits and CBR testing due to no matches being possible on accumulated properties.
+            // This is a workaround for buffered decision hits and CBR testing due to no matches being possible on certain meta-, dynamic (e.g., price or weather), and accumulated properties.
             if (x!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption") && y!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption")) {
                 return true;
             }
             if (x!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterMeasuredEnergyConsumption") && y!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionMeterMeasuredEnergyConsumption")) {
+                return true;
+            }
+            if (x!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionAccumulated") && y!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumptionAccumulated")) {
+                return true;
+            }
+            if (x!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MapekCycle") && y!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#MapekCycle")) {
+                return true;
+            }
+            if (x!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Price") && y!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Price")) {
+                return true;
+            }
+            if (x!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergy") && y!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergy")) {
+                return true;
+            }
+            if (x!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyAccumulated") && y!.Name.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyAccumulated")) {
                 return true;
             }
 

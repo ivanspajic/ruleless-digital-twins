@@ -16,9 +16,18 @@
                                    "1"^^xsd:int;
               a owl:NamedIndividual,
                 <http://www.w3.org/ns/sosa/Actuator>.
-:EnergyConsumption rdt:hasValue "111.6203865"^^xsd:double;
+:EnergyConsumption rdt:hasValue "41.5268715"^^xsd:double;
                    a owl:NamedIndividual,
                      <http://www.w3.org/ns/sosa/ObservableProperty>.
+:EnergyConsumptionAccumulated rdt:hasValue "0.0"^^xsd:double;
+                              a owl:NamedIndividual,
+                                <http://www.w3.org/ns/ssn/Property>.
+:EnergyConsumptionAccumulator a owl:NamedIndividual,
+                                <http://www.w3.org/ns/sosa/Sensor>;
+                              <http://www.w3.org/ns/ssn/implements> :EnergyConsumptionAccumulatorProcedure.
+:EnergyConsumptionAccumulatorProcedure a owl:NamedIndividual,
+                                         <http://www.w3.org/ns/sosa/Procedure>;
+                                       <http://www.w3.org/ns/ssn/hasOutput> :EnergyConsumptionAccumulated.
 :EnergyConsumptionDecrease rdt:affectsPropertyWith rdt:ValueDecrease;
                            a owl:NamedIndividual,
                              rdt:PropertyChange;
@@ -31,13 +40,20 @@
                           <http://www.w3.org/ns/sosa/Sensor>;
                         <http://www.w3.org/ns/sosa/observes> :EnergyConsumption;
                         <http://www.w3.org/ns/ssn/implements> :EnergyConsumptionMeterProcedure.
-:EnergyConsumptionMeterMeasuredEnergyConsumption rdt:hasValue "111.6203865"^^xsd:double;
+:EnergyConsumptionMeterMeasuredEnergyConsumption rdt:hasValue "41.5268715"^^xsd:double;
                                                  a owl:NamedIndividual,
                                                    <http://www.w3.org/ns/ssn/Output>,
                                                    <http://www.w3.org/ns/ssn/Property>.
 :EnergyConsumptionMeterProcedure a owl:NamedIndividual,
                                    <http://www.w3.org/ns/sosa/Procedure>;
                                  <http://www.w3.org/ns/ssn/hasOutput> :EnergyConsumptionMeterMeasuredEnergyConsumption.
+:Fakepool a owl:NamedIndividual,
+            <http://www.w3.org/ns/sosa/Sensor>;
+          <http://www.w3.org/ns/ssn/implements> :FakepoolProcedure.
+:FakepoolProcedure a owl:NamedIndividual,
+                     <http://www.w3.org/ns/sosa/Procedure>;
+                   <http://www.w3.org/ns/ssn/hasInput> :MapekCycle;
+                   <http://www.w3.org/ns/ssn/hasOutput> :Price.
 :FloorHeating rdt:enacts :EnergyConsumptionIncrease,
                          :RoomTemperatureIncrease;
               rdt:hasActuatorState "0"^^xsd:int,
@@ -55,13 +71,16 @@
                   <http://www.w3.org/ns/sosa/Sensor>;
                 <http://www.w3.org/ns/sosa/observes> :RoomHumidity;
                 <http://www.w3.org/ns/ssn/implements> :HumiditySensorProcedure.
-:HumiditySensorMeasuredRoomHumidity rdt:hasValue "55.46870162743965"^^xsd:double;
+:HumiditySensorMeasuredRoomHumidity rdt:hasValue "35.13909506401303"^^xsd:double;
                                     a owl:NamedIndividual,
                                       <http://www.w3.org/ns/ssn/Output>,
                                       <http://www.w3.org/ns/ssn/Property>.
 :HumiditySensorProcedure a owl:NamedIndividual,
                            <http://www.w3.org/ns/sosa/Procedure>;
                          <http://www.w3.org/ns/ssn/hasOutput> :HumiditySensorMeasuredRoomHumidity.
+:MapekCycle rdt:hasValue "0"^^xsd:int;
+            a owl:NamedIndividual,
+              <http://www.w3.org/ns/ssn/Property>.
 :Motion rdt:hasValue true;
         a owl:NamedIndividual,
           <http://www.w3.org/ns/sosa/ObservableProperty>.
@@ -127,16 +146,42 @@
 :OfficeTemperatureUpperLimit rdt:hasValue "22.0"^^xsd:double;
                              a owl:NamedIndividual,
                                <http://www.w3.org/ns/ssn/Property>.
-:RoomHumidity rdt:hasValue "55.46870162743965"^^xsd:double;
+:Price rdt:hasValue "1.5"^^xsd:double;
+       a owl:NamedIndividual,
+         <http://www.w3.org/ns/ssn/Output>,
+         <http://www.w3.org/ns/ssn/Property>.
+:PricePerEnergy rdt:hasValue "62.29030725"^^xsd:double;
+                a owl:NamedIndividual,
+                  <http://www.w3.org/ns/ssn/Output>,
+                  <http://www.w3.org/ns/ssn/Property>.
+:PricePerEnergyAccumulated rdt:hasValue "0.0"^^xsd:double;
+                           a owl:NamedIndividual,
+                             <http://www.w3.org/ns/ssn/Property>.
+:PricePerEnergyAccumulator a owl:NamedIndividual,
+                             <http://www.w3.org/ns/sosa/Sensor>;
+                           <http://www.w3.org/ns/ssn/implements> :PricePerEnergyAccumulatorProcedure.
+:PricePerEnergyAccumulatorProcedure a owl:NamedIndividual,
+                                      <http://www.w3.org/ns/sosa/Procedure>;
+                                    <http://www.w3.org/ns/ssn/hasInput> :PricePerEnergy;
+                                    <http://www.w3.org/ns/ssn/hasOutput> :PricePerEnergyAccumulated.
+:PricePerEnergyProcedure a owl:NamedIndividual,
+                           <http://www.w3.org/ns/sosa/Procedure>;
+                         <http://www.w3.org/ns/ssn/hasInput> :EnergyConsumptionMeterMeasuredEnergyConsumption,
+                                                             :Price;
+                         <http://www.w3.org/ns/ssn/hasOutput> :PricePerEnergy.
+:PricePerEnergySensor a owl:NamedIndividual,
+                        <http://www.w3.org/ns/sosa/Sensor>;
+                      <http://www.w3.org/ns/ssn/implements> :PricePerEnergyProcedure.
+:RoomHumidity rdt:hasValue "35.13909506401303"^^xsd:double;
               a owl:NamedIndividual,
                 <http://www.w3.org/ns/sosa/ObservableProperty>.
 :RoomHumidityDecrease rdt:affectsPropertyWith rdt:ValueDecrease;
                       a owl:NamedIndividual,
                         rdt:PropertyChange;
                       <http://www.w3.org/ns/ssn/forProperty> :RoomHumidity.
-:RoomM370 rdt:generateCombinationsOnlyFromOptimalConditions true;
+:RoomM370 rdt:generateCombinationsOnlyFromOptimalConditions false;
           rdt:hasSimulationModel :RoomM370FMU;
-          rdt:minimizes :EnergyConsumption;
+          rdt:minimizes :PricePerEnergy;
           a owl:NamedIndividual,
             <http://www.w3.org/ns/sosa/Platform>;
           <http://www.w3.org/ns/sosa/hosts> :Dehumidifier,
@@ -150,7 +195,7 @@
              rdt:hasURI "roomM370.fmu"^^xsd:anyURI;
              a owl:NamedIndividual,
                rdt:FmuModel.
-:RoomTemperature rdt:hasValue "17.80901724179465"^^xsd:double;
+:RoomTemperature rdt:hasValue "18.706672401415247"^^xsd:double;
                  a owl:NamedIndividual,
                    <http://www.w3.org/ns/sosa/ObservableProperty>.
 :RoomTemperatureIncrease rdt:affectsPropertyWith rdt:ValueIncrease;
@@ -167,7 +212,7 @@
                       <http://www.w3.org/ns/sosa/Sensor>;
                     <http://www.w3.org/ns/sosa/observes> :RoomTemperature;
                     <http://www.w3.org/ns/ssn/implements> :TemperatureSensor1Procedure.
-:TemperatureSensor1MeasuredRoomTemperature rdt:hasValue "17.80901724179465"^^xsd:double;
+:TemperatureSensor1MeasuredRoomTemperature rdt:hasValue "18.706672401415247"^^xsd:double;
                                            a owl:NamedIndividual,
                                              <http://www.w3.org/ns/ssn/Input>,
                                              <http://www.w3.org/ns/ssn/Output>,
@@ -179,7 +224,7 @@
                       <http://www.w3.org/ns/sosa/Sensor>;
                     <http://www.w3.org/ns/sosa/observes> :RoomTemperature;
                     <http://www.w3.org/ns/ssn/implements> :TemperatureSensor2Procedure.
-:TemperatureSensor2MeasuredRoomTemperature rdt:hasValue "17.80901724179465"^^xsd:double;
+:TemperatureSensor2MeasuredRoomTemperature rdt:hasValue "18.706672401415247"^^xsd:double;
                                            a owl:NamedIndividual,
                                              <http://www.w3.org/ns/ssn/Input>,
                                              <http://www.w3.org/ns/ssn/Output>,

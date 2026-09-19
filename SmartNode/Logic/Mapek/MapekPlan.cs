@@ -549,6 +549,11 @@ namespace Logic.Mapek
         private async static Task ExecuteSoftSensorsAndUpdateSimulationCache(Simulation simulation, IEnumerable<SoftSensorTreeNode> softSensorTreeNodes) {
             // Execute the tree of soft sensors in the correct order to ensure all Properties in the simulation's property cache are updated.
             foreach (var softSensorTreeNode in softSensorTreeNodes) {
+                // TODO: review this. It's currently hardcoded to prevent spoiling experimental data.
+                if (softSensorTreeNode.OutputProperty.Equals("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyAccumulated")) {
+                    continue;
+                }
+
                 if (softSensorTreeNode.Children.Any()) {
                     await ExecuteSoftSensorsAndUpdateSimulationCache(simulation, softSensorTreeNode.Children);
 

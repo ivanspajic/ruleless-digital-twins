@@ -123,7 +123,7 @@ namespace SmartNode.Factories {
                 {
                     ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyAccumulator",
                     "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyAccumulatorProcedure"),
-                    new DummyEnergyConsumptionAccumulatorSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyAccumulatorProcedure",
+                    new DummyPricePerEnergyAccumulatorSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyAccumulatorProcedure",
                         "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PricePerEnergyAccumulator",
                         _dummyRoomM370)
                 },

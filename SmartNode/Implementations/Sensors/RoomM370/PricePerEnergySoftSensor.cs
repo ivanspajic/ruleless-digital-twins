@@ -12,7 +12,7 @@ namespace Implementations.Sensors.RoomM370 {
         public string SensorName { get; }
 
         public string ProcedureName { get; }
-        public Func<double, double, double> Func{ get; }
+        public Func<double, double, double> Func { get; }
 
         public async Task<object> ObservePropertyValue(params object[] inputProperties) {
             for (var i = 0; i < inputProperties.Length; i++) {

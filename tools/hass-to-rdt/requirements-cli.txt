@@ -1,0 +1,20 @@
+# Minimal Python deps for the CLI export path (hacvt_rdt.py).
+# Compared to the upstream HASS-to-OWL-exporter requirements.txt, this
+# excludes Flask / Celery / Redis / SAREF tooling — kept only what the
+# RDT exporter actually imports through hacvt.py and ConfigSource.py.
+#
+# Most transitive deps (voluptuous, aiohttp, awesomeversion, …) come in
+# automatically via the `homeassistant` package.
+
+forcediphttpsadapter
+homeassistant
+PyYAML
+rdflib
+requests
+requests-cache
+websocket-client
+
+# Dev-only dependency for the WP1 generator tests (gen_bindings.py).
+# Not required to run hacvt_rdt.py against a live HA, but needed to run
+# `python -m pytest tools/hass-to-rdt/tests`.
+pytest

@@ -78,9 +78,9 @@ namespace TestProject
             }
 
             // Test property we want to accumulate:
-            var f_energy = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption");
-            var f_temp = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#price");
-            var f_prod = new FBinOpArith(f_energy, f_temp, (x, y) => x * y, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyTimesPrice");
+            var f_energy = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyConsumption", "xsd:double");
+            var f_temp = new FProp("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#price", "xsd:double");
+            var f_prod = new FBinOpArith<double>(f_energy, f_temp, (x, y) => x * y, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyTimesPrice");
             var f_prod_acc = new FAcc<double>(f_prod, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice");
 
             MapekPlan plan = new MapekPlan(serviceProvider);
@@ -142,7 +142,7 @@ namespace TestProject
                 var last = path.Last().PropertyCache.Properties["http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPrice"].Value;
 
                 // We compute the same value in different ways just to be sure:
-                var f_prod2 = new FBinOpArith(f_energy, f_temp, (x, y) => x * y, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyTimesPriceB");
+                var f_prod2 = new FBinOpArith<double>(f_energy, f_temp, (x, y) => x * y, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#EnergyTimesPriceB");
                 var f_prod_acc2 = new FAcc<double>(f_prod2, name: "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#AccumulatedEnergyTimesPriceB");
 
                 // Sanity check root-node in case we messed it up in-place:

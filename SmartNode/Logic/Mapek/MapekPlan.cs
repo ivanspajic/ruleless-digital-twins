@@ -1,7 +1,6 @@
 ﻿using Femyou;
 using Fitness;
 using Logic.FactoryInterface;
-using Logic.Mapek.Comparers;
 using Logic.Models.MapekModels;
 using Logic.Models.OntologicalModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +21,6 @@ namespace Logic.Mapek
         // instance model.
         private readonly bool _restrictToReactiveActionsOnly;
         private bool _restrictToReactiveActionsOnlyOld; // Used for performance enhancements.
-        private bool _javaInvocationAsyncError = false; // Used to track async errors from Java invocation.
 
         private bool _savedReactiveSetting = false;
         private int _currentMapekCycle = 0;
@@ -314,6 +312,8 @@ namespace Logic.Mapek
             using var process = Process.Start(processInfo);
             Debug.Assert(process != null, "Process failed to start.");
 
+            var javaInvocationAsyncError = false;
+            void SetError() => javaInvocationAsyncError = true;
             process!.OutputDataReceived += (sender, e) => {
                 _logger.LogInformation(e.Data);
                 if (e.Data != null && e.Data.Contains("Error!")) {
@@ -334,12 +334,8 @@ namespace Logic.Mapek
                 throw new Exception($"The inference engine encountered an error. Process {process.Id} exited with code {process.ExitCode}.");
             }
 
-            Debug.Assert(!_javaInvocationAsyncError, "Inconsistencies detected.");
+            Debug.Assert(!javaInvocationAsyncError, "Inconsistencies detected.");
             _logger.LogInformation("Process {processId} exited with code {processExitCode}.", process.Id, process.ExitCode);
-        }
-
-        private void SetError() {
-            _javaInvocationAsyncError = true;
         }
 
         // This method currently only supports ActuationActions.
@@ -660,8 +656,43 @@ namespace Logic.Mapek
 
         // Initialize the FMU between enter/exitInitialization (#42).
         protected virtual bool Initialization(Simulation simulation, IModel model, IInstance fmuInstance) {
-            var actions = simulation.InitializationActions.Select(action => (action.Actuator.ParameterName ?? MapekUtilities.GetSimpleName(action.Name), action.Actuator.Type!, action.NewStateValue)).ToList();
-            AssignSimulationInputsToParameters("parameters", model, fmuInstance, actions);
+            // Run the simulation by executing ActuationActions.
+            var fmuActuationInputs = new List<(string, string, object)>();
+
+            // Get all ObservableProperties and add them to the inputs for the FMU.
+            var observableProperties = GetObservablePropertiesFromPropertyCache(simulation.PropertyCache!);
+
+            foreach (var observableProperty in observableProperties) {
+                // Shave off the long name URIs from the instance model.
+                var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
+                fmuActuationInputs.Add((simpleObservablePropertyName, observableProperty.OwlType, observableProperty.Value));
+            }
+
+            // Add all ActuatorStates to the inputs for the FMU.
+            foreach (var action in simulation.Actions) {
+                string name;
+                string type;
+                object value;
+                if (action is ActuationAction actuationAction) {
+                    name = actuationAction.Actuator.ParameterName ?? actuationAction.Actuator.Name;
+                    type = actuationAction.Actuator.Type!;
+                    value = actuationAction.NewStateValue;
+                } else {
+                    var reconfigurationAction = (ReconfigurationAction)action;
+                    // TODO: override here as well?
+                    name = reconfigurationAction.ConfigurableParameter.Name;
+                    type = reconfigurationAction.ConfigurableParameter.OwlType;
+                    value = reconfigurationAction.NewParameterValue;
+                }
+
+                // Shave off the long name URIs from the instance model.
+                var simpleName = MapekUtilities.GetSimpleName(name);
+                fmuActuationInputs.Add((simpleName, type, value));
+            }
+
+            _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
+            AssignSimulationInputsToParameters("inputs", model, fmuInstance, fmuActuationInputs);
+
             return true;
         }
 
@@ -694,47 +725,10 @@ namespace Logic.Mapek
                 _logger.LogDebug("Resetting.");
                 fmuInstance.Reset();
             }
+
             Debug.Assert(fmuInstance != null, "Instance is null after creation.");
             _logger.LogDebug("Setting time {t}", simulation.Index * simulationDurationSeconds);
             fmuInstance.StartTime(simulation.Index * simulationDurationSeconds, (i) => Initialization(simulation, model, i));
-
-            // Run the simulation by executing ActuationActions.
-            var fmuActuationInputs = new List<(string, string, object)>();
-
-            // Get all ObservableProperties and add them to the inputs for the FMU.
-            var observableProperties = GetObservablePropertiesFromPropertyCache(simulation.PropertyCache!);
-
-            foreach (var observableProperty in observableProperties) {
-                // Shave off the long name URIs from the instance model.
-                var simpleObservablePropertyName = MapekUtilities.GetSimpleName(observableProperty.Name);
-                fmuActuationInputs.Add((simpleObservablePropertyName, observableProperty.OwlType, observableProperty.Value));
-            }
-
-            // Add all ActuatorStates to the inputs for the FMU.
-            foreach (var action in simulation.Actions)
-            {
-                string name;
-                string type;
-                object value;
-                if (action is ActuationAction actuationAction) {
-                    name = actuationAction.Actuator.ParameterName ?? actuationAction.Actuator.Name;
-                    type = actuationAction.Actuator.Type!;
-                    value = actuationAction.NewStateValue;
-                } else {
-                    var reconfigurationAction = (ReconfigurationAction)action;
-                    // TODO: override here as well?
-                    name = reconfigurationAction.ConfigurableParameter.Name;
-                    type = reconfigurationAction.ConfigurableParameter.OwlType;
-                    value = reconfigurationAction.NewParameterValue;
-                }
-
-                // Shave off the long name URIs from the instance model.
-                var simpleName = MapekUtilities.GetSimpleName(name);
-                fmuActuationInputs.Add((simpleName, type, value));
-            }
-
-            _logger.LogInformation("Parameters: {p}", string.Join(", ", fmuActuationInputs.Select(i => i.ToString())));
-            AssignSimulationInputsToParameters("inputs", model, fmuInstance, fmuActuationInputs);
 
             _logger.LogDebug("Tick ({fmuName}), {secs}s", fmuInstance.Name, simulationDurationSeconds);
             // Advance the FMU time for the duration of the simulation tick in steps of simulation fidelity.

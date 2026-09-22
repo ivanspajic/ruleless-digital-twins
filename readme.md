@@ -15,14 +15,39 @@ The Dockerfile builds and runs the example inside the container. Note that `arm6
 We use OpenModelica inside the container to compile the example FMU(s) into matching binaries.
 
 ```
-% docker build -t smartnode -f SmartNode/SmartNode/Dockerfile SmartNode
+% docker build -t smartnode -f SmartNode/Dockerfile SmartNode
 ...
 => => unpacking to docker.io/library/smartnode:latest
-% docker run --rm -v `pwd`/models-and-rules:/app/models smartnode /app/models/inferred-model-1.ttl
+% docker run -v `pwd`/models-and-rules:/app/models-and-rules -v `pwd`/ontology:/app/ontology --rm -it smartnode
 info: Logic.Mapek.MapekManager[0]
       Starting the MAPE-K loop.
 ...
 ```
+### Docker-based incubator
+
+To control the AU Incubator with the RDT:
+1. Start Incubator with only the following daemons:
+```
+startup/startup_all_services.py:
+    ...
+    start_as_daemon(start_incubator_realtime_mockup)
+    start_as_daemon(start_low_level_driver_mockup)
+    start_as_daemon(start_influx_data_recorder)
+```
+2. Create a Docker network and connect the running RabbitMQ-server:
+```
+$ docker network create incubator
+$ docker network connect rabbitmq-server incubator
+```
+3. Launch the RDT with the corresponding configuration. Use `docker network inspect incubator` to find out which IP address your RabbitMQ-server is using.
+```
+$ docker run --network incubator -e AU_INCUBATOR_RABBITMQ_HOST_NAME=172.20.0.2 -v `pwd`/models-and-rules:/app/models-and-rules -v `pwd`/ontology:/app/ontology --rm -it smartnode --appsettings appsettings-incubator.json
+```
+
+You should then see the RDT taking control of the incubator, switching on the fan and the heat.
+Note that while the temperature is **within** the optimal range, as the current model doesn't have any other constraint,
+the RDT may non-deterministically decide to run the heater or not. Only when it reaches the lower or upper boundary,
+again a unique decision will be made.
 
 ### MongoDB in Docker
 Since MongoDB is required to use the case-based functionality, there are some setup steps required to make it run (and persist) in Docker:

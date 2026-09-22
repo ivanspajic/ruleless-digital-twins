@@ -21,8 +21,8 @@ namespace TestProject.Mocks.ServiceMocks {
             int index,
             double fuzzinessFactor) {
             return Cases.Where(element =>
-                element.QuantizedProperties!.SequenceEqual(quantizedProperties) &&
-                element.QuantizedOptimalConditions!.SequenceEqual(quantizedOptimalConditions) &&
+                element.Properties!.SequenceEqual(quantizedProperties) &&
+                element.OptimalConditions!.SequenceEqual(quantizedOptimalConditions) &&
                 element.Index == index &&
                 element.LookAheadCycles == lookAheadCycles &&
                 element.CycleDurationSeconds == cycleDurationSeconds)

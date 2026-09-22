@@ -17,17 +17,11 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
         }
 
-        public async Task Execute(Simulation simulation, double mapekExecutionDurationSeconds = 0)
+        public async Task Execute(Simulation simulation)
         {
             _logger.LogInformation("Starting the Execute phase.");
 
             if (simulation is null || !simulation.Actions.Any()) {
-                // Workaround for a virtual dummy environment execution. Supports only ActuationActions.
-                // Actuate anyway to simulate the TT staying in its current state.
-                if (mapekExecutionDurationSeconds > 0) {
-                    ActuateDummyEnvironment(mapekExecutionDurationSeconds);
-                }
-
                 return;
             }
 
@@ -41,11 +35,6 @@ namespace Logic.Mapek
             }
 
             LogExpectedPropertyValues(simulation);
-
-            // Workaround for a virtual dummy environment execution. Supports only ActuationActions.
-            if (mapekExecutionDurationSeconds > 0) {
-                ActuateDummyEnvironment(mapekExecutionDurationSeconds);
-            }
         }
 
         private void ExecuteActuationAction(ActuationAction actuationAction) {
@@ -79,17 +68,6 @@ namespace Logic.Mapek
                 msg += $"\n{configurableParameterKeyValue.Key}: {configurableParameterKeyValue.Value.Value.ToString()}";
             }
             _logger.LogInformation(msg);
-        }
-
-        private void ActuateDummyEnvironment(double mapekExecutionDurationSeconds) {
-            // Use any actuator to actuate the dummy environment.
-            try {
-                var actuator = _factory.GetActuatorImplementation("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Heater");
-                actuator.RunDummyEnvironment(mapekExecutionDurationSeconds);
-            } catch (Exception e) {
-                // TODO: Review, will go away.
-                // No action required.
-            }
         }
     }
 }

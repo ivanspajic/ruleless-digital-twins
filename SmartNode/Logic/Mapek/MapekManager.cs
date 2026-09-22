@@ -1,5 +1,4 @@
 ﻿using Logic.CaseRepository;
-using Logic.FactoryInterface;
 using Logic.Mapek.Comparers;
 using Logic.Models.DatabaseModels;
 using Logic.Models.MapekModels;
@@ -61,12 +60,7 @@ namespace Logic.Mapek {
             SimulationTreeNode currentSimulationTree = null!;
             SimulationPath currentOptimalSimulationPath = null!;
 
-            var stopwatch = new Stopwatch();
-
             while (_isLoopActive) {
-                // Gather duration information for the dummy environment.
-                stopwatch.Start();
-
                 if (_coordinatorSettings.MaximumMapekRounds > -1) {
                     _logger.LogInformation("MAPE-K rounds left: {maxRound})", _coordinatorSettings.MaximumMapekRounds);
                 }
@@ -98,22 +92,18 @@ namespace Logic.Mapek {
                     simulationToExecute = _bangBangPlanner.Plan(cache);
                 }
 
-                stopwatch.Stop();
-
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
-                await _mapekExecute.Execute(simulationToExecute, stopwatch.ElapsedMilliseconds / 1000.0);
-                
-                stopwatch.Reset();
+                await _mapekExecute.Execute(simulationToExecute);
 
                 // If configured, write MAPE-K state to CSV.
-                if (_coordinatorSettings.SaveMapekCycleData && simulationToExecute is not null && currentSimulationTree is not null) {
+                if (_coordinatorSettings.SaveMapekCycleData && simulationToExecute is not null) {
                     CsvUtils.WritePropertyStatesToCsv(_filepathArguments.DataDirectory, currentMapekCycle, cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
                     CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentMapekCycle, simulationToExecute);
                     CsvUtils.WritePropertyState(Path.Combine(_filepathArguments.DataDirectory, "bufferedDecisionsUsed.csv"), currentMapekCycle, "Buffered_Decision_Used", _bufferedDecisionUsed);
                     CsvUtils.WritePropertyState(Path.Combine(_filepathArguments.DataDirectory, "caseHits.csv"), currentMapekCycle, "Matching_Case_Found", _caseHit);
 
-                    var serializedSimulationTree = JsonConvert.SerializeObject(currentSimulationTree.SerializableSimulationTreeNode);
-                    File.WriteAllText(Path.Combine(_filepathArguments.DataDirectory, SimulationTreeFilename), serializedSimulationTree);
+                    //var serializedSimulationTree = JsonConvert.SerializeObject(currentSimulationTree.SerializableSimulationTreeNode);
+                    //File.WriteAllText(Path.Combine(_filepathArguments.DataDirectory, SimulationTreeFilename), serializedSimulationTree);
                 }
 
                 if (_coordinatorSettings.MaximumMapekRounds > 0) {
@@ -162,9 +152,10 @@ namespace Logic.Mapek {
                 // from the simulation of the last cycle, then case is valid and can be saved to the database. Otherwise, the case should be nullified.
                 if (simulationMatches) {
                     _caseRepository.CreateCase(potentialCase);
-                } else {
-                    potentialCase = null!;
                 }
+
+                // Reset in case of leftover potential cases.
+                potentialCase = null!;
 
                 // If there are still remaining simulations in the simulation path, get the next potential case from it. Otherwise, try to look for it in the database.
                 if (currentOptimalSimulationPath is not null && currentOptimalSimulationPath.Simulations.Any()) {
@@ -239,8 +230,8 @@ namespace Logic.Mapek {
 
                 simulations.Add(savedCase.Simulation);
 
-                quantizedProperties = savedCase.QuantizedProperties;
-                quantizedOptimalConditions = savedCase.QuantizedOptimalConditions;
+                quantizedProperties = savedCase.Properties;
+                quantizedOptimalConditions = savedCase.OptimalConditions;
             }
 
             return new SimulationPath {
@@ -254,12 +245,12 @@ namespace Logic.Mapek {
             var firstSimulation = simulationPath.Simulations.First();
 
             return new Case {
-                ID = null,
+                ID = firstSimulation.GetHashCode().ToString(),
                 Index = firstSimulation.Index,
                 LookAheadCycles = _coordinatorSettings.LookAheadMapekCycles,
                 CycleDurationSeconds = _coordinatorSettings.CycleDurationSeconds,
-                QuantizedOptimalConditions = quantizedObservedOptimalConditions,
-                QuantizedProperties = quantizedObservedProperties,
+                OptimalConditions = quantizedObservedOptimalConditions,
+                Properties = quantizedObservedProperties,
                 Simulation = firstSimulation
             };
         }

@@ -35,7 +35,7 @@ namespace Logic.CaseRepository {
                 var propertySet = new HashSet<Property>(properties, new FuzzyPropertyEqualityComparer(propertyValueFuzziness));
                 var optimalConditionSet = new HashSet<OptimalCondition>(optimalConditions, new OptimalConditionEqualityComparer(propertyValueFuzziness));
 
-                return propertySet.SetEquals(element.QuantizedProperties) && optimalConditionSet.SetEquals(element.QuantizedOptimalConditions);
+                return propertySet.SetEquals(element.Properties) && optimalConditionSet.SetEquals(element.OptimalConditions);
             }).FirstOrDefault()!;
 
             if (match is not null) {
@@ -50,7 +50,12 @@ namespace Logic.CaseRepository {
         public void CreateCase(Case caseToCreate) {
             _logger.LogInformation("Saving a new case."); // This should probably include some information from the case. What exactly?
 
-            _caseCollection.InsertOne(caseToCreate);
+            try {
+                _caseCollection.InsertOne(caseToCreate);
+            }
+            catch (Exception exception) {
+                _logger.LogDebug(exception, "Error saving case: {error}", exception.Message);
+            }
         }
     }
 }

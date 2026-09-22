@@ -33,7 +33,7 @@ tempMeasure = Measure(g, MINE["TempMeasure"])
 tempProcedure = Procedure(g, MINE["TempProcedure"], tempMeasure, tempSensor)
 
 room = Platform(g, MINE["IncubatorTest"], False, [heaterActuator, tempSensor, fan], implements=[oc_rtemp])
-fmu = FMU(g, MINE["Incubator_FMU"], "Source/au_incubator.fmu", 3) # 3s
+fmu = FMU(g, MINE["Incubator_FMU"], "au_incubator.fmu", 3) # 3s
 room.addFMU(g, fmu)
 
 output = g.serialize(destination=None)

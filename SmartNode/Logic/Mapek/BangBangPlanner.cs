@@ -34,12 +34,12 @@ namespace Logic.Mapek {
             var officeTemperature = (double)cache.PropertyCache.Properties[RoomTemperatureName].Value;
             var officeHumidity = (double)cache.PropertyCache.Properties[RoomHumidityName].Value;
 
-            if (officeTemperature >= MaximumOfficeTemperature) {
-                heater.State = 0;
-                floorHeating.State = 0;
-            } else if (officeTemperature <= MinimumOfficeTemperature) {
+            if (officeTemperature <= MinimumOfficeTemperature) {
                 heater.State = 1;
                 floorHeating.State = 1;
+            } else if (officeTemperature >= MaximumOfficeTemperature) {
+                heater.State = 0;
+                floorHeating.State = 0;
             }
 
             if (officeHumidity >= MaximumOfficeHumidity) {

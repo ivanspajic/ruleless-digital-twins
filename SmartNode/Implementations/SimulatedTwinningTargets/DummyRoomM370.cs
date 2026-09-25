@@ -8,7 +8,7 @@ using static Femyou.IModel;
 namespace Implementations.SimulatedTwinningTargets
 {
     public class DummyRoomM370 {
-        private const int Seed = 10110111;
+        private const int Seed = 10111000;
         private const string FmuModelName = "roomM370.fmu";
         private const string FmuInstanceName = "DummyRoomM370";
         private const string RoomTemperatureParameterName = "RoomTemperature";
@@ -37,6 +37,24 @@ namespace Implementations.SimulatedTwinningTargets
         private int _oldFloorHeatingState = 0;
         private int _oldDehumidifierState = 0;
 
+
+
+        //private double _roomTemperature = 21.21076972080911;
+        //private double _roomHumidity = 60.352023602751295;
+
+        //private double _energyConsumption = 20.025;
+        //private double _energyConsumptionAccumulated = 409.9304839;
+        //private double _pricePerEnergyAccumulated = 704.7342540402999;
+
+        //private int _heaterState = 0;
+        //private int _floorHeatingState = 0;
+        //private int _dehumidifierState = 0;
+        //private int _oldHeaterState = 1;
+        //private int _oldFloorHeatingState = 0;
+        //private int _oldDehumidifierState = 1;
+
+
+
         private bool _heaterStateUpdated = false;
         private bool _floorHeatingStateUpdated = false;
         private bool _dehumidifierStateUpdated = false;
@@ -46,6 +64,12 @@ namespace Implementations.SimulatedTwinningTargets
 
         public DummyRoomM370(IServiceProvider serviceProvider){
             _fmuModelFullFilepath = Path.GetFullPath(Path.Combine(serviceProvider.GetRequiredService<FilepathArguments>().FmuDirectory, FmuModelName));
+
+            //// Used due to a bug with running more than a certain number of cycles with a larger prediction horizon. Sets the same random seed to be at where it otherwise would.
+            //for (var i = 0; i <= 23; i++) {
+            //    var valueTemp = _randomGenerator.NextDouble();
+            //    var valueHum = _randomGenerator.NextDouble();
+            //}
         }
 
         // Used for Sensor access.

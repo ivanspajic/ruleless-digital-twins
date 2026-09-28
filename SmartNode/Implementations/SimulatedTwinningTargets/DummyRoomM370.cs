@@ -135,6 +135,7 @@ namespace Implementations.SimulatedTwinningTargets
                 _dehumidifierStateUpdated = false;
 
                 // Start measuring again.
+                _stopwatch.Reset();
                 _stopwatch.Start();
             }
         }
@@ -224,6 +225,7 @@ namespace Implementations.SimulatedTwinningTargets
                     fmuInstance.AdvanceTime(mapekExecutionDuration);
                 }
             } else {
+                // XXX Review, might prevent FMU cleanup/reinitialisation?
                 throw new Exception($"MAPE execution took longer than the alloted time ({CycleDurationSeconds}s)!");
             }
         }

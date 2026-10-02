@@ -31,8 +31,8 @@ namespace Logic.Mapek {
         private readonly IFactory _factory;
         private readonly FilepathArguments _filepathArguments;
 
-        private readonly Graph _instanceModel;
-        private readonly Graph _inferredModel;
+        private Graph _instanceModel;
+        private Graph _inferredModel;
         private readonly TurtleParser _turtleParser;
         private readonly CompressingTurtleWriter _turtleWriter;
 
@@ -172,8 +172,8 @@ namespace Logic.Mapek {
         }
 
         public void LoadModelsFromKnowledgeBase() {
-            _instanceModel.Clear();
-            _inferredModel.Clear();
+            _instanceModel = new Graph();
+            _inferredModel = new Graph();
 
             _turtleParser.Load(_instanceModel, _filepathArguments.InstanceModelFilepath);
             _turtleParser.Load(_inferredModel, _filepathArguments.InferredModelFilepath);

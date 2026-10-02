@@ -3,13 +3,12 @@ using Logic.Models.MapekModels;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Reflection;
 using static Femyou.IModel;
 
 namespace Implementations.SimulatedTwinningTargets
 {
     public class DummyRoomM370 {
-        private const int Seed = 10110111;
+        private const int Seed = 10111000;
         private const string FmuModelName = "roomM370.fmu";
         private const string FmuInstanceName = "DummyRoomM370";
         private const string RoomTemperatureParameterName = "RoomTemperature";
@@ -28,6 +27,8 @@ namespace Implementations.SimulatedTwinningTargets
         private double _roomTemperature = 17.7;
         private double _roomHumidity = 10.2;
         private double _energyConsumption = 0.0;
+        private double _energyConsumptionAccumulated = 0.0;
+        private double _pricePerEnergyAccumulated = 0.0;
 
         private int _heaterState = 0;
         private int _floorHeatingState = 0;
@@ -58,6 +59,15 @@ namespace Implementations.SimulatedTwinningTargets
 
         public double EnergyConsumption {
             get => _energyConsumption;
+        }
+
+        public double EnergyConsumptionAccumulated {
+            get => _energyConsumptionAccumulated;
+        }
+
+        public double PricePerEnergyAccumulated {
+            get => _pricePerEnergyAccumulated;
+            set => _pricePerEnergyAccumulated = value;
         }
 
         // Used for Actuator access.
@@ -101,6 +111,7 @@ namespace Implementations.SimulatedTwinningTargets
                 _dehumidifierStateUpdated = false;
 
                 // Start measuring again.
+                _stopwatch.Reset();
                 _stopwatch.Start();
             }
         }
@@ -161,8 +172,10 @@ namespace Implementations.SimulatedTwinningTargets
             // Set the output properties for the next cycle.
             _roomTemperature = roomTemperatureOutput + roomTemperatureDeviation;
             _roomHumidity = roomHumidityOutput + roomHumidityDeviation;
-            // Accumulate this since it's accumulated in the simulations.
-            _energyConsumption = energyConsumptionOutput + _energyConsumption;
+            // Set this for soft sensors depending on the calculation.
+            _energyConsumption = energyConsumptionOutput;
+            // Accumulate this for experimental data gathering.
+            _energyConsumptionAccumulated = _energyConsumptionAccumulated + _energyConsumption;
             
             // PURRRRRRRRRRRGEEEEEE!!!
             _fmuInstance.Dispose();
@@ -172,20 +185,25 @@ namespace Implementations.SimulatedTwinningTargets
         }
 
         private static void AdvanceFmuTimeInSteps(IInstance fmuInstance, double mapekExecutionDuration) {
-            if (mapekExecutionDuration >= SimulationFidelitySeconds) {
-                var maximumSteps = (double)mapekExecutionDuration / SimulationFidelitySeconds;
-                var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
-                var difference = maximumSteps - maximumStepsRoundedDown;
+            if (mapekExecutionDuration >= 0) {
+                if (mapekExecutionDuration >= SimulationFidelitySeconds) {
+                    var maximumSteps = (double)mapekExecutionDuration / SimulationFidelitySeconds;
+                    var maximumStepsRoundedDown = (int)Math.Floor(maximumSteps);
+                    var difference = maximumSteps - maximumStepsRoundedDown;
 
-                for (var i = 0; i < maximumStepsRoundedDown; i++) {
-                    fmuInstance.AdvanceTime(SimulationFidelitySeconds);
+                    for (var i = 0; i < maximumStepsRoundedDown; i++) {
+                        fmuInstance.AdvanceTime(SimulationFidelitySeconds);
+                    }
+
+                    // Advance the remainder of time to stay true to the simulation duration.
+                    fmuInstance.AdvanceTime(difference);
+                } else {
+                    fmuInstance.AdvanceTime(mapekExecutionDuration);
                 }
-
-                // Advance the remainder of time to stay true to the simulation duration.
-                fmuInstance.AdvanceTime(difference);
             } else {
-                fmuInstance.AdvanceTime(mapekExecutionDuration);
-            }            
+                // XXX Review, might prevent FMU cleanup/reinitialisation?
+                throw new Exception($"MAPE execution took longer than the alloted time ({CycleDurationSeconds}s)!");
+            }
         }
     }
 }

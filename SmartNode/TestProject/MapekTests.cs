@@ -89,8 +89,8 @@ namespace TestProject
             plan._minMaxOverrides = false;
             serviceProvider.Add(plan);
             // Adjust duration in Fakepool-softsensor (TOD):
-            FakepoolSensor fps = (FakepoolSensor)factory.GetSensorImplementation("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
-                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure");
+            FakepoolSensor fps = (FakepoolSensor)factory.GetSensorImplementation("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fakepool",
+                "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolProcedure");
             fps._duration = duration;
 
             Assert.Equal(2, plan.GetHostPlatformFmuModel(filepathArguments.FmuDirectory).Count());

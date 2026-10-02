@@ -60,7 +60,12 @@ namespace Logic.Mapek {
             SimulationTreeNode currentSimulationTree = null!;
             SimulationPath currentOptimalSimulationPath = null!;
 
+            var cycleDurationStopwatch = new Stopwatch();
+
             while (_isLoopActive) {
+                cycleDurationStopwatch.Reset();
+                cycleDurationStopwatch.Start();
+
                 if (_coordinatorSettings.MaximumMapekRounds > -1) {
                     _logger.LogInformation("MAPE-K rounds left: {maxRound})", _coordinatorSettings.MaximumMapekRounds);
                 }
@@ -95,12 +100,15 @@ namespace Logic.Mapek {
                 // Execute - Execute the Actuators with the appropriate ActuatorStates and/or adjust the values of ReconfigurableParameters.
                 await _mapekExecute.Execute(simulationToExecute);
 
+                cycleDurationStopwatch.Stop();
+
                 // If configured, write MAPE-K state to CSV.
                 if (_coordinatorSettings.SaveMapekCycleData && simulationToExecute is not null) {
                     CsvUtils.WritePropertyStatesToCsv(_filepathArguments.DataDirectory, currentMapekCycle, cache.PropertyCache.ConfigurableParameters, cache.PropertyCache.Properties);
                     CsvUtils.WriteActuatorStatesToCsv(_filepathArguments.DataDirectory, currentMapekCycle, simulationToExecute);
                     CsvUtils.WritePropertyState(Path.Combine(_filepathArguments.DataDirectory, "bufferedDecisionsUsed.csv"), currentMapekCycle, "Buffered_Decision_Used", _bufferedDecisionUsed);
                     CsvUtils.WritePropertyState(Path.Combine(_filepathArguments.DataDirectory, "caseHits.csv"), currentMapekCycle, "Matching_Case_Found", _caseHit);
+                    CsvUtils.WritePropertyState(Path.Combine(_filepathArguments.DataDirectory, "cycleDuration.csv"), currentMapekCycle, "Cycle_Duration_(ms)", cycleDurationStopwatch.ElapsedMilliseconds);
 
                     //var serializedSimulationTree = JsonConvert.SerializeObject(currentSimulationTree.SerializableSimulationTreeNode);
                     //File.WriteAllText(Path.Combine(_filepathArguments.DataDirectory, SimulationTreeFilename), serializedSimulationTree);

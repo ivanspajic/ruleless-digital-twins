@@ -46,7 +46,12 @@ namespace Implementations.Sensors.Fakepool {
         {
             // TODO: find a better way to differentiate between input parameters. Consider using Properties instead.
             Debug.Assert(inputProperties.Count() == 1);
-            var dataIndex = (((int)inputProperties[0]+1) * _duration) / _step ;
+            var dataIndex = (int)inputProperties[0] * _duration / _step;
+
+            if (dataIndex == 0) {
+                return 0.0;
+            }
+
             return _records[dataIndex].State;
         }
     }

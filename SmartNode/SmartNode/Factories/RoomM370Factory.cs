@@ -164,6 +164,13 @@ namespace SmartNode.Factories {
                     new FakepoolSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#Fakepool",
                         "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#FakepoolProcedure")
                 },
+                { // [VS] Forked model-hack
+                    ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
+                    "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure"),
+                    new FakepoolSensor("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceSensor",
+                        "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceProcedure")
+
+                },
                 {
                     ("http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceDummySensor",
                     "http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#PriceDummyProcedure"),

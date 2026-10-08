@@ -12,7 +12,7 @@ namespace Implementations.Sensors.TAM_SCHT {
         public string ProcedureName { get; private set; }
 
         public async Task<object> ObservePropertyValue(params object[] inputProperties) {
-            return 1.0;
+            return 37.0;
         }
     }
 }

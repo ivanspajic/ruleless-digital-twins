@@ -10,8 +10,8 @@ namespace SmartNode.Factories {
         protected override IDictionary<string, IActuator> MakeActuatorMap(IServiceProvider serviceProvider) {
             return new Dictionary<string, IActuator> {
                 {
-                    "http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/HVAC",
-                    new HvacActuator("http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/HVAC")
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/tam-scht/HVAC",
+                    new HvacActuator("http://www.semanticweb.org/ispa/ontologies/2026/9/tam-scht/HVAC")
                 }
             };
         }
@@ -218,6 +218,146 @@ namespace SmartNode.Factories {
                     "http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBedroomRadiantProcedure"),
                     new Thermocouple("http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBedroomRadiantSensor",
                         "http://www.semanticweb.org/ispa/ontologies/2026/5/untitled-ontology-515/PrimaryBedroomRadiantProcedure")
+                },
+                #endregion
+#region Weather Sensors
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_altSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_altProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_altSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_altProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_ceiHeiSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_ceiHeiProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_ceiHeiSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_ceiHeiProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_cloTimSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_cloTimProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_cloTimSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_cloTimProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HDirNorSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HDirNorProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HDirNorSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HDirNorProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HGloHorSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HGloHorProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HGloHorSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HGloHorProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HHorIRSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HHorIRProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HHorIRSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HHorIRProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_latSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_latProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_latSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_latProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_lonSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_lonProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_lonSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_lonProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nOpaSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nOpaProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nOpaSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nOpaProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nTotSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nTotProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nTotSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nTotProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_pAtmSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_pAtmProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_pAtmSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_pAtmProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_relHumSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_relHumProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_relHumSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_relHumProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solAltSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solAltProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solAltSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solAltProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solDecSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solDecProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solDecSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solDecProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solHouAngSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solHouAngProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solHouAngSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solHouAngProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solTimSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solTimProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solTimSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solTimProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solZenSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solZenProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solZenSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solZenProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TBlaSkySensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TBlaSkyProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TBlaSkySensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TBlaSkyProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDewPoiSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDewPoiProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDewPoiSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDewPoiProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDryBulSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDryBulProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDryBulSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDryBulProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TWetBulSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TWetBulProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TWetBulSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TWetBulProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winDirSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winDirProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winDirSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winDirProcedure")
+                },
+                {
+                    ("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winSpeSensor",
+                    "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winSpeProcedure"),
+                    new DummyWeatherSensor("http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winSpeSensor",
+                        "http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winSpeProcedure")
                 }
 #endregion
             };

@@ -16,6 +16,7 @@ namespace TestProject
     public class MapekTests
     {
         [Theory]
+        [Trait("Category","CI")]
         // [InlineData("M370-instance.ttl", "M370-inferred.ttl",1,4,115.05600000000001, false, false, false)]
         [InlineData(2, 1800, 1, 106.488, true, false, false)]
         [InlineData(4, 900, 1, 114.696, false, false, false)]
@@ -176,6 +177,7 @@ namespace TestProject
         }
 
         [Theory]
+        [Trait("Category","CI")]
         [InlineData(2, 1800, 106.488, true, false, false)]
         [InlineData(4, 900, 114.696, false, false, false)]
         [InlineData(4, 900, 114.696, false, true, false)]

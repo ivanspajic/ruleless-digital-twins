@@ -102,6 +102,7 @@ namespace TestProject
 
 
         [Theory]
+        [Trait("Category","CI")]
         [InlineData(900)]
         public void Fmu_returns_same_value_after_specific_simulation_time(int simulationTimeSeconds)
         {

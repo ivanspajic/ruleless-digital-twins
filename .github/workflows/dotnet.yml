@@ -20,10 +20,6 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: true
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
     - name: Restore dependencies
       run: dotnet restore SmartNode/SmartNode.sln
     - name: Tweak git
@@ -37,9 +33,15 @@ jobs:
     - name: Build
       run: dotnet build --no-restore SmartNode/SmartNode.sln
     - name: Test
-      run: dotnet test --no-build --verbosity normal SmartNode/SmartNode.sln --filter Category=CI --logger "html;LogFileName=TestResults.html" || true
+      run: dotnet test --no-build --verbosity normal SmartNode/SmartNode.sln --filter Category=CI --logger "trx;LogFileName=TestResults.trx" || true
     - name: Upload test results
       uses: actions/upload-artifact@v4
       with:
         name: TestResults
-        path: SmartNode/TestProject/TestResults/TestResults.html
+        path: SmartNode/TestProject/TestResults/TestResults.trx
+    - name: Test Report
+      uses: dorny/test-reporter@v3
+      with:
+        name: xUnit tests
+        path: SmartNode/TestProject/TestResults/TestResults.trx
+        reporter: dotnet-trx

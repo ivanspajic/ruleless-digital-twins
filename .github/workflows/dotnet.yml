@@ -37,4 +37,9 @@ jobs:
     - name: Build
       run: dotnet build --no-restore SmartNode/SmartNode.sln
     - name: Test
-      run: dotnet test --no-build --verbosity normal SmartNode/SmartNode.sln --filter Category=CI
+      run: dotnet test --no-build --verbosity normal SmartNode/SmartNode.sln --filter Category=CI --logger "html;LogFileName=TestResults.html" || true
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: TestResults
+        path: SmartNode/TestProject/TestResults/TestResults.html

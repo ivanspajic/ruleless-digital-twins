@@ -34,6 +34,7 @@ namespace TestProject {
         }
 
         [Theory]
+        [Trait("Category","CI")]
         [InlineData(21.0, true, "Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
         // Higher temps may fail since I currently don't handle the upper bound correctly:
         [InlineData(37.0, false, "Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]

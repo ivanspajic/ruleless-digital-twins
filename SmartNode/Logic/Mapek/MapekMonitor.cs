@@ -141,7 +141,7 @@ namespace Logic.Mapek {
             // Get all Procedures (in Sensors) that have @property as their Output. SOSA/SSN theoretically allows for multiple Procedures
             // to have the same Output due to a lack of cardinality restrictions on the inverse predicate of 'has output' in the
             // definition of Output.
-            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?procedure ?sensor WHERE {
+            var query = IMapekKnowledge.GetParameterizedStringQuery(@"SELECT ?procedure ?sensor WHERE {
                 ?procedure ssn:hasOutput @property .
                 ?sensor ssn:implements ?procedure .
                 ?sensor rdf:type sosa:Sensor . }");
@@ -170,7 +170,7 @@ namespace Logic.Mapek {
             // Get an instance of a Sensor from the factory.
             var sensor = _factory.GetSensorImplementation(sensorNode.ToString(), procedureNode.ToString());
 
-            query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?inputProperty ?initialValue WHERE {
+            query = IMapekKnowledge.GetParameterizedStringQuery(@"SELECT ?inputProperty ?initialValue WHERE {
                     @procedure ssn:hasInput ?inputProperty .
                     ?inputProperty meta:hasValue ?initialValue .
                     @sensor ssn:implements @procedure .
@@ -229,7 +229,7 @@ namespace Logic.Mapek {
 
         private void PopulateObservablePropertiesCache(PropertyCache propertyCache) {
             // Get all ObservableProperties.
-            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty ?initialValue WHERE {
+            var query = IMapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty ?initialValue WHERE {
                 ?sensor rdf:type sosa:Sensor .
                 ?sensor sosa:observes ?observableProperty . 
                 ?observableProperty rdf:type sosa:ObservableProperty .
@@ -238,7 +238,7 @@ namespace Logic.Mapek {
             var queryResult = _mapekKnowledge.ExecuteQuery(query);
 
             // Get all measured Properties that are results of observing ObservableProperties.
-            var innerQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?outputProperty WHERE {
+            var innerQuery = IMapekKnowledge.GetParameterizedStringQuery(@"SELECT ?outputProperty WHERE {
                     ?sensor sosa:observes @observableProperty .
                     ?sensor ssn:implements ?procedure .
                     ?procedure ssn:hasOutput ?outputProperty . }");
@@ -285,7 +285,7 @@ namespace Logic.Mapek {
         }
 
         private void PopulateCacheWithConstantProperties(PropertyCache propertyCache) {
-            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?constantProperty ?initialValue WHERE {
+            var query = IMapekKnowledge.GetParameterizedStringQuery(@"SELECT ?constantProperty ?initialValue WHERE {
                 ?constantProperty rdf:type ssn:Property .
                 ?constantProperty meta:hasValue ?initialValue .
                 FILTER NOT EXISTS {
@@ -329,7 +329,7 @@ namespace Logic.Mapek {
         }
 
         private void PopulateActuatorCache(IDictionary<string, Actuator> actuators) {
-            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState WHERE {
+            var query = IMapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState WHERE {
                 ?actuator rdf:type sosa:Actuator .
                 ?actuator meta:hasActuatorState ?actuatorState . }");
 

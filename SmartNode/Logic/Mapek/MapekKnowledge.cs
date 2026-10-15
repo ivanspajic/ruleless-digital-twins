@@ -14,18 +14,6 @@ using VDS.RDF.Writing;
 
 namespace Logic.Mapek {
     public class MapekKnowledge : IMapekKnowledge {
-        public const string DtPrefix = "meta";
-        public const string DtUri = "http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/";
-        public const string SosaPrefix = "sosa";
-        public const string SosaUri = "http://www.w3.org/ns/sosa/";
-        public const string SsnPrefix = "ssn";
-        public const string SsnUri = "http://www.w3.org/ns/ssn/";
-        public const string RdfPrefix = "rdf";
-        public const string RdfUri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-        public const string OwlPrefix = "owl";
-        public const string OwlUri = "http://www.w3.org/2002/07/owl#";
-        public const string XsdPrefix = "xsd";
-        public const string XsdUri = "http://www.w3.org/2001/XMLSchema#";
 
         private readonly ILogger<IMapekKnowledge> _logger;
         private readonly IFactory _factory;
@@ -54,19 +42,8 @@ namespace Logic.Mapek {
         }
 
         public SparqlParameterizedString GetParameterizedStringQuery(string queryString) {
-            var query = new SparqlParameterizedString {
-                CommandText = queryString
-            };
-
-            // Register the relevant prefixes for the queries to come.
-            query.Namespaces.AddNamespace(DtPrefix, new Uri(DtUri));
-            query.Namespaces.AddNamespace(SosaPrefix, new Uri(SosaUri));
-            query.Namespaces.AddNamespace(SsnPrefix, new Uri(SsnUri));
-            query.Namespaces.AddNamespace(RdfPrefix, new Uri(RdfUri));
-            query.Namespaces.AddNamespace(OwlPrefix, new Uri(OwlUri));
-            query.Namespaces.AddNamespace(XsdPrefix, new Uri(XsdUri));
-
-            return query;
+            // TODO: axe proxy eventually, when we make more queries static?
+            return IMapekKnowledge.GetParameterizedStringQuery(queryString);
         }
 
         public SparqlResultSet ExecuteQuery(string queryString) {
@@ -77,6 +54,7 @@ namespace Logic.Mapek {
 
         bool suppressLogging = false;
         // Suppress logging in selected places. An alternative would be to switch to log level DEBUG instead INFO.
+
         private SparqlResultSet ExecuteSuppressedQuery(SparqlParameterizedString query) {
             suppressLogging = true;
             var result = ExecuteQuery(query);
@@ -106,40 +84,21 @@ namespace Logic.Mapek {
             return queryResult;
         }
 
+        SparqlParameterizedString query = IMapekKnowledge.GetParameterizedStringQuery(@"DELETE {
+                    @property meta:hasValue ?oldValue .
+                }
+                INSERT {
+                    @property meta:hasValue @newValue^^@type .
+                }
+                WHERE {
+                    @property meta:hasValue ?oldValue .
+                }");
         public void UpdatePropertyValue(Property property) {
             var valueHandler = _factory.GetValueHandlerImplementation(property.OwlType);
             var propertyValue = valueHandler.GetValueAsCultureInvariantString(property.Value);
 
-            // Update ObservableProperties first.
-            var query = GetParameterizedStringQuery(@"DELETE {
-                    @property meta:hasValue ?oldValue .
-                }
-                INSERT {
-                    @property meta:hasValue @newValue^^@type .
-                }
-                WHERE {
-                    @property rdf:type sosa:ObservableProperty .
-                    @property meta:hasValue ?oldValue .
-                }");
-
-            query.SetLiteral("newValue", propertyValue.ToLowerInvariant(), false);
-            query.SetUri("type", new Uri(property.OwlType));
-            query.SetUri("property", new Uri(property.Name));
-
-            UpdateModel(query);
-
-            // In case there was no match on an ObservableProperty, try to update a matching Output.
-            query = GetParameterizedStringQuery(@"DELETE {
-                    @property meta:hasValue ?oldValue .
-                }
-                INSERT {
-                    @property meta:hasValue @newValue^^@type .
-                }
-                WHERE {
-                    @property rdf:type ssn:Property .
-                    @property rdf:type ssn:Output .
-                    @property meta:hasValue ?oldValue .
-                }");
+            // Update ObservableProperties and Output in one go. They shouldn't overlap,
+            //  since @property is a fully qualified object.
 
             query.SetLiteral("newValue", propertyValue.ToLowerInvariant(), false);
             query.SetUri("type", new Uri(property.OwlType));

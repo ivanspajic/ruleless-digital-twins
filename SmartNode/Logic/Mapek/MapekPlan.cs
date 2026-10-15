@@ -143,7 +143,7 @@ namespace Logic.Mapek
 
         private int GetNumberOfSimulations(int lookAheadCycles) {
             // Get counts of Actuator states grouped by Actuator.
-            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator (COUNT(?actuatorState) as ?actuatorStateCount) WHERE {
+            var query = IMapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator (COUNT(?actuatorState) as ?actuatorStateCount) WHERE {
                 ?actuator rdf:type sosa:Actuator .
                 ?actuator meta:hasActuatorState ?actuatorState. }
                 GROUP BY ?actuator");
@@ -262,7 +262,7 @@ namespace Logic.Mapek
 
             _restrictToReactiveActionsOnlyOld = _restrictToReactiveActionsOnly;
 
-            var query = _mapekKnowledge.GetParameterizedStringQuery(@"DELETE {
+            var query = IMapekKnowledge.GetParameterizedStringQuery(@"DELETE {
                 ?platform meta:generateCombinationsOnlyFromOptimalConditions ?oldValue .
             }
             INSERT {
@@ -342,7 +342,7 @@ namespace Logic.Mapek
         private List<List<Models.OntologicalModels.Action>> GetActionCombinations(PropertyCache propertyCache) {
             var actionCombinations = new List<List<Models.OntologicalModels.Action>>();
 
-            var actionCombinationQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actionCombination (GROUP_CONCAT(?action; SEPARATOR="" "") AS ?actions) WHERE {
+            var actionCombinationQuery = IMapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actionCombination (GROUP_CONCAT(?action; SEPARATOR="" "") AS ?actions) WHERE {
 	                ?actionCombination rdf:type meta:ActionCombination .
 	                FILTER NOT EXISTS {
 		                {
@@ -369,7 +369,7 @@ namespace Logic.Mapek
                 var actionCombination = new List<Models.OntologicalModels.Action>();
                 var fmuInitActions = new List<FMUParameterAction>();
 
-                var actuationActionQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState ?actuatorName ?isParameter WHERE {
+                var actuationActionQuery = IMapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState ?actuatorName ?isParameter WHERE {
                         @action rdf:type meta:ActuationAction .
                         @action meta:hasActuator ?actuator .
                         OPTIONAL { ?actuator meta:hasActuatorName ?actuatorName } .
@@ -424,7 +424,7 @@ namespace Logic.Mapek
                 });
 
                 // Query for ReconfigurationAction contents.
-                var reconfigurationActionQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?configurableParameter ?newValue WHERE {
+                var reconfigurationActionQuery = IMapekKnowledge.GetParameterizedStringQuery(@"SELECT ?configurableParameter ?newValue WHERE {
                         @action rdf:type meta:ReconfigurationAction .
                         @action ssn:forProperty ?configurableParameter .
                         @action meta:hasValue ?newValue . }");
@@ -631,7 +631,7 @@ namespace Logic.Mapek
             if (staticObservables != null) {
                 return staticObservables;
             }
-            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty WHERE {
+            var query = IMapekKnowledge.GetParameterizedStringQuery(@"SELECT DISTINCT ?observableProperty WHERE {
                 ?sensor rdf:type sosa:Sensor .
                 ?sensor sosa:observes ?observableProperty . }");
 
@@ -641,7 +641,7 @@ namespace Logic.Mapek
 
         public IEnumerable<FmuModel> GetHostPlatformFmuModel(string fmuDirectory) {
             // Retrieve the Platform (TT) FMU to be used for Actuators and/or ConfigurableParameters.
-            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?fmuModel ?fmuFilePath ?simulationFidelitySeconds WHERE {
+            var query = IMapekKnowledge.GetParameterizedStringQuery(@"SELECT ?fmuModel ?fmuFilePath ?simulationFidelitySeconds WHERE {
                 ?platform rdf:type sosa:Platform .
                 ?platform meta:hasSimulationModel ?fmuModel .
                 ?fmuModel rdf:type meta:FmuModel .
@@ -975,7 +975,7 @@ namespace Logic.Mapek
             // Simple injection. We can achieve this similarly with dotNetRdf's own methods with full URIs.
             var filter = maximize ? "meta:maximizes" : "meta:minimizes";
 
-            var query = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?propertyName WHERE {
+            var query = IMapekKnowledge.GetParameterizedStringQuery(@"SELECT ?propertyName WHERE {
                 ?platform rdf:type sosa:Platform .
                 ?platform " + filter + " ?propertyName . }");
 

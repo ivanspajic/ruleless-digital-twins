@@ -36,7 +36,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore SmartNode/SmartNode.sln
     - name: Test
-      run: dotnet test --no-build --verbosity normal SmartNode/SmartNode.sln --filter Category=CI --logger "trx;LogFileName=TestResults.trx" || true
+      run: dotnet test --no-build --verbosity normal SmartNode/SmartNode.sln --filter Category!=NOCI --logger "trx;LogFileName=TestResults.trx" -- xUnit.ParallelizeTestCollections=false || true
     - name: Upload test results
       uses: actions/upload-artifact@v4
       with:

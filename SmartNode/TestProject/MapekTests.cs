@@ -36,7 +36,7 @@ namespace TestProject
                 InferenceEngineFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar")),
                 InferenceRulesFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "inference-rules.rules")),
                 InferredModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370-simulation-inferred.ttl")),
-                InstanceModelFilepath = Path.GetFullPath("/tmp/M370.ttl"),
+                InstanceModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370.ttl")),
                 OntologyFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "ontology", "ruleless-digital-twins.ttl"))
             };
             serviceProvider.Add(filepathArguments);
@@ -203,14 +203,14 @@ namespace TestProject
             var coordinatorSettings = new CoordinatorSettings
             {
                 Environment = "roomM370",
-                LookAheadMapekCycles = rounds,
-                MaximumMapekRounds = 1,
-                PropertyValueFuzziness = 0.25,
+                LookAheadMapekCycles = 3,
+                MaximumMapekRounds = 5,
+                PropertyValueFuzziness = 1,
                 SaveMapekCycleData = false,
-                CycleDurationSeconds = duration,
+                CycleDurationSeconds = 900,
                 SleepyTimeMilliseconds = 0,
-                StartInReactiveMode = false,
-                UseCaseBasedFunctionality = useCase,
+                StartInReactiveMode = true,
+                UseCaseBasedFunctionality = false,
                 UseDecisionLagMitigation = false, // XXX not supported for multiple FMUs yet.
                 UseEuclid = false
             };

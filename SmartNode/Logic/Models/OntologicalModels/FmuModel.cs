@@ -4,6 +4,6 @@
     {
         public required string Filepath { get; init; }
 
-        public int SimulationFidelitySeconds { get; init; }
+        public double SimulationFidelitySeconds { get; init; }
     }
 }

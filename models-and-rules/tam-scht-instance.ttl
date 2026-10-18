@@ -1,14 +1,14 @@
-@base <http://www.semanticweb.org/ispa/ontologies/2026/9/tam-scht/>.
+@base <http://www.semanticweb.org/ispa/ontologies/tam-scht/>.
 
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
-@prefix : <http://www.semanticweb.org/ispa/ontologies/2026/9/tam-scht/>.
+@prefix : <http://www.semanticweb.org/ispa/ontologies/tam-scht/>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix xml: <http://www.w3.org/XML/1998/namespace>.
 
-<http://www.semanticweb.org/ispa/ontologies/2026/9/tam-scht> a owl:Ontology;
-                                                             owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins>.
+<http://www.semanticweb.org/ispa/ontologies/tam-scht> a owl:Ontology;
+                                                      owl:imports <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins>.
 :CoolingOptimalCondition a owl:NamedIndividual,
                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>,
                            [a owl:Restriction ; 
@@ -16,10 +16,9 @@
                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
                             owl:onClass [a owl:Restriction ; 
                                          owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo> ; 
-                                         owl:hasValue :HVACCoolingSetpoint]];
-                         <http://www.w3.org/ns/ssn/forProperty> :LivingRoomSpace1Temperature.
-:HVAC <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :LivingRoomSpace1TemperatureDecrease,
-                                                                                       :LivingRoomSpace1TemperatureIncrease;
+                                         owl:hasValue :HVACCoolingSetpoint]].
+:HVAC <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :HouseTempDecrease,
+                                                                                       :HouseTempIncrease;
       <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> "0"^^xsd:int,
                                                                                                  "1"^^xsd:int;
       a owl:NamedIndividual,
@@ -37,10 +36,27 @@
                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
                             owl:onClass [a owl:Restriction ; 
                                          owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo> ; 
-                                         owl:hasValue :HVACHeatingSetpoint]];
-                         <http://www.w3.org/ns/ssn/forProperty> :LivingRoomSpace1Temperature.
-:LivingRoomSpace1Temperature a owl:NamedIndividual.
-:TamSchtFmu <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds> "100"^^xsd:int;
+                                         owl:hasValue :HVACHeatingSetpoint]].
+:HouseTemp <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0"^^xsd:double;
+           a owl:NamedIndividual,
+             <http://www.w3.org/ns/sosa/ObservableProperty>.
+:HouseTempDecrease <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease>;
+                   a owl:NamedIndividual,
+                     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>.
+:HouseTempIncrease <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease>;
+                   a owl:NamedIndividual,
+                     <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>.
+:HouseTempMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "24.3"^^xsd:double;
+                   a owl:NamedIndividual,
+                     <http://www.w3.org/ns/ssn/Property>.
+:HouseTempProcedure a owl:NamedIndividual,
+                      <http://www.w3.org/ns/sosa/Procedure>;
+                    <http://www.w3.org/ns/ssn/hasOutput> :HouseTempMeasured.
+:HouseTempSensor a owl:NamedIndividual,
+                   <http://www.w3.org/ns/sosa/Sensor>;
+                 <http://www.w3.org/ns/sosa/observes> :HouseTemp;
+                 <http://www.w3.org/ns/ssn/implements> :HouseTempProcedure.
+:TamSchtFmu <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds> "1.0"^^xsd:double;
             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI> "TAM_SCHT.fmu"^^xsd:anyURI;
             a owl:NamedIndividual,
               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/FmuModel>.
@@ -48,302 +64,315 @@
               <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationModel> :TamSchtFmu;
               a owl:NamedIndividual,
                 <http://www.w3.org/ns/sosa/Platform>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HDirNor> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0"^^xsd:double;
-                                                                                      a owl:NamedIndividual,
-                                                                                        <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HDirNorMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double;
-                                                                                              a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HDirNorProcedure> a owl:NamedIndividual,
-                                                                                                 <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                               <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HDirNorMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HDirNorSensor> a owl:NamedIndividual,
-                                                                                              <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                            <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HDirNor>;
-                                                                                            <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HDirNorProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HGloHor> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0"^^xsd:double;
-                                                                                      a owl:NamedIndividual,
-                                                                                        <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HGloHorMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double;
-                                                                                              a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HGloHorProcedure> a owl:NamedIndividual,
-                                                                                                 <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                               <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HGloHorMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HGloHorSensor> a owl:NamedIndividual,
-                                                                                              <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                            <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HGloHor>;
-                                                                                            <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HGloHorProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HHorIR> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0"^^xsd:double;
-                                                                                     a owl:NamedIndividual,
-                                                                                       <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HHorIRMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double;
-                                                                                             a owl:NamedIndividual,
-                                                                                               <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HHorIRProcedure> a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                              <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HHorIRMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HHorIRSensor> a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                           <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HHorIR>;
-                                                                                           <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_HHorIRProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TBlaSky> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "295"^^xsd:double;
-                                                                                      a owl:NamedIndividual,
-                                                                                        <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TBlaSkyMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "295.0"^^xsd:double;
-                                                                                              a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TBlaSkyProcedure> a owl:NamedIndividual,
-                                                                                                 <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                               <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TBlaSkyMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TBlaSkySensor> a owl:NamedIndividual,
-                                                                                              <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                            <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TBlaSky>;
-                                                                                            <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TBlaSkyProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDewPoi> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "288.15"^^xsd:double;
-                                                                                      a owl:NamedIndividual,
-                                                                                        <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDewPoiMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "288.15"^^xsd:double;
-                                                                                              a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDewPoiProcedure> a owl:NamedIndividual,
-                                                                                                 <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                               <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDewPoiMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDewPoiSensor> a owl:NamedIndividual,
-                                                                                              <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                            <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDewPoi>;
-                                                                                            <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDewPoiProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDryBul> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "305"^^xsd:double;
-                                                                                      a owl:NamedIndividual,
-                                                                                        <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDryBulMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "305.0"^^xsd:double;
-                                                                                              a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDryBulProcedure> a owl:NamedIndividual,
-                                                                                                 <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                               <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDryBulMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDryBulSensor> a owl:NamedIndividual,
-                                                                                              <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                            <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDryBul>;
-                                                                                            <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TDryBulProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TWetBul> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "293.15"^^xsd:double;
-                                                                                      a owl:NamedIndividual,
-                                                                                        <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TWetBulMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "293.15"^^xsd:double;
-                                                                                              a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TWetBulProcedure> a owl:NamedIndividual,
-                                                                                                 <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                               <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TWetBulMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TWetBulSensor> a owl:NamedIndividual,
-                                                                                              <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                            <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TWetBul>;
-                                                                                            <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_TWetBulProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_alt> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "90"^^xsd:double;
-                                                                                  a owl:NamedIndividual,
-                                                                                    <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_altMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "90.0"^^xsd:double;
-                                                                                          a owl:NamedIndividual,
-                                                                                            <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_altProcedure> a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                           <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_altMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_altSensor> a owl:NamedIndividual,
-                                                                                          <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                        <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_alt>;
-                                                                                        <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_altProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_ceiHei> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1"^^xsd:double;
-                                                                                     a owl:NamedIndividual,
-                                                                                       <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_ceiHeiMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.0"^^xsd:double;
-                                                                                             a owl:NamedIndividual,
-                                                                                               <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_ceiHeiProcedure> a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                              <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_ceiHeiMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_ceiHeiSensor> a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                           <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_ceiHei>;
-                                                                                           <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_ceiHeiProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_cloTim> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0"^^xsd:double;
-                                                                                     a owl:NamedIndividual,
-                                                                                       <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_cloTimMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double;
-                                                                                             a owl:NamedIndividual,
-                                                                                               <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_cloTimProcedure> a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                              <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_cloTimMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_cloTimSensor> a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                           <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_cloTim>;
-                                                                                           <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_cloTimProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_lat> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "30.6"^^xsd:double;
-                                                                                  a owl:NamedIndividual,
-                                                                                    <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_latMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "30.6"^^xsd:double;
-                                                                                          a owl:NamedIndividual,
-                                                                                            <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_latProcedure> a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                           <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_latMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_latSensor> a owl:NamedIndividual,
-                                                                                          <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                        <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_lat>;
-                                                                                        <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_latProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_lon> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "24.5"^^xsd:double;
-                                                                                  a owl:NamedIndividual,
-                                                                                    <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_lonMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "24.5"^^xsd:double;
-                                                                                          a owl:NamedIndividual,
-                                                                                            <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_lonProcedure> a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                           <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_lonMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_lonSensor> a owl:NamedIndividual,
-                                                                                          <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                        <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_lon>;
-                                                                                        <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_lonProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nOpa> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1"^^xsd:double;
-                                                                                   a owl:NamedIndividual,
-                                                                                     <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nOpaMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.0"^^xsd:double;
-                                                                                           a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nOpaProcedure> a owl:NamedIndividual,
-                                                                                              <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                            <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nOpaMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nOpaSensor> a owl:NamedIndividual,
-                                                                                           <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                         <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nOpa>;
-                                                                                         <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nOpaProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nTot> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1"^^xsd:double;
-                                                                                   a owl:NamedIndividual,
-                                                                                     <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nTotMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.0"^^xsd:double;
-                                                                                           a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nTotProcedure> a owl:NamedIndividual,
-                                                                                              <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                            <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nTotMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nTotSensor> a owl:NamedIndividual,
-                                                                                           <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                         <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nTot>;
-                                                                                         <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_nTotProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_pAtm> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "98900"^^xsd:double;
-                                                                                   a owl:NamedIndividual,
-                                                                                     <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_pAtmMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "98900.0"^^xsd:double;
-                                                                                           a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_pAtmProcedure> a owl:NamedIndividual,
-                                                                                              <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                            <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_pAtmMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_pAtmSensor> a owl:NamedIndividual,
-                                                                                           <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                         <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_pAtm>;
-                                                                                         <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_pAtmProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_relHum> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1"^^xsd:double;
-                                                                                     a owl:NamedIndividual,
-                                                                                       <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_relHumMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.0"^^xsd:double;
-                                                                                             a owl:NamedIndividual,
-                                                                                               <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_relHumProcedure> a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                              <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_relHumMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_relHumSensor> a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                           <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_relHum>;
-                                                                                           <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_relHumProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solAlt> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1"^^xsd:double;
-                                                                                     a owl:NamedIndividual,
-                                                                                       <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solAltMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.0"^^xsd:double;
-                                                                                             a owl:NamedIndividual,
-                                                                                               <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solAltProcedure> a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                              <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solAltMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solAltSensor> a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                           <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solAlt>;
-                                                                                           <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solAltProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solDec> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1"^^xsd:double;
-                                                                                     a owl:NamedIndividual,
-                                                                                       <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solDecMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.0"^^xsd:double;
-                                                                                             a owl:NamedIndividual,
-                                                                                               <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solDecProcedure> a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                              <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solDecMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solDecSensor> a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                           <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solDec>;
-                                                                                           <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solDecProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solHouAng> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1"^^xsd:double;
-                                                                                        a owl:NamedIndividual,
-                                                                                          <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solHouAngMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.0"^^xsd:double;
-                                                                                                a owl:NamedIndividual,
-                                                                                                  <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solHouAngProcedure> a owl:NamedIndividual,
-                                                                                                   <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                                 <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solHouAngMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solHouAngSensor> a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                              <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solHouAng>;
-                                                                                              <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solHouAngProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solTim> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "36000"^^xsd:double;
-                                                                                     a owl:NamedIndividual,
-                                                                                       <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solTimMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "36000.0"^^xsd:double;
-                                                                                             a owl:NamedIndividual,
-                                                                                               <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solTimProcedure> a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                              <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solTimMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solTimSensor> a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                           <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solTim>;
-                                                                                           <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solTimProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solZen> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "60"^^xsd:double;
-                                                                                     a owl:NamedIndividual,
-                                                                                       <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solZenMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "60.0"^^xsd:double;
-                                                                                             a owl:NamedIndividual,
-                                                                                               <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solZenProcedure> a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                              <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solZenMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solZenSensor> a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                           <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solZen>;
-                                                                                           <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_solZenProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winDir> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0"^^xsd:double;
-                                                                                     a owl:NamedIndividual,
-                                                                                       <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winDirMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double;
-                                                                                             a owl:NamedIndividual,
-                                                                                               <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winDirProcedure> a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                              <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winDirMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winDirSensor> a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                           <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winDir>;
-                                                                                           <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winDirProcedure>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winSpe> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1"^^xsd:double;
-                                                                                     a owl:NamedIndividual,
-                                                                                       <http://www.w3.org/ns/sosa/ObservableProperty>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winSpeMeasured> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.0"^^xsd:double;
-                                                                                             a owl:NamedIndividual,
-                                                                                               <http://www.w3.org/ns/ssn/Property>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winSpeProcedure> a owl:NamedIndividual,
-                                                                                                <http://www.w3.org/ns/sosa/Procedure>;
-                                                                                              <http://www.w3.org/ns/ssn/hasOutput> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winSpeMeasured>.
-<http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winSpeSensor> a owl:NamedIndividual,
-                                                                                             <http://www.w3.org/ns/sosa/Sensor>;
-                                                                                           <http://www.w3.org/ns/sosa/observes> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winSpe>;
-                                                                                           <http://www.w3.org/ns/ssn/implements> <http://www.semanticweb.org/ispa/ontologies/2026/9/untitled-ontology-542/fmu_winSpeProcedure>.
+:fmu_HDifHor <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0"^^xsd:double;
+             a owl:NamedIndividual,
+               <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_HDifHorMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double;
+                     a owl:NamedIndividual,
+                       <http://www.w3.org/ns/ssn/Property>.
+:fmu_HDifHorProcedure a owl:NamedIndividual,
+                        <http://www.w3.org/ns/sosa/Procedure>;
+                      <http://www.w3.org/ns/ssn/hasOutput> :fmu_HDifHorMeasured.
+:fmu_HDifHorSensor a owl:NamedIndividual,
+                     <http://www.w3.org/ns/sosa/Sensor>;
+                   <http://www.w3.org/ns/sosa/observes> :fmu_HDifHor;
+                   <http://www.w3.org/ns/ssn/implements> :fmu_HDifHorProcedure.
+:fmu_HDirNor <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0"^^xsd:double;
+             a owl:NamedIndividual,
+               <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_HDirNorMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double;
+                     a owl:NamedIndividual,
+                       <http://www.w3.org/ns/ssn/Property>.
+:fmu_HDirNorProcedure a owl:NamedIndividual,
+                        <http://www.w3.org/ns/sosa/Procedure>;
+                      <http://www.w3.org/ns/ssn/hasOutput> :fmu_HDirNorMeasured.
+:fmu_HDirNorSensor a owl:NamedIndividual,
+                     <http://www.w3.org/ns/sosa/Sensor>;
+                   <http://www.w3.org/ns/sosa/observes> :fmu_HDirNor;
+                   <http://www.w3.org/ns/ssn/implements> :fmu_HDirNorProcedure.
+:fmu_HGloHor <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0"^^xsd:double;
+             a owl:NamedIndividual,
+               <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_HGloHorMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double;
+                     a owl:NamedIndividual,
+                       <http://www.w3.org/ns/ssn/Property>.
+:fmu_HGloHorProcedure a owl:NamedIndividual,
+                        <http://www.w3.org/ns/sosa/Procedure>;
+                      <http://www.w3.org/ns/ssn/hasOutput> :fmu_HGloHorMeasured.
+:fmu_HGloHorSensor a owl:NamedIndividual,
+                     <http://www.w3.org/ns/sosa/Sensor>;
+                   <http://www.w3.org/ns/sosa/observes> :fmu_HGloHor;
+                   <http://www.w3.org/ns/ssn/implements> :fmu_HGloHorProcedure.
+:fmu_HHorIR <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0"^^xsd:double;
+            a owl:NamedIndividual,
+              <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_HHorIRMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.0"^^xsd:double;
+                    a owl:NamedIndividual,
+                      <http://www.w3.org/ns/ssn/Property>.
+:fmu_HHorIRProcedure a owl:NamedIndividual,
+                       <http://www.w3.org/ns/sosa/Procedure>;
+                     <http://www.w3.org/ns/ssn/hasOutput> :fmu_HHorIRMeasured.
+:fmu_HHorIRSensor a owl:NamedIndividual,
+                    <http://www.w3.org/ns/sosa/Sensor>;
+                  <http://www.w3.org/ns/sosa/observes> :fmu_HHorIR;
+                  <http://www.w3.org/ns/ssn/implements> :fmu_HHorIRProcedure.
+:fmu_TBlaSky <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "295"^^xsd:double;
+             a owl:NamedIndividual,
+               <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_TBlaSkyMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "295.0"^^xsd:double;
+                     a owl:NamedIndividual,
+                       <http://www.w3.org/ns/ssn/Property>.
+:fmu_TBlaSkyProcedure a owl:NamedIndividual,
+                        <http://www.w3.org/ns/sosa/Procedure>;
+                      <http://www.w3.org/ns/ssn/hasOutput> :fmu_TBlaSkyMeasured.
+:fmu_TBlaSkySensor a owl:NamedIndividual,
+                     <http://www.w3.org/ns/sosa/Sensor>;
+                   <http://www.w3.org/ns/sosa/observes> :fmu_TBlaSky;
+                   <http://www.w3.org/ns/ssn/implements> :fmu_TBlaSkyProcedure.
+:fmu_TDewPoi <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "295.3"^^xsd:double;
+             a owl:NamedIndividual,
+               <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_TDewPoiMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "295.3"^^xsd:double;
+                     a owl:NamedIndividual,
+                       <http://www.w3.org/ns/ssn/Property>.
+:fmu_TDewPoiProcedure a owl:NamedIndividual,
+                        <http://www.w3.org/ns/sosa/Procedure>;
+                      <http://www.w3.org/ns/ssn/hasOutput> :fmu_TDewPoiMeasured.
+:fmu_TDewPoiSensor a owl:NamedIndividual,
+                     <http://www.w3.org/ns/sosa/Sensor>;
+                   <http://www.w3.org/ns/sosa/observes> :fmu_TDewPoi;
+                   <http://www.w3.org/ns/ssn/implements> :fmu_TDewPoiProcedure.
+:fmu_TDryBul <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "305.8"^^xsd:double;
+             a owl:NamedIndividual,
+               <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_TDryBulMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "305.8"^^xsd:double;
+                     a owl:NamedIndividual,
+                       <http://www.w3.org/ns/ssn/Property>.
+:fmu_TDryBulProcedure a owl:NamedIndividual,
+                        <http://www.w3.org/ns/sosa/Procedure>;
+                      <http://www.w3.org/ns/ssn/hasOutput> :fmu_TDryBulMeasured.
+:fmu_TDryBulSensor a owl:NamedIndividual,
+                     <http://www.w3.org/ns/sosa/Sensor>;
+                   <http://www.w3.org/ns/sosa/observes> :fmu_TDryBul;
+                   <http://www.w3.org/ns/ssn/implements> :fmu_TDryBulProcedure.
+:fmu_TWetBul <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "298.15"^^xsd:double;
+             a owl:NamedIndividual,
+               <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_TWetBulMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "298.15"^^xsd:double;
+                     a owl:NamedIndividual,
+                       <http://www.w3.org/ns/ssn/Property>.
+:fmu_TWetBulProcedure a owl:NamedIndividual,
+                        <http://www.w3.org/ns/sosa/Procedure>;
+                      <http://www.w3.org/ns/ssn/hasOutput> :fmu_TWetBulMeasured.
+:fmu_TWetBulSensor a owl:NamedIndividual,
+                     <http://www.w3.org/ns/sosa/Sensor>;
+                   <http://www.w3.org/ns/sosa/observes> :fmu_TWetBul;
+                   <http://www.w3.org/ns/ssn/implements> :fmu_TWetBulProcedure.
+:fmu_alt <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "90"^^xsd:double;
+         a owl:NamedIndividual,
+           <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_altMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "90.0"^^xsd:double;
+                 a owl:NamedIndividual,
+                   <http://www.w3.org/ns/ssn/Property>.
+:fmu_altProcedure a owl:NamedIndividual,
+                    <http://www.w3.org/ns/sosa/Procedure>;
+                  <http://www.w3.org/ns/ssn/hasOutput> :fmu_altMeasured.
+:fmu_altSensor a owl:NamedIndividual,
+                 <http://www.w3.org/ns/sosa/Sensor>;
+               <http://www.w3.org/ns/sosa/observes> :fmu_alt;
+               <http://www.w3.org/ns/ssn/implements> :fmu_altProcedure.
+:fmu_ceiHei <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "30"^^xsd:double;
+            a owl:NamedIndividual,
+              <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_ceiHeiMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "30.0"^^xsd:double;
+                    a owl:NamedIndividual,
+                      <http://www.w3.org/ns/ssn/Property>.
+:fmu_ceiHeiProcedure a owl:NamedIndividual,
+                       <http://www.w3.org/ns/sosa/Procedure>;
+                     <http://www.w3.org/ns/ssn/hasOutput> :fmu_ceiHeiMeasured.
+:fmu_ceiHeiSensor a owl:NamedIndividual,
+                    <http://www.w3.org/ns/sosa/Sensor>;
+                  <http://www.w3.org/ns/sosa/observes> :fmu_ceiHei;
+                  <http://www.w3.org/ns/ssn/implements> :fmu_ceiHeiProcedure.
+:fmu_cloTim <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "18704100"^^xsd:double;
+            a owl:NamedIndividual,
+              <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_cloTimMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> 1.87041E7;
+                    a owl:NamedIndividual,
+                      <http://www.w3.org/ns/ssn/Property>.
+:fmu_cloTimProcedure a owl:NamedIndividual,
+                       <http://www.w3.org/ns/sosa/Procedure>;
+                     <http://www.w3.org/ns/ssn/hasOutput> :fmu_cloTimMeasured.
+:fmu_cloTimSensor a owl:NamedIndividual,
+                    <http://www.w3.org/ns/sosa/Sensor>;
+                  <http://www.w3.org/ns/sosa/observes> :fmu_cloTim;
+                  <http://www.w3.org/ns/ssn/implements> :fmu_cloTimProcedure.
+:fmu_lat <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.534"^^xsd:double;
+         a owl:NamedIndividual,
+           <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_latMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.534"^^xsd:double;
+                 a owl:NamedIndividual,
+                   <http://www.w3.org/ns/ssn/Property>.
+:fmu_latProcedure a owl:NamedIndividual,
+                    <http://www.w3.org/ns/sosa/Procedure>;
+                  <http://www.w3.org/ns/ssn/hasOutput> :fmu_latMeasured.
+:fmu_latSensor a owl:NamedIndividual,
+                 <http://www.w3.org/ns/sosa/Sensor>;
+               <http://www.w3.org/ns/sosa/observes> :fmu_lat;
+               <http://www.w3.org/ns/ssn/implements> :fmu_latProcedure.
+:fmu_lon <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.428"^^xsd:double;
+         a owl:NamedIndividual,
+           <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_lonMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.428"^^xsd:double;
+                 a owl:NamedIndividual,
+                   <http://www.w3.org/ns/ssn/Property>.
+:fmu_lonProcedure a owl:NamedIndividual,
+                    <http://www.w3.org/ns/sosa/Procedure>;
+                  <http://www.w3.org/ns/ssn/hasOutput> :fmu_lonMeasured.
+:fmu_lonSensor a owl:NamedIndividual,
+                 <http://www.w3.org/ns/sosa/Sensor>;
+               <http://www.w3.org/ns/sosa/observes> :fmu_lon;
+               <http://www.w3.org/ns/ssn/implements> :fmu_lonProcedure.
+:fmu_nOpa <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1"^^xsd:double;
+          a owl:NamedIndividual,
+            <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_nOpaMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.0"^^xsd:double;
+                  a owl:NamedIndividual,
+                    <http://www.w3.org/ns/ssn/Property>.
+:fmu_nOpaProcedure a owl:NamedIndividual,
+                     <http://www.w3.org/ns/sosa/Procedure>;
+                   <http://www.w3.org/ns/ssn/hasOutput> :fmu_nOpaMeasured.
+:fmu_nOpaSensor a owl:NamedIndividual,
+                  <http://www.w3.org/ns/sosa/Sensor>;
+                <http://www.w3.org/ns/sosa/observes> :fmu_nOpa;
+                <http://www.w3.org/ns/ssn/implements> :fmu_nOpaProcedure.
+:fmu_nTot <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1"^^xsd:double;
+          a owl:NamedIndividual,
+            <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_nTotMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.0"^^xsd:double;
+                  a owl:NamedIndividual,
+                    <http://www.w3.org/ns/ssn/Property>.
+:fmu_nTotProcedure a owl:NamedIndividual,
+                     <http://www.w3.org/ns/sosa/Procedure>;
+                   <http://www.w3.org/ns/ssn/hasOutput> :fmu_nTotMeasured.
+:fmu_nTotSensor a owl:NamedIndividual,
+                  <http://www.w3.org/ns/sosa/Sensor>;
+                <http://www.w3.org/ns/sosa/observes> :fmu_nTot;
+                <http://www.w3.org/ns/ssn/implements> :fmu_nTotProcedure.
+:fmu_pAtm <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "101450"^^xsd:double;
+          a owl:NamedIndividual,
+            <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_pAtmMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "101450.0"^^xsd:double;
+                  a owl:NamedIndividual,
+                    <http://www.w3.org/ns/ssn/Property>.
+:fmu_pAtmProcedure a owl:NamedIndividual,
+                     <http://www.w3.org/ns/sosa/Procedure>;
+                   <http://www.w3.org/ns/ssn/hasOutput> :fmu_pAtmMeasured.
+:fmu_pAtmSensor a owl:NamedIndividual,
+                  <http://www.w3.org/ns/sosa/Sensor>;
+                <http://www.w3.org/ns/sosa/observes> :fmu_pAtm;
+                <http://www.w3.org/ns/ssn/implements> :fmu_pAtmProcedure.
+:fmu_relHum <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.528"^^xsd:double;
+            a owl:NamedIndividual,
+              <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_relHumMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.528"^^xsd:double;
+                    a owl:NamedIndividual,
+                      <http://www.w3.org/ns/ssn/Property>.
+:fmu_relHumProcedure a owl:NamedIndividual,
+                       <http://www.w3.org/ns/sosa/Procedure>;
+                     <http://www.w3.org/ns/ssn/hasOutput> :fmu_relHumMeasured.
+:fmu_relHumSensor a owl:NamedIndividual,
+                    <http://www.w3.org/ns/sosa/Sensor>;
+                  <http://www.w3.org/ns/sosa/observes> :fmu_relHum;
+                  <http://www.w3.org/ns/ssn/implements> :fmu_relHumProcedure.
+:fmu_solAlt <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1"^^xsd:double;
+            a owl:NamedIndividual,
+              <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_solAltMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.0"^^xsd:double;
+                    a owl:NamedIndividual,
+                      <http://www.w3.org/ns/ssn/Property>.
+:fmu_solAltProcedure a owl:NamedIndividual,
+                       <http://www.w3.org/ns/sosa/Procedure>;
+                     <http://www.w3.org/ns/ssn/hasOutput> :fmu_solAltMeasured.
+:fmu_solAltSensor a owl:NamedIndividual,
+                    <http://www.w3.org/ns/sosa/Sensor>;
+                  <http://www.w3.org/ns/sosa/observes> :fmu_solAlt;
+                  <http://www.w3.org/ns/ssn/implements> :fmu_solAltProcedure.
+:fmu_solDec <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1"^^xsd:double;
+            a owl:NamedIndividual,
+              <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_solDecMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.0"^^xsd:double;
+                    a owl:NamedIndividual,
+                      <http://www.w3.org/ns/ssn/Property>.
+:fmu_solDecProcedure a owl:NamedIndividual,
+                       <http://www.w3.org/ns/sosa/Procedure>;
+                     <http://www.w3.org/ns/ssn/hasOutput> :fmu_solDecMeasured.
+:fmu_solDecSensor a owl:NamedIndividual,
+                    <http://www.w3.org/ns/sosa/Sensor>;
+                  <http://www.w3.org/ns/sosa/observes> :fmu_solDec;
+                  <http://www.w3.org/ns/ssn/implements> :fmu_solDecProcedure.
+:fmu_solHouAng <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1"^^xsd:double;
+               a owl:NamedIndividual,
+                 <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_solHouAngMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.0"^^xsd:double;
+                       a owl:NamedIndividual,
+                         <http://www.w3.org/ns/ssn/Property>.
+:fmu_solHouAngProcedure a owl:NamedIndividual,
+                          <http://www.w3.org/ns/sosa/Procedure>;
+                        <http://www.w3.org/ns/ssn/hasOutput> :fmu_solHouAngMeasured.
+:fmu_solHouAngSensor a owl:NamedIndividual,
+                       <http://www.w3.org/ns/sosa/Sensor>;
+                     <http://www.w3.org/ns/sosa/observes> :fmu_solHouAng;
+                     <http://www.w3.org/ns/ssn/implements> :fmu_solHouAngProcedure.
+:fmu_solTim <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "36000"^^xsd:double;
+            a owl:NamedIndividual,
+              <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_solTimMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "36000.0"^^xsd:double;
+                    a owl:NamedIndividual,
+                      <http://www.w3.org/ns/ssn/Property>.
+:fmu_solTimProcedure a owl:NamedIndividual,
+                       <http://www.w3.org/ns/sosa/Procedure>;
+                     <http://www.w3.org/ns/ssn/hasOutput> :fmu_solTimMeasured.
+:fmu_solTimSensor a owl:NamedIndividual,
+                    <http://www.w3.org/ns/sosa/Sensor>;
+                  <http://www.w3.org/ns/sosa/observes> :fmu_solTim;
+                  <http://www.w3.org/ns/ssn/implements> :fmu_solTimProcedure.
+:fmu_solZen <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.047"^^xsd:double;
+            a owl:NamedIndividual,
+              <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_solZenMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "1.047"^^xsd:double;
+                    a owl:NamedIndividual,
+                      <http://www.w3.org/ns/ssn/Property>.
+:fmu_solZenProcedure a owl:NamedIndividual,
+                       <http://www.w3.org/ns/sosa/Procedure>;
+                     <http://www.w3.org/ns/ssn/hasOutput> :fmu_solZenMeasured.
+:fmu_solZenSensor a owl:NamedIndividual,
+                    <http://www.w3.org/ns/sosa/Sensor>;
+                  <http://www.w3.org/ns/sosa/observes> :fmu_solZen;
+                  <http://www.w3.org/ns/ssn/implements> :fmu_solZenProcedure.
+:fmu_winDir <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "3.68"^^xsd:double;
+            a owl:NamedIndividual,
+              <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_winDirMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "3.68"^^xsd:double;
+                    a owl:NamedIndividual,
+                      <http://www.w3.org/ns/ssn/Property>.
+:fmu_winDirProcedure a owl:NamedIndividual,
+                       <http://www.w3.org/ns/sosa/Procedure>;
+                     <http://www.w3.org/ns/ssn/hasOutput> :fmu_winDirMeasured.
+:fmu_winDirSensor a owl:NamedIndividual,
+                    <http://www.w3.org/ns/sosa/Sensor>;
+                  <http://www.w3.org/ns/sosa/observes> :fmu_winDir;
+                  <http://www.w3.org/ns/ssn/implements> :fmu_winDirProcedure.
+:fmu_winSpe <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "4"^^xsd:double;
+            a owl:NamedIndividual,
+              <http://www.w3.org/ns/sosa/ObservableProperty>.
+:fmu_winSpeMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "4.0"^^xsd:double;
+                    a owl:NamedIndividual,
+                      <http://www.w3.org/ns/ssn/Property>.
+:fmu_winSpeProcedure a owl:NamedIndividual,
+                       <http://www.w3.org/ns/sosa/Procedure>;
+                     <http://www.w3.org/ns/ssn/hasOutput> :fmu_winSpeMeasured.
+:fmu_winSpeSensor a owl:NamedIndividual,
+                    <http://www.w3.org/ns/sosa/Sensor>;
+                  <http://www.w3.org/ns/sosa/observes> :fmu_winSpe;
+                  <http://www.w3.org/ns/ssn/implements> :fmu_winSpeProcedure.

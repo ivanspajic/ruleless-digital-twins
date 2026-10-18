@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using static Femyou.IModel;
 
 namespace Logic.Mapek
@@ -656,7 +657,7 @@ namespace Logic.Mapek
                 result.Add(new FmuModel {
                     Name = fmuModel["fmuModel"].ToString(),
                     Filepath = Path.Combine(fmuDirectory, fmuModel["fmuFilePath"].ToString().Split('^')[0]),
-                    SimulationFidelitySeconds = int.Parse(fmuModel["simulationFidelitySeconds"].ToString().Split('^')[0])
+                    SimulationFidelitySeconds = double.Parse(fmuModel["simulationFidelitySeconds"].ToString().Split('^')[0], CultureInfo.InvariantCulture)
                 });
             }
             return result;

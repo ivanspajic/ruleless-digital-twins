@@ -16,19 +16,7 @@
                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
                             owl:onClass [a owl:Restriction ; 
                                          owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo> ; 
-                                         owl:hasValue :HVACCoolingSetpoint]].
-:HVAC <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :HouseTempDecrease,
-                                                                                       :HouseTempIncrease;
-      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> "0"^^xsd:int,
-                                                                                                 "1"^^xsd:int;
-      a owl:NamedIndividual,
-        <http://www.w3.org/ns/sosa/Actuator>.
-:HVACCoolingSetpoint <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "24.0"^^xsd:double;
-                     a owl:NamedIndividual,
-                       <http://www.w3.org/ns/ssn/Property>.
-:HVACHeatingSetpoint <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "20.0"^^xsd:double;
-                     a owl:NamedIndividual,
-                       <http://www.w3.org/ns/ssn/Property>.
+                                         owl:hasValue :HouseTempUpperBound]].
 :HeatingOptimalCondition a owl:NamedIndividual,
                            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition>,
                            [a owl:Restriction ; 
@@ -36,7 +24,7 @@
                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; 
                             owl:onClass [a owl:Restriction ; 
                                          owl:onProperty <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo> ; 
-                                         owl:hasValue :HVACHeatingSetpoint]].
+                                         owl:hasValue :HouseTempLowerBound]].
 :HouseTemp <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0"^^xsd:double;
            a owl:NamedIndividual,
              <http://www.w3.org/ns/sosa/ObservableProperty>.
@@ -46,6 +34,9 @@
 :HouseTempIncrease <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueIncrease>;
                    a owl:NamedIndividual,
                      <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange>.
+:HouseTempLowerBound <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "20.0"^^xsd:double;
+                     a owl:NamedIndividual,
+                       <http://www.w3.org/ns/ssn/Property>.
 :HouseTempMeasured <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "24.3"^^xsd:double;
                    a owl:NamedIndividual,
                      <http://www.w3.org/ns/ssn/Property>.
@@ -56,6 +47,9 @@
                    <http://www.w3.org/ns/sosa/Sensor>;
                  <http://www.w3.org/ns/sosa/observes> :HouseTemp;
                  <http://www.w3.org/ns/ssn/implements> :HouseTempProcedure.
+:HouseTempUpperBound <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "24.0"^^xsd:double;
+                     a owl:NamedIndividual,
+                       <http://www.w3.org/ns/ssn/Property>.
 :TamSchtFmu <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasSimulationFidelitySeconds> "1.0"^^xsd:double;
             <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasURI> "TAM_SCHT.fmu"^^xsd:anyURI;
             a owl:NamedIndividual,
@@ -207,6 +201,11 @@
                     <http://www.w3.org/ns/sosa/Sensor>;
                   <http://www.w3.org/ns/sosa/observes> :fmu_cloTim;
                   <http://www.w3.org/ns/ssn/implements> :fmu_cloTimProcedure.
+:fmu_coil <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts> :HouseTempDecrease;
+          <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState> false,
+                                                                                                     true;
+          a owl:NamedIndividual,
+            <http://www.w3.org/ns/sosa/Actuator>.
 :fmu_lat <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue> "0.534"^^xsd:double;
          a owl:NamedIndividual,
            <http://www.w3.org/ns/sosa/ObservableProperty>.

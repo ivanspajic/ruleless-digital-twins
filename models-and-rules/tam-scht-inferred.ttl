@@ -5,43 +5,23 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xml:  <http://www.w3.org/XML/1998/namespace>
 PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
 
-:HVAC_0  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
+:fmu_coil_false  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
-                :HVAC;
+                :fmu_coil;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
-                "0"^^xsd:int .
+                false .
 
-[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :HVAC_1;
-            rdf:rest   ()
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :HVAC;
-            rdf:rest   ()
-          ]
-] .
-
-[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
-          [ rdf:type   rdf:List;
-            rdf:first  :HVAC_0;
-            rdf:rest   ()
-          ];
-  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
-          [ rdf:type   rdf:List;
-            rdf:first  :HVAC;
-            rdf:rest   ()
-          ]
-] .
+:fmu_coil_true  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
+                :fmu_coil;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
+                true .
 
 :CoolingOptimalCondition
         rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:NamedIndividual;
         rdf:type  [ rdf:type                  owl:Restriction;
                     owl:onClass               [ rdf:type        owl:Restriction;
-                                                owl:hasValue    :HVACCoolingSetpoint;
+                                                owl:hasValue    :HouseTempUpperBound;
                                                 owl:onProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/lessThanOrEqualTo>
                                               ];
                     owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
@@ -50,11 +30,24 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#isEnabled>
                 true .
 
+[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :fmu_coil_true;
+            rdf:rest   ()
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :fmu_coil;
+            rdf:rest   ()
+          ]
+] .
+
 :HeatingOptimalCondition
         rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/OptimalCondition> , owl:NamedIndividual;
         rdf:type  [ rdf:type                  owl:Restriction;
                     owl:onClass               [ rdf:type        owl:Restriction;
-                                                owl:hasValue    :HVACHeatingSetpoint;
+                                                owl:hasValue    :HouseTempLowerBound;
                                                 owl:onProperty  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/greaterThanOrEqualTo>
                                               ];
                     owl:onProperty            <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasConstraint>;
@@ -63,11 +56,18 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
         <http://www.semanticweb.org/ivans/ontologies/2025/instance-model-1#isEnabled>
                 true .
 
-:HVAC_1  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActuationAction>;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuator>
-                :HVAC;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
-                "1"^^xsd:int .
+[ rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ActionCombination>;
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActions>
+          [ rdf:type   rdf:List;
+            rdf:first  :fmu_coil_false;
+            rdf:rest   ()
+          ];
+  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuators>
+          [ rdf:type   rdf:List;
+            rdf:first  :fmu_coil;
+            rdf:rest   ()
+          ]
+] .
 
 :fmu_solAltMeasured  rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
@@ -128,10 +128,6 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
 :fmu_relHumProcedure  rdf:type  <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual;
         <http://www.w3.org/ns/ssn/hasOutput>
                 :fmu_relHumMeasured .
-
-:HVACCoolingSetpoint  rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "24.0"^^xsd:double .
 
 :fmu_TDewPoi  rdf:type  <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
@@ -224,6 +220,12 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
         <http://www.w3.org/ns/ssn/hasOutput>
                 :fmu_nTotMeasured .
 
+:fmu_coil  rdf:type  <http://www.w3.org/ns/sosa/Actuator> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts>
+                :HouseTempDecrease;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
+                true , false .
+
 :fmu_relHum  rdf:type  <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "0.528"^^xsd:double .
@@ -252,10 +254,6 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "0.534"^^xsd:double .
 
-:HVACHeatingSetpoint  rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "20.0"^^xsd:double .
-
 :fmu_HDirNorMeasured  rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "0.0"^^xsd:double .
@@ -268,17 +266,15 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "0"^^xsd:double .
 
-:HVAC   rdf:type  <http://www.w3.org/ns/sosa/Actuator> , owl:NamedIndividual;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts>
-                :HouseTempIncrease , :HouseTempDecrease;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasActuatorState>
-                "1"^^xsd:int , "0"^^xsd:int .
-
 :fmu_relHumSensor  rdf:type  <http://www.w3.org/ns/sosa/Sensor> , owl:NamedIndividual;
         <http://www.w3.org/ns/sosa/observes>
                 :fmu_relHum;
         <http://www.w3.org/ns/ssn/implements>
                 :fmu_relHumProcedure .
+
+:HouseTempUpperBound  rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "24.0"^^xsd:double .
 
 :fmu_TDryBulSensor  rdf:type  <http://www.w3.org/ns/sosa/Sensor> , owl:NamedIndividual;
         <http://www.w3.org/ns/sosa/observes>
@@ -357,6 +353,11 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
         <http://www.w3.org/ns/ssn/implements>
                 :fmu_ceiHeiProcedure .
 
+:fmu_solHouAngMeasured
+        rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "1.0"^^xsd:double .
+
 :HouseTempDecrease  rdf:type  <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/PropertyChange> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/enacts>
                 <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/ValueDecrease> .
@@ -370,11 +371,6 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
 :fmu_lat  rdf:type  <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "0.534"^^xsd:double .
-
-:fmu_solHouAngMeasured
-        rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
-        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
-                "1.0"^^xsd:double .
 
 :fmu_solTimProcedure  rdf:type  <http://www.w3.org/ns/sosa/Procedure> , owl:NamedIndividual;
         <http://www.w3.org/ns/ssn/hasOutput>
@@ -499,6 +495,10 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
 :fmu_TDryBul  rdf:type  <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
                 "305.8"^^xsd:double .
+
+:HouseTempLowerBound  rdf:type  <http://www.w3.org/ns/ssn/Property> , owl:NamedIndividual;
+        <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>
+                "20.0"^^xsd:double .
 
 :fmu_solHouAng  rdf:type  <http://www.w3.org/ns/sosa/ObservableProperty> , owl:NamedIndividual;
         <http://www.semanticweb.org/ivans/ontologies/2025/ruleless-digital-twins/hasValue>

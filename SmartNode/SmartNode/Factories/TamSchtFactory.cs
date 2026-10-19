@@ -10,8 +10,8 @@ namespace SmartNode.Factories {
         protected override IDictionary<string, IActuator> MakeActuatorMap(IServiceProvider serviceProvider) {
             return new Dictionary<string, IActuator> {
                 {
-                    "http://www.semanticweb.org/ispa/ontologies/tam-scht/HVAC",
-                    new HvacActuator("http://www.semanticweb.org/ispa/ontologies/tam-scht/HVAC")
+                    "http://www.semanticweb.org/ispa/ontologies/tam-scht/fmu_coil",
+                    new HvacActuator("http://www.semanticweb.org/ispa/ontologies/tam-scht/fmu_coil")
                 }
             };
         }

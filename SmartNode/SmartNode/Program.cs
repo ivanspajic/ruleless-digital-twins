@@ -12,6 +12,9 @@ using SmartNode.Factories;
 using System.CommandLine;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using VDS.RDF;
+using VDS.RDF.Parsing;
+using VDS.RDF.Storage;
 
 [assembly: InternalsVisibleTo("TestProject")]
 
@@ -68,9 +71,23 @@ namespace SmartNode
             // Register services here.
             builder.Services.AddLogging(loggingBuilder =>
             {
+                loggingBuilder.ClearProviders();
+                // loggingBuilder.SetMinimumLevel(LogLevel.Debug);
                 loggingBuilder.AddConsole(options => options.TimestampFormat = "HH:mm:ss ");
             });
+            var fusekiArguments = builder.Configuration.GetSection("FusekiArguments").Get<FusekiArguments>() ?? new FusekiArguments();
+
+            // The instance model file only seeds the knowledge base in Fuseki; all further access goes through Fuseki.
+            var initialInstanceModel = new Graph();
+            new TurtleParser().Load(initialInstanceModel, filepathArguments.InstanceModelFilepath);
+            // A base IRI would make the connector store the model in a named graph instead of the default graph.
+            initialInstanceModel.BaseUri = null;
+            var fc = fusekiArguments.InstanceModelUri;
+            fc.DeleteGraph((string)null);
+            fc.SaveGraph(initialInstanceModel);
+
             builder.Services.AddSingleton(filepathArguments);
+            builder.Services.AddSingleton(fusekiArguments);
             builder.Services.AddSingleton(coordinatorSettings!);
             builder.Services.AddSingleton(databaseSettings!);
             // Register a factory to allow for dynamic constructor argument passing through DI.

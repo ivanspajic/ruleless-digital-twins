@@ -24,6 +24,7 @@ public class HomeAssistantSensorTest : IDisposable {
     }
 
     [Theory]
+    [Trait("Category","NOCI")]
     [InlineData("MH30", "https://mh30.foldr.org:8123/", "HA:TOKEN", "sensor.pwr", null)]
     [InlineData("IoTLab", "http://100.104.156.81:8123/", "HA:TOKEN_IOTLAB", "sensor.nordpool_kwh_no5_nok_3_10_025", null)]
     // example with attributes:

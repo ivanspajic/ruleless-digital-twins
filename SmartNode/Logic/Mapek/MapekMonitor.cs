@@ -324,8 +324,6 @@ namespace Logic.Mapek {
             foreach (var property in propertyCache.ConfigurableParameters.Values) {
                 _mapekKnowledge.UpdatePropertyValue(property);
             }
-
-            _mapekKnowledge.CommitInMemoryInstanceModelToKnowledgeBase();
         }
 
         private void PopulateActuatorCache(IDictionary<string, Actuator> actuators) {

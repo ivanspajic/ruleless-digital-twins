@@ -171,7 +171,7 @@ namespace Logic.Mapek
 
         // TODO: consider making this async in the future.
         // The boolean flags are used for performance improvements.
-        internal IEnumerable<(IMapekKnowledge,Simulation)> GetSimulationsAndGenerateSimulationTree(int lookAheadCycles,
+        internal IEnumerable<Simulation> GetSimulationsAndGenerateSimulationTree(int lookAheadCycles,
             int currentCycle,
             SimulationTreeNode simulationTreeNode,
             bool unrestrictedInferenceExecuted,
@@ -228,7 +228,7 @@ namespace Logic.Mapek
                 };
 
                 // Already stream back the newly-created simulation.
-                yield return (mk, simulation);
+                yield return simulation;
 
                 // Choose whether to keep the current simulation after its property cache values are populated. This allows for dynamic tree
                 // pruning as the tree is being constructed for better performance.
@@ -432,7 +432,7 @@ namespace Logic.Mapek
                 select accseq.Concat(new[] { item }));
         }
 
-        internal async Task Simulate(IEnumerable<(IMapekKnowledge, Simulation)> simulations, IEnumerable<SoftSensorTreeNode> softSensorTreeNodes)
+        internal async Task Simulate(IEnumerable<Simulation> simulations, IEnumerable<SoftSensorTreeNode> softSensorTreeNodes)
         {
             // Retrieve the host platform FMU and its simulation fidelity for ActuationAction simulations.
             var fmuModels = GetHostPlatformFmuModel(_filepathArguments.FmuDirectory);
@@ -443,7 +443,7 @@ namespace Logic.Mapek
 
             int i = 0;
             // TODO: Parallelize simulations (#13).
-            foreach (var (mk, simulation) in simulations) {
+            foreach (var simulation in simulations) {
                 _logger.LogInformation("Running simulation #{run}", i++);
 
                 var orig = new Simulation(GetPropertyCacheCopy(simulation.PropertyCache!)) {

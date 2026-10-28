@@ -25,7 +25,7 @@ info: Logic.Mapek.MapekManager[0]
 ```
 ### Docker-based incubator
 
-To control the AU Incubator with the RDT:
+To control [the AU Incubator](https://github.com/INTO-CPS-Association/example_digital-twin_incubator) with the RDT:
 1. Start Incubator with only the following daemons:
 ```
 startup/startup_all_services.py:

@@ -13,6 +13,15 @@ RUN apt-get update ; apt-get install -y ca-certificates curl gnupg file gdb defa
   $(cat /etc/os-release | grep "\(UBUNTU\\|DEBIAN\\|VERSION\)_CODENAME" | sort | cut -d= -f 2 | head -1) \
   nightly" | tee /etc/apt/sources.list.d/openmodelica.list ; \
      apt update ; apt install -y --no-install-recommends omc ; apt clean
+# Apache does not publish a Debian package for Fuseki (and Debian does not ship one), so install the official release.
+# Fuseki 6 requires Java 21, which Debian bookworm does not provide, so install it separately and use it for Fuseki only (see start-fuseki.sh).
+RUN case "$(dpkg --print-architecture)" in arm64) JARCH=aarch64 ;; *) JARCH=x64 ;; esac ; \
+    mkdir -p /opt/java21 ; curl -fsSL "https://api.adoptium.net/v3/binary/latest/21/ga/linux/${JARCH}/jre/hotspot/normal/eclipse" | tar -xz -C /opt/java21 --strip-components=1
+ARG FUSEKI_VERSION=6.2.0
+RUN cd /tmp ; curl -fsSLO https://archive.apache.org/dist/jena/binaries/apache-jena-fuseki-${FUSEKI_VERSION}.tar.gz ; \
+    curl -fsSL https://archive.apache.org/dist/jena/binaries/apache-jena-fuseki-${FUSEKI_VERSION}.tar.gz.sha512 | awk '{print $1 "  apache-jena-fuseki-'${FUSEKI_VERSION}'.tar.gz"}' | sha512sum -c - ; \
+    mkdir -p /opt/fuseki ; tar -xzf apache-jena-fuseki-${FUSEKI_VERSION}.tar.gz -C /opt/fuseki --strip-components=1 ; \
+    rm apache-jena-fuseki-${FUSEKI_VERSION}.tar.gz
 # [VS] We have a `pip install --user ...` in devcontainer.json as well as i) I don't want to spam /usr, ii) Ivan needs those for `root` whereas I for `vscode`.
 #      We use a named volume to keep some Arm-specific stuff around that I otherwise have to rebuild from source every time (Ohi `cosim`!):
 RUN mkdir -p /opt/arm64 && chown vscode:vscode /opt/arm64

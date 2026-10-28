@@ -1,4 +1,5 @@
 using Implementations.ValueHandlers;
+using TestProject.Utilities;
 using Logic.TTComponentInterfaces;
 using Logic.FactoryInterface;
 using Logic.Mapek;
@@ -19,19 +20,8 @@ namespace TestProject {
         static readonly IncubatorAdapter i = new("172.21.0.2", TestContext.Current.CancellationToken);
         static readonly Factory.AMQSensor AMQTempSensor = new("http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempSensor", "http://www.semanticweb.org/vs/ontologies/2025/12/incubator#TempProcedure", ((d) => d.average_temperature));
         static bool crashed = true;
-        private static MyMapekPlan _mapekPlan;
 
-        private class MyMapekPlan : EuclidMapekPlan {
-
-            public MyMapekPlan(IServiceProvider serviceProvider) : base(serviceProvider) { }
-
-            protected override void InferActionCombinations() {
-                // Call Java explicitly?
-                if (IncubatorTests.runInference) {
-                    base.InferActionCombinations();
-                }
-            }
-        }
+        private static EuclidMapekPlan _mapekPlan;
 
         [Theory]
         [InlineData(21.0, true, "Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
@@ -39,8 +29,8 @@ namespace TestProject {
         [InlineData(37.0, false, "Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
         // This one used to glitch with an INF-crash in the FMU, but now passes?!
         [InlineData(53.2359909270973, false, "Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
-        public void SimulateFMUOnly(double initial_T_value, bool all_actuators, string fromPython, string model, string inferred, int lookAheadCycles) {
-            SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
+        public async Task SimulateFMUOnly(double initial_T_value, bool all_actuators, string fromPython, string model, string inferred, int lookAheadCycles) {
+            SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out EuclidMapekPlan mapekPlan);
 
             // TODO: Prototype populate cache from FMU.
             // If we're going to do this, we have to check that we correctly override with values from model.
@@ -102,7 +92,7 @@ namespace TestProject {
             mapekKnowledge.Validate(propertyCacheMock);
 
             // TODO: Assert that there's at least one actuator that's not a parameter.
-            var (simulationTree, simulationPath) = mapekPlan.Plan(new Cache() { PropertyCache = propertyCacheMock, OptimalConditions = [], SoftSensorTreeNodes = [], Actuators = new Dictionary<string, Actuator>() }, 0).Result;
+            var (simulationTree, simulationPath) = await mapekPlan.Plan(new Cache() { PropertyCache = propertyCacheMock, OptimalConditions = [], SoftSensorTreeNodes = [], Actuators = new Dictionary<string, Actuator>() }, 0);
             crashed = false;
 
             // Only valid AFTER focing evaluation through simulation:
@@ -110,7 +100,7 @@ namespace TestProject {
             Assert.Equal(30, simulationTree.ChildrenCount);
 
             Trace.WriteLine("Checking Volker's `best` solution:");
-                        // We move this up here in the test since it may spam the log:
+            // We move this up here in the test since it may spam the log:
             IEnumerable<OptimalCondition> optimalConditions = mapekKnowledge.GetAllOptimalConditions(propertyCacheMock);
             Assert.NotEmpty(optimalConditions);
 
@@ -132,16 +122,16 @@ namespace TestProject {
             // Cold room, assert that the optimal path is heading in the right direction:
             Assert.Equal(4, path.Simulations.Count());
             foreach (var s in path.Simulations) {
-                Assert.True(s.Actions.Where(a => a.Name.Contains("HeaterActuator")).All(a => (all_actuators ? "1" : "0") == ((ActuationAction)a).NewStateValue.ToString()));
+                    Assert.True(s.Actions.Where(a => a.Name.Contains("HeaterActuator")).All(a => (all_actuators ? "1" : "0") == ((ActuationAction)a).NewStateValue.ToString()));
             }
             crashed = false;
         }
 
-        [Theory]
-        [Trait("Category","NOCI")]
+        [Theory(Explicit=true)]
+        [Trait("Category","NOCI")]        
         [InlineData("Incubator.py", "incubator.ttl", "incubator-out.ttl", 4)]
         public void SimulateFromAMQ(string fromPython, string model, string inferred, int lookAheadCycles) {
-            SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan);
+            SetupFiles(fromPython, model, inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out EuclidMapekPlan mapekPlan);
             IMapekExecute mpe;
             mock.Add(mpe = new MapekExecute(mock));
 
@@ -181,7 +171,7 @@ namespace TestProject {
 #pragma warning restore xUnit1051
         }
 
-        private static void SetupFiles(string fromPython, string model, string inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out MyMapekPlan mapekPlan) {
+        private static void SetupFiles(string fromPython, string model, string inferred, out ServiceProviderMock mock, out FilepathArguments filepathArguments, out MapekKnowledge mapekKnowledge, out EuclidMapekPlan mapekPlan) {
             crashed = true;
             if (Directory.Exists("/tmp/Femyou")) {
                 Directory.Delete("/tmp/Femyou", true);
@@ -192,17 +182,6 @@ namespace TestProject {
             var modelFilePath = Path.Combine(modelDirPath, model);
             modelFilePath = Path.GetFullPath(modelFilePath);
             GenerateFromPython(fromPython, modelFilePath, rootDirectory);
-            // TODO: Review why file must exist if we're going to overwrite it anyway.
-            if (!File.Exists(inferredFilePath)) {
-                File.Create(inferredFilePath).Close();
-                runInference = true;
-            } else {
-                DateTime x, y;
-                runInference = !((x = File.GetLastWriteTime(inferredFilePath)) > (y = File.GetLastWriteTime(modelFilePath)));
-                if (runInference) {
-                    Trace.WriteLine($"Will regenerate inferred model because {inferredFilePath} ({x}) is older than {modelFilePath} ({y})");
-                }
-            }
 
             mock = new ServiceProviderMock();
             mock.Add<IFactory>(new Factory());
@@ -223,9 +202,11 @@ namespace TestProject {
                 CycleDurationSeconds = 10,
                 Environment = "incubator"
             });
+            FusekiTestHelper.UploadInstanceModel(modelFilePath);
+            mock.Add(new FusekiArguments());
             mapekKnowledge = new MapekKnowledge(mock);
             mock.Add<IMapekKnowledge>(mapekKnowledge);
-            mapekPlan = new MyMapekPlan(mock);
+            mapekPlan = new EuclidMapekPlan(mock);
             _mapekPlan = mapekPlan; // save for crash-handling.
         }
 

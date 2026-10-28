@@ -47,7 +47,11 @@ namespace TestProject.Mocks.ServiceMocks {
             }
         };
 
-        public void CommitInMemoryInstanceModelToKnowledgeBase() {
+        public void InferModelInKnowledgeBase() {
+            throw new NotImplementedException();
+        }
+
+        public void CommitInMemoryInstanceModelToKnowledgeBase(Uri? uri) {
             
         }
 

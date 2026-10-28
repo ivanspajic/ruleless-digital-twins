@@ -30,7 +30,7 @@ namespace Logic.Mapek
         private readonly IFactory _factory;
         private readonly IMapekKnowledge _mapekKnowledge;
         private readonly FilepathArguments _filepathArguments;
-
+        private readonly IServiceProvider _serviceProvider;
         public bool _minMaxOverrides = true; // XXX Hotfix to restore original behaviour. Eventually this should be only `false` again.
 
         public MapekPlan(IServiceProvider serviceProvider)
@@ -42,6 +42,7 @@ namespace Logic.Mapek
             _factory = serviceProvider.GetRequiredService<IFactory>();
             _mapekKnowledge = serviceProvider.GetRequiredService<IMapekKnowledge>();
             _filepathArguments = serviceProvider.GetRequiredService<FilepathArguments>();
+            _serviceProvider = serviceProvider;
         }
 
         /// <summary>
@@ -177,29 +178,39 @@ namespace Logic.Mapek
             bool reloadInferredModel,
             IEnumerable<IEnumerable<Models.OntologicalModels.Action>> actionCombinations,
             PropertyCache propertyCache) {
+                // Unfortunately no named graphs for now.
+            Uri? uri = null;
             // Update the restriction setting in the instance model to run the inference rules correctly.
-            EnsureUpdatedRestrictionSetting();
+            EnsureUpdatedRestrictionSetting(uri);
+            // We planned to roll a fresh instance with the models we just saved
+            // and make sure they have their own named graph in Fuseki in preparation for parallelization.
+            // Unfortunately we're still queueing on Fuseki, so we save ourselves this trouble for now and
+            // just soldier on with our single instance.
+            var mk = _mapekKnowledge; // XXX new MapekKnowledge(_serviceProvider, uri);
 
             if (_restrictToReactiveActionsOnly) {
                 // If the RDT runs in reactive mode, then write the current simulation's values into the instance model for
                 // dynamic OptimalCondition evaluation and ActionCombination generation.
                 if (simulationTreeNode.NodeItem.Index != -1) {
-                    UpdateInstanceModelWithSimulationValues(simulationTreeNode.NodeItem.PropertyCache!);
+                    UpdateInstanceModelWithSimulationValues(mk, simulationTreeNode.NodeItem.PropertyCache!);
                 }
-                InferActionCombinations();
+                InferActionCombinations(mk, simulationTreeNode);
 
                 // Check the performance flags for rerunning the inference engine and reloading the instance model.
                 unrestrictedInferenceExecuted = false;
                 reloadInferredModel = true;
             } else if (!_restrictToReactiveActionsOnly && !unrestrictedInferenceExecuted) {
-                InferActionCombinations();
+                InferActionCombinations(mk, simulationTreeNode);
                 // If the RDT runs in proactive mode, then we don't have to rerun the inference until the setting is changed.
                 unrestrictedInferenceExecuted = true;
+            } else
+            {
+                // Skipping inference.
             }
 
             // Only reload the instance model if a new set of ActionCombinations has been inferred.
             if (reloadInferredModel) {
-                actionCombinations = GetActionCombinations(propertyCache);
+                actionCombinations = GetActionCombinations(mk, propertyCache);
                 reloadInferredModel = false;
             }
 
@@ -250,8 +261,9 @@ namespace Logic.Mapek
         }
 
         // Updates the setting for restricting Actions and thus ActionCombinations only to those mitigating OptimalConditions.
-        private void EnsureUpdatedRestrictionSetting() {
+        private void EnsureUpdatedRestrictionSetting(Uri uri) {
             // Write the setting at least once to disk. Only write again if the setting changes.
+            // TODO: mostly nops now.
             if (_savedReactiveSetting) {
                 if (_restrictToReactiveActionsOnly == _restrictToReactiveActionsOnlyOld) {
                     return;
@@ -275,74 +287,30 @@ namespace Logic.Mapek
 
             query.SetLiteral("newValue", _restrictToReactiveActionsOnly);
 
-            // Update the instance model and commit its contents to the disk.
+            // Update the instance model.
             _mapekKnowledge.UpdateModel(query);
-            _mapekKnowledge.CommitInMemoryInstanceModelToKnowledgeBase();
         }
 
-        private void UpdateInstanceModelWithSimulationValues(PropertyCache simulationPropertyCache) {
+        private static void UpdateInstanceModelWithSimulationValues(IMapekKnowledge mapekKnowledge, PropertyCache simulationPropertyCache) {
             foreach (var configurableParameterKeyValue in simulationPropertyCache.ConfigurableParameters) {
-                _mapekKnowledge.UpdateConfigurableParameterValue(configurableParameterKeyValue.Value);
+                mapekKnowledge.UpdateConfigurableParameterValue(configurableParameterKeyValue.Value);
             }
 
             foreach (var propertyKeyValue in simulationPropertyCache.Properties) {
-                _mapekKnowledge.UpdatePropertyValue(propertyKeyValue.Value);
+                mapekKnowledge.UpdatePropertyValue(propertyKeyValue.Value);
             }
-
-            _mapekKnowledge.CommitInMemoryInstanceModelToKnowledgeBase();
         }
 
-        protected virtual void InferActionCombinations() {
-            // Execute the inference engine as an external process.
-            var processInfo = new ProcessStartInfo {
-                FileName = "java", // Assumes JAVA is registered in the PATH environment variable (or equivalent).
-                Arguments = $"-jar \"{_filepathArguments.InferenceEngineFilepath}\" " +
-                    $"\"{_filepathArguments.OntologyFilepath}\" " +
-                    $"\"{_filepathArguments.InstanceModelFilepath}\" " +
-                    $"\"{_filepathArguments.InferenceRulesFilepath}\" " +
-                    $"\"{_filepathArguments.InferredModelFilepath}\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = Directory.GetParent(_filepathArguments.InstanceModelFilepath)!.FullName
-            };
-
-            _logger.LogInformation("Inferring action combinations.");
-            using var process = Process.Start(processInfo);
-            Debug.Assert(process != null, "Process failed to start.");
-
-            var javaInvocationAsyncError = false;
-            void SetError() => javaInvocationAsyncError = true;
-            process!.OutputDataReceived += (sender, e) => {
-                _logger.LogInformation(e.Data);
-                if (e.Data != null && e.Data.Contains("Error!")) {
-                    SetError(); // Async was here
-                }
-            };
-
-            process.ErrorDataReceived += (sender, e) => {
-                _logger.LogInformation(e.Data);
-            };
-
-            _logger.LogInformation("Process started with ID {processId}.", process.Id);
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-            process.WaitForExit();
-
-            if (process.ExitCode != 0) {
-                throw new Exception($"The inference engine encountered an error. Process {process.Id} exited with code {process.ExitCode}.");
-            }
-
-            Debug.Assert(!javaInvocationAsyncError, "Inconsistencies detected.");
-            _logger.LogInformation("Process {processId} exited with code {processExitCode}.", process.Id, process.ExitCode);
+        protected virtual void InferActionCombinations(IMapekKnowledge mapekKnowledge, SimulationTreeNode s) {
+            // The instance model was committed to Fuseki beforehand; have Fuseki apply the inference rules to it.
+            mapekKnowledge.InferModelInKnowledgeBase();
         }
 
         // This method currently only supports ActuationActions.
-        private List<List<Models.OntologicalModels.Action>> GetActionCombinations(PropertyCache propertyCache) {
+        private static List<List<Models.OntologicalModels.Action>> GetActionCombinations(IMapekKnowledge mapekKnowledge, PropertyCache propertyCache) {
             var actionCombinations = new List<List<Models.OntologicalModels.Action>>();
 
-            var actionCombinationQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actionCombination (GROUP_CONCAT(?action; SEPARATOR="" "") AS ?actions) WHERE {
+            var actionCombinationQuery = mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actionCombination (GROUP_CONCAT(?action; SEPARATOR="" "") AS ?actions) WHERE {
 	                ?actionCombination rdf:type meta:ActionCombination .
 	                FILTER NOT EXISTS {
 		                {
@@ -356,11 +324,8 @@ namespace Logic.Mapek
 	                ?actionCombination meta:hasActions ?actionList .
 	                ?actionList rdf:rest*/rdf:first ?action . }
                 GROUP BY ?actionCombination");
-
-            // Make sure the updated inferred model is reloaded before querying for ActionCombinations.
-            _mapekKnowledge.LoadModelsFromKnowledgeBase();
-            
-            var actionCombinationQueryResult = _mapekKnowledge.ExecuteQuery(actionCombinationQuery, true);
+           
+            var actionCombinationQueryResult = mapekKnowledge.ExecuteQuery(actionCombinationQuery, true);
 
             actionCombinationQueryResult.Results.ForEach(combinationResult => {
                 // ActionCombinations can only be queried through concatenation in the query above, so they must be split.
@@ -369,7 +334,7 @@ namespace Logic.Mapek
                 var actionCombination = new List<Models.OntologicalModels.Action>();
                 var fmuInitActions = new List<FMUParameterAction>();
 
-                var actuationActionQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState ?actuatorName ?isParameter WHERE {
+                var actuationActionQuery = mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?actuator ?actuatorState ?actuatorName ?isParameter WHERE {
                         @action rdf:type meta:ActuationAction .
                         @action meta:hasActuator ?actuator .
                         OPTIONAL { ?actuator meta:hasActuatorName ?actuatorName } .
@@ -379,7 +344,7 @@ namespace Logic.Mapek
                     // For each Action, find the appropriate Actuator and its state.
                     // Ideally magic strings here should really be linked to/into the query-string.
                     actuationActionQuery.SetUri("action", new Uri(action));
-                    var actuationActionQueryResult = _mapekKnowledge.ExecuteQuery(actuationActionQuery, true);
+                    var actuationActionQueryResult = mapekKnowledge.ExecuteQuery(actuationActionQuery, true);
 
                     actuationActionQueryResult.Results.ForEach(actionResult => {
                         var actuatorName = actionResult["actuator"].ToString();
@@ -389,12 +354,12 @@ namespace Logic.Mapek
                         var actuatorType = split[1];
                         string? paramName = null; // Apologies for the confusing attribute name (see `actuatorName` above).
                         if (actionResult.TryGetValue("actuatorName", out var paramNameNode)) {
-                            paramName = paramNameNode.ToString().Split('^')[0];
+                            paramName = paramNameNode?.ToString().Split('^')[0];
                         }
                         // Check if we're dealing with initialization of the FMU:
                         bool isParameter = false;
                         if (actionResult.TryGetValue("isParameter", out var isParameterNode)) {
-                            string isParamStr = isParameterNode.ToString().Split('^')[0];
+                            string isParamStr = isParameterNode?.ToString().Split('^')[0];
                             isParameter = isParamStr == "true";
                         }
 
@@ -424,14 +389,14 @@ namespace Logic.Mapek
                 });
 
                 // Query for ReconfigurationAction contents.
-                var reconfigurationActionQuery = _mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?configurableParameter ?newValue WHERE {
+                var reconfigurationActionQuery = mapekKnowledge.GetParameterizedStringQuery(@"SELECT ?configurableParameter ?newValue WHERE {
                         @action rdf:type meta:ReconfigurationAction .
                         @action ssn:forProperty ?configurableParameter .
                         @action meta:hasValue ?newValue . }");
                 actions.ForEach(action => {
                     // For each Action, find the appropriate ConfigurableParameter and its value.
                     reconfigurationActionQuery.SetUri("action", new Uri(action));
-                    var reconfigurationActionQueryResult = _mapekKnowledge.ExecuteQuery(reconfigurationActionQuery, true);
+                    var reconfigurationActionQueryResult = mapekKnowledge.ExecuteQuery(reconfigurationActionQuery, true);
 
                     reconfigurationActionQueryResult.Results.ForEach(actionResult => {
                         var configurableParameterName = actionResult["configurableParameter"].ToString();

@@ -46,6 +46,7 @@ namespace TestProject
         }
 
         [Fact]
+        [Trait("Category","NOCI")]
         public void Simulation_loads_and_executes_Nordpool_Fmu()
         {
             // Arrange
@@ -77,6 +78,7 @@ namespace TestProject
         }
 
         [Fact]
+        [Trait("Category","NOCI")]
         public void Simulation_loads_and_executes_Nordpool_Fmu_TooLate()
         {
             // Arrange
@@ -102,7 +104,6 @@ namespace TestProject
 
 
         [Theory]
-        [Trait("Category","CI")]
         [InlineData(900)]
         public void Fmu_returns_same_value_after_specific_simulation_time(int simulationTimeSeconds)
         {

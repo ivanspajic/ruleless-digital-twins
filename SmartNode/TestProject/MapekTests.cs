@@ -1,6 +1,7 @@
 ﻿using Fitness;
 using Implementations.Sensors.Fakepool;
 using Logic.CaseRepository;
+using TestProject.Utilities;
 using Logic.FactoryInterface;
 using Logic.Mapek;
 using Logic.Models.DatabaseModels;
@@ -16,7 +17,6 @@ namespace TestProject
     public class MapekTests
     {
         [Theory]
-        [Trait("Category","CI")]
         // [InlineData("M370-instance.ttl", "M370-inferred.ttl",1,4,115.05600000000001, false, false, false)]
         [InlineData(2, 1800, 1, 106.488, true, false, false)]
         [InlineData(4, 900, 1, 114.696, false, false, false)]
@@ -37,13 +37,12 @@ namespace TestProject
                 InferenceEngineFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "ruleless-digital-twins-inference-engine.jar")),
                 InferenceRulesFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "inference-rules.rules")),
                 InferredModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370-simulation-inferred.ttl")),
-                InstanceModelFilepath = Path.GetFullPath("/tmp/M370.ttl"),
+                InstanceModelFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370.ttl")),
                 OntologyFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "ontology", "ruleless-digital-twins.ttl"))
             };
             serviceProvider.Add(filepathArguments);
-            // Refresh model (#70):
-            var model = Path.GetFullPath(Path.Combine(rootDirectory, "models-and-rules", "M370.ttl"));
-            File.Copy(model.ToString(), filepathArguments.InstanceModelFilepath.ToString(), true);
+            FusekiTestHelper.UploadInstanceModel(filepathArguments.InstanceModelFilepath);
+            serviceProvider.Add(new FusekiArguments());
 
             var coordinatorSettings = new CoordinatorSettings
             {
@@ -109,7 +108,7 @@ namespace TestProject
                 Stopwatch sw = Stopwatch.StartNew();
                 var simulationPathAndTree = await plan.Plan(cache, 0);
                 sw.Stop();
-                Debug.WriteLine($"Planning took {sw.Elapsed.TotalSeconds} seconds total.");
+                Debug.WriteLine($"Planning {simulationPathAndTree.Item1.SimulationPaths.Count()} simulations took {sw.Elapsed.TotalSeconds} seconds total.");
 
                 // Check that all best paths are as they should be:
                 IEnumerable<SimulationPath> paths = plan.GetOptimalSimulationPath(cache, simulationPathAndTree.Item1.SimulationPaths);
@@ -177,7 +176,6 @@ namespace TestProject
         }
 
         [Theory]
-        [Trait("Category","CI")]
         [InlineData(2, 1800, 106.488, true, false, false)]
         [InlineData(4, 900, 114.696, false, false, false)]
         [InlineData(4, 900, 114.696, false, true, false)]
@@ -201,6 +199,8 @@ namespace TestProject
                 OntologyFilepath = Path.GetFullPath(Path.Combine(rootDirectory, "ontology", "ruleless-digital-twins.ttl"))
             };
             serviceProvider.Add(filepathArguments);
+            FusekiTestHelper.UploadInstanceModel(filepathArguments.InstanceModelFilepath);
+            serviceProvider.Add(new FusekiArguments());
 
             var coordinatorSettings = new CoordinatorSettings
             {

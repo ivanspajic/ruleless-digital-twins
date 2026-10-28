@@ -9,6 +9,7 @@ using VDS.RDF;
 using VDS.RDF.Parsing;
 using VDS.RDF.Query;
 using VDS.RDF.Query.Datasets;
+using VDS.RDF.Storage;
 using VDS.RDF.Update;
 using VDS.RDF.Writing;
 
@@ -29,24 +30,21 @@ namespace Logic.Mapek {
 
         private readonly ILogger<IMapekKnowledge> _logger;
         private readonly IFactory _factory;
-        private readonly FilepathArguments _filepathArguments;
+        private readonly FusekiConnector _instanceModelConnector;
+        private readonly FusekiConnector _inferredModelConnector;
 
         private Graph _instanceModel;
         private Graph _inferredModel;
-        private readonly TurtleParser _turtleParser;
-        private readonly CompressingTurtleWriter _turtleWriter;
 
-        public MapekKnowledge(IServiceProvider serviceProvider) {
+        public MapekKnowledge(IServiceProvider serviceProvider) : this(serviceProvider, null) {}
+        public MapekKnowledge(IServiceProvider serviceProvider, Uri? uri = null) {
             _logger = serviceProvider.GetRequiredService<ILogger<IMapekKnowledge>>();
             _factory = serviceProvider.GetRequiredService<IFactory>();
-            _filepathArguments = serviceProvider.GetRequiredService<FilepathArguments>();
-            _turtleWriter = new CompressingTurtleWriter();
-
-            _instanceModel = new Graph();
-            _inferredModel = new Graph();
-            _turtleParser = new TurtleParser();
-            LoadModelsFromKnowledgeBase();
+            var fusekiArguments = serviceProvider.GetRequiredService<FusekiArguments>();
+            _instanceModelConnector = fusekiArguments.InstanceModelUri;
+            _inferredModelConnector = fusekiArguments.InferredModelUri;
             
+            LoadModelsFromKnowledgeBase(uri);
             // If nothing was loaded, don't start the loop.
             if (_instanceModel.IsEmpty) {
                 throw new Exception("There is nothing in the instance model graph.");
@@ -85,17 +83,12 @@ namespace Logic.Mapek {
         }
 
         public SparqlResultSet ExecuteQuery(SparqlParameterizedString query, bool useInferredModel = false) {
-            SparqlResultSet queryResult;
-            
-            if (useInferredModel) {
-                queryResult = (SparqlResultSet)_inferredModel.ExecuteQuery(query);
-            } else {
-                queryResult = (SparqlResultSet)_instanceModel.ExecuteQuery(query);
-            }
+            // var queryResult =  useInferredModel ? (SparqlResultSet)_inferredModel.ExecuteQuery(query) : (SparqlResultSet)_instanceModel.ExecuteQuery(query);
+            var queryResult =  useInferredModel ? (SparqlResultSet)_inferredModelConnector.Query(query.ToString()) : (SparqlResultSet)_instanceModel.ExecuteQuery(query);
 
             // Some parts like finding optimal conditions really spam the log, so introduce an override:
             if (!suppressLogging) {
-                _logger.LogInformation("Executed query: {query} ({numResults})", query.CommandText, queryResult.Results.Count);
+                _logger.LogInformation("Executed query (inf={inf}): {query} ({numResults})", useInferredModel, query.CommandText, queryResult.Results.Count);
 
                 if (!queryResult.IsEmpty) {
                     var resultString = string.Join("\n", queryResult.Results.Select(r => r.ToString()));
@@ -118,26 +111,6 @@ namespace Logic.Mapek {
                     @property meta:hasValue @newValue^^@type .
                 }
                 WHERE {
-                    @property rdf:type sosa:ObservableProperty .
-                    @property meta:hasValue ?oldValue .
-                }");
-
-            query.SetLiteral("newValue", propertyValue.ToLowerInvariant(), false);
-            query.SetUri("type", new Uri(property.OwlType));
-            query.SetUri("property", new Uri(property.Name));
-
-            UpdateModel(query);
-
-            // In case there was no match on an ObservableProperty, try to update a matching Output.
-            query = GetParameterizedStringQuery(@"DELETE {
-                    @property meta:hasValue ?oldValue .
-                }
-                INSERT {
-                    @property meta:hasValue @newValue^^@type .
-                }
-                WHERE {
-                    @property rdf:type ssn:Property .
-                    @property rdf:type ssn:Output .
                     @property meta:hasValue ?oldValue .
                 }");
 
@@ -167,20 +140,42 @@ namespace Logic.Mapek {
             UpdateModel(query);
         }
 
-        public void CommitInMemoryInstanceModelToKnowledgeBase() {
-            _turtleWriter.Save(_instanceModel, _filepathArguments.InstanceModelFilepath);
-        }
-
         public void LoadModelsFromKnowledgeBase() {
-            _instanceModel = new Graph();
-            _inferredModel = new Graph();
-
-            _turtleParser.Load(_instanceModel, _filepathArguments.InstanceModelFilepath);
-            _turtleParser.Load(_inferredModel, _filepathArguments.InferredModelFilepath);
+            LoadModelsFromKnowledgeBase(_instanceModel.BaseUri);
         }
 
+        public void LoadModelsFromKnowledgeBase(Uri? uri) {
+            // Unfortunately inference doesn't work with named graphs that have a URI,
+            // so you're going to see a lot of (null) here for now.
+            if (_instanceModel == null) {
+                _instanceModel = new Graph();
+                _logger.LogDebug("Loading instance model (URL={url})", uri);
+                // We haven't cleaned up the code-paths yet, so we don't know if this is the first time
+                // or a subsequent time. You have to have separately stored the initial model in Fuseki here
+                // using the static helper initially, like Program.cs does.
+                _instanceModelConnector.LoadGraph(_instanceModel, uri);
+            }
+            if (_inferredModel == null) {
+                // If we just started up, run initial inference.
+                _inferredModel = new Graph();
+                InferModelInKnowledgeBase();
+            } else {
+                _logger.LogDebug("Reusing old inferred model.");
+            }
+        }
+
+        public void InferModelInKnowledgeBase() {
+            _logger.LogInformation("Inferring action combinations for URL={url}.", _instanceModel.BaseUri);
+            // The inference service applies the rules to its graph on every replacement, so putting the current instance model there triggers the transformation.
+            _inferredModelConnector.SaveGraph(_instanceModel);
+            // We don't reload, since we're querying Fuseki directly:
+            // TODO: Investigate if we could/should use in-memory-queries here as well or not.
+            // _inferredModelConnector.LoadGraph(_inferredModel, _instanceModel.BaseUri);
+            // _logger.LogInformation("The inferred model was generated.");
+        }
+
+        SparqlUpdateParser sparqlUpdateParser = new SparqlUpdateParser();
         public void UpdateModel(SparqlParameterizedString query) {
-            var sparqlUpdateParser = new SparqlUpdateParser();
             var inMemoryDataset = new InMemoryDataset(_instanceModel);
             var processor = new LeviathanUpdateProcessor(inMemoryDataset);
             var commandSet = sparqlUpdateParser.ParseFromString(query);
@@ -259,7 +254,17 @@ namespace Logic.Mapek {
         }
 
         private static string GetOptionalQueryResult(ISparqlResult queryResult, string variableName) {
-            return queryResult.HasValue(variableName) ? queryResult[variableName].ToString().Split("^^")[0] : null!;
+            if (!queryResult.HasValue(variableName) || queryResult[variableName] == null)
+                return null;
+            var n = queryResult[variableName];
+            var splits = n.ToString().Split("^^");
+            if (splits.Length > 0)
+            {
+                return splits[0];
+            } else
+            {
+                return null;
+            }
         }
 
         private ConstraintExpression GetOptimalConditionConstraint(INode optimalCondition, PropertyCache propertyCache, bool enablingConstraint = false) {

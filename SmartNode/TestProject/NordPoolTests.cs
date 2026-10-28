@@ -1,4 +1,5 @@
 using Implementations.ValueHandlers;
+using TestProject.Utilities;
 using Logic.TTComponentInterfaces;
 using Logic.FactoryInterface;
 using Logic.Mapek;
@@ -42,19 +43,20 @@ namespace TestProject
 
     class MyMapekPlan : MapekPlan {
         public MyMapekPlan(IServiceProvider serviceProvider, bool logSimulations = false) : base(serviceProvider) {}
-        protected override void InferActionCombinations() {
+        protected override void InferActionCombinations(IMapekKnowledge mapekKnowledge, SimulationTreeNode s) {
             // Call Java explicitly?
             if (true) {
-                base.InferActionCombinations();
+                base.InferActionCombinations(mapekKnowledge, s);
             }
         }
     }
 
     public class NordPoolTests {
         [Theory]
+        [Trait("Category","NOCI")] // Don't actually talk to NordPool
         [InlineData(null, "nordpool-simple.ttl", "nordpool-out.ttl", 4)]
         [InlineData("SimpleNordpool.py", "nordpool1.ttl", "nordpool1-out.ttl", 4)]
-        public void Smallest_model_builds_tree_and_simulates(string? fromPython, string model, string inferred, int lookAheadCycles) {
+        public async Task Smallest_model_builds_tree_and_simulates(string? fromPython, string model, string inferred, int lookAheadCycles) {
             var rootDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
             var modelFilePath = Path.Combine(rootDirectory, "models-and-rules");
             var inferredFilePath = Path.Combine(rootDirectory, $"models-and-rules{Path.DirectorySeparatorChar}{inferred}");
@@ -104,6 +106,8 @@ namespace TestProject
                 CycleDurationSeconds = 10,
                 Environment = ""
             });
+            FusekiTestHelper.UploadInstanceModel(modelFilePath);
+            mock.Add(new FusekiArguments());
             // TODO: not sure anymore if pulling it out was actually necessary in the end:
             mock.Add<IMapekKnowledge>(new MapekKnowledge(mock));
             var mapekPlan = new MyMapekPlan(mock, false);
@@ -147,7 +151,7 @@ namespace TestProject
 
             var simulations = mapekPlan.GetSimulationsAndGenerateSimulationTree(lookAheadCycles, 0, simulationTree, false, true, new List<List<Logic.Models.OntologicalModels.Action>>(), propertyCacheMock);
 
-            mapekPlan.Simulate(simulations, []);
+            await mapekPlan.Simulate(simulations, []);
 
             // Only valid AFTER focing evaluation through simulation:
             Assert.Single(simulationTree.SimulationPaths);
